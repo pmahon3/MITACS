@@ -8,6 +8,8 @@ Analysis of Ontario power grid demand condutcted by Patrick Mahon under the supe
 
 [Sugihara Lab](https://deepeco.ucsd.edu/) (Scripps Institute of Oceanography)
 
+[Matt Davison](https://www.uwo.ca/stats/people/bios/matt-davison.html)(Western University
+
 ## Ontario Power Demand
 
 Ontario's power grid is managed by the [Independent Energy System Operator (IESO)](https://www.ieso.ca/) of Ontario. Historical data is aquired from IESO database [here](http://reports.ieso.ca/public/).
