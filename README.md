@@ -12,9 +12,9 @@ Analysis of Ontario power grid demand condutcted by Patrick Mahon under the supe
 
 ## Ontario Power Demand
 
-Ontario's power grid is managed by the [Independent Energy System Operator (IESO)](https://www.ieso.ca/) of Ontario. Historical data is aquired from IESO database [here](http://reports.ieso.ca/public/).
+Ontario's power grid is managed by the [Independent Energy System Operator (IESO)](https://www.ieso.ca/) of Ontario. Historical data is aquired from IESO database [here](http://reports.ieso.ca/public/). Weather and climate data is aquired from the [Government of Canada](https://climate.weather.gc.ca/historical_data/search_historic_data_e.html) and the [NASA Power Project](https://power.larc.nasa.gov.
 
 ## State Space Reconstruction Methods and Empirical Dynamic Modelling
 
-[Empirical Dynamic Modelling](https://deepeco.ucsd.edu/nonlinear-dynamics-research/edm/]) is a set of state space reconstruction based methods for non-linear data analysis built upon [Takens' Theorem](https://en.wikipedia.org/wiki/Takens%27s_theorem). This project using Empirical Dynamic Modelling packages ([pyEDM](https://github.com/SugiharaLab/pyEDM), [rEDM](https://github.com/SugiharaLab/rEDM)) to analyze Ontario power grid demand.
+[Empirical Dynamic Modelling](https://deepeco.ucsd.edu/nonlinear-dynamics-research/edm/]) is a set of state space reconstruction based methods for non-linear data analysis built upon [Takens' Theorem](https://en.wikipedia.org/wiki/Takens%27s_theorem). This project using Empirical Dynamic Modelling packages ([pyEDM](https://github.com/SugiharaLab/pyEDM), [rEDM](https://github.com/SugiharaLab/rEDM)) to analyze Ontario power grid demand. Specifically the project aims to utilize [convergent cross mapping](https://en.wikipedia.org/wiki/Convergent_cross_mapping), a statistical test for directional causality in non-linear time series.
 
