@@ -12,7 +12,7 @@ Analysis of Ontario power grid demand condutcted by Patrick Mahon under the supe
 
 ## Ontario Power Demand
 
-Ontario's power grid is managed by the [Independent Energy System Operator (IESO)](https://www.ieso.ca/) of Ontario. Historical data is aquired from IESO database [here](http://reports.ieso.ca/public/). Weather and climate data is aquired from the [Government of Canada](https://climate.weather.gc.ca/historical_data/search_historic_data_e.html) and the [NASA Power Project](https://power.larc.nasa.gov.
+Ontario's power grid is managed by the [Independent Energy System Operator (IESO)](https://www.ieso.ca/) of Ontario. Historical data is aquired from IESO database [here](http://reports.ieso.ca/public/). Weather and climate data is aquired from the [Government of Canada](https://climate.weather.gc.ca/historical_data/search_historic_data_e.html) and the [NASA Power Project](https://power.larc.nasa.gov).
 
 ## State Space Reconstruction Methods and Empirical Dynamic Modelling
 
