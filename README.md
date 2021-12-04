@@ -8,7 +8,7 @@ Analysis of Ontario power grid demand condutcted by Patrick Mahon under the supe
 
 [Sugihara Lab](https://deepeco.ucsd.edu/) (Scripps Institute of Oceanography)
 
-[Matt Davison](https://www.uwo.ca/stats/people/bios/matt-davison.html)(Western University
+[Matt Davison](https://www.uwo.ca/stats/people/bios/matt-davison.html) (Western University)
 
 ## Ontario Power Demand
 
