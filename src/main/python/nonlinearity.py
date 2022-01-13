@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import pyEDM
 import matplotlib.pyplot as plt
@@ -9,9 +8,13 @@ maxE = 10
 maxTp = 10
 tau = -1
 plot_title = "\n $\Delta$ Demand"
+variables = [
+    'Time',
+    'Demand'
+]
 
-ts = pd.DataFrame(pd.read_csv(inFile)['Demand'])
-ts.insert(0, 'Time', np.linspace(1, len(ts), len(ts)))
+ts = pd.DataFrame(pd.read_csv(inFile, index_col=0))
+ts = ts.loc[:, variables]
 ts.dropna(inplace=True)
 
 lib = "1 " + str(len(ts))

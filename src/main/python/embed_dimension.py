@@ -1,5 +1,4 @@
 # Used for generating plots of embedding dimension skill, via EmbedDimension, for power Demand
-import numpy as np
 import pandas as pd
 import pyEDM
 import matplotlib.pyplot as plt
@@ -8,10 +7,14 @@ inFile = "./main/resources/ontario_averaged_2020.csv"
 outFile = './main/resources/plots/2020/embed_dimensions_plots/demand_embed_dim_'
 maxTp = 10
 maxTau = 10
+variables = [
+    'Time',
+    'Demand'
+]
 plot_title = "\n Demand"
 
-ts = pd.DataFrame(pd.read_csv(inFile)['Demand'])
-ts.insert(0, 'Time', np.linspace(1, len(ts), len(ts)))
+ts = pd.DataFrame(pd.read_csv(inFile, index_col=0))
+ts = ts.loc[:, variables]
 ts.dropna(inplace=True)
 
 lib = "1 " + str(len(ts))
