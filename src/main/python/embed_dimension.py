@@ -3,15 +3,16 @@ import pandas as pd
 import pyEDM
 import matplotlib.pyplot as plt
 
-inFile = "./main/resources/ontario_averaged_2020.csv"
-outFile = './main/resources/plots/2020/embed_dimensions_plots/demand_embed_dim_'
+inFile = "../resources/ontario_averaged_first_diff_weekly_shuffle_2020.csv"
+outFile = '../resources/plots/2020/embed_dimensions_plots/demand_first_diff_weekly_shuffle' \
+          '/demand_first_diff_weekly_shuffle_ '
 maxTp = 10
 maxTau = 10
 variables = [
     'Time',
     'Demand'
 ]
-plot_title = "\n Demand"
+plot_title = "\n $\Delta$ Demand"
 
 ts = pd.DataFrame(pd.read_csv(inFile, index_col=0))
 ts = ts.loc[:, variables]

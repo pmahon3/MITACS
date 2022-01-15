@@ -2,8 +2,8 @@ import pandas as pd
 import pyEDM
 import matplotlib.pyplot as plt
 
-inFile = "./main/resources/ontario_averaged_2020.csv"
-outFile = './main/resources/plots/2020/nonlinearity_plots/demand_nonlinearity_'
+inFile = "../resources/ontario_averaged_first_diff_weekly_shuffle_2020.csv"
+outFile = '../resources/plots/2020/nonlinearity_plots/delta_demand_weekly_shuffle/delta_demand_weekly_shuffle_'
 maxE = 10
 maxTp = 10
 tau = -1

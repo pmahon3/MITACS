@@ -6,15 +6,13 @@ import matplotlib.pyplot as plt
 inFile = "./main/resources/ontario_averaged_2020.csv"
 outFile = './main/resources/plots/2020/ccm_plots/demand_'
 E = 6
-Tp = 7
-tau = -1
+Tp = 1
+tau = -7
 libSizes = "10 300 10"
 sample = 100
 column = ['Demand']
 targets = [
     'MEAN_TEMPERATURE',
-    'HOEP',
-    'TOTAL_PRECIPITATION',
     'SPEED_MAX_GUST',
     'MAX_REL_HUMIDITY',
     'ALLSKY_SFC_SW_DWN'
