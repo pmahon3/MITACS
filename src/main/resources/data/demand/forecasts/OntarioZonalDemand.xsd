@@ -1,0 +1,125 @@
+<!--  Ontario Zonal Demand Forecast Report XML Schema  -->
+<xs:schema xmlns="http://www.ieso.ca/schema" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.ieso.ca/schema" elementFormDefault="qualified">
+<!--  Following stuff is report specific  -->
+<xs:include schemaLocation="Document_r1.xsd"/>
+<xs:element name="DocBody">
+<xs:annotation>
+<xs:documentation>Document Body</xs:documentation>
+</xs:annotation>
+<xs:complexType>
+<xs:sequence>
+<xs:element name="DemandForecastStartDate" type="xs:date">
+<xs:annotation>
+<xs:documentation>The start date for the range of Demand Forecast data displayed in the report</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element name="DemandForecastEndDate" type="xs:date">
+<xs:annotation>
+<xs:documentation>The end date for the range of Demand Forecast data displayed in the report</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element name="ZonalDemands" minOccurs="1" maxOccurs="unbounded">
+<xs:annotation>
+<xs:documentation>Wrapper tag to encapsulate Demand Forecast daily data</xs:documentation>
+</xs:annotation>
+<xs:complexType>
+<xs:sequence>
+<xs:element name="DeliveryDate">
+<xs:annotation>
+<xs:documentation>The Date for which this Demand Forecast data applies</xs:documentation>
+</xs:annotation>
+</xs:element>
+<xs:element name="ZonalDemand" maxOccurs="3">
+<xs:annotation>
+<xs:documentation>Wrapper tag to encapsulate Zonal Demand</xs:documentation>
+</xs:annotation>
+<xs:complexType>
+<xs:sequence>
+<xs:element name="Ontario">
+<xs:annotation>
+<xs:documentation>Wrapper tag to encapsulate Ontario Demand</xs:documentation>
+</xs:annotation>
+<xs:complexType>
+<xs:sequence>
+<xs:element name="Demand" type="HourlyMWValue" maxOccurs="24">
+<xs:annotation>
+<xs:documentation>Wrapper tag to encapsulate: DeliveryHour, EnergyMW</xs:documentation>
+</xs:annotation>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="East">
+<xs:annotation>
+<xs:documentation>Wrapper tag to encapsulate East Demand</xs:documentation>
+</xs:annotation>
+<xs:complexType>
+<xs:sequence>
+<xs:element name="Demand" type="HourlyMWValue" maxOccurs="24">
+<xs:annotation>
+<xs:documentation>Wrapper tag to encapsulate: DeliveryHour, EnergyMW</xs:documentation>
+</xs:annotation>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="West">
+<xs:annotation>
+<xs:documentation>Wrapper tag to encapsulate West Demand</xs:documentation>
+</xs:annotation>
+<xs:complexType>
+<xs:sequence>
+<xs:element name="Demand" type="HourlyMWValue" maxOccurs="24">
+<xs:annotation>
+<xs:documentation>Wrapper tag to encapsulate: DeliveryHour, EnergyMW</xs:documentation>
+</xs:annotation>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<!--  Hourly Value combined Delivery Hour and Energy Value -->
+<xs:complexType name="HourlyMWValue">
+<xs:sequence>
+<xs:element name="DeliveryHour" type="Hour1To24">
+<xs:annotation>
+<xs:documentation>The Hour for which this data applies (1 to 24)</xs:documentation>
+</xs:annotation>
+</xs:element>
+<!--  Energy MW  -->
+<xs:element name="EnergyMW" type="MW_decimal5.1" minOccurs="0">
+<xs:annotation>
+<xs:documentation>The amount of Energy MW for this hour</xs:documentation>
+</xs:annotation>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+<!-- Decimal MW -->
+<xs:simpleType name="MW_decimal5.1">
+<xs:annotation>
+<xs:documentation>The amount of Energy MW in deciaml</xs:documentation>
+</xs:annotation>
+<xs:restriction base="xs:decimal">
+<xs:totalDigits value="6"/>
+<xs:fractionDigits value="1"/>
+</xs:restriction>
+</xs:simpleType>
+<!--  Delivery hour indicates hour ending at (1 to 24) -->
+<xs:simpleType name="Hour1To24">
+<xs:annotation>
+<xs:documentation>The Hour for which this data applies (1 to 24)</xs:documentation>
+</xs:annotation>
+<xs:restriction base="xs:integer">
+<xs:minInclusive value="1"/>
+<xs:maxInclusive value="24"/>
+</xs:restriction>
+</xs:simpleType>
+</xs:schema>
