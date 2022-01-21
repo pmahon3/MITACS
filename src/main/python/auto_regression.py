@@ -4,10 +4,9 @@ from EdmSeries import EdmSeries
 
 in_file = "../resources/data/processed_data_sets/ontario_averaged_2020.csv"
 
-E = 6
-p = E
+p = 6
 d = 0
-q = E
+q = 6
 tp = 1
 tau = -7
 
@@ -20,30 +19,30 @@ ts['ARMA(6)'] = res.predict()
 
 series = EdmSeries(
     time_series=ts,
-    minE=6,
-    maxE=7,
+    minE=1,
+    maxE=10,
     minTp=1,
-    maxTp=2,
+    maxTp=10,
     minTau=1,
-    maxTau=2
+    maxTau=10
 )
 series.perform_embeddings(
     variables=['Time', 'ARMA(6)'],
     target='ARMA(6)',
     E=6,
     split=0.8,
-    data_out_dir="../resources/output/previous_month/embed/data/",
+    data_out_dir="../resources/output/previous_month/embed/ARMA_6/data/",
     drop_na=False,
     show_plot=False
 )
-series.embed_plotting("../resources/output/previous_month/embed/plots/")
+series.embed_plotting("../resources/output/previous_month/embed/ARMA_6/plots/")
 series.perform_smaps(
     variables=['Time', 'ARMA(6)'],
     target='ARMA(6)',
     tau=-1,
     split=0.8,
-    data_out_dir="../resources/output/previous_month/nl/data/",
+    data_out_dir="../resources/output/previous_month/nl/ARMA_6/data/",
     drop_na=False,
     show_plot=False
 )
-series.smaps_plotting(plot_out_dir="../resources/output/previous_month/nl/plots/")
+series.smaps_plotting(plot_out_dir="../resources/output/previous_month/nl/ARMA_6/plots/")
