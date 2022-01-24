@@ -6,7 +6,9 @@ class XmlForecast:
 
     def __init__(self, in_file):
         self.file = in_file
-        self.xml_str = open(self.file).read()
+        with open(self.file, 'r') as f:
+            self.xml_str = f.read()
+        f.close()
         self.csv = None
 
     def to_csv(self):

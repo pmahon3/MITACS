@@ -42,5 +42,5 @@ data <- data %>%
 
 idx = mean(data$`Residual^2`, na.rm = TRUE) / (sd(data$Residual, na.rm = TRUE )*stdev_r)
 
-plot(data$Demand, data$Residual, xlab = '', ylab = '')
+plot(data$Demand, data$Residual, xlab = 'x_t', ylab = 'r_(t+1)')
 print(idx)

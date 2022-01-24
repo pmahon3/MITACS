@@ -1,11 +1,10 @@
 import requests
-from XmlForecast import XmlForecast
+from XmlForecast import *
 import os
 from bs4 import BeautifulSoup
 
 
 class IesoForecast:
-
     def __init__(self, url):
         self.url = url
         self.xml_dir = None
@@ -23,12 +22,17 @@ class IesoForecast:
         urls = []
         for link in soup.find_all('a'):
             link_str = link.get('href')
-            if 'v1' in link_str:
-                print(link_str)
-                response = requests.get(self.url + link_str)
-                with open(self.xml_dir + link_str, 'wb') as file:
-                    file.write(response.content)
-                file.close()
+            if '.xml' in link_str:
+                if 'v' in link_str:
+                    continue
+                else:
+                    print(link_str)
+                    response = requests.get(self.url + link_str)
+                    with open(self.xml_dir + link_str, 'wb') as file:
+                        file.write(response.content)
+                    file.close()
+        reqs.close()
+        soup.clear()
 
     def write_csv(self, out_file, in_dir=None):
         if in_dir is None:
