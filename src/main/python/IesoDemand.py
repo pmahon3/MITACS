@@ -42,7 +42,7 @@ class IesoDemand:
             for file in os.listdir(in_dir):
                 with open(in_dir + file, 'r') as f_in:
                     lines = f_in.readlines()
-                    for line in lines:
+                    for line in lines[4:]:
                         f_out.write(line)
                 f_in.close()
             f_out.write('\n')

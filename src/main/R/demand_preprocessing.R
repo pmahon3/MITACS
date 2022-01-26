@@ -1,30 +1,33 @@
+library(dplyr)
+library(rEDM)
 
-library('dplyr')
-library('rEDM')
+setwd('C:/Users/Patrick/OneDrive - The University of Western Ontario/Documents/Research/MITACS/Code/src/main/R/')
+forecast_in_file <- "../resources/data/demand/forecast/ieso_forecasts.csv"
+actual_in_file <- "../resources/data/demand/actual/ieso_demand.csv"
 
-location = './main/resources/demand/aggregate/'
-start = 2002
-stop =2021
-n = stop-start+1
-years = seq(start,stop,1)
+# read in data
+forecasts <- data.frame(read.csv(forecast_in_file))
+actual <- data.frame(read.csv(actual_in_file))
 
-data = data.frame()
-for (year in 1:n){
-  file_str = paste0(location, 'PUB_Demand_', as.character(years[year]), '.csv')
-  data = rbind(data, read.csv(file_str, skip=3, header = TRUE))
-}
+actual <- actual %>% mutate('Date' = as.POSIXct(paste(Date, Hour, sep = "-"), format = '%Y-%m-%d-%H')) %>%
+  select(-Hour,-"Market.Demand") %>% rename(Demand = Ontario.Demand)
 
-write.csv(data, file = paste0(location, 'PUB_Demand_combined.csv'))
+# get most recent predictions for Ontario demand
+forecasts <- forecasts %>%
+  mutate("CreationDate" = as.POSIXct(CreationDate, format = '%Y-%m-%dT%H:%M:%S')) %>%
+  mutate('Date' = as.POSIXct(paste(Date,Hour, sep = " "), format = '%Y-%m-%d %H')) %>%
+  filter(Zone == 'Ontario') %>%
+  group_by(Date) %>%
+  filter(CreationDate == max(CreationDate)) %>%
+  arrange(Date) %>%
+  ungroup() %>%
+  rename(Forecast = Demand) %>%
+  select(-CreationDate, -Hour, -Zone) %>%
+  distinct()
 
-location = './main/resources/demand/zonal/'
-data = data.frame()
-start = 2003
-stop =2021
-n = stop-start+1
-years = seq(start,stop,1)
-for (year in 1:n){
-  file_str = paste0(location, 'PUB_DemandZonal_', as.character(years[year]), '.csv')
-  data = rbind(data, read.csv(file_str, skip=3, header = TRUE))
-}
+data <- merge(actual, forecasts, by = 'Date', all = TRUE) %>%
+  unique() %>%
+  filter(is.na(Demand) == FALSE) %>%
+  mutate('Forecast' = as.integer(Forecast))
 
-write.csv(data, file = paste0(location, 'PUB_DemandZonal_combined.csv'))
+write.csv(data, '../resources/data/processed_data_sets/temp/forecast_demand.csv')
