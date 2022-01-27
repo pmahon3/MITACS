@@ -10,7 +10,6 @@ class NonlinearStatistic(ABC):
 
     def __init__(self, hypothesis: NonlinearHypothesis):
         """NonlinearStatistic is an object that defines the type of statistic used in a NonlinearHypothesis test
-        ...
 
         Attributes
         ----------

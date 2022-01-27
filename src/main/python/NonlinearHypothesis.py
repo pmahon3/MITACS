@@ -13,8 +13,6 @@ class NonlinearHypothesis(ABC):
     """Class Nonlinear Hypothesis defines null hypothesis testing for nonlinear structure of a given
     time series
 
-    ...
-
     Attributes
     ----------
     ts : ndarray numpy array.
