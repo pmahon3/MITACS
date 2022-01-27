@@ -30,6 +30,9 @@ class IesoDemand:
                     with open(self.csv_dir + link_str, 'wb') as file:
                         file.write(response.content)
                     file.close()
+                    with open(self.csv_dir + link_str, 'a') as file:
+                        file.write('\n')
+                    file.close()
         reqs.close()
         soup.clear()
 
