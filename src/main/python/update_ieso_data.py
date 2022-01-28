@@ -1,5 +1,5 @@
-from IesoForecast import *
-from IesoDemand import *
+from main.python.Scrapers.IesoForecast import *
+from main.python.Scrapers.IesoDemand import *
 
 forecast = IesoForecast(url = 'http://reports.ieso.ca/public/OntarioZonalDemand/')
 forecast.scrape_and_write(xml_out_dir = '../resources/data/demand/forecast/individual_files/',
