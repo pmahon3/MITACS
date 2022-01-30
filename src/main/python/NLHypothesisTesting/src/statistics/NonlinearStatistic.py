@@ -10,3 +10,4 @@ class NonlinearStatistic:
 
     def compute_lambda(self, null_series=False):
         pass
+

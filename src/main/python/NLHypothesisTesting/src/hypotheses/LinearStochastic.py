@@ -16,7 +16,7 @@ class LinearStochastic(NonlinearHypothesis):
     def generate_null_series(self) -> np.ndarray:
         print('Generating Surrogates:')
         self.null_series = np.empty(shape=(len(self.time_series), self.num_surrogates))
-        for i in tqdm(range(self.num_surrogates)):
+        for i in tqdm(range(self.num_surrogates), leave=True):
             ft = np.fft.fft(self.time_series)
             s = np.empty(shape=len(self.time_series), dtype=complex)
             for k in range(int(len(self.time_series) / 2 - 1)):

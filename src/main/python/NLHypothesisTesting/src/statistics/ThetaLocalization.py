@@ -6,8 +6,8 @@ import pyEDM
 
 
 class ThetaLocalization(NonlinearStatistic):
-    """ThetaLocalization is an object of type NonlinearStatistic that uses pyEDM's SMap's, which describes
-    the degree of nonlinearity for a delay embedded time series, to test a NonlinearHypothesis.
+    """ThetaLocalization is an object of type NonlinearStatistic that uses pyEDM's PredictNonlinear's, which describes
+    parameterizes the degree nonlinearity for a delay embedded time series, to test a NonlinearHypothesis.
 
             Attributes
             ----------
@@ -28,15 +28,16 @@ class ThetaLocalization(NonlinearStatistic):
             """
 
     def __init__(self, hypothesis: NonlinearHypothesis, embedding_dimension: int, library: str, prediction: str,
-                 time_to_prediction=1, tau=-1):
+                 theta: str, time_to_prediction=1, tau=-1):
         super().__init__(hypothesis=hypothesis)
         self.embedding_dimension = embedding_dimension
         self.library = library
         self.prediction = prediction
         self.time_to_prediction = time_to_prediction
         self.tau = tau
+        self.theta = theta
 
-    def compute_lambda(self, null_series=False, error=None):
+    def compute_lambda(self, null_series=False):
         if null_series:
             print('Computing lambda:')
             out = []
@@ -47,21 +48,19 @@ class ThetaLocalization(NonlinearStatistic):
                 columns = 'Series'
                 target = columns
                 out.append(
-                    pyEDM.SMap(
+                    pyEDM.PredictNonlinear(
                         dataFrame=ts,
                         lib=self.library,
                         pred=self.prediction,
+                        theta=self.theta,
                         E=self.embedding_dimension,
                         Tp=self.time_to_prediction,
                         tau=self.tau,
                         columns=columns,
-                        target=target
-                    )
+                        target=target,
+                        showPlot=False
+                    )['rho'][0]
                 )
-                if error is None:
-                    out[i] = pyEDM.ComputeError(out[i]['predictions']['Observations'], out[i]['predictions']['Predictions'])
-                else:
-                    out[i] = pyEDM.ComputeError(out[i]['predictions']['Observations'], out[i]['predictions']['Predictions'])[error]
             self.hypothesis.lambda_ns = out
 
         else:
@@ -70,20 +69,17 @@ class ThetaLocalization(NonlinearStatistic):
             ts.columns = ['Time', 'Series']
             columns = 'Series'
             target = columns
-            out = pyEDM.SMap(
+            out = pyEDM.PredictNonlinear(
                 dataFrame=ts,
                 lib=self.library,
                 pred=self.prediction,
+                theta=self.theta,
                 E=self.embedding_dimension,
                 Tp=self.time_to_prediction,
                 tau=self.tau,
                 columns=columns,
-                target=target
+                target=target,
+                showPlot=False
             )
 
-            if error is None:
-                self.hypothesis.lambda_ts = pyEDM.ComputeError(out['predictions']['Observations'],
-                                                           out['predictions']['Predictions'])
-            else:
-                self.hypothesis.lambda_ts = pyEDM.ComputeError(out['predictions']['Observations'],
-                                                               out['predictions']['Predictions'])[error]
+            self.hypothesis.lambda_ts = out['rho'][0]

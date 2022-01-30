@@ -25,6 +25,18 @@ class NonlinearHypothesis:
     def generate_null_series(self) -> np.ndarray:
         pass
 
+    def make_block(self, embedding_dimension, tau):
+        series = []
+        spread = embedding_dimension * tau
+        for i in reversed(range(len(self.time_series)-1)):
+            if (i + spread) < 0:
+                break
+            vector = np.empty(shape=(1, embedding_dimension))
+            for dim in range(embedding_dimension):
+                vector[0][dim] = self.time_series[i + dim * tau]
+            series.append(vector)
+        return series
+
     def get_time_series(self):
         return self.time_series
 

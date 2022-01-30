@@ -21,9 +21,8 @@ class FixedDensity(NonlinearHypothesis):
     """ Surrogate data is generated via shuffling the data wherein every entry at time_series.index modulo mod = a 
         are randomly shuffled with another entry at time_series.index modulo mod = a"""
     def generate_null_series(self) -> np.ndarray:
-        print("Generating surrogates:")
         self.null_series = np.empty(shape=(len(self.time_series), self.num_surrogates))
-        for i in tqdm(range(self.num_surrogates)):
+        for i in range(self.num_surrogates):
             self.null_series[:, i] = self.time_series
             subsamples = []
             for n in range(self.modulo):
