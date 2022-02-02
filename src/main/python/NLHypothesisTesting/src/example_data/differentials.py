@@ -15,7 +15,7 @@ def lorenz(steps):
         dx = s * (y - x)
         dy = r * x - y - x * z
         dz = x * y - b * z
-        return x_dot, y_dot, z_dot
+        return dx, dy, dz
 
     dt = 0.01
 

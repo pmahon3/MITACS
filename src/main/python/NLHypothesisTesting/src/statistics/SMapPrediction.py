@@ -1,6 +1,8 @@
 from main.python.NLHypothesisTesting.src.statistics.NonlinearStatistic import *
 from main.python.NLHypothesisTesting.src.hypotheses.NonlinearHypothesis import *
 from tqdm import tqdm
+from sklearn.linear_model import Ridge, Lasso, ElasticNet
+from sklearn.linear_model import RidgeCV, LassoCV, ElasticNetCV
 import pandas as pd
 import pyEDM
 
@@ -37,7 +39,7 @@ class SMapPrediction(NonlinearStatistic):
         self.tau = tau
         self.theta = theta
 
-    def compute_lambda(self, null_series=False, error=None):
+    def compute_lambda(self, null_series=False, performance_measure=None):
         if null_series:
             print('Computing lambda:')
             out = []
@@ -60,10 +62,10 @@ class SMapPrediction(NonlinearStatistic):
                         theta=self.theta
                     )
                 )
-                if error is None:
+                if performance_measure is None:
                     out[i] = pyEDM.ComputeError(out[i]['predictions']['Observations'], out[i]['predictions']['Predictions'])
                 else:
-                    out[i] = pyEDM.ComputeError(out[i]['predictions']['Observations'], out[i]['predictions']['Predictions'])[error]
+                    out[i] = pyEDM.ComputeError(out[i]['predictions']['Observations'], out[i]['predictions']['Predictions'])[performance_measure]
             self.hypothesis.lambda_ns = out
 
         else:
@@ -83,9 +85,9 @@ class SMapPrediction(NonlinearStatistic):
                 target=target
             )
 
-            if error is None:
+            if performance_measure is None:
                 self.hypothesis.lambda_ts = pyEDM.ComputeError(out['predictions']['Observations'],
                                                            out['predictions']['Predictions'])
             else:
                 self.hypothesis.lambda_ts = pyEDM.ComputeError(out['predictions']['Observations'],
-                                                               out['predictions']['Predictions'])[error]
+                                                               out['predictions']['Predictions'])[performance_measure]

@@ -1,3 +1,4 @@
 from .FixedDensity import FixedDensity
-from .LinearStochastic import LinearStochastic
+from .LinearStochasticGaussian import LinearStochasticGaussian
 from .NonlinearHypothesis import NonlinearHypothesis
+from .LinearStochasticEmpirical import LinearStochasticEmpirical
