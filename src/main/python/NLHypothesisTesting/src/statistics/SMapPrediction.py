@@ -1,6 +1,6 @@
 from main.python.NLHypothesisTesting.src.statistics.NonlinearStatistic import *
 from main.python.NLHypothesisTesting.src.hypotheses.NonlinearHypothesis import *
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from sklearn.linear_model import Ridge, Lasso, ElasticNet
 from sklearn.linear_model import RidgeCV, LassoCV, ElasticNetCV
 import pandas as pd
@@ -38,6 +38,7 @@ class SMapPrediction(NonlinearStatistic):
         self.time_to_prediction = time_to_prediction
         self.tau = tau
         self.theta = theta
+        self.performance = None
 
     def compute_lambda(self, null_series=False, performance_measure=None):
         if null_series:
@@ -63,9 +64,12 @@ class SMapPrediction(NonlinearStatistic):
                     )
                 )
                 if performance_measure is None:
-                    out[i] = pyEDM.ComputeError(out[i]['predictions']['Observations'], out[i]['predictions']['Predictions'])
+                    out[i] = pyEDM.ComputeError(out[i]['predictions']['Observations'],
+                                                out[i]['predictions']['Predictions'])
                 else:
-                    out[i] = pyEDM.ComputeError(out[i]['predictions']['Observations'], out[i]['predictions']['Predictions'])[performance_measure]
+                    out[i] = \
+                    pyEDM.ComputeError(out[i]['predictions']['Observations'], out[i]['predictions']['Predictions'])[
+                        performance_measure]
             self.hypothesis.lambda_ns = out
 
         else:
@@ -87,7 +91,39 @@ class SMapPrediction(NonlinearStatistic):
 
             if performance_measure is None:
                 self.hypothesis.lambda_ts = pyEDM.ComputeError(out['predictions']['Observations'],
-                                                           out['predictions']['Predictions'])
+                                                               out['predictions']['Predictions'])
             else:
                 self.hypothesis.lambda_ts = pyEDM.ComputeError(out['predictions']['Observations'],
                                                                out['predictions']['Predictions'])[performance_measure]
+
+    def compute_performance(self, max_dim: int, max_theta: int, tau: int, performance_measure: str):
+        ts = pd.DataFrame(self.hypothesis.time_series)
+        ts.insert(0, 1, np.linspace(1, len(ts), len(ts)))
+        ts.columns = ['Time', 'Series']
+        columns = ts.columns[1]
+        target = columns
+        dims, thetas, rhos = [], [], []
+        print('Computing performance:')
+        for dim in tqdm(range(1, max_dim + 1), position=0, desc='Dimensions', leave=False, colour='green', ncols=80):
+            for theta in tqdm(range(1, max_theta + 1), position=1, desc="Thetas    ", leave=False, colour='green',
+                              ncols=80):
+                out = pyEDM.SMap(
+                    dataFrame=ts,
+                    lib=self.library,
+                    pred=self.prediction,
+                    theta=theta,
+                    E=dim,
+                    Tp=self.time_to_prediction,
+                    tau=tau,
+                    columns=columns,
+                    target=target,
+                    showPlot=False
+                )
+                out = pyEDM.ComputeError(out['predictions']['Observations'],
+                                         out['predictions']['Predictions'])[performance_measure]
+                dims.append(dim)
+                thetas.append(theta)
+                rhos.append(out)
+
+        self.performance = [dims, thetas, rhos]
+        return self.performance

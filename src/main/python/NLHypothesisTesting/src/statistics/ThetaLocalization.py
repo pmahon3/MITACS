@@ -36,6 +36,7 @@ class ThetaLocalization(NonlinearStatistic):
         self.time_to_prediction = time_to_prediction
         self.tau = tau
         self.theta = theta
+        self.performance = None
 
     def compute_lambda(self, null_series=False):
         if null_series:
@@ -67,7 +68,7 @@ class ThetaLocalization(NonlinearStatistic):
             ts = pd.DataFrame(self.hypothesis.time_series)
             ts.insert(0, 1, np.linspace(1, len(ts), len(ts)))
             ts.columns = ['Time', 'Series']
-            columns = 'Series'
+            columns = ts.columns[1]
             target = columns
             out = pyEDM.PredictNonlinear(
                 dataFrame=ts,
@@ -81,5 +82,35 @@ class ThetaLocalization(NonlinearStatistic):
                 target=target,
                 showPlot=False
             )
-
             self.hypothesis.lambda_ts = out['rho'][0]
+
+    def compute_performance(self, max_dim: int, max_theta: int, tau: int):
+        ts = pd.DataFrame(self.hypothesis.time_series)
+        ts.insert(0, 1, np.linspace(1, len(ts), len(ts)))
+        ts.columns = ['Time', 'Series']
+        columns = ts.columns[1]
+        target = columns
+        dims, thetas, rhos = [], [], []
+        print('Computing Performance:')
+        for dim in tqdm(range(1, max_dim + 1), position=0, desc="i", leave=False, colour='green', ncols=80):
+            print('Dimension: ' + str(dim))
+            for theta in tqdm(range(1, max_theta + 1), position=0, desc="i", leave=False, colour='green', ncols=80):
+                print('Theta: ' + str(theta))
+                out = pyEDM.PredictNonlinear(
+                    dataFrame=ts,
+                    lib=self.library,
+                    pred=self.prediction,
+                    theta=str(theta),
+                    E=dim,
+                    Tp=self.time_to_prediction,
+                    tau=tau,
+                    columns=columns,
+                    target=target,
+                    showPlot=False
+                )
+                dims.append(dim)
+                thetas.append(theta)
+                rhos.append(out['rho'][0])
+
+        self.performance = [dims, thetas, rhos]
+        return self.performance

@@ -11,3 +11,5 @@ class NonlinearStatistic:
     def compute_lambda(self, null_series=False):
         pass
 
+    def compute_performance(self):
+        pass
