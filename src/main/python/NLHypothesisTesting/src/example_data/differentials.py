@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def lorenz(steps):
+def lorenz(steps, noise_scale: float = 0):
     def classic_lorenz(x, y, z, s=10, r=28, b=2.667):
         """
         Sourced from: https://matplotlib.org/3.1.0/gallery/mplot3d/lorenz_attractor.html
@@ -32,7 +32,10 @@ def lorenz(steps):
     for i in range(steps):
         x_dot, y_dot, z_dot = classic_lorenz(xs[i], ys[i], zs[i])
         xs[i + 1] = xs[i] + (x_dot * dt)
+        xs[i + 1] = xs[i + 1] + noise_scale * abs(xs[i + 1]) * np.random.uniform(low=-1, high=1, size=(1,))[0]
         ys[i + 1] = ys[i] + (y_dot * dt)
+        ys[i + 1] = ys[i + 1] + noise_scale * abs(ys[i + 1]) * np.random.uniform(low=-1, high=1, size=(1,))[0]
         zs[i + 1] = zs[i] + (z_dot * dt)
+        zs[i + 1] = zs[i + 1] + noise_scale * abs(zs[i + 1]) * np.random.uniform(low=-1, high=1, size=(1,))[0]
 
     return xs, ys, zs

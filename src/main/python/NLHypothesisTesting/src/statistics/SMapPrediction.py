@@ -30,7 +30,7 @@ class SMapPrediction(NonlinearStatistic):
             """
 
     def __init__(self, hypothesis: NonlinearHypothesis, embedding_dimension: int, library: str, prediction: str,
-                 theta: str, time_to_prediction=1, tau=-1):
+                 theta: str = '0', time_to_prediction: int = 1, tau: int = -1):
         super().__init__(hypothesis=hypothesis)
         self.embedding_dimension = embedding_dimension
         self.library = library
@@ -68,8 +68,8 @@ class SMapPrediction(NonlinearStatistic):
                                                 out[i]['predictions']['Predictions'])
                 else:
                     out[i] = \
-                    pyEDM.ComputeError(out[i]['predictions']['Observations'], out[i]['predictions']['Predictions'])[
-                        performance_measure]
+                        pyEDM.ComputeError(out[i]['predictions']['Observations'], out[i]['predictions']['Predictions'])[
+                            performance_measure]
             self.hypothesis.lambda_ns = out
 
         else:
@@ -96,7 +96,7 @@ class SMapPrediction(NonlinearStatistic):
                 self.hypothesis.lambda_ts = pyEDM.ComputeError(out['predictions']['Observations'],
                                                                out['predictions']['Predictions'])[performance_measure]
 
-    def compute_performance(self, max_dim: int, max_theta: int, tau: int, performance_measure: str):
+    def compute_parameter_performance(self, max_dim: int, max_theta: int, tau: int, performance_measure: str):
         ts = pd.DataFrame(self.hypothesis.time_series)
         ts.insert(0, 1, np.linspace(1, len(ts), len(ts)))
         ts.columns = ['Time', 'Series']
@@ -127,3 +127,10 @@ class SMapPrediction(NonlinearStatistic):
 
         self.performance = [dims, thetas, rhos]
         return self.performance
+
+    def set_optimal_parameters(self, dimension: int = None, theta: int = None):
+        optimal_idx = np.argmax(self.performance[2])
+        self.embedding_dimension = self.performance[0][optimal_idx]
+        self.theta = self.performance[1][optimal_idx]
+
+        return self.embedding_dimension, self.theta
