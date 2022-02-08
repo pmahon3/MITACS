@@ -29,8 +29,8 @@ class SMapPrediction(NonlinearStatistic):
                 The time lag used to perform the time series embedding
             """
 
-    def __init__(self, hypothesis: NonlinearHypothesis, embedding_dimension: int, library: str, prediction: str,
-                 theta: str = '0', time_to_prediction: int = 1, tau: int = -1):
+    def __init__(self, hypothesis: NonlinearHypothesis, library: str, prediction: str,
+                 embedding_dimension: int = 1, theta: str = '0', time_to_prediction: int = 1, tau: int = -1):
         super().__init__(hypothesis=hypothesis)
         self.embedding_dimension = embedding_dimension
         self.library = library
@@ -96,6 +96,11 @@ class SMapPrediction(NonlinearStatistic):
                 self.hypothesis.lambda_ts = pyEDM.ComputeError(out['predictions']['Observations'],
                                                                out['predictions']['Predictions'])[performance_measure]
 
+    def optimize_smap(self, max_dim: int = 5, max_theta: int = 5, tau: int = -1, performance_measure: str = 'rho'):
+        self.compute_parameter_performance(max_dim=max_dim, max_theta=max_theta, tau=tau,
+                                           performance_measure=performance_measure)
+        return self.set_optimal_parameters()
+
     def compute_parameter_performance(self, max_dim: int, max_theta: int, tau: int, performance_measure: str):
         ts = pd.DataFrame(self.hypothesis.time_series)
         ts.insert(0, 1, np.linspace(1, len(ts), len(ts)))
@@ -104,7 +109,7 @@ class SMapPrediction(NonlinearStatistic):
         target = columns
         dims, thetas, rhos = [], [], []
         print('Computing performance:')
-        for dim in tqdm(range(1, max_dim + 1), position=0, desc='Dimensions', leave=False, colour='green', ncols=80):
+        for dim in tqdm(range(1, max_dim + 1), position=0, desc='Dimensions', leave=True, colour='green', ncols=80):
             for theta in tqdm(range(1, max_theta + 1), position=1, desc="Thetas    ", leave=False, colour='green',
                               ncols=80):
                 out = pyEDM.SMap(

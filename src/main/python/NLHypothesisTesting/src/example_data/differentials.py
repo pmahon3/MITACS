@@ -1,7 +1,13 @@
 import numpy as np
 
 
-def lorenz(steps, noise_scale: float = 0):
+def lorenz(steps, step_size: float = 0.01, noise_standard_deviation: float = 0.1):
+    dt = step_size
+
+    def inject_error(data: np.array):
+        data = data + np.multiply(data, np.random.normal(loc=0, scale=noise_standard_deviation, size=data.size))
+        return data
+
     def classic_lorenz(x, y, z, s=10, r=28, b=2.667):
         """
         Sourced from: https://matplotlib.org/3.1.0/gallery/mplot3d/lorenz_attractor.html
@@ -17,8 +23,6 @@ def lorenz(steps, noise_scale: float = 0):
         dz = x * y - b * z
         return dx, dy, dz
 
-    dt = 0.01
-
     # Need one more for the initial values
     xs = np.empty(steps + 1)
     ys = np.empty(steps + 1)
@@ -32,10 +36,11 @@ def lorenz(steps, noise_scale: float = 0):
     for i in range(steps):
         x_dot, y_dot, z_dot = classic_lorenz(xs[i], ys[i], zs[i])
         xs[i + 1] = xs[i] + (x_dot * dt)
-        xs[i + 1] = xs[i + 1] + noise_scale * abs(xs[i + 1]) * np.random.uniform(low=-1, high=1, size=(1,))[0]
         ys[i + 1] = ys[i] + (y_dot * dt)
-        ys[i + 1] = ys[i + 1] + noise_scale * abs(ys[i + 1]) * np.random.uniform(low=-1, high=1, size=(1,))[0]
         zs[i + 1] = zs[i] + (z_dot * dt)
-        zs[i + 1] = zs[i + 1] + noise_scale * abs(zs[i + 1]) * np.random.uniform(low=-1, high=1, size=(1,))[0]
+
+    xs = inject_error(xs)
+    ys = inject_error(ys)
+    zs = inject_error(zs)
 
     return xs, ys, zs
