@@ -3,7 +3,7 @@ library(rEDM)
 library(lubridate)
 
 setwd('C:/Users/Patrick/OneDrive - The University of Western Ontario/Documents/Research/MITACS/Code/src/main/R/')
-forecast_in_file <- "../resources/data/demand/forecast/ieso_forecasts.csv"
+forecast_in_file <- "../resources/data/demand/forecast/csv_files/ieso_forecasts.csv"
 actual_in_file <- "../resources/data/demand/actual/ieso_demand.csv"
 
 # read in data
