@@ -15,20 +15,20 @@ class IesoForecast:
 
     def scrape(self, xml_out_dir):
         self.xml_dir = xml_out_dir
-        print('Scraping...')
+        print("Scraping...")
         reqs = requests.get(self.url)
-        soup = BeautifulSoup(reqs.text, 'html.parser')
+        soup = BeautifulSoup(reqs.text, "html.parser")
 
         urls = []
-        for link in soup.find_all('a'):
-            link_str = link.get('href')
-            if '.xml' in link_str:
-                if 'v' in link_str:
+        for link in soup.find_all("a"):
+            link_str = link.get("href")
+            if ".xml" in link_str:
+                if "v" in link_str:
                     continue
                 else:
                     print(link_str)
                     response = requests.get(self.url + link_str)
-                    with open(self.xml_dir + link_str, 'wb') as file:
+                    with open(self.xml_dir + link_str, "wb") as file:
                         file.write(response.content)
                     file.close()
         reqs.close()
@@ -37,14 +37,16 @@ class IesoForecast:
     def write_csv(self, out_file, in_dir=None):
         if in_dir is None:
             in_dir = self.xml_dir
-        with open(out_file, 'w') as f:
-            print('Writing...')
-            f.write('Date,Zone,Hour,Demand,CreationDate\n')
+        with open(out_file, "w") as f:
+            print("Writing...")
+            f.write("Date,Zone,Hour,Demand,CreationDate\n")
             for file in os.listdir(in_dir):
-                csv = iter(XmlForecast(in_dir + file).to_csv().splitlines(keepends=True))
+                csv = iter(
+                    XmlForecast(in_dir + file).to_csv().splitlines(keepends=True)
+                )
                 next(csv)
                 for line in csv:
                     f.write(line)
-            f.write('\n')
+            f.write("\n")
         f.close()
-        print('Done')
+        print("Done")

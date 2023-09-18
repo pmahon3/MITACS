@@ -2,9 +2,13 @@ from typing import Callable
 import pandas as pd
 
 
-def get_prediction_periods(mask_functions, indices: pd.MultiIndex, daily_prediction_start: pd.Timestamp, steps):
+def get_prediction_periods(
+    mask_functions, indices: pd.MultiIndex, daily_prediction_start: pd.Timestamp, steps
+):
     for function in mask_functions:
-        function_indices = indices[list(map(function, indices.get_level_values(level=len(indices.names))))]
+        function_indices = indices[
+            list(map(function, indices.get_level_values(level=len(indices.names))))
+        ]
 
 
 # Day masks
@@ -16,7 +20,7 @@ def day_masks(time: pd.Timestamp) -> Callable:
     elif time.dayofweek == 6:
         return lambda y: True if y.dayofweek == 6 else False
     else:
-        raise ValueError('Masking Error')
+        raise ValueError("Masking Error")
 
 
 # Start Times

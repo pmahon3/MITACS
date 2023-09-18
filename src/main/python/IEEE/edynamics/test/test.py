@@ -16,34 +16,40 @@ from warnings import simplefilter
 
 import matplotlib.pyplot as plt
 
-simplefilter(action='ignore', category=FutureWarning)
+simplefilter(action="ignore", category=FutureWarning)
 
 # manual params
 steps = 24
 step_size = 1
-target = 'Load_(kW)'
-method = 'smap'
+target = "Load_(kW)"
+method = "smap"
 improvement_threshold = 0.0
 
-type_set = ['weekdays', 'saturdays', 'sundays']
+type_set = ["weekdays", "saturdays", "sundays"]
 
-data_folder = r'C:\Users\Patrick\OneDrive - The University of Western ' + \
-              r'Ontario\Documents\Research\MITACS\Code\src\main\resources\data\IEEE'
+data_folder = (
+    r"C:\Users\Patrick\OneDrive - The University of Western "
+    + r"Ontario\Documents\Research\MITACS\Code\src\main\resources\data\IEEE"
+)
 
 # Load data
 loader = CompetitionLoader(data_directory=data_folder)
-data = loader.load_data(variable='Load_(kW)', frequency='H').to_frame()
+data = loader.load_data(variable="Load_(kW)", frequency="H").to_frame()
 
 splits = {
-    'library': {data.loc[pd.Timestamp('2020-09-01'):pd.Timestamp('2021-01-04 07:00:00')].index},
-    'prediction': {data.loc[pd.Timestamp('2021-01-04 07:00:00'):pd.Timestamp('2021-01-18 7:00:00')].index}
+    "library": {
+        data.loc[pd.Timestamp("2020-09-01") : pd.Timestamp("2021-01-04 07:00:00")].index
+    },
+    "prediction": {
+        data.loc[
+            pd.Timestamp("2021-01-04 07:00:00") : pd.Timestamp("2021-01-18 7:00:00")
+        ].index
+    },
 }
 
 # Define the masks
 
 # Initialize model and embedding
 embedding = Embedding(
-    library_times=None,
-    data=data,
-    observers=[lag(variable_name=target, tau=0)]
+    library_times=None, data=data, observers=[lag(variable_name=target, tau=0)]
 )

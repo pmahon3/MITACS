@@ -36,43 +36,46 @@ from Code.src.main.python.utils.IEEE_helpers import *
 from Code.src.main.python.IEEE.data_loaders.CompetitionLoader import CompetitionLoader
 from warnings import simplefilter
 
-simplefilter(action='ignore', category=FutureWarning)
+simplefilter(action="ignore", category=FutureWarning)
 
 # Load params
-parameters = pd.read_csv('./parameters.csv', header=0, index_col='parameter_name')
+parameters = pd.read_csv("./parameters.csv", header=0, index_col="parameter_name")
 
-data_folder = parameters.loc['data_folder'].parameter_value
-n_splits = parameters.loc['n_splits'].parameter_value
-split_length = parameters.loc['split_length'].parameter_value
-maxE = parameters.loc['maxE'].parameter_value
-training_start = parameters.loc['training_start'].parameter_value
-frequency = parameters.loc['frequency'].parameter_value
-day_types = eval(parameters.loc['day_types'].parameter_value)
-target = parameters.loc['target'].parameter_value
-library_start = pd.Timestamp(parameters.loc['library_start'].parameter_value)
-library_end = pd.Timestamp(parameters.loc['library_end'].parameter_value)
-prediction_start = pd.Timestamp(parameters.loc['prediction_start'].parameter_value)
-prediction_end = pd.Timestamp(parameters.loc['prediction_end'].parameter_value)
-theta = float(parameters.loc['theta'].parameter_value)
-minimum_lag = int(parameters.loc['minimum_lag'].parameter_value)
-maximum_lag = int(parameters.loc['maximum_lag'].parameter_value)
+data_folder = parameters.loc["data_folder"].parameter_value
+n_splits = parameters.loc["n_splits"].parameter_value
+split_length = parameters.loc["split_length"].parameter_value
+maxE = parameters.loc["maxE"].parameter_value
+training_start = parameters.loc["training_start"].parameter_value
+frequency = parameters.loc["frequency"].parameter_value
+day_types = eval(parameters.loc["day_types"].parameter_value)
+target = parameters.loc["target"].parameter_value
+library_start = pd.Timestamp(parameters.loc["library_start"].parameter_value)
+library_end = pd.Timestamp(parameters.loc["library_end"].parameter_value)
+prediction_start = pd.Timestamp(parameters.loc["prediction_start"].parameter_value)
+prediction_end = pd.Timestamp(parameters.loc["prediction_end"].parameter_value)
+theta = float(parameters.loc["theta"].parameter_value)
+minimum_lag = int(parameters.loc["minimum_lag"].parameter_value)
+maximum_lag = int(parameters.loc["maximum_lag"].parameter_value)
 
 # Load data
 loader = CompetitionLoader(data_directory=data_folder)
-data = loader.load_data(variable='Load_(kW)', frequency='H').to_frame()
+data = loader.load_data(variable="Load_(kW)", frequency="H").to_frame()
 
 # Define the masks
-types_ = {weekdays.__name__: weekdays, saturdays.__name__: saturdays, sundays.__name__: sundays}
+types_ = {
+    weekdays.__name__: weekdays,
+    saturdays.__name__: saturdays,
+    sundays.__name__: sundays,
+}
 
 for type_ in types_.keys():
-
     # Initialize embedding and model
     block = Block(
         library_start=library_start,
         library_end=prediction_end,
         series=data,
         frequency=timedelta(hours=1),
-        lags=[Lag(variable_name=target, tau=0)]
+        lags=[Lag(variable_name=target, tau=0)],
     )
 
     # Output containers
@@ -83,7 +86,7 @@ for type_ in types_.keys():
     # K-Best lag selection
     progress = tqdm(range(n_lags))
     for i in progress:
-        progress.set_description('Iteration %i' % i)
+        progress.set_description("Iteration %i" % i)
         # Add a slot for a new potential lag
         block.lags = block.lags + [None]
         # Set minimum for current round
@@ -94,45 +97,58 @@ for type_ in types_.keys():
             block.lags[-1] = lag
             block.compile(mask_function=types_[type_])
             # Starting points of each prediction period
-            times = pd.date_range(start=prediction_start,
-                                  end=prediction_end,
-                                  freq='D').to_series().apply(
-                lambda x: x if types_[type_](x) else None
-            ).dropna().index
+            times = (
+                pd.date_range(start=prediction_start, end=prediction_end, freq="D")
+                .to_series()
+                .apply(lambda x: x if types_[type_](x) else None)
+                .dropna()
+                .index
+            )
             starting_times = block.get_points(times).index
 
             model = Model(block=block, target=target, theta=1.0)
 
-            projections_index = model._build_prediction_index(index=starting_times, steps=24, step_size=1)
-            projections = pd.DataFrame(index=projections_index, columns=block.frame.columns)
+            projections_index = model._build_prediction_index(
+                index=starting_times, steps=24, step_size=1
+            )
+            projections = pd.DataFrame(
+                index=projections_index, columns=block.frame.columns
+            )
 
             # Run the multi-step predictions
             for start_time in starting_times:
                 frame = block.frame.copy()[:start_time]
-                frame.insert(0, 'Time', frame.index)
+                frame.insert(0, "Time", frame.index)
                 lib_start = 1
                 for prediction_time in projections.xs(key=start_time).index:
-                    frame.loc[prediction_time] = [prediction_time] + [0 for i in range(frame.shape[1]-1)]
+                    frame.loc[prediction_time] = [prediction_time] + [
+                        0 for i in range(frame.shape[1] - 1)
+                    ]
                     lib_end = len(frame) - 2
                     pred_start = lib_end + 1
                     pred_end = pred_start + 1
 
                     projection = pyEDM.Simplex(
                         dataFrame=frame,
-                        lib=str(lib_start) + ' ' + str(lib_end),
-                        pred=str(pred_start) + ' ' + str(pred_end),
+                        lib=str(lib_start) + " " + str(lib_end),
+                        pred=str(pred_start) + " " + str(pred_end),
                         target=target,
                         columns=list(frame.columns[1:]),
-                        embedded=True
+                        embedded=True,
                     )
-                    projections.loc[(start_time, prediction_time)][target] = projection['Predictions'][1]
-                    projections = model._update_lagged_values(projections=projections,
-                                                              current_time=start_time,
-                                                              prediction_time=prediction_time)
-                    frame.loc[prediction_time] = [prediction_time] + \
-                                                 list(projections.loc[(start_time, prediction_time)])
+                    projections.loc[(start_time, prediction_time)][target] = projection[
+                        "Predictions"
+                    ][1]
+                    projections = model._update_lagged_values(
+                        projections=projections,
+                        current_time=start_time,
+                        prediction_time=prediction_time,
+                    )
+                    frame.loc[prediction_time] = [prediction_time] + list(
+                        projections.loc[(start_time, prediction_time)]
+                    )
 
-            projections = projections.astype('float64')
+            projections = projections.astype("float64")
             # Compute errors
             times = projections.droplevel(level=0)[target].index
 
@@ -142,7 +158,7 @@ for type_ in types_.keys():
             mae = error.abs().mean()
             pmae = (error.abs() / points[target]).mean() * 100
             rmse = (error * error).sum() ** 0.5 / len(points)
-            rho = projections[target].droplevel('Current_Time').corr(points[target])
+            rho = projections[target].droplevel("Current_Time").corr(points[target])
 
             output[tuple([l.tau for l in block.lags])] = (mae, pmae, rmse, rho)
 
@@ -154,5 +170,5 @@ for type_ in types_.keys():
         lag_pool.remove(minimum[0])
         block.lags[-1] = minimum[0]
 
-    with open('simplex_' + type_ + '.pickle', 'wb') as file:
+    with open("simplex_" + type_ + ".pickle", "wb") as file:
         pickle.dump([parameters, output], file, protocol=pickle.HIGHEST_PROTOCOL)

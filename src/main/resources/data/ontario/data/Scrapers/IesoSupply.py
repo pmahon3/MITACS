@@ -17,20 +17,20 @@ class IesoSupply:
 
     def scrape(self, xml_out_dir):
         self.xml_dir = xml_out_dir
-        print('Scraping...')
+        print("Scraping...")
         reqs = requests.get(self.url)
-        soup = BeautifulSoup(reqs.text, 'html.parser')
+        soup = BeautifulSoup(reqs.text, "html.parser")
 
-        for link in soup.find_all('a'):
-            link_str = link.get('href')
+        for link in soup.find_all("a"):
+            link_str = link.get("href")
             year = link_str[-8:-4]
-            if '.xml' in link_str:
-                if re.match(r'.*([1-3][0-9]{3})', year) is None:
+            if ".xml" in link_str:
+                if re.match(r".*([1-3][0-9]{3})", year) is None:
                     continue
                 else:
                     print(link_str)
                     response = requests.get(self.url + link_str)
-                    with open(self.xml_dir + link_str, 'wb') as file:
+                    with open(self.xml_dir + link_str, "wb") as file:
                         file.write(response.content)
                     file.close()
         reqs.close()
@@ -39,15 +39,15 @@ class IesoSupply:
     def write_csv(self, out_file, in_dir=None):
         if in_dir is None:
             in_dir = self.xml_dir
-        with open(out_file, 'w') as f:
-            print('Writing...')
-            f.write('Date,Hour,Nuclear,Gas,Hydro,Wind,Solar,Biofuel,Total Output\n')
+        with open(out_file, "w") as f:
+            print("Writing...")
+            f.write("Date,Hour,Nuclear,Gas,Hydro,Wind,Solar,Biofuel,Total Output\n")
             for file in os.listdir(in_dir):
                 print(file)
                 csv = iter(XmlSupply(in_dir + file).to_csv().splitlines(keepends=True))
                 next(csv)
                 for line in csv:
                     f.write(line)
-            f.write('\n')
+            f.write("\n")
         f.close()
-        print('Done')
+        print("Done")
