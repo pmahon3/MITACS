@@ -12,7 +12,7 @@ from edynamics.modelling_tools.estimators import nonlinearity, dimensionality
 from edynamics.modelling_tools.optimizers import gnn_optimizer
 from edynamics.modelling_tools.projectors import smap
 from edynamics.modelling_tools.observers import lag
-from edynamics.modelling_tools.weighers import exponential
+from edynamics.modelling_tools.kernels import exponential
 
 from warnings import simplefilter
 
@@ -60,7 +60,8 @@ with open(data_file, "rb") as file:
 file.close()
 
 data.index = list(map(pd.Timestamp, data.index.values))
-data.index.freq = data.index.inferred_freq
+data = data[~data.index.duplicated(keep='first')]
+data = data.asfreq("H")
 
 library_times = data.loc[
     pd.Timestamp("2020-09-01") : pd.Timestamp("2020-12-07 07:00:00")
@@ -82,7 +83,7 @@ for variable in variables:
     data[variable] = scaler.transform(data[variable].values.reshape(-1, 1))
 
 # Initialize model and embedding
-embedding_ = embedding(
+embedding = Embedding(
     library_times=library_times, data=data, observers=[lag(variable_name=target, tau=0)]
 )
 
@@ -93,8 +94,8 @@ print("Dimensionality:")
 for variable in variables:
     print(variable + ":")
     dimensionalities[variable] = dimensionality(
-        embedding=embedding_,
-        projector_=smap(),
+        embedding=embedding,
+        projector=smap(),
         target=variable,
         points=data.loc[training_times],
         dimensions=dimensions,
@@ -125,7 +126,7 @@ print("Nonlinearities:")
 for variable in variables:
     print(variable + ":")
     opt_E = optimal_dimensions[variable]
-    embedding_ = embedding(
+    embedding = Embedding(
         library_times=library_times,
         data=data,
         observers=[lag(variable_name=variable, tau=-i) for i in range(opt_E)],
@@ -133,8 +134,8 @@ for variable in variables:
     embedding.compile()
 
     nonlinearity_ = nonlinearity(
-        embedding=embedding_,
-        projector_=smap(),
+        embedding=embedding,
+        projector=smap(),
         target=variable,
         points=data.loc[training_times],
         thetas=thetas,
@@ -168,10 +169,10 @@ for variable in variables:
     opt_theta = optimal_thetas[variable]
 
     optimal_observers = gnn_optimizer(
-        embedding=embedding_,
+        embedding=embedding,
         target=variable,
         observers=observers,
-        projector_=smap(weigher_=exponential(theta=opt_theta)),
+        projector=smap(kernel=exponential(theta=opt_theta)),
         points=data.loc[training_times],
         steps=24,
         step_size=1,
