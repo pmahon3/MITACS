@@ -1,6 +1,7 @@
 import ray
 import pickle
 import os
+import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -42,9 +43,7 @@ thetas = np.linspace(0, 10, 11)
 type_set = ["weekdays", "saturdays", "sundays"]
 
 # In Directories
-data_file = (
-    r"/home/pmahon/repositories/MITACS/src/main/resources/data/IEEE/pickles/main.pickle"
-)
+data_file = r"/Users/pmahon/Research/Dynamics/MITACS/src/main/resources/data/IEEE/pickles/main.pickle"
 
 # Out Directories
 plot_folders = ["./plots/dimensionalities/", "./plots/nonlinearities/"]
@@ -60,17 +59,18 @@ with open(data_file, "rb") as file:
 file.close()
 
 data.index = list(map(pd.Timestamp, data.index.values))
-data = data[~data.index.duplicated(keep='first')]
+data = data[~data.index.duplicated(keep="first")]
 data = data.asfreq("H")
 
+# Splits
 library_times = data.loc[
-    pd.Timestamp("2020-09-01") : pd.Timestamp("2020-12-07 07:00:00")
+    pd.Timestamp("2020-09-01") : pd.Timestamp("2020-12-04 07:00:00")
 ].index
 training_times = data.loc[
-    pd.Timestamp("2020-12-07 07:00:00") : pd.Timestamp("2020-12-21 07:00:00")
+    pd.Timestamp("2020-12-04 07:00:00") : pd.Timestamp("2020-12-18 07:00:00")
 ].index
 prediction_times = data.loc[
-    pd.Timestamp("2020-12-21 07:00:00") : pd.Timestamp("2021-01-04 07:00:00")
+    pd.Timestamp("2020-12-18 07:00:00") : pd.Timestamp("2021-01-01 07:00:00")
 ].index
 
 # scaling
@@ -178,11 +178,11 @@ for variable in variables:
         step_size=1,
         compute_pool=compute_pool,
         improvement_threshold=0.0,
-        verbose=False,
+        verbose=True,
     )
 
     print([observer_.observation_name for observer_ in optimal_observers])
 
-    with open(pickle_folder[0] + variable + " gnn observers.pickle", "rb") as file:
+    with open(pickle_folder[0] + variable + " gnn observers.pickle", "wb") as file:
         pickle.dump(optimal_observers, file, protocol=pickle.HIGHEST_PROTOCOL)
     file.close()
