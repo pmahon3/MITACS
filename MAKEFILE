@@ -1,28 +1,32 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Iinclude
 LDFLAGS =
-
 SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
+INCLUDE_DIR = include
 
-# Add main.c to the sources
-MAIN_SRC = main.c
-SOURCES = $(wildcard $(SRC_DIR)/*.c) $(MAIN_SRC)
-OBJECTS = $(SOURCES:%.c=$(OBJ_DIR)/%.o)
-EXECUTABLE = $(BIN_DIR)/main
+SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
+OBJ_FILES = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC_FILES))
+MAIN_OBJ = $(OBJ_DIR)/main.o
 
-.PHONY: all clean
+TARGET = $(BIN_DIR)/main
 
-all: $(EXECUTABLE)
+all: $(TARGET)
 
-$(EXECUTABLE): $(OBJECTS)
-	@mkdir -p $(BIN_DIR)
+$(TARGET): $(OBJ_FILES) $(MAIN_OBJ) | $(BIN_DIR)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-$(OBJ_DIR)/%.o: %.c
-	@mkdir -p $(dir $@)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
+$(MAIN_OBJ): main.c | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(BIN_DIR) $(OBJ_DIR) $(INCLUDE_DIR):
+	mkdir -p $@
+
 clean:
-	$(RM) -r $(OBJ_DIR) $(BIN_DIR)
+	rm -rf $(OBJ_DIR) $(BIN_DIR)
+
+.PHONY: all clean
