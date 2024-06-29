@@ -1,8 +1,5 @@
 from setuptools import setup, find_packages
 requirements = [
-    "uuid",
-    "os",
-    "logging",
     "matplotlib",
     "pytest",
     "pytest_html",

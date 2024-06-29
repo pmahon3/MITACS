@@ -1,97 +1,81 @@
+#include <stdio.h>
 #include "data.h"
 #include "model.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
-
-// Function to check if the matrix D is close to the identity matrix
-int is_close_to_identity(double** D, size_t size, double tolerance) {
-    for (size_t i = 0; i < size; ++i) {
-        for (size_t j = 0; j < size; ++j) {
-            if (i == j) {
-                if (fabs(D[i][j] - 1.0) > tolerance) {
-                    return 0;
-                }
-            } else {
-                if (fabs(D[i][j]) > tolerance) {
-                    return 0;
-                }
-            }
-        }
-    }
-    return 1;
-}
 
 int main() {
-    // Seed the random number generator
-    srand(time(NULL));
-
     // Load data
-    Data* data = load_data("./resources/test_data/lorenz.csv");
+    const char* filename = "resources/test_data/lorenz.csv";
+    Data* data = load_data(filename);
     if (!data) {
-        fprintf(stderr, "Failed to load data\n");
         return 1;
     }
 
-    // Perform lag embedding on the first column (assuming it represents X)
-    size_t lag = 1;
-    size_t embedding_dim = 3;
-    Data* embedded_data = lag_embed(data, 0, lag, embedding_dim);
+    // Print the number of rows and columns
+    printf("Data loaded: %zu rows, %zu columns\n", data->rows, data->cols);
 
-    // Print the lag-embedded data for verification (first 10 lines)
-    printf("Lag-embedded data (first 10 lines):\n");
-    size_t lines_to_print = embedded_data->rows < 10 ? embedded_data->rows : 10;
-    for (size_t i = 0; i < lines_to_print; ++i) {
-        for (size_t j = 0; j < embedding_dim; ++j) {
-            printf("%f ", embedded_data->values[i][j]);
+    // Print the first 10 rows of data
+    size_t rows_to_print = data->rows < 10 ? data->rows : 10;
+    for (size_t i = 0; i < rows_to_print; ++i) {
+        printf("%s", data->timestamps[i]);
+        for (size_t j = 0; j < data->cols; ++j) {
+            printf(", %f", data->values[i][j]);
         }
         printf("\n");
     }
 
-    // Initialize the model
-    double initial_theta = 1.0;
-    Model* model = init_model(embedding_dim, initial_theta);
+    // Initialize custom D matrix with lags at 1, 3, 5
+    size_t m = data->cols; // Assume the embedding dimension is equal to the number of columns in data
+    size_t n = 5; // Maximum lag to consider
+    double theta = 1.0; // Example theta value
+    double** custom_D = allocate_matrix(m, n);
 
-    // Print the initialized model parameters for verification
-    printf("\nInitialized model parameters:\n");
-    printf("Theta: %f\n", model->theta);
-    printf("Matrix D:\n");
-    for (size_t i = 0; i < model->size; ++i) {
-        for (size_t j = 0; j < model->size; ++j) {
+    Model* model = init_model_custom(theta, custom_D, m, n);
+    if (!model) {
+        free_data(data);
+        free_matrix(custom_D, m);
+        return 1;
+    }
+
+
+    // Initialize the custom D matrix
+    for (size_t i = 0; i < m; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            custom_D[i][j] = 0.0;
+        }
+    }
+    custom_D[0][0] = 1.0; // Lag 1
+    custom_D[1][2] = 1.0; // Lag 3
+    custom_D[2][4] = 1.0; // Lag 5
+
+    model->D = custom_D;
+
+    // Print the transformation matrix D
+    printf("Transformation matrix D:\n");
+    for (size_t i = 0; i < m; ++i) {
+        for (size_t j = 0; j < n; ++j) {
             printf("%f ", model->D[i][j]);
         }
         printf("\n");
     }
 
-    // Allocate memory for the result
-    double** result = allocate_matrix(embedded_data->rows, embedding_dim);
+    // Apply transformation matrix D to the X series
+    size_t column = 1;
+    double** embedding = embed_series(data, column, model->D, m, n);
 
-    // Apply the model
-    apply_model(model, embedded_data, result);
-
-    // Print the transformed data
-    printf("\nTransformed data (first 10 lines):\n");
-    for (size_t i = 0; i < lines_to_print; ++i) {
-        for (size_t j = 0; j < embedding_dim; ++j) {
-            printf("%f ", result[i][j]);
+    // Print the first 10 rows of transformed data
+    printf("Embedded data:\n");
+    for (size_t i = 0; i < 10; ++i) {
+        for (size_t j = 0; j < m; ++j) {
+            printf("%f ", embedding[i][j]);
         }
         printf("\n");
     }
 
-    // Check if the current D matrix is close to the identity matrix
-    double tolerance = 0.1;
-    if (is_close_to_identity(model->D, model->size, tolerance)) {
-        printf("\nThe matrix D is close to the identity matrix.\n");
-    } else {
-        printf("\nThe matrix D is not close to the identity matrix.\n");
-    }
-
     // Free resources
-    free_matrix(result, embedded_data->rows);
-    free_model(model);
-    free_data(embedded_data);
     free_data(data);
+    free_matrix(embedding, data->rows - n);
+    free_model(model);
+    free_matrix(custom_D, n);
 
     return 0;
 }

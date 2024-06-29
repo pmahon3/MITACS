@@ -1,114 +1,50 @@
-#include "data.h"
-#include <stdio.h>
+#include "model.h"
 #include <stdlib.h>
-#include <string.h>
 
-#define MAX_LINE_LENGTH 1024
+// Function to initialize the model
+Model* init_model(size_t size, double theta) {
+    Model* model = (Model*)malloc(sizeof(Model));
+    model->m = size;
+    model->n = size;
+    model->theta = theta;
+    model->D = allocate_matrix(size, size);
 
-double** allocate_matrix(size_t rows, size_t cols) {
-    double **matrix = (double**)malloc(rows * sizeof(double*));
-    for (size_t i = 0; i < rows; ++i) {
-        matrix[i] = (double*)malloc(cols * sizeof(double));
-    }
-    return matrix;
-}
-
-void free_matrix(double** matrix, size_t rows) {
-    for (size_t i = 0; i < rows; ++i) {
-        free(matrix[i]);
-    }
-    free(matrix);
-}
-
-char** allocate_timestamps(size_t rows) {
-    char **timestamps = (char**)malloc(rows * sizeof(char*));
-    for (size_t i = 0; i < rows; ++i) {
-        timestamps[i] = (char*)malloc(MAX_LINE_LENGTH * sizeof(char));
-    }
-    return timestamps;
-}
-
-void free_timestamps(char** timestamps, size_t rows) {
-    for (size_t i = 0; i < rows; ++i) {
-        free(timestamps[i]);
-    }
-    free(timestamps);
-}
-
-size_t count_lines(const char* filename) {
-    FILE *file = fopen(filename, "r");
-    if (!file) return 0;
-    size_t lines = 0;
-    char line[MAX_LINE_LENGTH];
-    while (fgets(line, sizeof(line), file)) {
-        lines++;
-    }
-    fclose(file);
-    return lines;
-}
-
-size_t count_columns(const char* filename) {
-    FILE *file = fopen(filename, "r");
-    if (!file) return 0;
-    size_t cols = 0;
-    char line[MAX_LINE_LENGTH];
-    if (fgets(line, sizeof(line), file)) {
-        char *token = strtok(line, ",");
-        while (token) {
-            cols++;
-            token = strtok(NULL, ",");
+    // Initialize D to the identity matrix
+    for (size_t i = 0; i < size; ++i) {
+        for (size_t j = 0; j < size; ++j) {
+            model->D[i][j] = (i == j) ? 1.0 : 0.0;
         }
     }
-    fclose(file);
-    return cols; // Do not subtract 1, since the CSV does not include a title for the timestamp column
+    return model;
 }
 
-Data* load_data(const char* filename) {
-    size_t rows = count_lines(filename) - 1; // Subtract one for the header
-    size_t cols = count_columns(filename);
-    char line[MAX_LINE_LENGTH];
+// Function to initialize the model with a custom D
+Model* init_model_custom(double theta, double** custom_D, size_t m, size_t n) {
+    Model* model = (Model*)malloc(sizeof(Model));
+    model->m = m;
+    model->n = n;
+    model->theta = theta;
+    model->D = allocate_matrix(m, n);
 
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        perror("Error opening file");
-        return NULL;
-    }
-
-    Data* data = (Data*)malloc(sizeof(Data));
-    data->rows = rows;
-    data->cols = cols;
-
-    data->timestamps = allocate_timestamps(rows);
-    data->values = allocate_matrix(rows, cols - 1); // Subtract one for the timestamp column
-
-    // Skip header
-    fgets(line, sizeof(line), file);
-
-    for (size_t i = 0; i < rows; ++i) {
-        fgets(line, sizeof(line), file);
-        char *token = strtok(line, ",");
-        if (token != NULL) {
-            strcpy(data->timestamps[i], token);
-        }
-
-        for (size_t j = 0; j < cols - 1; ++j) { // Adjust to exclude the timestamp column
-            token = strtok(NULL, ",");
-            if (token != NULL) {
-                data->values[i][j] = atof(token);
-            } else {
-                data->values[i][j] = 0.0; // Handle missing values
-            }
+    // Initialize D to the custom matrix
+    for (size_t i = 0; i < m; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            model->D[i][j] = custom_D[i][j];
         }
     }
-
-    fclose(file);
-
-    return data;
+    return model;
 }
 
-void free_data(Data* data) {
-    free_timestamps(data->timestamps, data->rows);
-    free_matrix(data->values, data->rows);
-    free(data);
+
+// Function to apply the model for prediction
+void predict(const Model* model, const Data* data, double start_time, int steps, int step_size, double **result) {
+    size_t num_steps = (size_t)steps;
+    size_t m = model->m;
+    size_t n = model->n;
 }
 
+// Function to free the model structure
+void free_model(Model* model) {
+    free_matrix(model->D, model->m);
+    free(model);
+}

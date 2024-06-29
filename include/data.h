@@ -17,13 +17,13 @@ Data* load_data(const char* filename);
 // Function to free the data structure
 void free_data(Data* data);
 
-// Function to perform lag embedding on a specified column
-Data* lag_embed(const Data* data, size_t column, size_t lag, size_t embedding_dim);
-
 // Function to allocate a matrix
 double** allocate_matrix(size_t rows, size_t cols);
 
 // Function to free a matrix
 void free_matrix(double** matrix, size_t rows);
+
+// Function to transform data using a transformation matrix
+double** embed_series(Data* data, size_t column, double** D, size_t m, size_t n);
 
 #endif // DATA_H
