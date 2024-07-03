@@ -18,7 +18,7 @@ int main() {
     for (size_t i = 0; i < rows_to_print; ++i) {
         printf("%s", data->timestamps[i]);
         for (size_t j = 0; j < data->cols; ++j) {
-            printf(", %f", data->values[i][j]);
+            printf(", %f", data->values[i * data->cols + j]);
         }
         printf("\n");
     }
@@ -27,55 +27,51 @@ int main() {
     size_t m = data->cols; // Assume the embedding dimension is equal to the number of columns in data
     size_t n = 5; // Maximum lag to consider
     double theta = 1.0; // Example theta value
-    double** custom_D = allocate_matrix(m, n);
-
-    Model* model = init_model_custom(theta, custom_D, m, n);
-    if (!model) {
-        free_data(data);
-        free_matrix(custom_D, m);
-        return 1;
-    }
-
+    double* custom_D = allocate_matrix(m, n);
 
     // Initialize the custom D matrix
     for (size_t i = 0; i < m; ++i) {
         for (size_t j = 0; j < n; ++j) {
-            custom_D[i][j] = 0.0;
+            custom_D[i * n + j] = 0.0;
         }
     }
-    custom_D[0][0] = 1.0; // Lag 1
-    custom_D[1][2] = 1.0; // Lag 3
-    custom_D[2][4] = 1.0; // Lag 5
+    custom_D[0 * n + 0] = 1.0; // Lag 1
+    custom_D[1 * n + 1] = 1.0; // Lag 2
+    custom_D[2 * n + 2] = 1.0; // Lag 3
 
-    model->D = custom_D;
+    Model* model = init_model_custom(theta, custom_D, m, n);
+    if (!model) {
+        free_data(data);
+        free_matrix(custom_D);
+        return 1;
+    }
 
     // Print the transformation matrix D
     printf("Transformation matrix D:\n");
-    for (size_t i = 0; i < m; ++i) {
-        for (size_t j = 0; j < n; ++j) {
-            printf("%f ", model->D[i][j]);
+    for (size_t i = 0; i < m; i++) {
+        for (size_t j = 0; j < n; j++) {
+            printf("%f ", model->D[i * n + j]);  // Correct indexing
         }
         printf("\n");
     }
 
+
     // Apply transformation matrix D to the X series
-    size_t column = 1;
-    double** embedding = embed_series(data, column, model->D, m, n);
+    size_t column = 0;
+    double* embedding = embed_series(data, column, model->D, m, n);
 
     // Print the first 10 rows of transformed data
     printf("Embedded data:\n");
-    for (size_t i = 0; i < 10; ++i) {
+    for (size_t i = 0; i < 10 && i < (data->rows - n); i++) {
         for (size_t j = 0; j < m; ++j) {
-            printf("%f ", embedding[i][j]);
+            printf("%f ", embedding[i * m + j]);
         }
         printf("\n");
     }
 
     // Free resources
+    free_matrix(embedding);
     free_data(data);
-    free_matrix(embedding, data->rows - n);
     free_model(model);
-    free_matrix(custom_D, n);
-
     return 0;
 }

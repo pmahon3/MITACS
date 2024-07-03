@@ -1,19 +1,16 @@
 #include "fitting.h"
 
 // Placeholder function to compute the error
+// Error function implementation
 double compute_error(const Data* predicted, const Data* actual) {
     double error = 0.0;
-    size_t rows = predicted->rows;
-    size_t cols = predicted->cols;
-
-    for (size_t i = 0; i < rows; ++i) {
-        for (size_t j = 0; j < cols; ++j) {
-            double diff = predicted->values[i][j] - actual->values[i][j];
+    for (size_t i = 0; i < predicted->rows; ++i) {
+        for (size_t j = 0; j < predicted->cols; ++j) {
+            double diff = predicted->values[i * predicted->cols + j] - actual->values[i * actual->cols + j];
             error += diff * diff;
         }
     }
-
-    return error / (rows * cols);
+    return error;
 }
 
 // Placeholder function to fit the model (to be implemented)

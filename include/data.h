@@ -8,7 +8,7 @@ typedef struct {
     size_t rows;
     size_t cols;
     char **timestamps;
-    double **values;
+    double *values; // 1D array for data values
 } Data;
 
 // Function to load data from a CSV file
@@ -17,13 +17,13 @@ Data* load_data(const char* filename);
 // Function to free the data structure
 void free_data(Data* data);
 
-// Function to allocate a matrix
-double** allocate_matrix(size_t rows, size_t cols);
+// Function to allocate a matrix as a 1D array
+double* allocate_matrix(size_t rows, size_t cols);
 
-// Function to free a matrix
-void free_matrix(double** matrix, size_t rows);
+// Function to free a matrix allocated as a 1D array
+void free_matrix(double* matrix);
 
 // Function to transform data using a transformation matrix
-double** embed_series(Data* data, size_t column, double** D, size_t m, size_t n);
+double* embed_series(Data* data, size_t column, double* D, size_t m, size_t n);
 
 #endif // DATA_H
