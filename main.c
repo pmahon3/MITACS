@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "data.h"
 #include "model.h"
+#include "pseudo_inverse.h"
 
 int main() {
     // Load data
@@ -27,7 +29,14 @@ int main() {
     size_t m = data->cols; // Assume the embedding dimension is equal to the number of columns in data
     size_t n = 5; // Maximum lag to consider
     double theta = 1.0; // Example theta value
-    double* custom_D = allocate_matrix(m, n);
+    double* custom_D = (double*)malloc(m * n * sizeof(double));
+
+    Model* model = init_model_custom(theta, custom_D, m, n);
+    if (!model) {
+        free_data(data);
+        free(custom_D);
+        return 1;
+    }
 
     // Initialize the custom D matrix
     for (size_t i = 0; i < m; ++i) {
@@ -36,42 +45,49 @@ int main() {
         }
     }
     custom_D[0 * n + 0] = 1.0; // Lag 1
-    custom_D[1 * n + 1] = 1.0; // Lag 2
-    custom_D[2 * n + 2] = 1.0; // Lag 3
+    custom_D[1 * n + 2] = 1.0; // Lag 3
+    custom_D[2 * n + 4] = 1.0; // Lag 5
 
-    Model* model = init_model_custom(theta, custom_D, m, n);
-    if (!model) {
-        free_data(data);
-        free_matrix(custom_D);
-        return 1;
-    }
+    model->D = custom_D;
 
     // Print the transformation matrix D
     printf("Transformation matrix D:\n");
-    for (size_t i = 0; i < m; i++) {
-        for (size_t j = 0; j < n; j++) {
-            printf("%f ", model->D[i * n + j]);  // Correct indexing
+    for (size_t i = 0; i < m; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            printf("%f ", model->D[i * n + j]);
         }
         printf("\n");
     }
 
+    // Define the start indices for prediction
+    size_t start_indices[] = {7500, 8000, 8500, 9000, 9500, 10000};
+    size_t num_predictions = sizeof(start_indices) / sizeof(start_indices[0]);
 
-    // Apply transformation matrix D to the X series
-    size_t column = 0;
-    double* embedding = embed_series(data, column, model->D, m, n);
+    // Allocate memory for results
+    double** results = (double**)malloc(num_predictions * sizeof(double*));
+    for (size_t i = 0; i < num_predictions; ++i) {
+        results[i] = (double*)malloc(data->cols * sizeof(double));
+    }
 
-    // Print the first 10 rows of transformed data
-    printf("Embedded data:\n");
-    for (size_t i = 0; i < 10 && i < (data->rows - n); i++) {
-        for (size_t j = 0; j < m; ++j) {
-            printf("%f ", embedding[i * m + j]);
+    // Make predictions
+    predict(model, data, start_indices, num_predictions, results);
+
+    // Print predictions
+    for (size_t i = 0; i < num_predictions; ++i) {
+        printf("Prediction at index %zu: ", start_indices[i]);
+        for (size_t j = 0; j < data->cols; ++j) {
+            printf("%f ", results[i][j]);
         }
         printf("\n");
     }
 
-    // Free resources
-    free_matrix(embedding);
-    free_data(data);
+    // Free allocated memory
+    for (size_t i = 0; i < num_predictions; ++i) {
+        free(results[i]);
+    }
+    free(results);
     free_model(model);
+    free_data(data);
+
     return 0;
 }
