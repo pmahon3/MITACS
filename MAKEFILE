@@ -1,7 +1,7 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -I./include -g
-LDFLAGS = -L./lib -llapacke -llapack -lblas
-RPATH_FLAG = -Wl,-rpath,@executable_path/../lib
+CC = /opt/homebrew/bin/gcc-14
+CFLAGS = -Wall -Wextra -g -fopenmp
+LDFLAGS = -L/opt/homebrew/opt/openblas/lib -llapack -lopenblas
+INCLUDES = -I./include -I/opt/homebrew/opt/openblas/include
 
 SRC_DIR = src
 OBJ_DIR = obj
@@ -18,13 +18,13 @@ TARGET = $(BIN_DIR)/main
 all: $(TARGET)
 
 $(TARGET): $(OBJS) | $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(RPATH_FLAG)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 $(OBJ_DIR)/main.o: main.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)

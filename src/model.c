@@ -1,8 +1,11 @@
 #include "model.h"
-#include "pseudo_inverse.h"
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
+#include <lapacke.h>
+#include <cblas.h>
+#include <omp.h>
+#include <string.h>
 
 // Function to initialize the model
 Model* init_model(size_t size, double theta) {
@@ -22,7 +25,7 @@ Model* init_model(size_t size, double theta) {
 }
 
 // Function to initialize the model with a custom D
-Model* init_model_custom(const double theta, const double* custom_D, size_t m, size_t n) {
+Model* init_model_custom(const double theta, const double* custom_D, const size_t m, const size_t n) {
     Model* model = (Model*)malloc(sizeof(Model));
     model->m = m;
     model->n = n;
@@ -38,111 +41,146 @@ Model* init_model_custom(const double theta, const double* custom_D, size_t m, s
     return model;
 }
 
-// Function to calculate the distance between two points
-double calculate_distance(const double* x1, const double* x2, const size_t n) {
+void compute_C(const double* pseudo_inverse_matrix, const double* data_values, double* C, const size_t rows, const size_t cols) {
+    // Parallelize the computation of C
+#pragma omp parallel for collapse(2)
+    for (size_t i = 0; i < cols; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
+            C[i * cols + j] = 0.0;
+            for (size_t k = 0; k < rows; ++k) {
+                C[i * cols + j] += pseudo_inverse_matrix[i * rows + k] * data_values[(k + 1) * cols + j];
+            }
+        }
+    }
+}
+
+double calculate_distance(const double* x1, const double* x2, size_t n) {
     double distance = 0.0;
     for (size_t i = 0; i < n; ++i) {
-        distance += (x1[i] - x2[i]) * (x1[i] - x2[i]);
+        distance += pow(x1[i] - x2[i], 2);
     }
     return sqrt(distance);
 }
 
-// Function to compute the weighting matrix
 void compute_weighting_matrix(const Model* model, const Data* data, const double* x_star, double* W, const size_t max_idx) {
-    size_t cols = data->cols;
-    double sum_distances = 0.0;
+    const size_t cols = data->cols;
+    double avg_distance = 0.0;
 
-    // First pass: compute distances, accumulate them for the average, and compute the weights
+    // Parallelize distance calculation for average distance
+    #pragma omp parallel for reduction(+:avg_distance)
     for (size_t i = 0; i < max_idx; ++i) {
-        double distance = calculate_distance(x_star, &data->values[i * cols], cols);
-        sum_distances += distance;
-        W[i] = distance;  // Store the distance temporarily in W
+        avg_distance += calculate_distance(x_star, &data->values[i * cols], cols);
     }
+    avg_distance /= max_idx;
 
-    // Calculate the average distance
-    const double avg_distance = sum_distances / max_idx;
-
-    // Second pass: compute the weights using the average distance
+    // Parallelize weight computation
+    #pragma omp parallel for
     for (size_t i = 0; i < max_idx; ++i) {
-        W[i] = exp(-model->theta * W[i] / avg_distance);
+        const double distance = calculate_distance(x_star, &data->values[i * cols], cols);
+        W[i] = exp(-model->theta * distance / avg_distance);
     }
 }
 
-// Function to compute the matrix C directly using data->values
-void compute_C(const Data* data, size_t max_idx, double* W, double* weighted_data, double* Y_t1, double* pseudo_inverse_matrix, double* C, double* u, double* vt, double* s, double* superb) {
-    const size_t rows = max_idx - 1;
-    size_t cols = data->cols;
+void compute_pseudo_inverse(double* data_values, size_t rows, size_t cols, double* pseudo_inverse_matrix, double* u, double* vt, double* s, double* superb) {
+    // Compute SVD of weighted data_values directly
+    LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', rows, cols, data_values, cols, s, u, rows, vt, cols, superb);
 
-    // Compute the weighted data values
-    for (size_t i = 0; i < rows; ++i) {
-        for (size_t j = 0; j < cols; ++j) {
-            weighted_data[i * cols + j] = data->values[i * cols + j] * W[i];
-            Y_t1[i * cols + j] = data->values[(i + 1) * cols + j];
+    // Compute the pseudo-inverse of weighted data
+    double tolerance = 1e-15;  // Tolerance for small singular values
+    for (size_t i = 0; i < cols; ++i) {
+        if (s[i] > tolerance) {
+            s[i] = 1.0 / s[i];
+        } else {
+            s[i] = 0.0;
         }
     }
 
-    // Compute the pseudo-inverse
-    compute_pseudo_inverse(weighted_data, rows, cols, pseudo_inverse_matrix, u, vt, s, superb);
+    // Create a diagonal matrix for S^+
+    double* S_inv = (double*)calloc(rows * cols, sizeof(double));
+    for (size_t i = 0; i < rows && i < cols; ++i) {
+        S_inv[i * cols + i] = s[i];
+    }
 
-    // Apply the pseudo-inverse to solve for C
-    apply_pseudo_inverse(pseudo_inverse_matrix, Y_t1, C, rows, cols, W);
+    // Allocate intermediate matrix for V * S^+
+    double* VS_inv = (double*)malloc(cols * rows * sizeof(double));
+
+    // Compute V * S^+
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, cols, rows, cols, 1.0, vt, cols, S_inv, rows, 0.0, VS_inv, rows);
+
+    // Compute pseudo-inverse matrix = (V * S^+) * U^T
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, cols, rows, rows, 1.0, VS_inv, rows, u, rows, 0.0, pseudo_inverse_matrix, rows);
+
+    // Free allocated memory
+    free(S_inv);
+    free(VS_inv);
 }
 
-// Function to apply the model for multiple predictions
-void predict(const Model* model, const Data* data, const size_t* start_indices, const size_t num_predictions, double** results) {
+// Function to apply the model for prediction
+void predict(const Model* model, const Data* data, const size_t* start_indices, size_t num_indices, int step_size, double *result) {
     const size_t rows = data->rows;
     const size_t cols = data->cols;
 
-    // Preallocate memory for SVD components
-    double* u = (double*)malloc((rows - 1) * (rows - 1) * sizeof(double));
+    // Allocate memory for SVD components and weighting matrix
+    double* u = (double*)malloc(rows * rows * sizeof(double));
     double* vt = (double*)malloc(cols * cols * sizeof(double));
-    double* s = (double*)malloc((rows - 1 < cols ? rows - 1 : cols) * sizeof(double));
-    double* superb = (double*)malloc((rows - 1 < cols ? rows - 1 : cols - 1) * sizeof(double));
-
-    // Preallocate memory for weighted data, Y_t1, and pseudo-inverse matrix
-    double* weighted_data = (double*)malloc((rows - 1) * cols * sizeof(double));
-    double* Y_t1 = (double*)malloc((rows - 1) * cols * sizeof(double));
-    double* pseudo_inverse_matrix = (double*)malloc(cols * rows * sizeof(double));
-
-    // Allocate memory for weights
+    double* s = (double*)malloc((rows < cols ? rows : cols) * sizeof(double));
+    double* superb = (double*)malloc((rows < cols ? rows : cols - 1) * sizeof(double));
     double* W = (double*)malloc(rows * sizeof(double));
-
-    // Allocate memory for C
+    double* pseudo_inverse_matrix = (double*)malloc(rows * cols * sizeof(double));
     double* C = (double*)malloc(cols * cols * sizeof(double));
 
-    // Loop over each start index to compute the prediction
-    for (size_t p = 0; p < num_predictions; ++p) {
-        size_t start_row = start_indices[p];
-        double* x_star = &data->values[start_row * cols];
+    const size_t progress_step = num_indices / 10; // Calculate step size for 10% progress
+
+    // Parallelize the prediction over multiple start indices
+    #pragma omp parallel for
+    for (size_t idx = 0; idx < num_indices; ++idx) {
+        const size_t start_idx = start_indices[idx];
+        const double* x_star = &data->values[start_idx * cols];
 
         // Compute the weighting matrix
-        compute_weighting_matrix(model, data, x_star, W, start_row);
+        compute_weighting_matrix(model, data, x_star, W, start_idx);
+
+        // Compute the pseudo-inverse matrix using data up to start_idx
+        double* data_subset = (double*)malloc((start_idx + 1) * cols * sizeof(double));
+        memcpy(data_subset, data->values, (start_idx + 1) * cols * sizeof(double)); // Copy data up to start_idx
+
+        compute_pseudo_inverse(data_subset, start_idx + 1, cols, pseudo_inverse_matrix, u, vt, s, superb);
+
+        free(data_subset); // Free the allocated memory for data_subset
+
 
         // Compute C
-        compute_C(data, start_row, W, weighted_data, Y_t1, pseudo_inverse_matrix, C, u, vt, s, superb);
+        compute_C(pseudo_inverse_matrix, data->values, C, rows, cols);
 
-        // Predict the next state using C
+        // Predict the next state
         for (size_t i = 0; i < cols; ++i) {
-            results[p][i] = 0.0;
+            result[idx * cols + i] = 0.0;
             for (size_t j = 0; j < cols; ++j) {
-                results[p][i] += C[i * cols + j] * x_star[j];
+                result[idx * cols + i] += C[i * cols + j] * x_star[j];
+            }
+        }
+
+        // Print progress every 10%
+        #pragma omp critical
+        {
+            if (idx % progress_step == 0) {
+                printf("Progress: %zu%%\n", (idx / progress_step) * 10);
             }
         }
     }
-
+    printf("Progress: %d%%\n", 100);
     // Free allocated memory
-    free(C);
     free(u);
     free(vt);
     free(s);
     free(superb);
-    free(weighted_data);
-    free(Y_t1);
-    free(pseudo_inverse_matrix);
     free(W);
+    free(pseudo_inverse_matrix);
+    free(C);
 }
 
-// Function to free the model structure
+
+
 void free_model(Model* model) {
     free(model->D);
     free(model);

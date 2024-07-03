@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include "data.h"
 #include "model.h"
-#include "pseudo_inverse.h"
 
 int main() {
     // Load data
@@ -59,35 +58,26 @@ int main() {
         printf("\n");
     }
 
-    // Define the start indices for prediction
-    size_t start_indices[] = {7500, 8000, 8500, 9000, 9500, 10000};
-    size_t num_predictions = sizeof(start_indices) / sizeof(start_indices[0]);
-
-    // Allocate memory for results
-    double** results = (double**)malloc(num_predictions * sizeof(double*));
-    for (size_t i = 0; i < num_predictions; ++i) {
-        results[i] = (double*)malloc(data->cols * sizeof(double));
+    // Define start indices for predictions (e.g., from 7500 to 10000)
+    size_t start = 2001;
+    size_t end = 3000;
+    size_t num_indices = end - start + 1;
+    size_t* start_indices = (size_t*)malloc(num_indices * sizeof(size_t));
+    for (size_t i = 0; i < num_indices; ++i) {
+        start_indices[i] = start + i;
     }
 
-    // Make predictions
-    predict(model, data, start_indices, num_predictions, results);
+    // Allocate memory for the predictions
+    double* predictions = (double*)malloc(num_indices * data->cols * sizeof(double));
 
-    // Print predictions
-    for (size_t i = 0; i < num_predictions; ++i) {
-        printf("Prediction at index %zu: ", start_indices[i]);
-        for (size_t j = 0; j < data->cols; ++j) {
-            printf("%f ", results[i][j]);
-        }
-        printf("\n");
-    }
+    // Perform predictions
+    predict(model, data, start_indices, num_indices, 1, predictions);
 
     // Free allocated memory
-    for (size_t i = 0; i < num_predictions; ++i) {
-        free(results[i]);
-    }
-    free(results);
-    free_model(model);
+    free(start_indices);
+    free(predictions);
     free_data(data);
+    free_model(model);
 
     return 0;
 }
