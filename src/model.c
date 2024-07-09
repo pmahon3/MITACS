@@ -8,10 +8,11 @@
 #include <string.h>
 
 // Function to initialize the model
-Model* init_model(size_t size, double theta) {
+Model* init_model(const size_t size, const double theta) {
     Model* model = (Model*)malloc(sizeof(Model));
     model->m = size;
     model->n = size;
+    model->l = size * size;
     model->theta = theta;
     model->D = (double*)malloc(size * size * sizeof(double));
 
@@ -29,6 +30,7 @@ Model* init_model_custom(const double theta, const double* custom_D, const size_
     Model* model = (Model*)malloc(sizeof(Model));
     model->m = m;
     model->n = n;
+    model->l = m * n;
     model->theta = theta;
     model->D = (double*)malloc(m * n * sizeof(double));
 
@@ -54,7 +56,7 @@ void compute_C(const double* pseudo_inverse_matrix, const double* data_values, d
     }
 }
 
-double calculate_distance(const double* x1, const double* x2, size_t n) {
+double calculate_distance(const double* x1, const double* x2, const size_t n) {
     double distance = 0.0;
     for (size_t i = 0; i < n; ++i) {
         distance += pow(x1[i] - x2[i], 2);
@@ -67,7 +69,7 @@ void compute_weighting_matrix(const Model* model, const Data* data, const double
     double avg_distance = 0.0;
 
     // Parallelize distance calculation for average distance
-    #pragma omp parallel for reduction(+:avg_distance)
+    //#pragma omp parallel for reduction(+:avg_distance)
     for (size_t i = 0; i < max_idx; ++i) {
         avg_distance += calculate_distance(x_star, &data->values[i * cols], cols);
     }
@@ -132,7 +134,7 @@ void predict(const Model* model, const Data* data, const size_t* start_indices, 
     const size_t progress_step = num_indices / 10; // Calculate step size for 10% progress
 
     // Parallelize the prediction over multiple start indices
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (size_t idx = 0; idx < num_indices; ++idx) {
         const size_t start_idx = start_indices[idx];
         const double* x_star = &data->values[start_idx * cols];
@@ -180,6 +182,25 @@ void predict(const Model* model, const Data* data, const size_t* start_indices, 
 }
 
 
+double* embed_series(const double* data, const size_t rows, const size_t cols, double* D, const size_t n_lags, const size_t max_lag) {
+    const size_t n_points = rows * n_lags - max_lag;
+    double* embedding = (double*)malloc(n_points);
+
+    double* x_i = data;
+    // Loop over embedding array filling in embedding vectors
+    for (double* y = embedding; y < embedding + n_points; y) {
+        *y = 0.0;
+        for (size_t j = 0; j < n_lags; j++, y++) {
+            for (double* phi = D + max_lag * j; phi < D + max_lag * (j+1); phi++, x_i += cols ) {
+                *y += *x_i * *phi;
+            }
+            // Reset X pointer to start of current data vector
+            x_i -= max_lag * cols;
+        }
+        x_i += cols;
+    }
+    return embedding;
+}
 
 void free_model(Model* model) {
     free(model->D);

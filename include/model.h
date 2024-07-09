@@ -13,6 +13,7 @@
 typedef struct {
     size_t m;
     size_t n;
+    size_t l;
     double theta;
     double* D;  // Pointer to the model's matrix D
 } Model;
@@ -40,5 +41,9 @@ double calculate_distance(const double* x1, const double* x2, size_t n);
 
 // Function to free memory allocated for the model
 void free_model(Model* model);
+
+// Function to transform data using a transformation matrix
+double* embed_series(const double* data, size_t rows, size_t cols, double* D, size_t n_lags, size_t max_lag);
+
 
 #endif // MODEL_H

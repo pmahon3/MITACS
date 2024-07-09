@@ -23,7 +23,4 @@ double* allocate_matrix(size_t rows, size_t cols);
 // Function to free a matrix allocated as a 1D array
 void free_matrix(double* matrix);
 
-// Function to transform data using a transformation matrix
-double* embed_series(Data* data, size_t column, double* D, size_t m, size_t n);
-
 #endif // DATA_H

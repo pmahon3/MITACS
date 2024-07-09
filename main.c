@@ -58,6 +58,17 @@ int main() {
         printf("\n");
     }
 
+    // Test embedding
+    double* embedding = embed_series(data->values, data->rows, data->cols, model->D, model->m, model->n);
+
+    printf("Embedding:\n");
+    for (size_t i = 0; i < data->rows - model->n; i++) {
+        for (size_t j = 0; j < model->m; j++) {
+            printf("%f ", embedding[i * model->m + j]);
+        }
+        printf("\n");
+    }
+
     // Define start indices for predictions (e.g., from 7500 to 10000)
     size_t start = 2001;
     size_t end = 3000;
