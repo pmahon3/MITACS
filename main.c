@@ -44,8 +44,8 @@ int main() {
         }
     }
     custom_D[0 * n + 0] = 1.0; // Lag 1
-    custom_D[1 * n + 2] = 1.0; // Lag 3
-    custom_D[2 * n + 4] = 1.0; // Lag 5
+    custom_D[1 * n + 1] = 1.0; // Lag 2
+    custom_D[2 * n + 2] = 1.0; // Lag 3
 
     model->D = custom_D;
 
@@ -59,30 +59,35 @@ int main() {
     }
 
     // Test embedding
-    double* embedding = embed_series(data->values, data->rows, data->cols, model->D, model->m, model->n);
+    double* embedding_ = embed_series(data->values, data->rows, data->cols, model->D, model->n_lags, model->max_lag);
 
     printf("Embedding:\n");
-    for (size_t i = 0; i < data->rows - model->n; i++) {
-        for (size_t j = 0; j < model->m; j++) {
-            printf("%f ", embedding[i * model->m + j]);
+    for (size_t i = 0; i < 10; i++) {
+        printf("%s", data->timestamps[i]);
+        for (size_t j = 0; j < model->n_lags; j++) {
+            printf(", %f", embedding_[i * model->n_lags + j]);
         }
         printf("\n");
     }
 
+    // Save embedding as a Data object
+    Data* embedding = initialize_data(embedding_, data->timestamps, data->rows, data->cols);
+
+
     // Define start indices for predictions (e.g., from 7500 to 10000)
-    size_t start = 2001;
-    size_t end = 3000;
-    size_t num_indices = end - start + 1;
+    const size_t start = 2001;
+    const size_t end = 3000;
+    const size_t num_indices = end - start + 1;
     size_t* start_indices = (size_t*)malloc(num_indices * sizeof(size_t));
     for (size_t i = 0; i < num_indices; ++i) {
         start_indices[i] = start + i;
     }
 
     // Allocate memory for the predictions
-    double* predictions = (double*)malloc(num_indices * data->cols * sizeof(double));
+    double* predictions = (double*)malloc(num_indices * embedding->cols * sizeof(double));
 
     // Perform predictions
-    predict(model, data, start_indices, num_indices, 1, predictions);
+    predict(model, embedding, start_indices, num_indices, 1, predictions);
 
     // Free allocated memory
     free(start_indices);

@@ -14,6 +14,9 @@ typedef struct {
 // Function to load data from a CSV file
 Data* load_data(const char* filename);
 
+// Function to predefine from existing artifacts
+Data* initialize_data(double* values, char** timestamps, size_t rows, size_t cols);
+
 // Function to free the data structure
 void free_data(Data* data);
 

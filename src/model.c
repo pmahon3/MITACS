@@ -7,14 +7,17 @@
 #include <omp.h>
 #include <string.h>
 
+#include "../../../../../../opt/homebrew/opt/openblas/include/cblas.h"
+
 // Function to initialize the model
 Model* init_model(const size_t size, const double theta) {
     Model* model = (Model*)malloc(sizeof(Model));
-    model->m = size;
-    model->n = size;
+    model->n_lags = size;
+    model->max_lag = size;
     model->l = size * size;
     model->theta = theta;
     model->D = (double*)malloc(size * size * sizeof(double));
+    model->C = (double*)malloc(size * size * sizeof(double));
 
     // Initialize D to the identity matrix
     for (size_t i = 0; i < size; ++i) {
@@ -28,11 +31,12 @@ Model* init_model(const size_t size, const double theta) {
 // Function to initialize the model with a custom D
 Model* init_model_custom(const double theta, const double* custom_D, const size_t m, const size_t n) {
     Model* model = (Model*)malloc(sizeof(Model));
-    model->m = m;
-    model->n = n;
+    model->n_lags = m;
+    model->max_lag = n;
     model->l = m * n;
     model->theta = theta;
     model->D = (double*)malloc(m * n * sizeof(double));
+    model->C = (double*)malloc(m * m * sizeof(double));
 
     // Initialize D to the custom matrix
     for (size_t i = 0; i < m; ++i) {
@@ -43,19 +47,6 @@ Model* init_model_custom(const double theta, const double* custom_D, const size_
     return model;
 }
 
-void compute_C(const double* pseudo_inverse_matrix, const double* data_values, double* C, const size_t rows, const size_t cols) {
-    // Parallelize the computation of C
-#pragma omp parallel for collapse(2)
-    for (size_t i = 0; i < cols; ++i) {
-        for (size_t j = 0; j < cols; ++j) {
-            C[i * cols + j] = 0.0;
-            for (size_t k = 0; k < rows; ++k) {
-                C[i * cols + j] += pseudo_inverse_matrix[i * rows + k] * data_values[(k + 1) * cols + j];
-            }
-        }
-    }
-}
-
 double calculate_distance(const double* x1, const double* x2, const size_t n) {
     double distance = 0.0;
     for (size_t i = 0; i < n; ++i) {
@@ -64,28 +55,28 @@ double calculate_distance(const double* x1, const double* x2, const size_t n) {
     return sqrt(distance);
 }
 
-void compute_weighting_matrix(const Model* model, const Data* data, const double* x_star, double* W, const size_t max_idx) {
-    const size_t cols = data->cols;
+void compute_weighting_vector(const Model* model, const Data* embedding, const double* x_star, double* W, const size_t max_idx) {
+    const size_t cols = embedding->cols;
     double avg_distance = 0.0;
 
     // Parallelize distance calculation for average distance
     //#pragma omp parallel for reduction(+:avg_distance)
     for (size_t i = 0; i < max_idx; ++i) {
-        avg_distance += calculate_distance(x_star, &data->values[i * cols], cols);
+        avg_distance += calculate_distance(x_star, &embedding->values[i * cols], cols);
     }
     avg_distance /= max_idx;
 
     // Parallelize weight computation
     #pragma omp parallel for
     for (size_t i = 0; i < max_idx; ++i) {
-        const double distance = calculate_distance(x_star, &data->values[i * cols], cols);
+        const double distance = calculate_distance(x_star, &embedding->values[i * cols], cols);
         W[i] = exp(-model->theta * distance / avg_distance);
     }
 }
 
-void compute_pseudo_inverse(double* data_values, size_t rows, size_t cols, double* pseudo_inverse_matrix, double* u, double* vt, double* s, double* superb) {
+void compute_pseudo_inverse(double* data_values, size_t max_idx, size_t cols, double* pseudo_inverse_matrix, double* u, double* vt, double* s, double* superb) {
     // Compute SVD of weighted data_values directly
-    LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', rows, cols, data_values, cols, s, u, rows, vt, cols, superb);
+    LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', max_idx, cols, data_values, cols, s, u, max_idx, vt, cols, superb);
 
     // Compute the pseudo-inverse of weighted data
     double tolerance = 1e-15;  // Tolerance for small singular values
@@ -98,19 +89,19 @@ void compute_pseudo_inverse(double* data_values, size_t rows, size_t cols, doubl
     }
 
     // Create a diagonal matrix for S^+
-    double* S_inv = (double*)calloc(rows * cols, sizeof(double));
-    for (size_t i = 0; i < rows && i < cols; ++i) {
+    double* S_inv = (double*)calloc(max_idx * cols, sizeof(double));
+    for (size_t i = 0; i < max_idx && i < cols; ++i) {
         S_inv[i * cols + i] = s[i];
     }
 
     // Allocate intermediate matrix for V * S^+
-    double* VS_inv = (double*)malloc(cols * rows * sizeof(double));
+    double* VS_inv = (double*)malloc(cols * max_idx * sizeof(double));
 
     // Compute V * S^+
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, cols, rows, cols, 1.0, vt, cols, S_inv, rows, 0.0, VS_inv, rows);
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, cols, max_idx, cols, 1.0, vt, cols, S_inv, max_idx, 0.0, VS_inv, max_idx);
 
     // Compute pseudo-inverse matrix = (V * S^+) * U^T
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, cols, rows, rows, 1.0, VS_inv, rows, u, rows, 0.0, pseudo_inverse_matrix, rows);
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, cols, max_idx, max_idx, 1.0, VS_inv, max_idx, u, max_idx, 0.0, pseudo_inverse_matrix, max_idx);
 
     // Free allocated memory
     free(S_inv);
@@ -118,18 +109,21 @@ void compute_pseudo_inverse(double* data_values, size_t rows, size_t cols, doubl
 }
 
 // Function to apply the model for prediction
-void predict(const Model* model, const Data* data, const size_t* start_indices, size_t num_indices, int step_size, double *result) {
-    const size_t rows = data->rows;
-    const size_t cols = data->cols;
+void predict(const Model* model, const Data* embedding, const size_t* start_indices, const size_t num_indices, int step_size, double* result) {
+    const size_t rows = embedding->rows;
+    const size_t cols = embedding->cols;
 
     // Allocate memory for SVD components and weighting matrix
-    double* u = (double*)malloc(rows * rows * sizeof(double));
-    double* vt = (double*)malloc(cols * cols * sizeof(double));
-    double* s = (double*)malloc((rows < cols ? rows : cols) * sizeof(double));
-    double* superb = (double*)malloc((rows < cols ? rows : cols - 1) * sizeof(double));
-    double* W = (double*)malloc(rows * sizeof(double));
-    double* pseudo_inverse_matrix = (double*)malloc(rows * cols * sizeof(double));
-    double* C = (double*)malloc(cols * cols * sizeof(double));
+    double* u = (double*)malloc(rows * rows * sizeof(double) * num_indices);
+    double* vt = (double*)malloc(cols * cols * sizeof(double) * num_indices);
+    double* s = (double*)malloc((rows < cols ? rows : cols) * sizeof(double) * num_indices);
+    double* superb = (double*)malloc((rows < cols ? rows : cols - 1) * sizeof(double) * num_indices);
+    double* W = (double*)malloc(rows * sizeof(double) * num_indices);
+    double* wY_t = (double*)malloc(rows * cols * sizeof(double) * num_indices);
+    double* wY_t1 = (double*)malloc(rows * cols * sizeof(double) * num_indices);
+    double* wY_t_pseudo_inverse = (double*)malloc(rows * cols * sizeof(double) * num_indices);
+    double* C = (double*)malloc(cols * cols * sizeof(double) * num_indices);
+    double** x_star = (double**)malloc( num_indices * sizeof(double*));
 
     const size_t progress_step = num_indices / 10; // Calculate step size for 10% progress
 
@@ -137,33 +131,30 @@ void predict(const Model* model, const Data* data, const size_t* start_indices, 
     //#pragma omp parallel for
     for (size_t idx = 0; idx < num_indices; ++idx) {
         const size_t start_idx = start_indices[idx];
-        const double* x_star = &data->values[start_idx * cols];
+        x_star[idx] = &embedding->values[start_idx * cols];
 
-        // Compute the weighting matrix
-        compute_weighting_matrix(model, data, x_star, W, start_idx);
+        // We are solving for C, w_t * Y_t+1 = w_t * Y_t * C
 
-        // Compute the pseudo-inverse matrix using data up to start_idx
-        double* data_subset = (double*)malloc((start_idx + 1) * cols * sizeof(double));
-        memcpy(data_subset, data->values, (start_idx + 1) * cols * sizeof(double)); // Copy data up to start_idx
+        // Compute the weighting vector, w_t = w(X, t)
+        compute_weighting_vector(model, embedding, x_star[idx], &W[idx], start_idx);
 
-        compute_pseudo_inverse(data_subset, start_idx + 1, cols, pseudo_inverse_matrix, u, vt, s, superb);
+        // Compute weighted data, wY_t = w_t * Y_t = w(X, t) * Y_t
+        cblas_dgemv(CblasRowMajor, CblasTrans, start_idx, cols, 1.0, embedding->values, cols, W, 1, 0.0, &wY_t[idx], 1);
 
-        free(data_subset); // Free the allocated memory for data_subset
+        // Compute the weigted successor(?) data wY_t+1 =  w_t * Y_t+1 = w_t(X, t) * Y_t+1
+        cblas_dgemv(CblasRowMajor, CblasTrans, start_idx + 1, cols, 1.0, &embedding->values[1], cols, W, 1, 0.0, &wY_t1[idx], 1);
 
+        // Compute Moore Penrose psuedo inverse  of weighted data (w_t Y_t)^-1
+        compute_pseudo_inverse(&wY_t[idx], start_idx, cols, &wY_t_pseudo_inverse[idx], &u[idx], &vt[idx], &s[idx], &superb[idx]);
 
-        // Compute C
-        compute_C(pseudo_inverse_matrix, data->values, C, rows, cols);
+        // Compute C as (w_t Y_t)^-1 * w_t * Y_t+1 = C
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, start_idx, cols, cols, 1.0, &wY_t1[idx], cols, &wY_t_pseudo_inverse[idx], 1, 0.0, &C[idx], 1);
 
-        // Predict the next state
-        for (size_t i = 0; i < cols; ++i) {
-            result[idx * cols + i] = 0.0;
-            for (size_t j = 0; j < cols; ++j) {
-                result[idx * cols + i] += C[i * cols + j] * x_star[j];
-            }
-        }
+        // Predict the next state, C * Y_t
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, start_idx, cols, cols, 1.0, &C[idx], cols, &wY_t[idx], 1, 0.0, &result[idx], 1);
 
         // Print progress every 10%
-        #pragma omp critical
+        //#pragma omp critical
         {
             if (idx % progress_step == 0) {
                 printf("Progress: %zu%%\n", (idx / progress_step) * 10);
@@ -177,21 +168,37 @@ void predict(const Model* model, const Data* data, const size_t* start_indices, 
     free(s);
     free(superb);
     free(W);
-    free(pseudo_inverse_matrix);
+    free(wY_t);
+    free(wY_t1);
+    free(x_star);
+    free(wY_t_pseudo_inverse);
     free(C);
 }
 
 
 double* embed_series(const double* data, const size_t rows, const size_t cols, double* D, const size_t n_lags, const size_t max_lag) {
-    const size_t n_points = rows * n_lags - max_lag;
+    const size_t n_points = rows * n_lags;
     double* embedding = (double*)malloc(n_points);
 
     double* x_i = data;
     // Loop over embedding array filling in embedding vectors
-    for (double* y = embedding; y < embedding + n_points; y) {
+    for (double* y = embedding; y < embedding + n_points - max_lag; y) {
         *y = 0.0;
         for (size_t j = 0; j < n_lags; j++, y++) {
-            for (double* phi = D + max_lag * j; phi < D + max_lag * (j+1); phi++, x_i += cols ) {
+            for (double* phi = D + j * max_lag; phi < D + max_lag * (j+1); phi++, x_i += cols ) {
+                *y += *x_i * *phi;
+            }
+            // Reset X pointer to start of current data vector
+            x_i -= max_lag * cols;
+        }
+        x_i += cols;
+    }
+
+    // Deal with the last few where x_i + max_lag exceeds data length
+    for (double* y = embedding + n_points - max_lag; y < embedding + n_points; y){
+        *y = 0.0;
+        for (size_t j = 0; j < n_lags; j++, y++) {
+            for (double* phi = D + j * max_lag; phi < D + max_lag * (j+1); phi++, x_i += cols ) {
                 *y += *x_i * *phi;
             }
             // Reset X pointer to start of current data vector
