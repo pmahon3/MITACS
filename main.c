@@ -89,6 +89,20 @@ int main() {
     // Perform predictions
     predict(model, embedding, start_indices, num_indices, 1, predictions);
 
+    // Print errors
+    for (size_t i = 0; i < 10; i++) {
+        printf("%s", data->timestamps[start_indices[i]]);
+        for (size_t j = 0; j < model->n_lags; j++) {
+            printf(", %f", embedding->values[start_indices[i] * model->n_lags + j]);
+        }
+        printf("\n");
+        printf("%s", data->timestamps[start_indices[i]]);
+        for (size_t j = 0; j < model->n_lags; j++) {
+            printf(", %f", predictions[embedding->cols * i + j]);
+        }
+        printf("\n");
+    }
+
     // Free allocated memory
     free(start_indices);
     free(predictions);

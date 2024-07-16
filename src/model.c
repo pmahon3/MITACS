@@ -7,8 +7,6 @@
 #include <omp.h>
 #include <string.h>
 
-#include "../../../../../../opt/homebrew/opt/openblas/include/cblas.h"
-
 // Function to initialize the model
 Model* init_model(const size_t size, const double theta) {
     Model* model = (Model*)malloc(sizeof(Model));
@@ -76,7 +74,12 @@ void compute_weighting_vector(const Model* model, const Data* embedding, const d
 
 void compute_pseudo_inverse(double* data_values, size_t max_idx, size_t cols, double* pseudo_inverse_matrix, double* u, double* vt, double* s, double* superb) {
     // Compute SVD of weighted data_values directly
-    LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', max_idx, cols, data_values, cols, s, u, max_idx, vt, cols, superb);
+    int info = LAPACKE_dgesvd(LAPACK_ROW_MAJOR, 'A', 'A', max_idx, cols, data_values, cols, s, u, max_idx, vt, cols, superb);
+    if (info > 0) {
+        // SVD computation did not converge
+        fprintf(stderr, "The algorithm computing SVD failed to converge.\n");
+        exit(1);
+    }
 
     // Compute the pseudo-inverse of weighted data
     double tolerance = 1e-15;  // Tolerance for small singular values
@@ -89,9 +92,9 @@ void compute_pseudo_inverse(double* data_values, size_t max_idx, size_t cols, do
     }
 
     // Create a diagonal matrix for S^+
-    double* S_inv = (double*)calloc(max_idx * cols, sizeof(double));
-    for (size_t i = 0; i < max_idx && i < cols; ++i) {
-        S_inv[i * cols + i] = s[i];
+    double* S_inv = (double*)calloc(cols * max_idx, sizeof(double));
+    for (size_t i = 0; i < cols; ++i) {
+        S_inv[i * max_idx + i] = s[i];
     }
 
     // Allocate intermediate matrix for V * S^+
@@ -113,7 +116,6 @@ void predict(const Model* model, const Data* embedding, const size_t* start_indi
     const size_t rows = embedding->rows;
     const size_t cols = embedding->cols;
 
-    // Allocate memory for SVD components and weighting matrix
     double* u = (double*)malloc(rows * rows * sizeof(double) * num_indices);
     double* vt = (double*)malloc(cols * cols * sizeof(double) * num_indices);
     double* s = (double*)malloc((rows < cols ? rows : cols) * sizeof(double) * num_indices);
@@ -121,48 +123,42 @@ void predict(const Model* model, const Data* embedding, const size_t* start_indi
     double* W = (double*)malloc(rows * sizeof(double) * num_indices);
     double* wY_t = (double*)malloc(rows * cols * sizeof(double) * num_indices);
     double* wY_t1 = (double*)malloc(rows * cols * sizeof(double) * num_indices);
-    double* wY_t_pseudo_inverse = (double*)malloc(rows * cols * sizeof(double) * num_indices);
+    double* wY_t_pseudo_inverse = (double*)malloc(cols * rows * sizeof(double) * num_indices);
     double* C = (double*)malloc(cols * cols * sizeof(double) * num_indices);
-    double** x_star = (double**)malloc( num_indices * sizeof(double*));
+    double** x_star = (double**)malloc(num_indices * sizeof(double*));
 
-    const size_t progress_step = num_indices / 10; // Calculate step size for 10% progress
+    const size_t progress_step = num_indices / 10;
 
-    // Parallelize the prediction over multiple start indices
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t idx = 0; idx < num_indices; ++idx) {
         const size_t start_idx = start_indices[idx];
         x_star[idx] = &embedding->values[start_idx * cols];
 
-        // We are solving for C, w_t * Y_t+1 = w_t * Y_t * C
+        compute_weighting_vector(model, embedding, x_star[idx], &W[idx * rows], start_idx);
 
-        // Compute the weighting vector, w_t = w(X, t)
-        compute_weighting_vector(model, embedding, x_star[idx], &W[idx], start_idx);
+        // Compute weighted data, wY_t = w_t * Y_t
+        cblas_dgemv(CblasRowMajor, CblasTrans, start_idx, cols, 1.0, embedding->values, cols, &W[idx * rows], 1, 0.0, &wY_t[idx * rows * cols], 1);
 
-        // Compute weighted data, wY_t = w_t * Y_t = w(X, t) * Y_t
-        cblas_dgemv(CblasRowMajor, CblasTrans, start_idx, cols, 1.0, embedding->values, cols, W, 1, 0.0, &wY_t[idx], 1);
+        // Compute the weighted successor data wY_t1 = w_t * Y_t1
+        cblas_dgemv(CblasRowMajor, CblasTrans, start_idx + 1, cols, 1.0, &embedding->values[cols], cols, &W[idx * rows], 1, 0.0, &wY_t1[idx * rows * cols], 1);
 
-        // Compute the weigted successor(?) data wY_t+1 =  w_t * Y_t+1 = w_t(X, t) * Y_t+1
-        cblas_dgemv(CblasRowMajor, CblasTrans, start_idx + 1, cols, 1.0, &embedding->values[1], cols, W, 1, 0.0, &wY_t1[idx], 1);
+        // Compute Moore-Penrose pseudo-inverse of weighted data (w_t Y_t)^-1
+        compute_pseudo_inverse(&wY_t[idx * rows * cols], start_idx, cols, &wY_t_pseudo_inverse[idx * cols * rows], &u[idx * rows * rows], &vt[idx * cols * cols], &s[idx * (rows < cols ? rows : cols)], &superb[idx * ((rows < cols ? rows : cols) - 1)]);
 
-        // Compute Moore Penrose psuedo inverse  of weighted data (w_t Y_t)^-1
-        compute_pseudo_inverse(&wY_t[idx], start_idx, cols, &wY_t_pseudo_inverse[idx], &u[idx], &vt[idx], &s[idx], &superb[idx]);
-
-        // Compute C as (w_t Y_t)^-1 * w_t * Y_t+1 = C
-        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, start_idx, cols, cols, 1.0, &wY_t1[idx], cols, &wY_t_pseudo_inverse[idx], 1, 0.0, &C[idx], 1);
+        // Compute C as (w_t Y_t)^-1 * wY_t1 = C
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, cols, cols, start_idx, 1.0, &wY_t_pseudo_inverse[idx * cols * rows], start_idx, &wY_t1[idx * rows * cols], cols, 0.0, &C[idx * cols * cols], cols);
 
         // Predict the next state, C * Y_t
-        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, start_idx, cols, cols, 1.0, &C[idx], cols, &wY_t[idx], 1, 0.0, &result[idx], 1);
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, 1, cols, cols, 1.0, &C[idx * cols * cols], cols, x_star[idx], cols, 0.0, &result[idx * cols], cols);
 
-        // Print progress every 10%
-        //#pragma omp critical
         {
-            if (idx % progress_step == 0) {
+            if (progress_step > 0 && idx % progress_step == 0) {
                 printf("Progress: %zu%%\n", (idx / progress_step) * 10);
             }
         }
     }
     printf("Progress: %d%%\n", 100);
-    // Free allocated memory
+
     free(u);
     free(vt);
     free(s);
