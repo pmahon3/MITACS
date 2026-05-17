@@ -103,6 +103,13 @@ a now-shadowed older library version). It is what caught the `Σ ≈ w²·Q` bug
 - ⚠️ Cost: `LocalGLSelector.fit` is a triple loop (anchor × θ × σ). At full Ontario weekday
   scale (~44k library times, `sample_frac=0.8`, 25×25 grid) that is ~22M `lstsq` calls. Use
   small grids / low `sample_frac` for first runs; the runner logs anchor/grid sizes.
+- ⛔ **Production run PAUSED (2026-05-17).** `theta_max=5.0` is too small: `LocalGLSelector`
+  rail-pins θ* at the grid ceiling for **saturday (99.9%) and weekday (99.6%)** in both cheap
+  and full runs — so their drift/diffusion are at maximal (not selected) bandwidth. **Sunday is
+  the only trustworthy result** (interior θ*, r_hat=3). Resolve the bandwidth grid /
+  GL-penalty convention (a `[DEFER-RF]` question) before trusting saturday/weekday numbers.
+  See memory note `mitacs-theta-rail-pinning`; `outputs/STATUS.md` marks current artifact
+  trust; cheap-pass snapshot at `archive/cheap_pass_2026-05-17/`.
 - ✅ `run_pipeline.py`: config-driven orchestration (stage registry, skip-if-exists,
   `--from/--to/--only/--daytype/--profile/--dry-run/--force`). Run profiles live in
   `pipeline.yaml` (`fast` = cheap validation pass, `full` = production); `--profile`
