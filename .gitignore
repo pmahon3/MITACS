@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
+# Generated estimator artifacts (regenerable via run_pipeline.py;
+# profile-dependent binary tensors, not meaningful to version)
+processing/innovations/outputs/
+
 # Legacy climate data (paths no longer in this layout)
 src/main/resources/data/climate/ontario/*
 src/main/resources/data/ontario/climate/ontario/csv_files/54239.csv

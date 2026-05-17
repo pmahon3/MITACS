@@ -47,8 +47,24 @@ def _resolve(rel: str) -> Path:
     return (PROJECT_ROOT / p).resolve()
 
 
+# keys a profile is allowed to override, and which sub-block they live in
+_PROFILE_KEYS = {
+    "theta_count": "theta",
+    "sigma_count": "theta",
+    "theta_min": "theta",
+    "theta_max": "theta",
+    "sigma_min": "theta",
+    "sigma_max": "theta",
+    "gl_penalty_C": "theta",
+    "sample_frac": "sampling",
+}
+
+
 @lru_cache(maxsize=None)
-def load_config(config_path: Path | str | None = None) -> PipelineConfig:
+def load_config(
+    config_path: Path | str | None = None,
+    profile: str | None = None,
+) -> PipelineConfig:
     """Load and cache the pipeline configuration.
 
     Parameters
@@ -56,10 +72,31 @@ def load_config(config_path: Path | str | None = None) -> PipelineConfig:
     config_path:
         Optional override for the YAML file. Defaults to
         ``config/pipeline.yaml`` at the project root.
+    profile:
+        Optional run-profile name overriding the YAML's ``profile:`` key
+        (e.g. ``"fast"`` for a cheap validation pass, ``"full"`` for
+        production). A profile's keys override matching ``theta``/
+        ``sampling`` values.
     """
     path = Path(config_path) if config_path is not None else DEFAULT_CONFIG_PATH
     with open(path, "r") as fh:
         raw = yaml.safe_load(fh)
+
+    # --- apply run profile -------------------------------------------------
+    active_profile = profile or raw.get("profile", "full")
+    profiles = raw.get("profiles", {})
+    if active_profile not in profiles:
+        raise ValueError(
+            f"unknown profile {active_profile!r}; "
+            f"available: {sorted(profiles)}"
+        )
+    for key, value in (profiles[active_profile] or {}).items():
+        if key not in _PROFILE_KEYS:
+            raise ValueError(
+                f"profile {active_profile!r} overrides disallowed key {key!r}; "
+                f"allowed: {sorted(_PROFILE_KEYS)}"
+            )
+        raw[_PROFILE_KEYS[key]][key] = value
 
     paths = PathsConfig(**{k: _resolve(v) for k, v in raw["paths"].items()})
 
@@ -98,6 +135,7 @@ def load_config(config_path: Path | str | None = None) -> PipelineConfig:
         theta=theta,
         sampling=sampling,
         project_root=PROJECT_ROOT,
+        profile=active_profile,
     )
 
 

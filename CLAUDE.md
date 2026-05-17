@@ -102,7 +102,14 @@ a now-shadowed older library version). It is what caught the `Σ ≈ w²·Q` bug
 - ⚠️ Cost: `LocalGLSelector.fit` is a triple loop (anchor × θ × σ). At full Ontario weekday
   scale (~44k library times, `sample_frac=0.8`, 25×25 grid) that is ~22M `lstsq` calls. Use
   small grids / low `sample_frac` for first runs; the runner logs anchor/grid sizes.
-- ⏳ No top-level runner yet (planned: config-driven orchestration with skip-if-exists).
+- ✅ `run_pipeline.py`: config-driven orchestration (stage registry, skip-if-exists,
+  `--from/--to/--only/--daytype/--profile/--dry-run/--force`). Run profiles live in
+  `pipeline.yaml` (`fast` = cheap validation pass, `full` = production); `--profile`
+  overrides. **Default is `fast`** — switch to `full` for production-scale runs.
+- ✅ End-to-end verified on real Ontario data (`fast` profile, all 3 day-types, ~82s):
+  100% finite drift, all diffusion SPD, interpretable spectra (weekday/saturday d=2
+  single dominant mode; sunday d=7, r_hat=3). The expensive `full` run has not been
+  executed yet.
 - `scratch/` and `processing/innovations/scratch.py` are exploratory; not part of the pipeline.
 
 ## Data files

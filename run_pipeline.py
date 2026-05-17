@@ -133,10 +133,16 @@ def main() -> None:
     ap.add_argument("--daytype", help="restrict per-daytype stages to one day type")
     ap.add_argument("--force", action="store_true", help="ignore skip-if-exists")
     ap.add_argument("--dry-run", action="store_true", help="print plan only")
+    ap.add_argument(
+        "--profile",
+        choices=["fast", "full"],
+        help="override the config run profile (fast = cheap validation pass)",
+    )
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    cfg = load_config()
+    cfg = load_config(profile=args.profile)
+    logger.info("Profile: %s", cfg.profile)
 
     if args.only:
         selected = [s for s in REGISTRY if s.name in args.only]

@@ -51,3 +51,19 @@ sampling:
   sample_frac: 0.8
   random_seed: 42
   num_processes: null   # null -> serial; int -> parallel worker count
+
+# ---------------------------------------------------------------------------
+# Run profile. `full` uses the production grids/sample_frac above. `fast` is
+# a cheap validation pass (minutes, not hours) that proves the pipeline
+# produces sane artifacts before committing to the ~22M-lstsq full run.
+# Select via `profile:` here or `--profile` on run_pipeline.py.
+# A profile's keys override the matching theta/sampling values above.
+# ---------------------------------------------------------------------------
+profile: fast
+
+profiles:
+  full: {}   # use the values above unchanged
+  fast:
+    theta_count: 6
+    sigma_count: 6
+    sample_frac: 0.05

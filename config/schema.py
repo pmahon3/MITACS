@@ -67,6 +67,7 @@ class PipelineConfig:
     theta: ThetaGridConfig
     sampling: SamplingConfig
     project_root: Path
+    profile: str = "full"
 
     # --- derived helpers (one place for the shared idioms) ---------------
 
