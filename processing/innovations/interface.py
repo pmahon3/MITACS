@@ -1,111 +1,86 @@
-#!/usr/bin/env python3
+"""Save/load layer for the local Gaussian semigroup (Pi_Delta) estimator.
+
+Supersedes the previous broken ``save_all`` (which required an ``ensembles``
+tensor the producer never passed and used mismatched keyword names). The
+filename convention follows the established ``<artifact>_<tag>`` glob contract
+so existing loaders/dashboards keep working:
+
+    coeffs_<tag>.pt        (N, d, d) float32  -- drift C_j
+    covs_<tag>.pt          (N, d, d) float32  -- diffusion Sigma_j
+    resid_means_<tag>.pt   (N, d)    float32  -- residual mean mu_j
+    resid_eigvals_<tag>.pt (N, d)    float32  -- ascending eig(Sigma_j)
+    residuals_<tag>.pt     (N, 1, d) float32  -- mu_j as (N,1,d) for the
+                                                 legacy dashboard's loader
+    thetas_<tag>.npy       (N,) float64       -- per-anchor drift bandwidth
+    sigmas_<tag>.npy       (N,) float64       -- per-anchor diffusion bandwidth
+    times_<tag>.npy        (N,) int64 ns      -- anchor timestamps
+    spectrum_<tag>.npz                        -- aggregated spectral diagnostic
 """
-Processing interface for Rose-Operator forecasts.
-Provides a single save_all() to write out all artifacts from a run.
-"""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any, Dict
+
 import numpy as np
 import torch
-from pathlib import Path
-from typing import Optional, Sequence, Any
-import logging
 
-logger = logging.getLogger(__name__)
-
-
-def _save_residuals(
-        residuals: torch.Tensor,  # shape (N, H, d)
-        output_dir: Path,
-        run_tag: str,
-) -> Path:
-    """Save the raw residuals tensor."""
-    output_dir.mkdir(exist_ok=True, parents=True)
-    path = output_dir / f"residuals_{run_tag}.pt"
-    torch.save(residuals, path)
-    return path
-
-
-def _save_ensembles(
-        ensembles: torch.Tensor,  # shape (N, M, H, d)
-        output_dir: Path,
-        run_tag: str,
-) -> Path:
-    """Save the raw ensemble tensor."""
-    output_dir.mkdir(exist_ok=True, parents=True)
-    path = output_dir / f"ensemble_{run_tag}.pt"
-    torch.save(ensembles, path)
-    return path
-
-
-def _save_coefficients(
-        coefficients: torch.Tensor,  # shape (N, H, d, d)
-        output_dir: Path,
-        run_tag: str,
-) -> Path:
-    """Save the local linear map coefficient tensor."""
-    output_dir.mkdir(exist_ok=True, parents=True)
-    path = output_dir / f"coeffs_{run_tag}.pt"
-    torch.save(coefficients, path)
-    return path
-
-
-def _save_covariances(
-        covariances: Optional[torch.Tensor],  # shape (N, H, d, d)
-        output_dir: Path,
-        run_tag: str,
-) -> Optional[Path]:
-    """Save the innovation covariance tensor, if provided."""
-    if covariances is None:
-        return None
-    output_dir.mkdir(exist_ok=True, parents=True)
-    path = output_dir / f"covs_{run_tag}.pt"
-    torch.save(covariances, path)
-    return path
-
-
-def _save_anchor_times(
-        anchor_times: Sequence[Any],  # e.g. numpy datetime64 or pandas Timestamp
-        output_dir: Path,
-        run_tag: str,
-) -> Path:
-    """
-    Save the anchor times array so downstream dashboards can use real datetimes.
-    Stored as NumPy .npy.
-    """
-    output_dir.mkdir(exist_ok=True, parents=True)
-    path = output_dir / f"times_{run_tag}.npy"
-    arr = np.asarray(anchor_times)
-    np.save(path, arr)
-    return path
-
-
-# --- new helper -------------------------------------------------------
-def _save_times(times: np.ndarray, out_dir: Path, tag: str) -> Path:
-    """
-    Save anchor times (dtype=datetime64[ns]) to times_<tag>.npy.
-    """
-    out_dir.mkdir(exist_ok=True, parents=True)
-    path = out_dir / f"times_{tag}.npy"
-    np.save(path, times)
-    return path
+from .estimator import SemigroupEstimate
+from .spectral import SpectralDiagnostic
 
 
 def save_all(
     *,
-    residuals:   torch.Tensor,          # (N,H,d)   or (N,M,H,d)
-    coefficients:torch.Tensor,          # (N,H,d,d)
-    covariances: torch.Tensor | None,   # optional
-    ensembles:   torch.Tensor,          # (N,M,H,d)
-    anchor_times: np.ndarray,           # (N,) datetime64[ns]
-    output_dir:  Path,
-    run_tag:     str,
+    estimate: SemigroupEstimate,
+    spectrum: SpectralDiagnostic,
+    output_dir: Path,
+    run_tag: str,
 ) -> None:
-    """
-    Save residuals, ensembles, coeffs, covs (optional), and anchor_times.
-    """
-    _save_residuals(residuals, output_dir, run_tag)
-    _save_ensembles(ensembles, output_dir, run_tag)
-    _save_coefficients(coefficients, output_dir, run_tag)
-    _save_times(anchor_times, output_dir, run_tag)           # ← NEW
-    if covariances is not None:
-        _save_covariances(covariances, output_dir, run_tag)
-    logger.info("Saved all outputs for %s in %s", run_tag, output_dir)
+    """Persist all estimator + spectral artifacts for ``run_tag``."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    def _t(arr: np.ndarray) -> torch.Tensor:
+        return torch.as_tensor(arr, dtype=torch.float32)
+
+    torch.save(_t(estimate.coefficients), output_dir / f"coeffs_{run_tag}.pt")
+    torch.save(_t(estimate.covariances), output_dir / f"covs_{run_tag}.pt")
+    torch.save(_t(estimate.resid_means), output_dir / f"resid_means_{run_tag}.pt")
+    torch.save(_t(estimate.eigvals), output_dir / f"resid_eigvals_{run_tag}.pt")
+    # legacy dashboard expects residuals_*.pt as (N, H, d); use H=1 with mu_j
+    torch.save(
+        _t(estimate.resid_means[:, None, :]), output_dir / f"residuals_{run_tag}.pt"
+    )
+
+    np.save(output_dir / f"thetas_{run_tag}.npy", estimate.theta_star.astype(np.float64))
+    np.save(output_dir / f"sigmas_{run_tag}.npy", estimate.sigma_star.astype(np.float64))
+    np.save(output_dir / f"times_{run_tag}.npy", estimate.anchor_times.astype(np.int64))
+
+    np.savez(
+        output_dir / f"spectrum_{run_tag}.npz",
+        mean_spectrum=spectrum.mean_spectrum,
+        energy_fraction=spectrum.energy_fraction,
+        gap_ratios=spectrum.gap_ratios,
+        r_hat=np.int64(spectrum.r_hat),
+    )
+
+
+def _one(run_dir: Path, pattern: str) -> Path:
+    matches = sorted(run_dir.glob(pattern))
+    if not matches:
+        raise FileNotFoundError(f"no file matching {pattern!r} in {run_dir}")
+    return matches[0]
+
+
+def load_all(run_dir: Path) -> Dict[str, Any]:
+    """Load the estimator + spectral artifacts written by :func:`save_all`."""
+    run_dir = Path(run_dir)
+    spec = np.load(_one(run_dir, "spectrum_*.npz"))
+    return {
+        "coeffs": torch.load(_one(run_dir, "coeffs_*.pt")).numpy(),
+        "covs": torch.load(_one(run_dir, "covs_*.pt")).numpy(),
+        "resid_means": torch.load(_one(run_dir, "resid_means_*.pt")).numpy(),
+        "resid_eigvals": torch.load(_one(run_dir, "resid_eigvals_*.pt")).numpy(),
+        "thetas": np.load(_one(run_dir, "thetas_*.npy")),
+        "sigmas": np.load(_one(run_dir, "sigmas_*.npy")),
+        "times": np.load(_one(run_dir, "times_*.npy")),
+        "spectrum": {k: spec[k] for k in spec.files},
+    }

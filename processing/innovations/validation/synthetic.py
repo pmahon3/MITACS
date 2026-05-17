@@ -48,6 +48,9 @@ from edynamics.modelling_tools.estimators import LocalGLSelector
 from edynamics.modelling_tools.kernels import Gaussian
 from edynamics.modelling_tools.projectors import WeightedLeastSquares
 
+# Validate the *production* estimator code path, not a copy.
+from processing.innovations.estimator import raw_residual_diffusion
+
 
 # ──────────────────────────────────────────────────────────────────────────
 # Ground-truth process
@@ -98,33 +101,6 @@ def build_embedding(X: np.ndarray) -> tuple[Embedding, pd.DatetimeIndex]:
     embedding = Embedding(data=df, observers=observers, library_times=idx)
     embedding.compile()
     return embedding, idx
-
-
-def raw_residual_diffusion(
-    *,
-    embedding: Embedding,
-    anchor: pd.Timestamp,
-    C: np.ndarray,
-    residual_kernel,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Diffusion ``Σ`` and residual mean ``μ`` from *raw* residuals.
-
-    Uses the (library-recovered, correct) drift ``C`` but recomputes the
-    residual covariance from unweighted residuals ``Y - X@C`` with only the
-    residual kernel applied -- avoiding the ``w²`` collapse in the library's
-    own ``_local_stats_from_weighted``. This is the exact computation the
-    rebuilt ``estimator.py`` will perform.
-    """
-    block = embedding.block
-    blk = block.loc[block.index != anchor]  # leave-one-out, matching project()
-    X_full = blk.iloc[:-1].values
-    Y_full = blk.iloc[1:].values
-    resid = Y_full - X_full @ C
-    g = residual_kernel.weigh(np.linalg.norm(resid, axis=1))
-    mu = np.average(resid, axis=0, weights=g)
-    rc = resid - mu[None, :]
-    Sigma = (rc * g[:, None]).T @ rc / (g.sum() + 1e-12)
-    return Sigma, mu
 
 
 # ──────────────────────────────────────────────────────────────────────────
