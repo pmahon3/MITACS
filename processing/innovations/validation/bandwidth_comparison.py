@@ -236,18 +236,158 @@ def compare(n_anchors: int = 8, seed: int = 1) -> list[RuleResult]:
     return out
 
 
-if __name__ == "__main__":
-    rows = compare()
+# ──────────────────────────────────────────────────────────────────────────
+# Sigma-rule comparison: theta FIXED at true-LOO-CV (settled winner), vary
+# only how the diffusion covariance is estimated from the resulting
+# residuals. Decides whether to keep a residual-kernel bandwidth at all.
+# ──────────────────────────────────────────────────────────────────────────
+def _sigma_cv_lik_holdout(r: np.ndarray, d: int, seed: int = 0) -> np.ndarray:
+    """Pick sigma by HELD-OUT Gaussian log-lik of residual vectors.
+
+    Split residuals; for each sigma estimate Sigma on the train half
+    (residual-kernel-weighted), score full multivariate-normal log-lik on
+    the test half. Held-out (unlike the older monotone all-data NLL).
+    Returns the chosen Sigma on all residuals at the selected sigma.
+    """
+    rng = np.random.default_rng(seed)
+    n = len(r)
+    perm = rng.permutation(n)
+    tr, te = perm[: n // 2], perm[n // 2 :]
+    rn = np.linalg.norm(r, axis=1)
+    grid = np.geomspace(max(rn.min(), 1e-4), rn.max() + 1e-9, 20)
+    best = (-np.inf, None)
+    for s in grid:
+        g = gauss_w(np.linalg.norm(r[tr], axis=1), s, d)
+        if g.sum() <= 0:
+            continue
+        mu = np.average(r[tr], axis=0, weights=g)
+        rc = r[tr] - mu
+        S = (rc * g[:, None]).T @ rc / (g.sum() + 1e-12)
+        S += 1e-9 * np.eye(d)
+        try:
+            sign, logdet = np.linalg.slogdet(S)
+            Si = np.linalg.inv(S)
+        except np.linalg.LinAlgError:
+            continue
+        if sign <= 0:
+            continue
+        rt = r[te] - mu
+        ll = -0.5 * (
+            np.einsum("ij,jk,ik->i", rt, Si, rt) + logdet + d * np.log(2 * np.pi)
+        ).mean()
+        if ll > best[0]:
+            best = (ll, s)
+    s_star = best[1] if best[1] is not None else float(np.median(rn))
+    g = gauss_w(rn, s_star, d)
+    mu = np.average(r, axis=0, weights=g)
+    rc = r - mu
+    return (rc * g[:, None]).T @ rc / (g.sum() + 1e-12)
+
+
+def _sigma_none(r: np.ndarray, d: int) -> np.ndarray:
+    """No residual kernel: plain mu-centered covariance (sigma -> infinity)."""
+    rc = r - r.mean(axis=0)
+    return rc.T @ rc / len(r)
+
+
+def _sigma_knn_resid(r: np.ndarray, d: int, k: int = 100) -> np.ndarray:
+    rn = np.linalg.norm(r, axis=1)
+    k = min(k, len(rn) - 1)
+    s = float(np.partition(rn, k)[k]) or float(np.median(rn))
+    g = gauss_w(rn, s, d)
+    mu = np.average(r, axis=0, weights=g)
+    rc = r - mu
+    return (rc * g[:, None]).T @ rc / (g.sum() + 1e-12)
+
+
+def _sigma_fixed_med(r: np.ndarray, d: int) -> np.ndarray:
+    rn = np.linalg.norm(r, axis=1)
+    g = gauss_w(rn, float(np.median(rn)), d)
+    mu = np.average(r, axis=0, weights=g)
+    rc = r - mu
+    return (rc * g[:, None]).T @ rc / (g.sum() + 1e-12)
+
+
+SIGMA_RULES = {
+    "no_kernel": _sigma_none,
+    "cv_lik": _sigma_cv_lik_holdout,
+    "knn_resid": _sigma_knn_resid,
+    "fixed_med": _sigma_fixed_med,
+}
+
+
+def compare_sigma(n_anchors: int = 8, seed: int = 1) -> None:
+    """theta fixed at true-LOO-CV; compare Sigma-estimation rules."""
+    cfg = load_config()
     hdr = (
-        f"{'daytype':9s} {'rule':9s} {'theta~':>8s} {'th_sd':>7s} "
-        f"{'sigma~':>9s} {'sg_sd':>8s} {'||C||~':>8s} {'||S||~':>9s} "
-        f"{'r_hat~':>6s}"
+        f"{'daytype':9s} {'sigma_rule':11s} {'||S||~':>10s} "
+        f"{'minEig~':>10s} {'r_hat~':>7s} {'collapsed?':>10s}"
     )
     print(hdr)
     print("-" * len(hdr))
-    for x in rows:
-        print(
-            f"{x.daytype:9s} {x.rule:9s} {x.theta_med:8.3f} {x.theta_std:7.3f} "
-            f"{x.sigma_med:9.4f} {x.sigma_std:8.4f} {x.drift_norm_med:8.4f} "
-            f"{x.diff_norm_med:9.5f} {x.r_hat_med:6.1f}"
+    for dt in cfg.data.daytypes:
+        emb, fl, d = _build_embedding(cfg, dt)
+        block = emb.block
+        rng = np.random.default_rng(seed)
+        anchors = fl[
+            np.sort(rng.choice(len(fl), min(n_anchors, len(fl)), replace=False))
+        ]
+        acc = {r: {"sn": [], "me": [], "rh": []} for r in SIGMA_RULES}
+        for t in anchors:
+            x = block.loc[t].values
+            m = block.index != t
+            blo = block.loc[m]
+            dists = np.linalg.norm(blo.values - x, axis=1)
+            X, Y = blo.iloc[:-1].values, blo.iloc[1:].values
+            dists = dists[:-1]
+            th = theta_cv(dists, X, Y, d)  # settled theta rule
+            w = gauss_w(dists, th, d)
+            if w.sum() <= 0:
+                continue
+            C = np.linalg.lstsq(
+                w[:, None] * X, w[:, None] * Y, rcond=None
+            )[0]
+            resid = Y - X @ C
+            for name, fn in SIGMA_RULES.items():
+                S = fn(resid, d)
+                ev = np.clip(np.linalg.eigvalsh(S)[::-1], 0, None)
+                acc[name]["sn"].append(np.linalg.norm(S))
+                acc[name]["me"].append(ev[-1])
+                gaps = ev[:-1] / (ev[1:] + 1e-12)
+                acc[name]["rh"].append(
+                    int(np.argmax(gaps) + 1) if gaps.size else d
+                )
+        for name in SIGMA_RULES:
+            a = acc[name]
+            if not a["sn"]:
+                continue
+            sn = float(np.median(a["sn"]))
+            me = float(np.median(a["me"]))
+            collapsed = "YES" if sn < 1e-4 else "no"
+            print(
+                f"{dt:9s} {name:11s} {sn:10.5f} {me:10.2e} "
+                f"{float(np.median(a['rh'])):7.1f} {collapsed:>10s}"
+            )
+
+
+if __name__ == "__main__":
+    import sys
+
+    if "--sigma" in sys.argv:
+        compare_sigma()
+    else:
+        rows = compare()
+        hdr = (
+            f"{'daytype':9s} {'rule':9s} {'theta~':>8s} {'th_sd':>7s} "
+            f"{'sigma~':>9s} {'sg_sd':>8s} {'||C||~':>8s} {'||S||~':>9s} "
+            f"{'r_hat~':>6s}"
         )
+        print(hdr)
+        print("-" * len(hdr))
+        for x in rows:
+            print(
+                f"{x.daytype:9s} {x.rule:9s} {x.theta_med:8.3f} "
+                f"{x.theta_std:7.3f} {x.sigma_med:9.4f} {x.sigma_std:8.4f} "
+                f"{x.drift_norm_med:8.4f} {x.diff_norm_med:9.5f} "
+                f"{x.r_hat_med:6.1f}"
+            )
