@@ -77,6 +77,34 @@ def simulate_var1(
     return X[burn:]
 
 
+def simulate_var1_t(
+    A: np.ndarray,
+    Q: np.ndarray,
+    n: int,
+    burn: int,
+    seed: int,
+    df: int = 5,
+) -> np.ndarray:
+    """VAR(1) with Student-t innovations (KNOWN heavy-tailed).
+
+    Innovations are t_df scaled to unit variance then coloured by
+    ``chol(Q)``. For df=5 the per-coordinate excess kurtosis is exactly
+    ``6/(df-4) = 6.0`` -- a finite, unambiguous non-Gaussian target the
+    diagnostic must clearly flag (vs ~0 for the Gaussian simulator).
+    """
+    d = A.shape[0]
+    rng = np.random.default_rng(seed)
+    L = np.linalg.cholesky(Q)
+    scale = np.sqrt((df - 2) / df)  # t_df variance = df/(df-2); unit-ise
+    T = n + burn
+    X = np.empty((T + 1, d))
+    X[0] = rng.standard_normal(d)
+    for t in range(T):
+        eps = rng.standard_t(df, size=d) * scale
+        X[t + 1] = A @ X[t] + L @ eps
+    return X[burn:]
+
+
 def build_embedding(X: np.ndarray) -> tuple[Embedding, pd.DatetimeIndex]:
     """Wrap the VAR(1) path as an hourly DataFrame with d Lag(tau=0) observers.
 
@@ -180,6 +208,60 @@ def test_recovers_var1() -> None:
     )
 
 
+def _innov_kurt_over_anchors(X: np.ndarray, n_anchors: int, seed: int):
+    """Median (excess_kurt, tail_ratio) from the PRODUCTION
+    ``innovation_diagnostics`` over anchors of a VAR(1) path."""
+    from processing.innovations.estimator import innovation_diagnostics
+
+    embedding, idx = build_embedding(X)
+    d = X.shape[1]
+    rng = np.random.default_rng(seed)
+    interior = idx[d + 1 : -2]
+    sel = np.sort(
+        rng.choice(len(interior), min(n_anchors, len(interior)), replace=False)
+    )
+    eks, trs = [], []
+    for t in interior[sel]:
+        di = innovation_diagnostics(embedding=embedding, anchor=t)  # no mask
+        if np.isfinite(di["excess_kurt"]):
+            eks.append(di["excess_kurt"])
+            trs.append(di["tail_ratio"])
+    return float(np.median(eks)), float(np.median(trs))
+
+
+# Gaussian innovations -> excess kurt ~0, tail ratio ~1.
+# Student-t(df=5) -> per-coord excess kurt 6.0 (the WLS fit attenuates it
+# somewhat; observed ~4.7). Thresholds calibrated from observed clean-vs-
+# heavy behaviour (G: kurt~-0.05 tail~0.98 ; t: kurt~4.7 tail~1.43). The
+# tail_ratio is deliberately outlier-RESISTANT so it moves less than
+# kurtosis -- the binding assertions are (a) no false positive on
+# Gaussian and (b) clear SEPARATION, not large absolute t values.
+GAUSS_KURT_MAX = 0.5      # Gaussian must read ~0 (no false positive)
+GAUSS_TAIL_MAX = 1.10
+T_KURT_MIN = 3.0          # t kurtosis must register clearly elevated
+T_TAIL_MIN = 1.20         # t tail_ratio clearly above the Gaussian ~0.98
+KURT_SEP_MIN = 2.0        # t must exceed Gaussian kurt by a clear margin
+TAIL_SEP_MIN = 0.25       # and tail_ratio by a clear margin
+
+
+def test_innovation_nongaussianity() -> None:
+    A, Q = make_var1_params(d=3, seed=11)
+    Xg = simulate_var1(A, Q, n=6000, burn=500, seed=12)
+    Xt = simulate_var1_t(A, Q, n=6000, burn=500, seed=12, df=5)
+    gk, gt = _innov_kurt_over_anchors(Xg, 40, seed=1)
+    tk, tt = _innov_kurt_over_anchors(Xt, 40, seed=1)
+    assert gk < GAUSS_KURT_MAX, f"Gaussian excess_kurt {gk:.2f} not ~0"
+    assert gt < GAUSS_TAIL_MAX, f"Gaussian tail_ratio {gt:.2f} not ~1"
+    assert tk > T_KURT_MIN, f"t excess_kurt {tk:.2f} not flagged heavy"
+    assert tt > T_TAIL_MIN, f"t tail_ratio {tt:.2f} not flagged heavy"
+    assert tk - gk > KURT_SEP_MIN, (
+        f"kurt can't separate t ({tk:.2f}) from G ({gk:.2f})"
+    )
+    assert tt - gt > TAIL_SEP_MIN, (
+        f"tail_ratio can't separate t ({tt:.2f}) from G ({gt:.2f})"
+    )
+
+
 if __name__ == "__main__":
     result, A, Q = recover()
     print("VAR(1) recovery:")
@@ -194,3 +276,22 @@ if __name__ == "__main__":
         and result.eig_rel_err < EIG_TOL
     )
     print("RESULT:", "PASS" if ok else "FAIL")
+
+    print()
+    print("Non-Gaussianity gate (production innovation_diagnostics):")
+    A2, Q2 = make_var1_params(d=3, seed=11)
+    Xg = simulate_var1(A2, Q2, n=6000, burn=500, seed=12)
+    Xt = simulate_var1_t(A2, Q2, n=6000, burn=500, seed=12, df=5)
+    gk, gt = _innov_kurt_over_anchors(Xg, 40, seed=1)
+    tk, tt = _innov_kurt_over_anchors(Xt, 40, seed=1)
+    print(f"  Gaussian noise : excess_kurt={gk:6.3f}  tail_ratio={gt:5.3f}")
+    print(f"  Student-t(df=5): excess_kurt={tk:6.3f}  tail_ratio={tt:5.3f}")
+    ng_ok = (
+        gk < GAUSS_KURT_MAX
+        and gt < GAUSS_TAIL_MAX
+        and tk > T_KURT_MIN
+        and tt > T_TAIL_MIN
+        and (tk - gk) > KURT_SEP_MIN
+        and (tt - gt) > TAIL_SEP_MIN
+    )
+    print("RESULT:", "PASS" if ng_ok else "FAIL")

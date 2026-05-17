@@ -141,8 +141,12 @@ def local_drift_and_diffusion(
     embedding: Embedding,
     anchor: pd.Timestamp,
     day_anchor_hour: int | None = None,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
-    """Per-anchor ``(C, Sigma, mu, theta*)``.
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float, np.ndarray]:
+    """Per-anchor ``(C, Sigma, mu, theta*, resid)``.
+
+    ``resid`` is the production residual array ``Y - X@C`` (after any
+    day-anchor masking) -- returned so diagnostics can read it without
+    reimplementing the fit.
 
     Drift ``C``: WLS with Gaussian kernel at the true-LOO-CV bandwidth
     ``theta*``. Diffusion ``Sigma``: mu-centred *plain* covariance of the
@@ -185,7 +189,63 @@ def local_drift_and_diffusion(
     mu = resid.mean(axis=0)
     rc = resid - mu[None, :]
     Sigma = rc.T @ rc / len(rc)              # plain (unweighted) covariance
-    return C, Sigma, mu, theta
+    return C, Sigma, mu, theta, resid
+
+
+def innovation_diagnostics(
+    *,
+    embedding: Embedding,
+    anchor: pd.Timestamp,
+    day_anchor_hour: int | None = None,
+) -> dict:
+    """Univariate non-Gaussianity of the scalar one-step innovation.
+
+    For a single-variable delay embedding, ``Sigma_j`` is rank-1 by
+    construction (coords 2..d of the image are deterministic shifts of the
+    input -- see memory ``mitacs-rank1-structural``). The ONLY stochastic
+    content is the coordinate-0 residual r0 = z_{t+1} - (X@C)_0. So
+    non-Gaussianity is a univariate question on r0, not a multivariate
+    (Mardia) one -- the multivariate machinery was the source of earlier
+    inflated/degenerate numbers.
+
+    Reuses :func:`local_drift_and_diffusion` for the production fit and the
+    exact production residuals (no reimplementation); reads only r0.
+
+    Returns ``innov_var`` (= Sigma[0,0], the one scalar diffusion
+    content), ``excess_kurt`` (Fisher; 0 = Gaussian), and ``tail_ratio``
+    (robust, outlier-resistant: the r0 (0.5, 99.5) inter-quantile range
+    over its IQR, divided by the same ratio for a standard normal so
+    Gaussian ~ 1.0 -- cross-checks the fragile kurtosis).
+    """
+    _C, Sigma, _mu, _theta, resid = local_drift_and_diffusion(
+        embedding=embedding, anchor=anchor, day_anchor_hour=day_anchor_hour
+    )
+    r0 = resid[:, 0]
+    r0 = r0 - r0.mean()
+
+    n = r0.size
+    s = r0.std()
+    excess_kurt = float(np.mean(r0**4) / (s**4) - 3.0) if s > 0 else float("nan")
+
+    q005, q25, q75, q995 = np.quantile(r0, [0.005, 0.25, 0.75, 0.995])
+    iqr = q75 - q25
+    # standard-normal reference for (q99.5-q0.5)/(q75-q25); derived from
+    # scipy (= 3.818930) so the constant can't silently drift.
+    from scipy.stats import norm as _norm
+
+    _NORM_REF = (_norm.ppf(0.995) - _norm.ppf(0.005)) / (
+        _norm.ppf(0.75) - _norm.ppf(0.25)
+    )
+    tail_ratio = (
+        float(((q995 - q005) / iqr) / _NORM_REF) if iqr > 0 else float("nan")
+    )
+
+    return {
+        "innov_var": float(Sigma[0, 0]),
+        "excess_kurt": excess_kurt,
+        "tail_ratio": tail_ratio,
+        "n": int(n),
+    }
 
 
 def build_local_gaussian_semigroup(
@@ -215,7 +275,7 @@ def build_local_gaussian_semigroup(
     theta_star = np.empty(N, dtype=float)
 
     for i, anchor_t in enumerate(anchors):
-        C, Sigma, mu, theta = local_drift_and_diffusion(
+        C, Sigma, mu, theta, _resid = local_drift_and_diffusion(
             embedding=embedding,
             anchor=anchor_t,
             day_anchor_hour=day_anchor_hour,
