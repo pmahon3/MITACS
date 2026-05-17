@@ -95,10 +95,11 @@ a now-shadowed older library version). It is what caught the `Σ ≈ w²·Q` bug
   (`estimator.py` + `spectral.py` + `interface.py` + config-driven `process.py`); verified
   end-to-end on real Ontario data. Operator naming defers to the `Resolvent_Framework`
   programme (no novelty claims; lag-selection stopping rule flagged `[DEFER-RF]`).
-- ⚠️ `processing/locality/{pointwise,global}/process.py` still **crash** on the WLS API change
-  (direct `.project()` without `LocalGLSelector.fit`). These are the *old* θ-sweep / manual
-  θ-selection workflow; their fate (refactor as a `LocalGLSelector` diagnostic vs. delete as
-  superseded by the auto-(θ*,σ*) estimator) is deferred until after the Ontario end-to-end run.
+- 🗄️ `processing/locality/` (the old θ-sweep / manual θ-selection workflow, broken on the
+  WLS API change) was removed — superseded by the auto-(θ*,σ*) `innovations` estimator. It is
+  archived at `archive/legacy_locality_sweep.zip` (gitignored; also fully recoverable from git
+  history at the commit before its removal). Restore if a sweep-vs-selector robustness
+  comparison is wanted for the writeup.
 - ⚠️ Cost: `LocalGLSelector.fit` is a triple loop (anchor × θ × σ). At full Ontario weekday
   scale (~44k library times, `sample_frac=0.8`, 25×25 grid) that is ~22M `lstsq` calls. Use
   small grids / low `sample_frac` for first runs; the runner logs anchor/grid sizes.

@@ -10,3 +10,6 @@ processing/innovations/outputs/
 # Legacy climate data (paths no longer in this layout)
 src/main/resources/data/climate/ontario/*
 src/main/resources/data/ontario/climate/ontario/csv_files/54239.csv
+
+# Local convenience archives (originals recoverable from git history)
+archive/
