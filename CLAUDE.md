@@ -63,62 +63,81 @@ the **filename convention is the contract** (`save_all`/`load_all` discover arti
 6. **Explore** — Dash apps in `post_processing/` read a run dir via `load_all(run_dir)`:
    `python post_processing/innovations/dashboard.py --run-dir <output_dir> [--port 8050]`.
 
-## edynamics WLS API: critical, non-obvious
+## Estimator design (current, post-rebuild)
 
-The loaded `WeightedLeastSquares` (sibling editable install) **requires
-`LocalGLSelector.fit(embedding, anchors)` to be called before `.project(...)`** — it sets
-`anchor_times`/`best_theta_vals`/`best_sigma_vals`, else `project()` raises `RuntimeError`.
-Every legacy `process.py` calls `.project()` directly and would fail against the installed
-library. Use `LocalGLSelector` (dual θ/σ grids) — see `processing/innovations/validation/synthetic.py`
-for the correct call chain.
+The `innovations` stage estimates, per anchor, a local linear drift `C_j` and a
+diffusion `Σ_j` defining the Gaussian Markov kernel `x' | x ~ N(x C_j, Σ_j)` on the
+delay-embedding state space — an estimator of the programme's conditional-regularity
+kernel `κ_Q` (see memory `mitacs-theory-correspondence` for the precise mapping and
+its qualifiers; operator naming defers to `Resolvent_Framework`, no novelty claims).
 
-**Drift is correct; the library's diffusion is not.** `RoseResult.coefficients` (drift `C`,
-`x_next = x@C`, so `C ≈ Aᵀ` for column-convention VAR `x_{t+1}=Ax_t`) is reliable.
-`RoseResult.covariances` is the covariance of the *weighted* residual `Wy−WX@C` ≈ `w²·Q`, which
-collapses to ~1e-9 under wide kernels — **it does not estimate the diffusion**. Diffusion must be
-recomputed from **raw** residuals `Y−X@C` with only the residual kernel applied (see
-`raw_residual_diffusion` in the validation module — this is the validated estimator core).
+Key facts (each was hard-won this session; do not "simplify" without reading the memory):
 
-## Validation gate
+- **Bandwidth selection is true-LOO cross-validation**, not the edynamics
+  `LocalGLSelector`. The GL criterion is degenerate for the normalized Gaussian kernel
+  (no interior optimum — score monotone in bandwidth); the `Resolvent_Framework`
+  programme has no bandwidth convention to defer to. `_theta_loo_cv` in `estimator.py`
+  is the validated rule. (memory `mitacs-theta-rail-pinning`)
+- **Diffusion is the plain μ-centred residual covariance** (`Y−X@C_j`), no residual
+  kernel. The edynamics kernel-weighted covariance is `≈ w²·Q` and collapses; the
+  plain covariance is the unbiased local second moment.
+- **`Σ_j` is rank-1 by construction** of a single-variable delay embedding (coords
+  2..d of the one-step image are deterministic shifts of the input). The only
+  stochastic content is the scalar coordinate-0 innovation. `r_hat`/"multi-mode" is
+  therefore incoherent for this embedding and is not reported. (memory
+  `mitacs-rank1-structural`)
+- **`day_anchor_hour`**: transitions whose one-step target lands on the day-anchor
+  hour cross the day-type rollover seam and must be excluded — without this, `Σ_j` is
+  catastrophically ill-conditioned. `process.py` passes `cfg.data.day_anchor_hours`.
 
-`processing/innovations/validation/synthetic.py` recovers known drift `A` and diffusion `Q`
-from a VAR(1) ground-truth process through the real call chain.
-`python -m processing.innovations.validation.synthetic` must print `RESULT: PASS` before any
-Ontario output — or any pre-existing `.pt` artifact — is trusted (existing artifacts may be from
-a now-shadowed older library version). It is what caught the `Σ ≈ w²·Q` bug above.
+## Validation gates (both must PASS — `python -m processing.innovations.validation.synthetic`)
 
-## Status (what is done vs. in progress, as of 2026-05-17)
+Both gates call the **production** estimator directly (not reimplementations) — that
+is why they are trustworthy:
 
-- ✅ `config/` package; stages 2–4 config-driven (clustering verified end-to-end on real data).
-- ✅ VAR(1) validation gate built and passing (drift 4.6%, diffusion 2.6%, eig 0.9%).
-- ✅ `innovations` stage rebuilt as the local Gaussian semigroup (`Pi_Delta`) estimator
-  (`estimator.py` + `spectral.py` + `interface.py` + config-driven `process.py`); verified
-  end-to-end on real Ontario data. Operator naming defers to the `Resolvent_Framework`
-  programme (no novelty claims; lag-selection stopping rule flagged `[DEFER-RF]`).
-- 🗄️ `processing/locality/` (the old θ-sweep / manual θ-selection workflow, broken on the
-  WLS API change) was removed — superseded by the auto-(θ*,σ*) `innovations` estimator. It is
-  archived at `archive/legacy_locality_sweep.zip` (gitignored; also fully recoverable from git
-  history at the commit before its removal). Restore if a sweep-vs-selector robustness
-  comparison is wanted for the writeup.
-- ⚠️ Cost: `LocalGLSelector.fit` is a triple loop (anchor × θ × σ). At full Ontario weekday
-  scale (~44k library times, `sample_frac=0.8`, 25×25 grid) that is ~22M `lstsq` calls. Use
-  small grids / low `sample_frac` for first runs; the runner logs anchor/grid sizes.
-- ⛔ **Production run PAUSED (2026-05-17).** `theta_max=5.0` is too small: `LocalGLSelector`
-  rail-pins θ* at the grid ceiling for **saturday (99.9%) and weekday (99.6%)** in both cheap
-  and full runs — so their drift/diffusion are at maximal (not selected) bandwidth. **Sunday is
-  the only trustworthy result** (interior θ*, r_hat=3). Resolve the bandwidth grid /
-  GL-penalty convention (a `[DEFER-RF]` question) before trusting saturday/weekday numbers.
-  See memory note `mitacs-theta-rail-pinning`; `outputs/STATUS.md` marks current artifact
-  trust; cheap-pass snapshot at `archive/cheap_pass_2026-05-17/`.
-- ✅ `run_pipeline.py`: config-driven orchestration (stage registry, skip-if-exists,
-  `--from/--to/--only/--daytype/--profile/--dry-run/--force`). Run profiles live in
-  `pipeline.yaml` (`fast` = cheap validation pass, `full` = production); `--profile`
-  overrides. **Default is `fast`** — switch to `full` for production-scale runs.
-- ✅ End-to-end verified on real Ontario data (`fast` profile, all 3 day-types, ~82s):
-  100% finite drift, all diffusion SPD, interpretable spectra (weekday/saturday d=2
-  single dominant mode; sunday d=7, r_hat=3). The expensive `full` run has not been
-  executed yet.
-- `scratch/` and `processing/innovations/scratch.py` are exploratory; not part of the pipeline.
+1. **Recovery gate**: VAR(1) with known `(A, Q)` → `build_local_gaussian_semigroup`
+   must recover drift/diffusion within tolerance.
+2. **Non-Gaussianity gate**: Gaussian-innovation VAR(1) must read ≈Gaussian;
+   Student-t-innovation VAR(1) must be clearly flagged heavy-tailed — validating
+   `innovation_diagnostics` against ground truth.
+
+`processing/innovations/validation/rebaseline.py` is the authoritative
+production-path factual record (`mitacs-rebaseline-facts`).
+
+## Discipline rule (the durable lesson of this session)
+
+**A diagnostic that reimplements production logic is a hypothesis, not a finding,
+until confirmed through the production code path.** This session, ≥3 confident Ontario
+claims (sunday multi-mode; "mild"/"10×" non-Gaussianity; a 4-decimal "match") were all
+reimplemented-diagnostic artifacts that inverted when finally run through production
+functions. The gates never misled because they call production directly. Any Ontario
+diagnostic must call production functions or its output is labelled provisional and
+not committed as fact.
+
+## Status (as of 2026-05-17)
+
+- ✅ Config-driven pipeline (`config/`, `run_pipeline.py` with stage registry,
+  skip-if-exists, `--from/--to/--only/--daytype/--profile/--dry-run/--force`; `fast`/
+  `full` profiles in `pipeline.yaml`). Stages 2–6 config-driven.
+- ✅ Estimator rebuilt and **both validation gates pass** (recovery + non-Gaussianity).
+- ✅ **Authoritative empirical facts** established via production-path re-baseline
+  (`mitacs-rebaseline-facts` — trust this file for Ontario facts; all earlier Ontario
+  claims are superseded):
+  - **The intra-day conditioning set is required**: full-process `Σ_j` is numerically
+    unusable (cond up to ~1e20, sunday singular) due to the day-anchor seam; intra-day
+    gives cond ~6–1072. The estimand is effectively forced to intra-day.
+  - **The scalar one-step innovation is strongly non-Gaussian** (gate-validated
+    excess kurtosis ≈24–33, tail ratio ≈2.4–3.8; clean VAR(1) reference reads ≈0/≈1).
+    `Σ_j` is a Gaussian second-moment *proxy* of a heavy-tailed law — a mandatory
+    writeup caveat.
+- 🗄️ `processing/locality/` (old θ-sweep, broken on the WLS API) removed; archived at
+  `archive/legacy_locality_sweep.zip` (gitignored; recoverable from git history).
+- ⏳ Not yet started: IESO published-forecast comparison + web dashboard; the
+  publication writeup. A future production-scale (`full` profile) run is a separate
+  question — the re-baseline is the current trustworthy factual record.
+- `scratch/` and `processing/innovations/scratch.py` are exploratory; not pipeline.
+- `processing/innovations/validation/bandwidth_comparison.py` is a superseded
+  investigation record (its conclusion is implemented); kept runnable for trace.
 
 ## Data files
 
