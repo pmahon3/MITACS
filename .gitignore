@@ -7,6 +7,11 @@ __pycache__/
 # profile-dependent binary tensors, not meaningful to version)
 processing/innovations/outputs/
 
+# Raw IESO forecast XML cache (bulky, regenerable by data.forecast_scraping;
+# the parsed data product data/ontario/forecast/ieso_forecast.csv IS tracked,
+# matching the repo convention of tracking processed demand CSVs)
+data/ontario/forecast/xml/
+
 # Legacy climate data (paths no longer in this layout)
 src/main/resources/data/climate/ontario/*
 src/main/resources/data/ontario/climate/ontario/csv_files/54239.csv

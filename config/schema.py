@@ -26,6 +26,8 @@ class PathsConfig:
     pointwise_output_dir: Path
     global_output_dir: Path
     operator_output_dir: Path
+    forecast_xml_dir: Path
+    forecast_csv: Path
 
 
 @dataclass(frozen=True)

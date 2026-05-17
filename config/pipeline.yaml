@@ -25,6 +25,9 @@ paths:
   global_output_dir:    processing/locality/global/params
   # --- stochastic-operator / Pi_Delta estimator (stage 6, rebuilt) ---
   operator_output_dir:  processing/innovations/outputs
+  # --- IESO published day-ahead demand forecast (Adequacy3 report) ---
+  forecast_xml_dir:     data/ontario/forecast/xml
+  forecast_csv:         data/ontario/forecast/ieso_forecast.csv
 
 data:
   year_range: [2018, 2025]   # inclusive start, exclusive end (range semantics)
