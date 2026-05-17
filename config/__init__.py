@@ -108,7 +108,12 @@ def load_config(
         day_anchor_hours=int(d["day_anchor_hours"]),
     )
 
-    embedding = EmbeddingConfig(max_dimensions=int(raw["embedding"]["max_dimensions"]))
+    _emb = raw["embedding"]
+    embedding = EmbeddingConfig(
+        max_dimensions=int(_emb["max_dimensions"]),
+        dim_selection=str(_emb.get("dim_selection", "elbow")),
+        elbow_tol=float(_emb.get("elbow_tol", 0.005)),
+    )
 
     t = raw["theta"]
     theta = ThetaGridConfig(

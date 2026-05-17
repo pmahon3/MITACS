@@ -34,6 +34,17 @@ data:
 
 embedding:
   max_dimensions: 10
+  # dimension selection from the rho-vs-dim curve. "elbow" = smallest d
+  # within elbow_tol (relative) of the plateau max -- principled on flat
+  # curves (sunday plateaus from d=3; idxmax wrongly picks d=7).
+  # "idxmax" = naive argmax (kept for reproducing pre-2026-05-17 results).
+  dim_selection: elbow
+  # 0.001 calibrated from the actual curves: weekday's true peak at d=2 has
+  # relative prominence 0.00102, so tol must be < that to keep d=2 (not
+  # collapse to d=1); still cuts sunday's idxmax=7 artifact to d=4 (the
+  # first point on sunday's genuine plateau). 0.005 was too loose (weekday
+  # -> d=1, discarding a real peak).
+  elbow_tol: 0.001
 
 theta:
   # Bandwidth grids for LocalGLSelector. The GL score has a sharp interior

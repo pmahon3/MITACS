@@ -140,6 +140,7 @@ def local_drift_and_diffusion(
     *,
     embedding: Embedding,
     anchor: pd.Timestamp,
+    day_anchor_hour: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
     """Per-anchor ``(C, Sigma, mu, theta*)``.
 
@@ -150,12 +151,29 @@ def local_drift_and_diffusion(
     fit); the diffusion is the unbiased local second moment of those
     residuals, not a kernel-shrunk proxy. Leave-one-out (drop the anchor
     row) mirrors the old ``project(leave_out=True)``.
+
+    ``day_anchor_hour``: if set, transitions whose one-step *target*
+    timestamp falls on that hour are dropped from the fit and the
+    residuals. These are the day-type rollover seam: the one-step map
+    spans the day-anchor boundary, producing artificial discontinuous
+    transitions that otherwise dominate ``Sigma`` (Ontario weekday
+    per-component residual excess kurtosis 133 -> 5 when masked; ~4% of
+    steps; see memory ``mitacs-dayanchor-seam``). ``None`` (default) =
+    no masking -- correct for data with no day-anchor structure (e.g.
+    the VAR(1) validation gate).
     """
     d = embedding.block.shape[1]
     block = embedding.block
     blk = block.loc[block.index != anchor]
-    X = blk.iloc[:-1].values
-    Y = blk.iloc[1:].values
+    X_df = blk.iloc[:-1]
+    Y_df = blk.iloc[1:]
+
+    if day_anchor_hour is not None:
+        keep = Y_df.index.hour != day_anchor_hour
+        X_df, Y_df = X_df[keep], Y_df[keep]
+
+    X = X_df.values
+    Y = Y_df.values
     x0 = block.loc[anchor].values
     dists = np.linalg.norm(X - x0, axis=1)
 
@@ -174,14 +192,17 @@ def build_local_gaussian_semigroup(
     *,
     embedding: Embedding,
     anchors: pd.DatetimeIndex,
+    day_anchor_hour: int | None = None,
     **_legacy,
 ) -> SemigroupEstimate:
     """Fit per-anchor local Gaussian semigroup parameters.
 
     Drift bandwidth per anchor by true-LOO-CV; diffusion = plain residual
-    covariance (no residual kernel). ``**_legacy`` swallows the now-unused
-    ``theta_grid``/``sigma_grid``/``gl_penalty_C`` kwargs so existing
-    callers (process.py) keep working without change.
+    covariance (no residual kernel). ``day_anchor_hour`` (if set) masks
+    day-type-rollover-seam transitions -- see
+    :func:`local_drift_and_diffusion`. ``**_legacy`` swallows the
+    now-unused ``theta_grid``/``sigma_grid``/``gl_penalty_C`` kwargs so
+    existing callers keep working without change.
     """
     anchors = pd.DatetimeIndex(anchors)
     d = embedding.block.shape[1]
@@ -195,7 +216,9 @@ def build_local_gaussian_semigroup(
 
     for i, anchor_t in enumerate(anchors):
         C, Sigma, mu, theta = local_drift_and_diffusion(
-            embedding=embedding, anchor=anchor_t
+            embedding=embedding,
+            anchor=anchor_t,
+            day_anchor_hour=day_anchor_hour,
         )
         C_all[i] = C
         Sigma_all[i] = Sigma

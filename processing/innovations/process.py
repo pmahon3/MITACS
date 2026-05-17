@@ -40,8 +40,8 @@ def main(cfg: PipelineConfig, daytype: str | None = None) -> None:
     out_dir = cfg.paths.operator_output_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    theta_grid = cfg.theta.theta_grid   # geometric/linear per config
-    sigma_grid = cfg.theta.sigma_grid
+    # theta is now selected per-anchor by true-LOO-CV inside the estimator;
+    # the old theta/sigma grids are obsolete (LocalGLSelector removed).
 
     for dt in daytypes:
         d = cfg.embedding_dim(dt)
@@ -68,9 +68,7 @@ def main(cfg: PipelineConfig, daytype: str | None = None) -> None:
         estimate = build_local_gaussian_semigroup(
             embedding=embedding,
             anchors=anchors,
-            theta_grid=theta_grid,
-            sigma_grid=sigma_grid,
-            gl_penalty_C=cfg.theta.gl_penalty_C,
+            day_anchor_hour=cfg.data.day_anchor_hours,
         )
         spectrum = diffusion_spectrum(estimate.eigvals)
 

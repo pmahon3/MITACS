@@ -39,6 +39,12 @@ class DataConfig:
 @dataclass(frozen=True)
 class EmbeddingConfig:
     max_dimensions: int
+    # "elbow" = smallest d within `elbow_tol` (relative) of the plateau max
+    # of the rho-vs-dim curve; "idxmax" = naive argmax (over-embeds on flat
+    # curves, e.g. sunday d=7 artifact). The programme's own withdrawn
+    # Paper III flagged elbow/Lepski-1991 as the principled selection rule.
+    dim_selection: str = "elbow"
+    elbow_tol: float = 0.005
 
 
 @dataclass(frozen=True)
@@ -96,10 +102,21 @@ class PipelineConfig:
         return self.paths.dimensions_dir / f"results_{daytype}.csv"
 
     def embedding_dim(self, daytype: str) -> int:
-        """Embedding dimension for ``daytype`` (idxmax of its results CSV).
+        """Embedding dimension for ``daytype`` from its results CSV.
 
-        This is the single source of truth for the ``idxmax()`` idiom that
-        was previously duplicated across every ``process.py``.
+        Single source of truth for dimension selection (was duplicated
+        ``idxmax()`` across every ``process.py``). Default rule is
+        ``elbow``: the smallest dimension whose rho is within
+        ``elbow_tol`` (relative) of the curve's maximum -- the knee of a
+        plateau. ``idxmax`` over-embeds when the curve is flat-with-noise
+        (sunday: idxmax=7 but the curve plateaus from d=3; elbow=3).
         """
-        df = pd.read_csv(self.dimensions_csv(daytype), index_col=0)
-        return int(df.idxmax().iloc[0])
+        series = pd.read_csv(self.dimensions_csv(daytype), index_col=0).iloc[:, 0]
+        rule = self.embedding.dim_selection
+        if rule == "idxmax":
+            return int(series.idxmax())
+        if rule == "elbow":
+            peak = series.max()
+            thr = peak - self.embedding.elbow_tol * abs(peak)
+            return int(series.index[series >= thr][0])
+        raise ValueError(f"unknown dim_selection {rule!r}")
