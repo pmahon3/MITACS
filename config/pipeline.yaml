@@ -36,13 +36,20 @@ embedding:
   max_dimensions: 10
 
 theta:
+  # Bandwidth grids for LocalGLSelector. The GL score has a sharp interior
+  # optimum whose location is strongly dimension-dependent: empirically
+  # ~theta=1.6 for sunday (d=7) but ~20 (saturday) / ~43 (weekday) for d=2.
+  # A linear grid capped at 5.0 rail-pinned the d=2 day-types; the range
+  # must reach ~60 and be GEOMETRIC so a single grid resolves both the
+  # ~1.6 and the ~40 regions. (See memory: mitacs-theta-rail-pinning.)
+  grid_spacing: geometric    # geometric | linear
   # drift-localization bandwidth grid (kernel theta)
-  theta_min: 0.1
-  theta_max: 5.0
+  theta_min: 0.5
+  theta_max: 60.0
   theta_count: 25
-  # diffusion bandwidth grid (residual kernel) for LocalGLSelector
-  sigma_min: 0.1
-  sigma_max: 5.0
+  # diffusion bandwidth grid (residual kernel)
+  sigma_min: 0.5
+  sigma_max: 60.0
   sigma_count: 25
   # LocalGLSelector global-local penalty constant
   gl_penalty_C: 2.0

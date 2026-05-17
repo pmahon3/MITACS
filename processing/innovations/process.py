@@ -40,12 +40,8 @@ def main(cfg: PipelineConfig, daytype: str | None = None) -> None:
     out_dir = cfg.paths.operator_output_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    theta_grid = np.linspace(
-        cfg.theta.theta_min, cfg.theta.theta_max, cfg.theta.theta_count
-    )
-    sigma_grid = np.linspace(
-        cfg.theta.sigma_min, cfg.theta.sigma_max, cfg.theta.sigma_count
-    )
+    theta_grid = cfg.theta.theta_grid   # geometric/linear per config
+    sigma_grid = cfg.theta.sigma_grid
 
     for dt in daytypes:
         d = cfg.embedding_dim(dt)

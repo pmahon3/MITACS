@@ -119,6 +119,7 @@ def load_config(
         sigma_max=float(t["sigma_max"]),
         sigma_count=int(t["sigma_count"]),
         gl_penalty_C=float(t["gl_penalty_C"]),
+        grid_spacing=str(t.get("grid_spacing", "geometric")),
     )
 
     s = raw["sampling"]

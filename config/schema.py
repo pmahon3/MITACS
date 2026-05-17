@@ -50,6 +50,26 @@ class ThetaGridConfig:
     sigma_max: float
     sigma_count: int
     gl_penalty_C: float
+    grid_spacing: str = "geometric"  # "geometric" | "linear"
+
+    def _build(self, lo: float, hi: float, n: int) -> "np.ndarray":
+        import numpy as np
+
+        if self.grid_spacing == "geometric":
+            if lo <= 0:
+                raise ValueError("geometric grid requires min > 0")
+            return np.geomspace(lo, hi, n)
+        if self.grid_spacing == "linear":
+            return np.linspace(lo, hi, n)
+        raise ValueError(f"unknown grid_spacing {self.grid_spacing!r}")
+
+    @property
+    def theta_grid(self):
+        return self._build(self.theta_min, self.theta_max, self.theta_count)
+
+    @property
+    def sigma_grid(self):
+        return self._build(self.sigma_min, self.sigma_max, self.sigma_count)
 
 
 @dataclass(frozen=True)
