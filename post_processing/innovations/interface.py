@@ -28,16 +28,28 @@ def load_all(run_dir: Path) -> Dict[str, Any]:
     r = list(run_dir.glob("residuals_*.pt")) or list(run_dir.glob("residuals_*.npy"))
     e = list(run_dir.glob("ensemble_*.pt"))
     c = list(run_dir.glob("coeffs_*.pt"))
-    t = list(run_dir.glob("times_*.npy"))  # ← NEW
-    if not (r and e and c and t):
+    t = list(run_dir.glob("times_*.npy"))
+    # `ensembles` is optional: the local Gaussian semigroup estimator is not
+    # an ensemble forecaster, so ensemble_*.pt may be absent.
+    if not (r and c and t):
         raise FileNotFoundError(f"Missing artefacts in {run_dir}")
+    residuals = torch.load(r[0]).numpy()
     data = {
-        "residuals": torch.load(r[0]).numpy(),
-        "ensembles": torch.load(e[0]).numpy(),
+        "residuals": residuals,
         "coeffs": torch.load(c[0]).numpy(),
-        "times": _load_times(t[0]),  # ← NEW
+        "times": _load_times(t[0]),
     }
     cov = list(run_dir.glob("covs_*.pt"))
     if cov:
         data["covs"] = torch.load(cov[0]).numpy()
+    if e:
+        data["ensembles"] = torch.load(e[0]).numpy()
+    else:
+        # Synthesize a degenerate 1-member ensemble (N, 1, H, d) from the
+        # residual tensor (N, H, d) so the dashboard's shape logic still
+        # works without an ensemble forecaster.
+        res = residuals
+        if res.ndim == 2:  # (N, d) -> (N, 1, d)
+            res = res[:, None, :]
+        data["ensembles"] = res[:, None, :, :]  # (N, 1, H, d)
     return data

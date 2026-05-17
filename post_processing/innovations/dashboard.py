@@ -4,7 +4,7 @@ Forecast Dashboard
 ================================
 Launch:
 
-    python coeff_dashboard.py --run-dir ./outputs/<run_tag> [--port 8050]
+    python -m post_processing.innovations.dashboard --run-dir <run_dir> [--port 8050]
 """
 from __future__ import annotations
 import argparse, socket
@@ -17,7 +17,7 @@ import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output, callback
 from logging import getLogger
 
-from interface import load_all  # post‑processing interface
+from post_processing.innovations.interface import load_all
 
 logger = getLogger(__name__)
 
