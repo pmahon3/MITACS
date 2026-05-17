@@ -41,13 +41,33 @@ def _git_sha() -> str:
     ).strip()
 
 
+_FREEZE_IGNORE = (".DS_Store", ".pyc", ".pyo")
+
+
 def _git_clean() -> bool:
-    """True iff no tracked, non-ignored changes (an honest freeze must be
-    made from a clean tree, else the recorded SHA misrepresents the code)."""
+    """True iff no uncommitted changes to files that affect predictor
+    reproducibility.
+
+    The recorded ``git_sha`` must reproduce the *predictor*. OS/editor
+    cruft (``.DS_Store``), bytecode (``.pyc``), and untracked IDE dirs
+    (``.idea/``) do not affect it, so they are excluded -- otherwise
+    pre-existing tracked junk in this repo would block every freeze
+    forever. Any modified/added/deleted *source* path makes it dirty.
+    """
     out = subprocess.check_output(
         ["git", "status", "--porcelain"], cwd=PROJECT_ROOT, text=True
     )
-    return out.strip() == ""
+    for line in out.splitlines():
+        path = line[3:].strip().strip('"')
+        # status of a rename is "old -> new"; check the destination
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1]
+        if path.endswith(_FREEZE_IGNORE):
+            continue
+        if path.endswith("/") or path.startswith(".idea/"):
+            continue  # untracked dir (e.g. .idea/) -- not source
+        return False
+    return True
 
 
 def _canonical(spec: dict[str, Any]) -> bytes:
