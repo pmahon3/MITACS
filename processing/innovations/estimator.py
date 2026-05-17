@@ -7,10 +7,30 @@ covariance of the kernel-weighted residual ``Wy - WX@C`` ~ ``w^2 * Q`` and
 collapses to ~1e-9 under wide kernels -- verified by the VAR(1) gate, see
 ``validation/synthetic.py``).
 
-Together ``(C_j, Sigma_j)`` parameterise the per-anchor Gaussian kernel
-``x' | x ~ N(x @ C_j, Sigma_j)`` -- an empirical estimator of the programme's
-``Pi_Delta`` predictive-semigroup kernel. No novelty/operator-naming claims
-are made here; terminology defers to the Resolvent_Framework programme.
+Together ``(C_j, Sigma_j)`` parameterise the per-anchor Gaussian Markov
+kernel ``x' | x ~ N(x @ C_j, Sigma_j)`` on the delay-embedding state space.
+
+Theoretical correspondence to the Resolvent_Framework programme (Paper II),
+stated precisely with its qualifiers (see the project memory note
+``mitacs-theory-correspondence`` for the full mapping):
+
+  This is a finite-sample, parametric, SINGLE-STEP, *locally-Gaussian*
+  estimator of the programme's conditional-regularity (disintegration)
+  kernel ``kappa_Q`` at the embedding layer -- the layer it targets. From
+  ``(C_j, Sigma_j)`` the operator pair ``K_Delta`` / ``P_Delta*`` is
+  recoverable; ``Sigma_j != 0`` is the programme's non-Dirac regime, and
+  ``Sigma_j -> 0`` reproduces the classical-Koopman collapse.
+
+  Qualifiers (do not drop): (1) register -- the programme *discloses*
+  ``kappa_Q`` from the measure; this *constructs* a Gaussian proxy and
+  fits it (same target, opposite register: "estimator of", not "instance
+  of"); (2) Gaussianity is imposed, exact only where the local
+  conditional law is Gaussian; (3) single-step only -- Chapman-Kolmogorov
+  / the ``{Pi_t}`` semigroup is neither constructed nor verified, so this
+  is ``Pi_Delta`` (the generator/slice), not the semigroup.
+
+No novelty/operator-naming claims are made here; terminology defers to
+the Resolvent_Framework programme.
 """
 from __future__ import annotations
 
