@@ -1,0 +1,27 @@
+{
+  "data_cutoff": "2024-12-31T23:00:00",
+  "predictor": {
+    "day_anchor_hour": 7,
+    "diffusion": "plain_mu_centred_residual_covariance_no_kernel",
+    "dim_selection": "elbow",
+    "drift_bandwidth_rule": "true_loo_cv",
+    "elbow_tol": 0.001,
+    "embedding_dims": {
+      "saturday": 2,
+      "sunday": 4,
+      "weekday": 2
+    },
+    "estimand": "intra_day",
+    "estimator": "build_local_gaussian_semigroup",
+    "grid_spacing": "geometric",
+    "horizon": "one_step",
+    "variable_name": "zscore"
+  },
+  "provenance": {
+    "edynamics_version": "0.3.14",
+    "git_clean": true,
+    "git_sha": "16933788acf9b32e8cf472345a7fa8e52daeb997"
+  },
+  "schema": "mitacs.experiment.frozen_spec/1",
+  "spec_hash": "e89fb28782d9abfe5a27125f4bde673bd1050703a77075b682f09772616dfb09"
+}
