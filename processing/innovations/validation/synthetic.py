@@ -5,32 +5,26 @@ Generates a stable VAR(1) process
     x_{t+1} = A x_t + eps_t,   eps_t ~ N(0, Q)
 
 with a *known* drift ``A`` (spectral radius < 1) and a *known* SPD diffusion
-``Q``, flows it through the exact call chain the rebuilt innovations stage
-will use --
-
-    Embedding -> LocalGLSelector.fit -> WeightedLeastSquares.project(
-        return_coefficients=True, return_residual_stats=True,
-        use_innovations=True)
-
--- and asserts that the recovered per-anchor drift and diffusion match the
-ground truth.
+``Q``, flows it through the **exact production code path** --
+``estimator.build_local_gaussian_semigroup`` (per-anchor true-LOO-CV drift
+bandwidth + plain mu-centred residual covariance, NO residual kernel) -- and
+asserts that the recovered per-anchor drift and diffusion match ground truth.
 
 Convention note
 ---------------
-The projector computes ``C = lstsq(WX, Wy)`` and forecasts ``x_next = x @ C``
+The drift is ``C = lstsq(WX, Wy)`` with forecast ``x_next = x @ C``
 (row-vector / right-multiply convention). For the column-convention VAR(1)
 ``x_{t+1} = A x_t`` this means the recovered ``C`` estimates ``A.T``. The
 checks below compare ``C_hat`` against ``A.T`` accordingly.
 
-Diffusion note (verified 2026-05-17)
-------------------------------------
-The library's ``RoseResult.covariances`` is the covariance of the *weighted*
-residual ``Wy - WX@C = w·(Y - XC)``, i.e. it scales as ``w²·Q`` and collapses
-to ~1e-9 under wide kernels. It does **not** estimate ``Q``. Diffusion is
-therefore recomputed here from **raw** residuals ``Y - X@C`` with only the
-residual kernel applied -- the same recomputation the rebuilt
-``estimator.py`` will use. The library drift (``RoseResult.coefficients``)
-*is* correct and is reused.
+Diffusion note
+--------------
+Diffusion is the plain mu-centred covariance of the locally-fitted residuals
+``Y - X@C`` (no residual kernel -- see ``estimator.py`` and memory note
+``mitacs-theta-rail-pinning`` for why the kernel was dropped). For VAR(1)
+the innovations are Gaussian iid, so this plain covariance is the *exact*
+maximum-likelihood estimator of ``Q`` -- the sharpest possible check that
+the production estimator is unbiased.
 
 Run standalone::
 
@@ -44,12 +38,9 @@ import numpy as np
 import pandas as pd
 
 from edynamics.modelling_tools import Embedding, Lag
-from edynamics.modelling_tools.estimators import LocalGLSelector
-from edynamics.modelling_tools.kernels import Gaussian
-from edynamics.modelling_tools.projectors import WeightedLeastSquares
 
 # Validate the *production* estimator code path, not a copy.
-from processing.innovations.estimator import raw_residual_diffusion
+from processing.innovations.estimator import build_local_gaussian_semigroup
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -134,46 +125,20 @@ def recover(
     )
     anchors = interior[sel]
 
-    # Wide kernels: a broad drift bandwidth -> near-global linear fit (the
-    # right limit for a *globally* linear VAR(1)); a broad residual bandwidth
-    # -> the kernel-weighted residual covariance approaches the plain
-    # covariance, i.e. Q.
-    wls = WeightedLeastSquares(
-        kernel=Gaussian(theta=1.0, dim=d),
-        residual_kernel=Gaussian(theta=1.0, dim=d),
-    )
-    theta_grid = np.linspace(5.0, 50.0, 8)
-    sigma_grid = np.linspace(5.0, 50.0, 8)
-    selector = LocalGLSelector(theta_grid, sigma_grid, lwls=wls, C=2.0)
-    selector.fit(embedding, anchors)
-
-    res = wls.project(
-        embedding=embedding,
-        points=embedding.get_points(anchors),
-        steps=1,
-        step_size=1,
-        leave_out=True,
-        return_coefficients=True,
-        return_residual_stats=True,
-        use_innovations=True,
+    # Validate the EXACT production code path: build_local_gaussian_semigroup
+    # (true-LOO-CV theta + plain residual covariance, no residual kernel).
+    est = build_local_gaussian_semigroup(
+        embedding=embedding, anchors=pd.DatetimeIndex(anchors)
     )
 
-    C_hat = res.coefficients.cpu().numpy()[:, 0]    # (N, d, d) -- correct
-    sigma_star = selector.sigma_star.cpu().numpy()  # (N,)
+    C_hat = est.coefficients          # (N, d, d) -- estimates A.T
+    Sig_hat = est.covariances         # (N, d, d) -- estimates Q
 
     A_T = A.T
     eig_Q = np.sort(np.linalg.eigvalsh(Q))
 
     drift_errs, diff_errs, eig_errs = [], [], []
-    for Ci, anchor_t, sig in zip(C_hat, anchors, sigma_star):
-        # Diffusion recomputed from raw residuals (library Σ is w²-collapsed).
-        wls.residual_kernel.theta = float(sig)
-        Si, _ = raw_residual_diffusion(
-            embedding=embedding,
-            anchor=anchor_t,
-            C=Ci,
-            residual_kernel=wls.residual_kernel,
-        )
+    for Ci, Si in zip(C_hat, Sig_hat):
         if not (np.all(np.isfinite(Ci)) and np.all(np.isfinite(Si))):
             continue
         drift_errs.append(np.linalg.norm(Ci - A_T) / np.linalg.norm(A_T))

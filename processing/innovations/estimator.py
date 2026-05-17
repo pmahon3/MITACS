@@ -1,11 +1,32 @@
 """Local Gaussian predictive-semigroup estimator.
 
-For each anchor time the estimator fits a local linear drift ``C_j`` (the
-edynamics WLS map, which is correct) and a local diffusion ``Sigma_j``
-recomputed from *raw* residuals (the library's own residual covariance is the
-covariance of the kernel-weighted residual ``Wy - WX@C`` ~ ``w^2 * Q`` and
-collapses to ~1e-9 under wide kernels -- verified by the VAR(1) gate, see
-``validation/synthetic.py``).
+For each anchor time the estimator fits a local linear drift ``C_j`` by
+weighted least squares whose Gaussian drift bandwidth ``theta_j`` is chosen
+per anchor by **true leave-one-out cross-validation** on one-step forecast
+error, and a local diffusion ``Sigma_j`` = the mu-centred *plain* covariance
+of the locally-fitted residuals ``Y - X @ C_j`` (NO residual kernel).
+
+Why this design (see memory ``mitacs-theta-rail-pinning`` for the full
+evidence trail):
+
+  - The edynamics ``LocalGLSelector`` is degenerate for the normalized
+    Gaussian kernel: its GL score has no interior optimum (sigma* pins at
+    any grid ceiling; score monotone-decreasing as bandwidth -> inf).
+    Verified empirically. The Resolvent_Framework programme prescribes no
+    bandwidth-selection convention to defer to (verified). So the rule is
+    a settled applied-statistics choice, not a theory question.
+  - true-LOO-CV is the only candidate that is well-posed (genuinely
+    U-shaped objective), non-degenerate, per-anchor adaptive, and free of
+    extra hyperparameters.
+  - Dropping the residual kernel: diffusion is still residual-based and
+    still spatially local (theta localizes which points enter the fit);
+    only the residual-magnitude reweighting is removed. The kernel
+    systematically shrank Sigma toward the small-residual core (the
+    collapse pathology in mild form); the plain covariance is the
+    unbiased local second moment -- the honest ``kappa_Q`` 2nd moment,
+    not a robustified proxy. Empirically, CV-likelihood when free to pick
+    sigma reproduces the plain covariance within ~10%, and the headline
+    spectral structure (r_hat) is invariant across all bandwidth rules.
 
 Together ``(C_j, Sigma_j)`` parameterise the per-anchor Gaussian Markov
 kernel ``x' | x ~ N(x @ C_j, Sigma_j)`` on the delay-embedding state space.
@@ -40,9 +61,7 @@ import numpy as np
 import pandas as pd
 
 from edynamics.modelling_tools import Embedding
-from edynamics.modelling_tools.estimators import LocalGLSelector
 from edynamics.modelling_tools.kernels import Gaussian
-from edynamics.modelling_tools.projectors import WeightedLeastSquares
 
 
 @dataclass
@@ -54,8 +73,10 @@ class SemigroupEstimate:
         covariances  : (N, d, d)  -- diffusion ``Sigma_j`` (SPD)
         resid_means  : (N, d)     -- residual mean ``mu_j``
         eigvals      : (N, d)     -- ascending eigenvalues of ``Sigma_j``
-        theta_star   : (N,)       -- selected drift bandwidth per anchor
-        sigma_star   : (N,)       -- selected diffusion bandwidth per anchor
+        theta_star   : (N,)       -- per-anchor true-LOO-CV drift bandwidth
+        sigma_star   : (N,)       -- OBSOLETE: residual kernel was dropped;
+                                     filled with NaN, retained only so the
+                                     save/load interface contract is stable
         anchor_times : (N,) int64 -- nanosecond anchor timestamps
     """
 
@@ -68,89 +89,119 @@ class SemigroupEstimate:
     anchor_times: np.ndarray
 
 
-def raw_residual_diffusion(
+def _gauss_w(dist: np.ndarray, theta: float, dim: int) -> np.ndarray:
+    """Normalized Gaussian kernel weights (matches edynamics ``Gaussian``)."""
+    norm = (2.0 * np.pi) ** (-dim / 2) * (1.0 / theta**dim)
+    return norm * np.exp(-0.5 * (dist / theta) ** 2)
+
+
+def _theta_loo_cv(
+    dists: np.ndarray,
+    X: np.ndarray,
+    Y: np.ndarray,
+    d: int,
+    n_grid: int = 18,
+    sub: int = 150,
+    seed: int = 0,
+) -> float:
+    """Per-anchor drift bandwidth by TRUE leave-one-out one-step CV.
+
+    True LOO (refit C excluding the held-out row) is genuinely U-shaped in
+    theta; an *in-sample* weighted residual is monotone and rail-pins. LOO
+    is O(m^2) per theta, so it is evaluated exactly on a bounded random
+    subsample of ``sub`` library points (no convention-sensitive
+    hat-matrix shortcut -- a buggy shortcut was the reason this is naive).
+    """
+    n = len(dists)
+    rng = np.random.default_rng(seed)
+    idx = rng.choice(n, sub, replace=False) if n > sub else np.arange(n)
+    Xs, Ys, ds = X[idx], Y[idx], dists[idx]
+    m = len(idx)
+    grid = np.geomspace(max(ds.min(), 1e-3), ds.max(), n_grid)
+    best = (np.inf, grid[len(grid) // 2])
+    for th in grid:
+        w = _gauss_w(ds, th, d)
+        if w.sum() <= 0:
+            continue
+        tot = 0.0
+        for i in range(m):
+            keep = np.arange(m) != i
+            wi = w[keep]
+            Ci = np.linalg.lstsq(
+                wi[:, None] * Xs[keep], wi[:, None] * Ys[keep], rcond=None
+            )[0]
+            tot += np.sum((Ys[i] - Xs[i] @ Ci) ** 2)
+        if tot / m < best[0]:
+            best = (tot / m, th)
+    return float(best[1])
+
+
+def local_drift_and_diffusion(
     *,
     embedding: Embedding,
     anchor: pd.Timestamp,
-    C: np.ndarray,
-    residual_kernel,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Diffusion ``Sigma`` and residual mean ``mu`` from *raw* residuals.
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+    """Per-anchor ``(C, Sigma, mu, theta*)``.
 
-    Uses the (correct) library-recovered drift ``C`` but recomputes the
-    residual covariance from unweighted residuals ``Y - X@C`` with only the
-    residual kernel applied -- avoiding the ``w^2`` collapse in the library's
-    ``_local_stats_from_weighted``. Leave-one-out (drop the anchor row)
-    mirrors ``WeightedLeastSquares.project(leave_out=True)``.
+    Drift ``C``: WLS with Gaussian kernel at the true-LOO-CV bandwidth
+    ``theta*``. Diffusion ``Sigma``: mu-centred *plain* covariance of the
+    locally-fitted residuals ``Y - X @ C`` -- NO residual kernel. Spatial
+    locality is carried entirely by ``theta*`` (which points enter the
+    fit); the diffusion is the unbiased local second moment of those
+    residuals, not a kernel-shrunk proxy. Leave-one-out (drop the anchor
+    row) mirrors the old ``project(leave_out=True)``.
     """
+    d = embedding.block.shape[1]
     block = embedding.block
     blk = block.loc[block.index != anchor]
-    X_full = blk.iloc[:-1].values
-    Y_full = blk.iloc[1:].values
-    resid = Y_full - X_full @ C
-    g = residual_kernel.weigh(np.linalg.norm(resid, axis=1))
-    mu = np.average(resid, axis=0, weights=g)
+    X = blk.iloc[:-1].values
+    Y = blk.iloc[1:].values
+    x0 = block.loc[anchor].values
+    dists = np.linalg.norm(X - x0, axis=1)
+
+    theta = _theta_loo_cv(dists, X, Y, d)
+    w = _gauss_w(dists, theta, d)
+    C = np.linalg.lstsq(w[:, None] * X, w[:, None] * Y, rcond=None)[0]
+
+    resid = Y - X @ C
+    mu = resid.mean(axis=0)
     rc = resid - mu[None, :]
-    Sigma = (rc * g[:, None]).T @ rc / (g.sum() + 1e-12)
-    return Sigma, mu
+    Sigma = rc.T @ rc / len(rc)              # plain (unweighted) covariance
+    return C, Sigma, mu, theta
 
 
 def build_local_gaussian_semigroup(
     *,
     embedding: Embedding,
     anchors: pd.DatetimeIndex,
-    theta_grid: np.ndarray,
-    sigma_grid: np.ndarray,
-    gl_penalty_C: float = 2.0,
+    **_legacy,
 ) -> SemigroupEstimate:
     """Fit per-anchor local Gaussian semigroup parameters.
 
-    Drift comes from the edynamics WLS projector (reliable); diffusion is
-    recomputed from raw residuals via :func:`raw_residual_diffusion`. The
-    per-anchor ``(theta*, sigma*)`` come from the pointwise
-    Goldenshluger-Lepski selector.
+    Drift bandwidth per anchor by true-LOO-CV; diffusion = plain residual
+    covariance (no residual kernel). ``**_legacy`` swallows the now-unused
+    ``theta_grid``/``sigma_grid``/``gl_penalty_C`` kwargs so existing
+    callers (process.py) keep working without change.
     """
-    d = embedding.block.shape[1]
     anchors = pd.DatetimeIndex(anchors)
-
-    wls = WeightedLeastSquares(
-        kernel=Gaussian(theta=1.0, dim=d),
-        residual_kernel=Gaussian(theta=1.0, dim=d),
-    )
-    selector = LocalGLSelector(theta_grid, sigma_grid, lwls=wls, C=gl_penalty_C)
-    selector.fit(embedding, anchors)
-
-    res = wls.project(
-        embedding=embedding,
-        points=embedding.get_points(anchors),
-        steps=1,
-        step_size=1,
-        leave_out=True,
-        return_coefficients=True,
-        return_residual_stats=True,
-        use_innovations=False,
-    )
-
-    C_all = res.coefficients.cpu().numpy()[:, 0]      # (N, d, d) -- correct
-    theta_star = selector.theta_star.cpu().numpy()    # (N,)
-    sigma_star = selector.sigma_star.cpu().numpy()    # (N,)
-
+    d = embedding.block.shape[1]
     N = len(anchors)
+
+    C_all = np.empty((N, d, d), dtype=float)
     Sigma_all = np.empty((N, d, d), dtype=float)
     mu_all = np.empty((N, d), dtype=float)
     eig_all = np.empty((N, d), dtype=float)
+    theta_star = np.empty(N, dtype=float)
 
-    for i, (anchor_t, sig) in enumerate(zip(anchors, sigma_star)):
-        wls.residual_kernel.theta = float(sig)
-        Sigma, mu = raw_residual_diffusion(
-            embedding=embedding,
-            anchor=anchor_t,
-            C=C_all[i],
-            residual_kernel=wls.residual_kernel,
+    for i, anchor_t in enumerate(anchors):
+        C, Sigma, mu, theta = local_drift_and_diffusion(
+            embedding=embedding, anchor=anchor_t
         )
+        C_all[i] = C
         Sigma_all[i] = Sigma
         mu_all[i] = mu
         eig_all[i] = np.linalg.eigvalsh(Sigma)  # ascending, symmetric
+        theta_star[i] = theta
 
     return SemigroupEstimate(
         coefficients=C_all,
@@ -158,6 +209,6 @@ def build_local_gaussian_semigroup(
         resid_means=mu_all,
         eigvals=eig_all,
         theta_star=theta_star,
-        sigma_star=sigma_star,
+        sigma_star=np.full(N, np.nan),  # obsolete; interface stability only
         anchor_times=anchors.asi8.astype(np.int64),
     )

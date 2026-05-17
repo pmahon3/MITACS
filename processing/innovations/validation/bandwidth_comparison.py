@@ -32,7 +32,12 @@ from edynamics.modelling_tools import Embedding, Lag
 
 from config import load_config
 
-from ..estimator import raw_residual_diffusion
+# NOTE: this is a SUPERSEDED investigation artifact. It settled the theta/
+# sigma bandwidth questions; the production estimator (estimator.py) now
+# implements the conclusion (true-LOO-CV theta, NO residual kernel) and the
+# old shared `raw_residual_diffusion` helper was removed with it. The
+# kernel-weighted covariance the comparison itself studied is inlined below
+# (`_kernel_weighted_cov`) so this record stays runnable and self-contained.
 
 
 # ── kernel (matches edynamics normalized Gaussian) ────────────────────────
@@ -41,8 +46,18 @@ def gauss_w(dist: np.ndarray, theta: float, dim: int) -> np.ndarray:
     return norm * np.exp(-0.5 * (dist / theta) ** 2)
 
 
+def _kernel_weighted_cov(
+    resid: np.ndarray, sigma: float, dim: int
+) -> np.ndarray:
+    """Residual-kernel-weighted covariance (the object this study compares)."""
+    g = gauss_w(np.linalg.norm(resid, axis=1), sigma, dim)
+    mu = np.average(resid, axis=0, weights=g)
+    rc = resid - mu[None, :]
+    return (rc * g[:, None]).T @ rc / (g.sum() + 1e-12)
+
+
 class _K:
-    """Minimal residual-kernel shim for raw_residual_diffusion (needs .weigh)."""
+    """Retained for back-compat of older call sites; unused after inlining."""
 
     def __init__(self, theta: float, dim: int):
         self.theta, self.dim = theta, dim
@@ -206,11 +221,10 @@ def compare(n_anchors: int = 8, seed: int = 1) -> list[RuleResult]:
                     continue
                 WX, WY = w[:, None] * X, w[:, None] * Y
                 C = np.linalg.lstsq(WX, WY, rcond=None)[0]
-                rn = np.linalg.norm(Y - X @ C, axis=1)
+                resid = Y - X @ C
+                rn = np.linalg.norm(resid, axis=1)
                 sg = _SG[r](rn, d)
-                Sigma, _ = raw_residual_diffusion(
-                    embedding=emb, anchor=t, C=C, residual_kernel=_K(sg, d)
-                )
+                Sigma = _kernel_weighted_cov(resid, sg, d)
                 acc[r]["th"].append(th)
                 acc[r]["sg"].append(sg)
                 acc[r]["dn"].append(np.linalg.norm(C))
