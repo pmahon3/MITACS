@@ -1,0 +1,53 @@
+# MITACS pipeline configuration.
+#
+# All `paths.*` values are relative to the project root (the directory
+# containing this `config/` folder) and are resolved to absolute paths by
+# config/__init__.py. Do NOT use leading slashes or `../` here.
+#
+# This file replaces the old .env / data.convert_to_absolute_path mechanism.
+
+paths:
+  # --- data acquisition (stage 1) ---
+  historical_csvs:      data/ontario/historical/csv
+  pickled_dir:          data/ontario/historical/pickled
+  # --- detrend (stage 2) ---
+  stationary_candidate: pre_processing/csv/stationary_candidate.csv
+  annual_params:        pre_processing/csv/annual_params.csv
+  preprocess_plots:     pre_processing/plots
+  # --- day-type tagging (stage 3) ---
+  clustered_csv:        processing/clustering/csv/stationary_candidate.csv
+  clustering_plots:     processing/clustering/plots
+  # --- embedding dimension (stage 4) ---
+  dimensions_dir:       processing/dimensions/params
+  dimensions_plots:     processing/dimensions/plots
+  # --- local-linear fits (stage 5) ---
+  pointwise_output_dir: processing/locality/pointwise/output
+  global_output_dir:    processing/locality/global/params
+  # --- stochastic-operator / Pi_Delta estimator (stage 6, rebuilt) ---
+  operator_output_dir:  processing/innovations/outputs
+
+data:
+  year_range: [2018, 2025]   # inclusive start, exclusive end (range semantics)
+  variable_name: zscore
+  daytypes: [weekday, saturday, sunday]
+  day_anchor_hours: 7        # the "day" starts at 07:00, not midnight
+
+embedding:
+  max_dimensions: 10
+
+theta:
+  # drift-localization bandwidth grid (kernel theta)
+  theta_min: 0.1
+  theta_max: 5.0
+  theta_count: 25
+  # diffusion bandwidth grid (residual kernel) for LocalGLSelector
+  sigma_min: 0.1
+  sigma_max: 5.0
+  sigma_count: 25
+  # LocalGLSelector global-local penalty constant
+  gl_penalty_C: 2.0
+
+sampling:
+  sample_frac: 0.8
+  random_seed: 42
+  num_processes: null   # null -> serial; int -> parallel worker count

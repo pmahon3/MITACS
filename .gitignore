@@ -1,2 +1,8 @@
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Legacy climate data (paths no longer in this layout)
 src/main/resources/data/climate/ontario/*
 src/main/resources/data/ontario/climate/ontario/csv_files/54239.csv
