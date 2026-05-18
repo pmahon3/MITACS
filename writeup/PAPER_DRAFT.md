@@ -1,69 +1,73 @@
 <!--
-DRAFT for Simon & Matt. Status: theory track written; application track
-scaffolded with [PENDING] markers awaiting verified honed/full runs and
-forward-experiment calendar time. Register discipline (agreed
-2026-05-18): describe the operator as it is; cite Resolvent_Framework
-where concepts originate; make NO novelty assertion in either direction
-(neither "we contribute / first" nor "not novel / merely an instance").
-Contribution-worthiness is left open for the reader to judge. The three
-qualifiers are honest scope statements, not significance disclaimers.
-Resolvent_Framework cited at pinned commit dbc7078,
-notes/programme/program_overview.md.
+DRAFT for Simon & Matt. APPLICATION paper (restructured 2026-05-18 from
+an earlier two-track version). The standalone theory/method paper is
+DEFERRED, not abandoned — its outline is parked at
+writeup/THEORY_PAPER_OUTLINE.md; this application paper must stand alone
+and only POSITIONS the theory (compressed §2), pointing to the separate
+treatment for numerical demonstrations.
+
+Register discipline (agreed 2026-05-18, unchanged): describe the
+operator as it is; cite Resolvent_Framework where concepts originate;
+make NO novelty assertion in either direction (neither "we contribute /
+first" nor "not novel / merely an instance"). Contribution-worthiness
+is left open for the reader. The three qualifiers are honest scope
+statements, not significance disclaimers. Resolvent_Framework cited at
+pinned commit dbc7078, notes/programme/program_overview.md.
+
+Status: method positioning + application methodology written; numeric
+results carry [PENDING] markers awaiting verified honed/full runs and
+forward-experiment calendar time.
 -->
 
-# A locally-Gaussian conditional-kernel estimator and its instantiation on Ontario electricity demand
+# Empirical conditional-kernel forecasting of Ontario electricity demand: a registered prediction experiment
 
 **Authors:** [PLACEHOLDER — author list]
-**Status:** working draft
+**Status:** working draft (application paper; companion method paper in preparation)
 
 ---
 
 ## Abstract
 
-[PLACEHOLDER — written last, once the application-track numbers are
-verified. Will state: (a) the estimator and its correspondence to the
-Resolvent_Framework conditional-regularity kernel κ_Q with three
-explicit qualifiers; (b) the rank-1 / Gaussian-proxy structural finding;
-(c) the Ontario instantiation, validated backtest, and registered
-forward experiment.]
+[PLACEHOLDER — written last, once the application numbers are verified.
+Will state: (a) a delay-embedding local-Gaussian conditional-kernel
+predictor instantiated on Ontario IESO demand; (b) the validated
+out-of-sample backtest; (c) the directly-verified infeasibility of a
+retrospective IESO head-to-head and the registered forward experiment
+built in response; (d) the rank-1 / Gaussian-proxy structural caveat
+that bounds every predictive claim. The method's theoretical
+positioning relative to the Resolvent_Framework programme is summarised
+here and treated in depth in a companion paper.]
 
 ---
 
 ## 1. Introduction
 
-This document frames short-horizon electricity demand as a question
-about the *conditional law of a reconstructed dynamical state*: given a
-delay embedding of recent demand, what is the distribution of the next
-state, and what operator does estimating that distribution correspond
-to?
+This paper frames short-horizon Ontario electricity-demand forecasting
+as a question about the *conditional law of a reconstructed dynamical
+state*: given a delay embedding of recent demand, what is the
+distribution of the next state? We instantiate a local-Gaussian
+conditional-kernel estimator of that law on IESO data and evaluate it
+as a *prediction experiment* — with an out-of-sample backtest, a
+hash-stamped registered forward experiment, and an explicit accounting
+of what can and cannot be compared against IESO's own published
+forecasts.
 
-This document has two tracks, given equal weight and joined by a
-correspondence section.
+The estimator has a precise relationship to the conditional-regularity
+kernel `κ_Q` of the Resolvent_Framework programme [RF]. That
+relationship — and its numerical demonstration on controlled systems —
+is the subject of a **companion method paper in preparation**; this
+paper states the correspondence compactly (§2) only insofar as it is
+needed to interpret the applied object honestly, and is otherwise
+self-contained.
 
-- **Theory track (§2–§4).** We construct, per state-space anchor, a
-  local linear drift `C_j` and a residual diffusion `Σ_j` that together
-  define a state-dependent Gaussian Markov kernel on the delay-embedding
-  space. We describe the relationship between this constructed object
-  and the conditional-regularity kernel `κ_Q` of the Resolvent_Framework
-  programme [RF], stating three qualifiers that bound the relationship.
-  We then give the central structural finding: for a single-variable
-  delay embedding `Σ_j` is rank-1 *by construction*, and the scalar
-  innovation it summarises is strongly non-Gaussian — so `Σ_j` is a
-  Gaussian second-moment proxy of a heavy-tailed law, which delimits
-  what the Gaussian estimator of `κ_Q` can capture.
-
-- **Application track (§5–§7).** We instantiate the estimator on Ontario
-  IESO electricity demand: a configuration-driven pipeline
-  (de-seasonalisation → day-type tagging → embedding-dimension
-  selection → per-anchor fit), an out-of-sample backtest, a
-  hash-stamped *registered* forward prediction experiment, and a
-  directly-verified finding about the (in)feasibility of a retrospective
-  head-to-head against IESO's own published forecasts.
-
-§8 records reproducibility/provenance machinery; §9 collects
-claim/method-grade limitations and open questions; §10 fences
-development-set preliminary observations whose lower evidentiary grade
-is stated explicitly and on which nothing in §1–§9 depends.
+The paper proceeds: §2 the estimator and its compact theoretical
+positioning; §3 the structural caveat (rank-1 diffusion / Gaussian
+proxy) that bounds every predictive number here; §4 the Ontario
+pipeline and the z-score framework coupling; §5 the validated backtest
+and the registered forward experiment; §6 the IESO head-to-head
+infeasibility finding; §7 synthetic-ground-truth validation; §8
+reproducibility/provenance; §9 claim/method-grade limitations; §10
+fenced development-set preliminary observations.
 
 *Positioning relative to prior work is deliberately deferred* —
 [PLACEHOLDER: prior-work context, for the author group to supply; this
@@ -71,11 +75,11 @@ draft makes no comparative-novelty claims].
 
 ---
 
-## 2. The estimator
+## 2. The estimator and its theoretical positioning
 
-### Setup
+### 2.1 Construction
 
-Let a scalar observable (here, de-seasonalised hourly demand; §5) be
+Let a scalar observable (here, de-seasonalised hourly demand; §4) be
 delay-embedded into `ℝ^d` by lags `x_t = (s_t, s_{t-1}, …, s_{t-(d-1)})`.
 For a query state `x` we form a local neighbourhood in the embedding
 space and fit, by weighted least squares, a local linear one-step map
@@ -92,44 +96,35 @@ state-dependent Gaussian Markov kernel
 
     Π^(j)(x, ·) = 𝒩(x C_j, Σ_j)
 
-on the embedding state space. `C_j` is the local conditional-mean
-(drift) estimate; `Σ_j` is the local conditional second moment
-(diffusion).
+on the embedding state space: `C_j` is the local conditional-mean
+(drift) estimate, `Σ_j` the local conditional second moment
+(diffusion). The neighbourhood bandwidth (`θ`) is selected by true
+leave-one-out cross-validation per anchor. (For the record: the
+Goldenshluger–Lepski-style selector in the supporting library is
+degenerate for the normalised Gaussian kernel used here — its criterion
+is monotone in bandwidth with no interior optimum — so it is not used;
+the LOO-CV rule is validated against synthetic ground truth, §7. The
+diffusion uses the plain, not residual-kernel-weighted, covariance
+because the weighted form collapses toward `≈ w²·Q` and is not the
+unbiased local second moment.) Estimator internals are detailed in
+Appendix A; the companion method paper treats them in full.
 
-### Bandwidth selection
-
-The neighbourhood bandwidth (`θ`) is selected by true leave-one-out
-cross-validation per anchor. We note for the record that the
-Goldenshluger–Lepski-style selector available in the supporting library
-is degenerate for the normalised Gaussian kernel used here — its
-criterion is monotone in bandwidth with no interior optimum — so it is
-not used; the LOO-CV rule is validated against synthetic ground truth
-(§4). The diffusion uses the plain (unweighted-by-residual-kernel)
-covariance because the kernel-weighted form collapses toward `≈ w²·Q`
-and is not the unbiased local second moment.
-
----
-
-## 3. Correspondence to the Resolvent_Framework conditional-regularity kernel
+### 2.2 Relationship to the Resolvent_Framework kernel `κ_Q`
 
 The Resolvent_Framework programme [RF, §"Conditional regularity and
 dynamics"] defines, by Rokhlin disintegration of two observations
-`Q, F`, a Markov kernel
+`Q, F`, a Markov kernel `κ_Q(q, ·) = P(F ∈ · | Q = q)`, described there
+as "forced by the measure, not chosen", in a register the programme
+labels "Disclosure, not construction. The structures are *in* the
+measure." (direct quotations, [RF] lines 69–70 and 63). Indexing over
+time yields a Markov semigroup `{Π_t}` (Chapman–Kolmogorov *derived*,
+not assumed) and Koopman–Perron duality
+`∫ K_t g dμ = ∫ g d(P_t^* μ)`; when the kernels are Dirac measures
+`K_t` collapses to the classical Koopman operator. The programme keeps
+three layers notationally distinct: `κ_Q` (disintegration layer),
+`{Π_t}` (semigroup), `K_t` (operator layer).
 
-    κ_Q(q, ·) = P(F ∈ · | Q = q) ,
-
-described there as "forced by the measure, not chosen", in a register
-the programme labels "Disclosure, not construction. The structures are
-*in* the measure." (direct quotations, [RF] lines 69–70 and 63).
-Indexing over time yields a Markov semigroup
-`{Π_t}` (Chapman–Kolmogorov *derived*, not assumed) and Koopman–Perron
-duality `∫ K_t g dμ = ∫ g d(P_t^* μ)`; when the kernels are Dirac
-measures `K_t` collapses to the classical Koopman operator. The
-programme keeps three layers notationally distinct: `κ_Q`
-(disintegration / conditional-regularity layer), `{Π_t}` (time-indexed
-semigroup), `K_t` (operator layer).
-
-Against that, the object §2 constructs is, stated plainly:
+The object §2.1 constructs is, stated plainly:
 
 > a finite-sample, parametric, single-step, *locally-Gaussian*
 > estimator of the conditional-regularity kernel `κ_Q` at the
@@ -137,48 +132,44 @@ Against that, the object §2 constructs is, stated plainly:
 > are recoverable in the programme's non-Dirac regime (`Σ_j ≠ 0`).
 
 The delay embedding corresponds to the programme's reconstruction
-object; the drift `C_j` to a local linearisation of the
-minimal-sufficient factor; the diffusion `Σ_j` to the second moment of
-`κ_Q`'s Gaussian projection. `Σ_j ≠ 0` is exactly the programme's
-non-Dirac regime; `Σ_j → 0` reproduces the classical-Koopman collapse
-the programme names.
+object; `C_j` to a local linearisation of the minimal-sufficient
+factor; `Σ_j` to the second moment of `κ_Q`'s Gaussian projection.
+`Σ_j ≠ 0` is the non-Dirac regime; `Σ_j → 0` reproduces the
+classical-Koopman collapse. **Three qualifiers** bound this
+relationship and are stated as scope, not as commentary on its
+significance:
 
-### Three qualifiers
-
-These bound the correspondence and are stated as scope, not as
-commentary on its significance.
-
-1. **Register.** The programme *discloses* `κ_Q` from the measure; the
-   code *constructs* a Gaussian proxy and fits it from finite data.
-   Same target object, opposite epistemic register — the relationship
-   is "estimator of," not "instance of."
-
+1. **Register.** The programme *discloses* `κ_Q` from the measure; this
+   work *constructs* a Gaussian proxy and fits it from finite data.
+   Same target object, opposite epistemic register — "estimator of,"
+   not "instance of."
 2. **Imposed Gaussianity.** `Π^(j) = 𝒩(x C_j, Σ_j)` coincides with the
    true `κ_Q` only where the local conditional law is itself Gaussian.
-   §4 shows this assumption is decisively operative here, not benign.
-
+   §3 shows this is decisively operative here, not benign.
 3. **Single step.** The construction yields only `Π_Δ` (one sampling
-   interval). Chapman–Kolmogorov / the full semigroup `{Π_t}` is
-   neither composed nor verified; `{Π_t}` in the programme is *derived*,
-   whereas here only the single-step slice exists.
+   interval). The full semigroup `{Π_t}` is neither composed nor
+   verified; in the programme `{Π_t}` is *derived*, whereas here only
+   the single-step slice exists.
 
 The delay embedding, the drift as local linearisation, and the
 diffusion as the correct weighted conditional covariance require no
-qualifier — these are clean correspondences.
+qualifier. *Numerical demonstration of this correspondence on
+controlled systems is the subject of the companion method paper; this
+paper carries only what is needed to interpret the Ontario results.*
 
 ---
 
-## 4. Central structural finding: rank-1 diffusion and the Gaussian-proxy gap
+## 3. Structural caveat: rank-1 diffusion and the Gaussian-proxy gap
 
-Two facts about `Σ_j` together delimit what the Gaussian estimator of
-`κ_Q` can represent for this embedding.
+This bounds every predictive number in this paper and is stated up
+front, not buried in limitations.
 
 **`Σ_j` is rank-1 by construction.** For a single-variable delay
 embedding, coordinates `2..d` of the one-step image are deterministic
 shifts of the input coordinates (`Y[:, 1:] = X[:, :-1]` exactly). The
 only stochastic content of the one-step map is the scalar
-coordinate-0 innovation. Therefore `Σ_j` has (exactly) rank one,
-independent of data: the multivariate diffusion is, structurally, a
+coordinate-0 innovation; therefore `Σ_j` has exactly rank one,
+independent of data — the multivariate diffusion is structurally a
 single scalar innovation variance embedded in `ℝ^{d×d}`. Any
 "multi-mode" reading of `Σ_j` is incoherent for this embedding and is
 not reported.
@@ -186,77 +177,71 @@ not reported.
 **That scalar innovation is strongly non-Gaussian.** The relevant
 non-Gaussianity question is therefore *univariate* (the rank-1 fact
 makes the multivariate question vacuous). Measured through the
-production estimator and validated against synthetic ground truth (§7
-gates), the one-step innovation is strongly heavy-tailed: the
-production-path re-baseline gives excess kurtosis ≈ 24–33 and tail
-ratio ≈ 2.4–3.8, against a clean VAR(1) reference of ≈ 0 / ≈ 1. [These
-are the current authoritative production-path values; the slot here
-will be updated with the re-confirmed figure and artifact hash from the
-verified honed/full run, but the finding and its order of magnitude are
-established, not pending.]
+production estimator and validated against synthetic ground truth (§7),
+the one-step innovation is strongly heavy-tailed: the production-path
+re-baseline gives excess kurtosis ≈ 24–33 and tail ratio ≈ 2.4–3.8,
+against a clean VAR(1) reference of ≈ 0 / ≈ 1. [Current authoritative
+production-path values; the slot will be updated with the re-confirmed
+figure and artifact hash from the verified honed/full run — the finding
+and its order of magnitude are established, not pending.]
 
 **Consequence.** `Σ_j` is a Gaussian second-moment *proxy* of a
-strongly heavy-tailed scalar innovation law. This is the operative form
-of Qualifier 2: the estimator faithfully captures the conditional mean
-(`C_j`) and the conditional *variance* (`Σ_j`), but the conditional
-*law* is not Gaussian, so `Π^(j)` is not `κ_Q` itself even in the
-large-sample limit — it is the best Gaussian summary of it. We treat
-this as a result about the reach of a locally-Gaussian `κ_Q` estimator
-on this class of system, not as a defect to be hidden: it is reported,
-quantified, and carried as a standing caveat wherever `Π^(j)` is used
-predictively.
+strongly heavy-tailed scalar innovation law. The estimator faithfully
+captures the conditional mean (`C_j`) and variance (`Σ_j`), but the
+conditional *law* is not Gaussian, so `Π^(j)` is not `κ_Q` itself even
+in the large-sample limit — it is the best Gaussian summary of it. We
+report and quantify this rather than hide it, and carry it as a
+standing caveat wherever `Π^(j)` is used predictively (notably the
+interval coverage in §5).
 
 ---
 
-## 5. Application: pipeline and de-seasonalisation
+## 4. Ontario pipeline and the z-score framework coupling
 
-### Pipeline
+### 4.1 Pipeline
 
-The Ontario instantiation is a configuration-driven pipeline; all paths
-and parameters resolve from a single `config/pipeline.yaml` relative to
-the project root (no working-directory dependence). Stages:
+The instantiation is a configuration-driven pipeline; all paths and
+parameters resolve from a single `config/pipeline.yaml` relative to the
+project root (no working-directory dependence). Stages: **acquire**
+IESO public `PUB_Demand`; **de-seasonalise** (§4.2) hourly demand → a
+stationary `zscore`; **day-type tag** `{weekday, saturday, sunday}`
+using a configurable 07:00 day-anchor offset (transitions whose
+one-step target crosses the day-type rollover seam are excluded —
+without this `Σ_j` is catastrophically ill-conditioned, so the estimand
+is effectively forced to be *intra-day*); **embedding dimension**
+selected per day-type by an elbow rule on the
+prediction-skill-vs-dimension curve; **per-anchor fit** of the §2
+estimator.
 
-1. **Acquire** — IESO public `PUB_Demand` series.
-2. **De-seasonalise** (§5.1) — hourly demand → a stationary `zscore`
-   series.
-3. **Day-type tagging** — `{weekday, saturday, sunday}` using a
-   configurable 07:00 day-anchor offset; transitions whose one-step
-   target crosses the day-type rollover seam are excluded (without
-   this, `Σ_j` is catastrophically ill-conditioned — the estimand is
-   effectively forced to be *intra-day*).
-4. **Embedding dimension** — selected per day-type by an elbow rule on
-   the prediction-skill-vs-dimension curve.
-5. **Per-anchor fit** — the §2 estimator.
+### 4.2 The z-score transform is a framework coupling, not a preprocessing detail
 
-### 5.1 The z-score transform is a framework coupling, not a preprocessing detail
-
-De-seasonalisation is `z = (D − μ_{m,h}) / σ_{m,h}` where `μ, σ` are a
+De-seasonalisation is `z = (D − μ_{m,h}) / σ_{m,h}` with `μ, σ` a
 month×hour-of-day climatology estimated strictly from pre-cutoff data.
 This single climatology object is woven through *all four* estimator
-layers: it defines the embedded state, the drift fit, the diffusion
-(`Σ_j` is the covariance of z-residuals), and the demand-space
-round-trip. So the transform is not a benign preprocessing step; it is
-an implicit seasonal model coupled into `κ_Q`.
+layers: the embedded state, the drift fit, the diffusion (`Σ_j` is the
+covariance of z-residuals), and the demand-space round-trip. It is
+therefore an implicit seasonal model coupled into `κ_Q`, not a benign
+preprocessing step.
 
 We tested whether this coupling corrupts the dynamics (a leaky implicit
-seasonal model — call it "Reading 2") or is a benign invertible
-coordinate change ("Reading 1"), by re-running under climatology specs
-of varying resolution including the no-transform extreme and measuring
-the error structure in demand space. The phase/asymmetry structure was
+seasonal model — "Reading 2") or is a benign invertible coordinate
+change ("Reading 1"), by re-running under climatology specs of varying
+resolution including the no-transform extreme and measuring error
+structure in demand space. The phase/asymmetry structure was
 **invariant** across specs including no-transform — Reading 1 for the
 phase axis: the conditional-mean structure is genuine demand dynamics,
 not a transform artifact. The tail structure *did* move with seasonal
 resolution — a partial Reading 2 confined to the heavy-tail axis, which
-is exactly the §4 caveat and is documented as a framework caveat, not a
-separate defect. [This result is from a development-set investigation;
-its role here is methodological — establishing that the coordinate is
-sound before any state-representation honing.]
+is exactly the §3 caveat and is documented as a framework caveat, not a
+separate defect. [Development-set investigation; its role here is
+methodological — establishing the coordinate is sound before any
+state-representation honing.]
 
 ---
 
-## 6. Application: validated backtest and registered forward experiment
+## 5. Validated backtest and registered forward experiment
 
-### 6.1 Out-of-sample backtest
+### 5.1 Out-of-sample backtest
 
 We backtest the multi-step (iterated one-step) predictor on real
 Ontario ground truth for complete delivery days strictly after the
@@ -270,15 +255,17 @@ ramps hardest), not pure horizon compounding.
 
 The current committed provenanced C1 artifact gives MAE ≈ 786 MW,
 MAPE ≈ 4.78% over 500 out-of-sample days, ≈1.5× better than seasonal
-persistence at every hour. [These are the current CLAIM-grade values
-from the committed provenanced artifact; the artifact hash will be
-restated once the in-flight cosmetic header re-emit lands and after any
-honing re-freeze. Per-horizon table → Appendix B.]
+persistence at every hour. [Current CLAIM-grade values from the
+committed provenanced artifact; the artifact hash will be restated
+after any honing re-freeze. Per-horizon table → Appendix B.] Interval
+coverage is reported with the §3 Gaussian-proxy caveat made explicit
+(a Gaussian interval around a heavy-tailed innovation is expected to
+under-cover; this is disclosed, not hidden).
 
-### 6.2 Registered forward prediction experiment
+### 5.2 Registered forward prediction experiment
 
 Because a fair comparison to IESO's published forecast is not
-retrospectively recoverable (§6.3), we built a *registered* forward
+retrospectively recoverable (§6), we built a *registered* forward
 experiment. A hash-stamped frozen specification captures everything
 that determines a forecast — estimator identity, resolved
 hyperparameters, data cutoff, code commit, and a content fingerprint of
@@ -286,16 +273,18 @@ the pre-cutoff actuals — and is verified on load (tamper-evident). The
 predictor is local/lazy (it fits per anchor at prediction time from
 ≤-cutoff library data), so the freeze pins the function and its inputs
 rather than a trained-weight blob, and a cutoff guard enforces that no
-post-cutoff data enters a fit. Forecasts are issued forward, scraped
+post-cutoff data enters a fit. Forecasts are issued forward; scraped
 actuals are settled into an append-only write-once ledger (IESO
-restates recent demand; revisions are appended, never overwritten), and
+restates recent demand; revisions are appended, never overwritten);
 scoring is honest-by-construction against persistence baselines with
 IESO published values recorded as differently-horizoned context.
 
-[PENDING: forward-experiment results accrue with calendar time;
-report once a sufficient settled window exists.]
+[PENDING: forward-experiment results accrue with calendar time; report
+once a sufficient settled window exists.]
 
-### 6.3 The retrospective IESO head-to-head is infeasible from public archives
+---
+
+## 6. The retrospective IESO head-to-head is infeasible from public archives
 
 We sought to compare our day-ahead Ontario-demand forecast against
 IESO's published day-ahead Ontario-demand forecast on historical
@@ -309,10 +298,11 @@ settled actuals (wrong horizon); the true day-ahead-issued products
 (DATotals, PredispTotals) publish only market totals — not Ontario
 demand — where "Total Load" carries a definitional ≈+2485 MW offset
 over Ontario Demand (the MarketQuantity enumeration is Total
-Energy/Loss/Load/Dispatchable/10S/10N/30R; none is Ontario demand). This is a finding, not a workaround
-motivation: it is *why* the registered forward experiment (§6.2) is the
-methodologically correct comparison. (Stated for public archives as of
-the recorded access date; IESO restructures its public site.)
+Energy/Loss/Load/Dispatchable/10S/10N/30R; none is Ontario demand).
+This is a finding, not a workaround motivation: it is *why* the
+registered forward experiment (§5.2) is the methodologically correct
+comparison. (Stated for public archives as of the recorded access
+date; IESO restructures its public site.)
 
 ---
 
@@ -326,8 +316,8 @@ trustworthy:
    within tolerance (drift and diffusion).
 2. **Non-Gaussianity** — a Gaussian-innovation VAR(1) reads
    approximately Gaussian; a Student-t-innovation VAR(1) is clearly
-   flagged heavy-tailed. This validates the diagnostic that §4's
-   finding rests on, against ground truth.
+   flagged heavy-tailed. This validates the diagnostic that §3's
+   caveat rests on, against ground truth.
 3. **Multi-step composition** — iterated one-step `Π_Δ` is checked
    against the VAR(1) closed form; drift error compounds with horizon
    *by construction* and is reported, not hidden, as an error-growth
@@ -357,17 +347,18 @@ this document.
 
 ## 9. Limitations and open questions
 
-- **Gaussian-proxy gap (§4).** The standing caveat: `Π^(j)` captures
+- **Gaussian-proxy gap (§3).** The standing caveat: `Π^(j)` captures
   conditional mean and variance but not the heavy-tailed conditional
   law. Open: a non-Gaussian local conditional model for `κ_Q`.
 - **State representation.** A possible reach limit of the univariate
   estimator at demand ramps is described, with its lower evidentiary
-  grade explicitly fenced, in §10 (Preliminary observations) — it is
-  *not* a claim-grade limitation and is deliberately not stated as one
-  here.
+  grade explicitly fenced, in §10 — *not* a claim-grade limitation and
+  deliberately not stated as one here.
 - **Single-step only (Qualifier 3).** The semigroup `{Π_t}` is not
   constructed; multi-step is iteration of `Π_Δ`, validated for error
-  growth but not a Chapman–Kolmogorov-verified semigroup.
+  growth but not a Chapman–Kolmogorov-verified semigroup. (The
+  companion method paper is the natural home for the semigroup
+  treatment.)
 - **Exogenous information.** The estimator uses no weather/exogenous
   covariates; the backtest error structure suggests this is a
   model-scope ceiling, not a hyperparameter issue.
@@ -417,7 +408,9 @@ mechanism is the wall between development and the registered test.
 ## Appendices
 
 - **A. Estimator detail.** [PLACEHOLDER: WLS weighting, the LOO-CV θ
-  rule, the GL-degeneracy note in full.]
+  rule, the GL-degeneracy note in full. The companion method paper is
+  the primary home for this; reproduce here only what the application
+  reader needs.]
 - **B. Per-horizon backtest table.** [PENDING: from the C1 artifact.]
 - **C. Provenance requirements matrix.** [Reference:
   `experiment/results/PROVENANCE_REQUIREMENTS.md`.]
@@ -432,4 +425,8 @@ mechanism is the wall between development and the registered test.
   the §"Conditional regularity and dynamics" definitions of `κ_Q`,
   `{Π_t}`, `K_t` and the disclosure-not-construction register are at
   lines 60–77 of that file at that commit.
+- **[companion method paper]** [PLACEHOLDER — in preparation; the
+  standalone treatment of the estimator and its `κ_Q` correspondence
+  with numerical demonstrations on controlled systems. Outline:
+  `writeup/THEORY_PAPER_OUTLINE.md`.]
 - [PLACEHOLDER: remaining references — for the author group.]
