@@ -18,3 +18,9 @@ src/main/resources/data/ontario/climate/ontario/csv_files/54239.csv
 
 # Local convenience archives (originals recoverable from git history)
 archive/
+
+# Experiment ledger: gitignored UNTIL a live collect run produces genuine
+# accrued forecasts/actuals. Current/offline-test contents are regenerable
+# placeholder rows, NOT the experiment record. Track it (remove this rule)
+# once real data accrues -- it is then irreplaceable like settled_actuals.csv.
+data/ontario/forecast/experiment_ledger.csv
