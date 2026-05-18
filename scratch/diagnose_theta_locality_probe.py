@@ -27,20 +27,24 @@ Decision rule:
 Also runs a regime-switching VAR (drift flips by half-space) as a
 second, higher-dimensional locality witness.
 
-RESULT (2026-05-18, production `_theta_loo_cv`): **BRANCH A — SELECTOR
-BROKEN.** theta/grid_max median = 1.000 for 100% of anchors on the
-logistic map (d=2 AND d=3) and the regime-switching VAR; median
-library fraction inside the half-weight kernel ≈ 1.0 (fully global).
-These systems are UNAMBIGUOUSLY state-dependent (logistic slope
-r(1-2x); regime drift flips by half-space) — a competent selector MUST
-localize and CANNOT here under any near-linear reading. Confirmed
-across FOUR independent systems (Ontario z-scores, linear VAR(1),
-logistic map, regime-switching VAR): `_theta_loo_cv` rails to the grid
-ceiling irrespective of whether locality exists. The recovery gate
-never caught it because a linear VAR(1) is recovered by global OLS
-regardless of θ. Conclusion: the bandwidth selector is degenerate; the
-"locally-Gaussian" estimator is, as run, global OLS with a constant
-kernel. Fix NOT pre-decided (surfaced to advisor per discipline rule).
+RESULT (2026-05-18, production `_theta_loo_cv`): the CRITERION, not
+just the argmin, is the problem. The full LOO score curve is
+**monotone-decreasing in θ to the grid edge** on the logistic map
+(d=2: span 56%; d=3: 3.84→0.131, 96.6%) and the regime-switching VAR
+(0.035→0.0092, 73.5%) — systems whose local slope PROVABLY varies. So:
+  * NOT a code/argmin bug: there is no interior minimum being skipped —
+    no minimum EXISTS; the criterion strictly rewards more smoothing.
+  * NOT "data near-linear" (would have shown a flat curve, not a
+    strong monotone gradient on a chaotic map).
+  => true-LOO ONE-STEP PREDICTION ERROR is the wrong criterion for a
+  LOCALIZATION bandwidth: it is bias-dominated here and monotonically
+  prefers near-global smoothing (the well-known oversmoothing failure
+  of pointwise prediction-error CV in local-linear regression). This
+  is a METHOD-DESIGN problem with the adopted rule, not a broken
+  implementation. Confirmed across 4 systems (Ontario, VAR(1),
+  logistic, regime-switch). The recovery gate is merely CONSISTENT
+  with this (a linear VAR(1) is recovered by global OLS regardless of
+  θ) — it does not discriminate locality. Fix NOT pre-decided.
 
 PROVENANCE-GRADE: INSPECTION-ONLY — exploratory dev diagnostic that
 calls the PRODUCTION `_theta_loo_cv`. It DECIDES the framing question
