@@ -176,11 +176,28 @@ def local_drift_and_diffusion(
         keep = Y_df.index.hour != day_anchor_hour
         X_df, Y_df = X_df[keep], Y_df[keep]
 
-    X = X_df.values
-    Y = Y_df.values
     x0 = block.loc[anchor].values
-    dists = np.linalg.norm(X - x0, axis=1)
+    return _local_fit_at(X_df.values, Y_df.values, x0, d)
 
+
+def _local_fit_at(
+    X: np.ndarray,
+    Y: np.ndarray,
+    x_query: np.ndarray,
+    d: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float, np.ndarray]:
+    """Core local Gaussian fit at an explicit query state.
+
+    The shared mechanism behind :func:`local_drift_and_diffusion` (which
+    derives ``X, Y, x_query`` from an embedding + anchor) and the frozen
+    forecast generator (which supplies a pre-cutoff library ``X, Y`` and
+    a post-cutoff query state ``x_query``). Both call THIS -- the
+    prediction path *is* the production path, not a parallel
+    reimplementation (the project's diagnostic-discipline rule).
+
+    Returns ``(C, Sigma, mu, theta*, resid)`` exactly as before.
+    """
+    dists = np.linalg.norm(X - x_query, axis=1)
     theta = _theta_loo_cv(dists, X, Y, d)
     w = _gauss_w(dists, theta, d)
     C = np.linalg.lstsq(w[:, None] * X, w[:, None] * Y, rcond=None)[0]

@@ -30,9 +30,17 @@ from importlib import metadata
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
+
 from config import PROJECT_ROOT, load_config
 
+from ._actuals import actuals_fingerprint as _actuals_fingerprint
+
 SPEC_PATH = PROJECT_ROOT / "experiment" / "frozen_spec.json"
+
+# The model-specification boundary: nothing dated after this informs the
+# predictor (fits or z-score representation). Single source of truth.
+DATA_CUTOFF = pd.Timestamp("2024-12-31T23:00:00")
 
 
 def _git_sha() -> str:
@@ -96,11 +104,19 @@ def build_spec() -> dict[str, Any]:
             },
             "horizon": "one_step",  # multi-step is the unbuilt semigroup
         },
-        "data_cutoff": "2024-12-31T23:00:00",
+        "data_cutoff": DATA_CUTOFF.isoformat(),
         "provenance": {
             "git_sha": _git_sha(),
             "git_clean": _git_clean(),
             "edynamics_version": metadata.version("edynamics"),
+        },
+        # Content hash of the exact pre-cutoff actuals the predictor's
+        # z-score representation is derived from. The z-score params are
+        # NOT stored (they are reproducible from this pinned data + the
+        # pinned code commit); this fingerprint makes any later change to
+        # the historical CSVs tamper-evident via the spec hash.
+        "data_fingerprint": {
+            "pre_cutoff_actuals_sha256": _actuals_fingerprint(DATA_CUTOFF),
         },
     }
     spec["spec_hash"] = hashlib.sha256(_canonical(spec)).hexdigest()
