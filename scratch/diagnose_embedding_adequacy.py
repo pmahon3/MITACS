@@ -16,6 +16,9 @@ Re-run that SAME rho-vs-d elbow logic STRATIFIED BY HOUR-OF-DAY (dev,
 coincide with hours where the per-day-type d is far from the hour-local
 optimum, then per-hour (or per-hour x day-type) dimension is the lever
 (under-embedded at the complex evening ramp, over-embedded overnight).
+
+PROVENANCE-GRADE: INSPECTION-ONLY -- exploratory dev-set; MUST NOT be
+cited as a result (Task 36 / PROVENANCE_REQUIREMENTS.md C7, gap #6).
 """
 from __future__ import annotations
 

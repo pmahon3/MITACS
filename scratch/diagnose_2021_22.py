@@ -15,6 +15,9 @@ Axes (each isolates a different honing lever):
        high corr  => shared difficulty (intrinsic, not fixable by us)
        low/neg    => OUR-specific failure (fixable by honing)
        IESO good where we're bad => the exogenous-information gap
+
+PROVENANCE-GRADE: INSPECTION-ONLY -- exploratory dev-set; MUST NOT be
+cited as a result (Task 36 / PROVENANCE_REQUIREMENTS.md C7, gap #6).
 """
 from __future__ import annotations
 

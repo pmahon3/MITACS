@@ -12,6 +12,9 @@ Decides whether state-space-adaptive localisation is a REAL lever:
   Q3  Do HIGH-ERROR rows have systematically different theta vs
       low-error rows in the SAME region?  If high error <-> mis-scaled
       theta -> direct evidence the lever bites.
+
+PROVENANCE-GRADE: INSPECTION-ONLY -- exploratory dev-set; MUST NOT be
+cited as a result (Task 36 / PROVENANCE_REQUIREMENTS.md C7, gap #6).
 """
 from __future__ import annotations
 

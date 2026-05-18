@@ -22,6 +22,9 @@ three candidate mechanisms, which are DISTINGUISHABLE:
 
 Decisive views: signed error in Z-SPACE by hour-of-day; the same by
 forecast HORIZON; sigma_mh's hour profile vs the MW-bias hour profile.
+
+PROVENANCE-GRADE: INSPECTION-ONLY -- exploratory dev-set; MUST NOT be
+cited as a result (Task 36 / PROVENANCE_REQUIREMENTS.md C7, gap #6).
 """
 from __future__ import annotations
 

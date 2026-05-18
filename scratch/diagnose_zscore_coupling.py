@@ -27,6 +27,9 @@ Specs (crude -> fine -> none):
   monthhour: per (month,hour) -- the CURRENT production spec (288)
   identity : no transform (operate on raw demand) -- framework-aligned
              "no seasonal surrogate" extreme
+
+PROVENANCE-GRADE: INSPECTION-ONLY -- exploratory dev-set; MUST NOT be
+cited as a result (Task 36 / PROVENANCE_REQUIREMENTS.md C7, gap #6).
 """
 from __future__ import annotations
 

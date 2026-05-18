@@ -17,6 +17,9 @@ Honest scope:
   * IESO selected at true day-ahead lead via CreationDate.
 This is a look, not a deliverable. Reuses the validated estimator core
 (no reimplementation).
+
+PROVENANCE-GRADE: INSPECTION-ONLY -- exploratory dev-set; MUST NOT be
+cited as a result (Task 36 / PROVENANCE_REQUIREMENTS.md C6, gap #6).
 """
 from __future__ import annotations
 
