@@ -1,0 +1,49 @@
+IESO DAY-AHEAD HEAD-TO-HEAD: RETROSPECTIVE INFEASIBILITY (2026-05-18)
+=====================================================================
+
+Goal: compare our day-ahead Ontario-demand forecast vs IESO's published
+day-ahead Ontario-demand forecast on historical (settled) delivery days.
+
+FINDING: not achievable from IESO PUBLIC archives. Two independent,
+directly-verified blockers:
+
+1. Ontario-demand-basis product (Adequacy Report, Adequacy3
+   `ForecastOntDemand`): for delivery days old enough to have settled
+   actuals (the gradable Feb–mid-May 2026 window), the public archive
+   retains ONLY the end-of-delivery-day version. Verified e.g. delivery
+   2026-03-15: only PUB_Adequacy3_20260315.xml and _v120 survive, both
+   CreatedAt 2026-03-15T23:53 (end of D). Probe: 0 of 18 gradable
+   delivery days had any version with CreatedAt <= D-1 23:59. Wrong
+   horizon (sees ~all of D); no recoverable day-ahead version.
+   (A few very recent deliveries still retain early versions only
+   because intraday revisions had not yet been purged — not the
+   gradable window.)
+
+2. True day-ahead-issued products (DATotals, PredispTotals): issued
+   ~D-1 (DATotals CreatedAt ~D-1 12:30; Predisp ~D-1 05:10) BUT publish
+   only market totals, NOT Ontario demand. "Total Load" runs a
+   consistent +2485 MW (median +2499, std 767) above Ontario Demand —
+   a definitional offset (losses + dispatchable), not forecast error.
+   No Ontario-demand field exists in either
+   (MarketQuantity = Total Energy/Loss/Load/Dispatchable/10S/10N/30R).
+
+No PUBLIC IESO archive is BOTH Ontario-demand-basis AND day-ahead-issued
+for historical dates. (A direct IESO data request / privileged feed
+might surface it; out of scope here.)
+
+DISCARDED (product/quantity mismatches, NOT recorded as results):
+  - vs Adequacy3 end-of-D final : ours 5.60% / "IESO" 1.88% MAPE
+  - vs DATotals Total Load      : ours 5.57% / "IESO" 15.83% MAPE
+Both artifacts of comparing against the wrong IESO quantity/horizon.
+
+VALID PATH: the forward registered experiment (experiment/, Tasks
+24–27) captures Adequacy3 `ForecastOntDemand` PROSPECTIVELY at D-1
+(before purge-down), enabling a fair head-to-head as calendar time
+accrues. This is why the prospective infrastructure was built; it is
+the methodologically correct comparison, not a workaround.
+
+UNAFFECTED: the model's own validated result stands independently —
+Step-4 historical backtest, 500 out-of-sample post-cutoff days,
+leakage directly verified: MAE 786 MW, MAPE 4.78%, ~1.5x better than
+seasonal persistence at every hour (experiment/results/
+backtest_postcutoff_2025-01-01_2026-05-16.txt).
