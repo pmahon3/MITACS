@@ -1,3 +1,33 @@
+<<<PROVENANCE
+{
+  "body_sha256": "7ad69e7fb17313c8e51da869b7d98381b223c0fc5cce8890940d40c50561e2c3",
+  "generated_utc": "2026-05-18T19:05:55+00:00",
+  "git_clean": true,
+  "git_sha": "35ee90226d3f1281619bbfed08646d609f627182",
+  "grade": "CLAIM-GRADE",
+  "inputs_fingerprint": "84e0b2d880a1f0702b1d8d69f1b3883d3452c0b991b8f111d521b68505c1f028",
+  "reproducibility": {
+    "frozen_spec_hash": "f0dd9c8795fda781fa8cab80ddd9ec9fb844af284cdb3077c0d1116b13e0536d",
+    "git_sha": "35ee90226d3f1281619bbfed08646d609f627182",
+    "inputs": {
+      "ieso_access_date": "2026-05-18",
+      "ieso_archive_root": "https://reports-public.ieso.ca/public/",
+      "ieso_enumeration_scope": "all 133 public directories enumerated; every demand/load-forecast candidate directly inspected (not a sampled subset)",
+      "ieso_restructures_caveat": "IESO restructures its public site; this negative result is as of the access date above and may not hold for a re-probe at a later date"
+    },
+    "lib_versions": {
+      "edynamics": "0.3.14",
+      "numpy": "2.2.4",
+      "pandas": "2.2.3",
+      "scipy": "1.15.2"
+    },
+    "seeds": {}
+  },
+  "schema": "mitacs.experiment.result_provenance/1",
+  "title": "IESO retrospective day-ahead head-to-head: infeasible from public archives (directly-verified negative result)"
+}
+PROVENANCE>>>
+
 IESO DAY-AHEAD HEAD-TO-HEAD: RETROSPECTIVE INFEASIBILITY (2026-05-18)
 =====================================================================
 
@@ -9,20 +39,20 @@ directly-verified blockers:
 
 1. Ontario-demand-basis product (Adequacy Report, Adequacy3
    `ForecastOntDemand`): for delivery days old enough to have settled
-   actuals (the gradable Feb–mid-May 2026 window), the public archive
+   actuals (the gradable Feb-mid-May 2026 window), the public archive
    retains ONLY the end-of-delivery-day version. Verified e.g. delivery
    2026-03-15: only PUB_Adequacy3_20260315.xml and _v120 survive, both
    CreatedAt 2026-03-15T23:53 (end of D). Probe: 0 of 18 gradable
    delivery days had any version with CreatedAt <= D-1 23:59. Wrong
    horizon (sees ~all of D); no recoverable day-ahead version.
    (A few very recent deliveries still retain early versions only
-   because intraday revisions had not yet been purged — not the
+   because intraday revisions had not yet been purged - not the
    gradable window.)
 
 2. True day-ahead-issued products (DATotals, PredispTotals): issued
    ~D-1 (DATotals CreatedAt ~D-1 12:30; Predisp ~D-1 05:10) BUT publish
    only market totals, NOT Ontario demand. "Total Load" runs a
-   consistent +2485 MW (median +2499, std 767) above Ontario Demand —
+   consistent +2485 MW (median +2499, std 767) above Ontario Demand -
    a definitional offset (losses + dispatchable), not forecast error.
    No Ontario-demand field exists in either
    (MarketQuantity = Total Energy/Loss/Load/Dispatchable/10S/10N/30R).
@@ -49,13 +79,12 @@ DISCARDED (product/quantity mismatches, NOT recorded as results):
 Both artifacts of comparing against the wrong IESO quantity/horizon.
 
 VALID PATH: the forward registered experiment (experiment/, Tasks
-24–27) captures Adequacy3 `ForecastOntDemand` PROSPECTIVELY at D-1
+24-27) captures Adequacy3 `ForecastOntDemand` PROSPECTIVELY at D-1
 (before purge-down), enabling a fair head-to-head as calendar time
 accrues. This is why the prospective infrastructure was built; it is
 the methodologically correct comparison, not a workaround.
 
-UNAFFECTED: the model's own validated result stands independently —
+UNAFFECTED: the model's own validated result stands independently --
 Step-4 historical backtest, 500 out-of-sample post-cutoff days,
-leakage directly verified: MAE 786 MW, MAPE 4.78%, ~1.5x better than
-seasonal persistence at every hour (experiment/results/
-backtest_postcutoff_2025-01-01_2026-05-16.txt).
+leakage directly verified (see the provenanced C1 backtest artifact
+under experiment/results/, which carries its own header + body hash).
