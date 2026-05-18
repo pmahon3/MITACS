@@ -114,6 +114,28 @@ functions. The gates never misled because they call production directly. Any Ont
 diagnostic must call production functions or its output is labelled provisional and
 not committed as fact.
 
+## Result provenance (Tier-1, implemented 2026-05-18)
+
+Every claim-grade / method-grade result artifact MUST be written through
+`experiment.provenance.make_result()` — never hand-written. It stamps a header with
+two distinct, independently-verifiable hashes: `inputs_fingerprint`
+(git SHA + frozen_spec hash + lib versions + RNG seeds + declared inputs =
+"rerun these, get this") and `body_sha256` (tamper-evidence; `load_verified_result()`
+recomputes it on read). Policy is **strict refuse-on-dirty** (same bar as `freeze.py`;
+a recorded git SHA that can't reproduce the artifact is the hole this closes) and a
+mandatory `Grade` banner (CLAIM-GRADE / METHOD/DESIGN / INSPECTION-ONLY). Predictor-
+derived CLAIM results pass `frozen_spec_required=True` so a missing/tampered spec
+raises rather than stamping `null`. Shared primitives live in `experiment/_prov_core.py`
+(ONE definition; `freeze.py` consumes it — do not copy-paste git/hash helpers). The
+emitters are `experiment/backtest.py --emit-result` (C1), `processing/innovations/
+validation/synthetic.py --emit-result` (C4), `experiment/emit_theory_correspondence.py`
+(C3), `experiment/emit_ieso_infeasibility.py` (C2). The requirements analysis driving
+this is `experiment/results/PROVENANCE_REQUIREMENTS.md` (memory
+`mitacs-provenance-requirements`); `freeze.py`/the registered experiment is the C5
+gold-standard template the rest was raised to. Inspection-only scratch carries a
+greppable `PROVENANCE-GRADE: INSPECTION-ONLY` docstring banner — never cite it as a
+result.
+
 ## Status (as of 2026-05-17)
 
 - ✅ Config-driven pipeline (`config/`, `run_pipeline.py` with stage registry,
