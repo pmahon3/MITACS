@@ -60,8 +60,10 @@ correspondence section.
   directly-verified finding about the (in)feasibility of a retrospective
   head-to-head against IESO's own published forecasts.
 
-§8 records reproducibility/provenance machinery; §9 collects limitations
-and open questions.
+§8 records reproducibility/provenance machinery; §9 collects
+claim/method-grade limitations and open questions; §10 fences
+development-set preliminary observations whose lower evidentiary grade
+is stated explicitly and on which nothing in §1–§9 depends.
 
 *Positioning relative to prior work is deliberately deferred* —
 [PLACEHOLDER: prior-work context, for the author group to supply; this
@@ -358,15 +360,11 @@ this document.
 - **Gaussian-proxy gap (§4).** The standing caveat: `Π^(j)` captures
   conditional mean and variance but not the heavy-tailed conditional
   law. Open: a non-Gaussian local conditional model for `κ_Q`.
-- **State representation / honing.** A development-set diagnostic
-  indicates a systematic phase-centred conditional-mean bias
-  attributable to under-embedding / missing phase state at demand
-  ramps (the local linear map centres between rising and falling
-  phases). Whether to address this by phase/derivative-augmented
-  embedding, per-hour dimension, or to accept it as a documented
-  reach limit of the univariate estimator is an open decision; any
-  change is dev-only-derived and re-frozen before forward scoring.
-  [Status: investigation recorded; decision pending.]
+- **State representation.** A possible reach limit of the univariate
+  estimator at demand ramps is described, with its lower evidentiary
+  grade explicitly fenced, in §10 (Preliminary observations) — it is
+  *not* a claim-grade limitation and is deliberately not stated as one
+  here.
 - **Single-step only (Qualifier 3).** The semigroup `{Π_t}` is not
   constructed; multi-step is iteration of `Π_Δ`, validated for error
   growth but not a Chapman–Kolmogorov-verified semigroup.
@@ -376,6 +374,43 @@ this document.
 - **[DEFER-RF] points.** [PLACEHOLDER: residual theory-correspondence
   questions for resolution with the Resolvent_Framework authors;
   several are mooted by the rank-1 finding.]
+
+---
+
+## 10. Preliminary observations (INSPECTION-ONLY — not claim-grade)
+
+> **Evidentiary grade.** Everything in this section is from
+> development-set exploratory investigation. It has *not* been
+> established through the production-validated code path on
+> claim-grade data and is *not* cited as a result anywhere else in
+> this document. It is recorded here for collaborator visibility and
+> to motivate an open decision — nothing in §1–§9 depends on it. Per
+> the project's discipline rule, a diagnostic that has not been
+> confirmed through the production path is a hypothesis, not a
+> finding.
+
+**Phase-centred conditional-mean bias at demand ramps.** A
+development-set diagnostic on a separate (2021–22) inspection window
+indicates a systematic, phase-dependent conditional-mean bias: the
+local linear map appears to centre between rising and falling demand
+phases, under-predicting overnight troughs and over-predicting evening
+peaks. The working interpretation is under-embedding / missing phase
+state at the ramps (a single per-day-type embedding dimension may be
+simultaneously over-embedded at simple overnight hours and
+under-embedded at the complex evening ramp). A complementary dev-set
+check found a state-space-adaptive bandwidth to be a weak, high-risk
+lever that does not touch this bias.
+
+**Status / open decision.** Whether to address this by a
+phase/derivative-augmented embedding, a per-hour embedding dimension,
+or to accept and document it as a reach limit of the univariate
+estimator is an open decision. Any change would be derived strictly on
+the development set and locked into a *new* hash-stamped frozen
+specification (superseding the current registration) *before* any
+forward forecast is scored with the changed model — the freeze
+mechanism is the wall between development and the registered test.
+[Status: investigation recorded; decision pending — see project tasks
+#30/#31.]
 
 ---
 
