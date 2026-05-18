@@ -1,0 +1,55 @@
+<<<PROVENANCE
+{
+  "body_sha256": "d8435415dd3e6faf4ae0ac5d7b5f539e37151a9a8479c94d6213cc4ee5440864",
+  "generated_utc": "2026-05-18T18:45:06+00:00",
+  "git_clean": true,
+  "git_sha": "ed5ec9f229c5485fdc97689f76416ae10dc414f4",
+  "grade": "METHOD/DESIGN",
+  "inputs_fingerprint": "cd8d73923df0571a8379546ff2f44b67746518232d8761b35188165bf3a3264e",
+  "reproducibility": {
+    "frozen_spec_hash": "f0dd9c8795fda781fa8cab80ddd9ec9fb844af284cdb3077c0d1116b13e0536d",
+    "git_sha": "ed5ec9f229c5485fdc97689f76416ae10dc414f4",
+    "inputs": {
+      "all_gates_pass": true
+    },
+    "lib_versions": {
+      "edynamics": "0.3.14",
+      "numpy": "2.2.4",
+      "pandas": "2.2.3",
+      "scipy": "1.15.2"
+    },
+    "seeds": {
+      "non_gaussianity_anchors": 1,
+      "non_gaussianity_simulate": 12,
+      "non_gaussianity_student_t_df": 5,
+      "non_gaussianity_var1_params": 11,
+      "recover_and_multistep": "see recover()/multistep_recovery() internal seeds (fixed, deterministic)"
+    }
+  },
+  "schema": "mitacs.experiment.result_provenance/1",
+  "title": "Estimator validation gates: VAR(1) recovery + non-Gaussianity + multi-step composition (production-path)"
+}
+PROVENANCE>>>
+
+VAR(1) recovery:
+  anchors evaluated  : 60
+  drift  rel err     : 0.0476  (tol 0.1)
+  diff   rel err     : 0.0261  (tol 0.25)
+  eig(Σ) rel err     : 0.0084  (tol 0.25)
+RESULT: PASS
+
+Non-Gaussianity gate (production innovation_diagnostics):
+  Gaussian noise : excess_kurt=-0.054  tail_ratio=0.981
+  Student-t(df=5): excess_kurt= 4.719  tail_ratio=1.425
+RESULT: PASS
+
+Multi-step composition gate (iterated Pi_Delta vs VAR(1) closed-form; error growth shown, not hidden):
+    H  drift_relerr   (tol)  diff_relerr   (tol)
+    1        0.0451    0.10       0.0261    0.25  ok
+    2        0.0490    0.15       0.0253    0.30  ok
+    4        0.0795    0.25       0.0251    0.40  ok
+    8        0.1493    0.40       0.0251    0.55  ok
+   12        0.2211    0.55       0.0251    0.70  ok
+   24        0.4446    0.90       0.0251    1.10  ok
+RESULT: PASS
+  (drift error compounds with horizon BY CONSTRUCTION -- this is the honest error-growth characterization, not a defect unless it breaches tolerance)
