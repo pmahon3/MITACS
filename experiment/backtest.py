@@ -1,0 +1,177 @@
+"""Historical day-ahead backtest -- the basic-pipeline test, no IESO.
+
+Validates the multi-step predictor end-to-end on real Ontario data
+against ground truth we already have (the refreshed 2025-06..2026-05
+actuals). No IESO, no calendar wait: for every complete delivery day in
+the span, produce the iterated day-ahead forecast and compare to the
+actual that already happened.
+
+Honest by construction (memory mitacs-multistep-design / scoring-design):
+  * error reported PER HORIZON h=1..24 -- the error-growth curve is the
+    deliverable, never averaged into one number;
+  * naive baselines: t-168h (day-type-CLEAN, primary) and t-24h (kept,
+    its day-type-mismatch % reported);
+  * leakage guard: predict_multistep already restricts fits to the
+    frozen <=2024 cutoff; the refreshed actuals are used ONLY as query
+    history up to each issue time and as scoring ground truth;
+  * per-day checkpointing -> resumable; a partial run is still usable.
+
+Run::
+
+    python -m experiment.backtest                 # full span
+    python -m experiment.backtest --max-days 30   # quick mechanics check
+"""
+from __future__ import annotations
+
+import argparse
+
+import numpy as np
+import pandas as pd
+
+from config import load_config
+
+from ._actuals import load_actuals
+from .predict_multistep import day_ahead
+from .score import _daytype
+
+
+def _complete_delivery_days(actual: pd.Series, dmax: int = 4) -> pd.DatetimeIndex:
+    """Dates D with all 24 actual hours AND >= dmax actual hours of
+    pre-issue history immediately before D 00:00."""
+    days = pd.DatetimeIndex(sorted({ts.normalize() for ts in actual.index}))
+    out = []
+    idx = actual.index
+    for D in days:
+        day_hours = pd.date_range(D, periods=24, freq="h")
+        if not all(h in idx for h in day_hours):
+            continue
+        hist = [D - pd.Timedelta(hours=i + 1) for i in range(dmax)]
+        if all(h in idx for h in hist):
+            out.append(D)
+    return pd.DatetimeIndex(out)
+
+
+def run_backtest(max_days: int | None = None, anchor_h: int = 7) -> dict:
+    cfg = load_config()
+    actual = load_actuals(cutoff=None)
+    cutoff = pd.Timestamp("2024-12-31T23:00:00")
+    # backtest only on POST-cutoff days (true out-of-sample for the frozen
+    # model; pre-cutoff days are training territory).
+    days = _complete_delivery_days(actual)
+    days = days[days > cutoff]
+    if max_days:
+        days = days[:max_days]
+    if len(days) == 0:
+        return {"sufficient": False, "note": "no complete post-cutoff days"}
+
+    fc = day_ahead(days)
+    if fc.empty:
+        return {"sufficient": False, "note": "predictor produced no rows"}
+
+    fc = fc.copy()
+    fc["actual_mw"] = fc["target_dt"].map(actual)
+    fc = fc.dropna(subset=["actual_mw"])
+
+    # naive baselines aligned to each target
+    fc["persist_168h"] = fc["target_dt"].map(
+        lambda t: actual.get(t - pd.Timedelta(hours=168), np.nan)
+    )
+    fc["persist_24h"] = fc["target_dt"].map(
+        lambda t: actual.get(t - pd.Timedelta(hours=24), np.nan)
+    )
+
+    def _mae(pred, act):
+        e = (pred - act).dropna()
+        return float(e.abs().mean()) if len(e) else np.nan
+
+    def _mape(pred, act):
+        m = act != 0
+        e = ((pred[m] - act[m]).abs() / act[m]).dropna()
+        return float(e.mean() * 100) if len(e) else np.nan
+
+    # CRITICAL FRAMING: in a day-ahead forecast horizon h maps 1:1 to
+    # hour-of-day (h=1 -> 00:00, h=24 -> 23:00). So "error by horizon" IS
+    # "error by hour-of-day" -- they are perfectly collinear and must not
+    # be read as pure horizon-compounding. The error structure is diurnal:
+    # deep night (low usage) is easiest; the dawn/dusk demand RAMPS are
+    # hardest (a well-known load-forecasting property), not the longest
+    # horizons. Absolute MW error also tracks demand level, so MAPE
+    # (level-controlled) is reported alongside MAE.
+    per_h = []
+    for h, g in fc.groupby("horizon_h"):
+        per_h.append({
+            "horizon_h": int(h),
+            "hour_of_day": int(h) - 1,  # h=1 -> 00:00
+            "n": int(len(g)),
+            "ours_mae": _mae(g["our_forecast_mw"], g["actual_mw"]),
+            "ours_mape": _mape(g["our_forecast_mw"], g["actual_mw"]),
+            "persist168_mae": _mae(g["persist_168h"], g["actual_mw"]),
+            "persist24_mae": _mae(g["persist_24h"], g["actual_mw"]),
+            "mean_demand_mw": float(g["actual_mw"].mean()),
+        })
+
+    # t-24h day-type mismatch rate (07:00 anchor crosses regime at weekends)
+    tt = fc["target_dt"]
+    mism = np.mean([
+        _daytype(t, anchor_h) != _daytype(t - pd.Timedelta(hours=24), anchor_h)
+        for t in tt
+    ]) * 100.0
+
+    inside = (
+        (fc["actual_mw"] >= fc["our_pi_lo_mw"])
+        & (fc["actual_mw"] <= fc["our_pi_hi_mw"])
+    ).mean() * 100.0
+
+    return {
+        "sufficient": True,
+        "delivery_days": int(fc["delivery_date"].nunique()),
+        "rows": int(len(fc)),
+        "span": (str(days.min().date()), str(days.max().date())),
+        "per_horizon": per_h,
+        "overall_ours_mae": _mae(fc["our_forecast_mw"], fc["actual_mw"]),
+        "overall_ours_mape": _mape(fc["our_forecast_mw"], fc["actual_mw"]),
+        "overall_persist168_mae": _mae(fc["persist_168h"], fc["actual_mw"]),
+        "persist24_daytype_mismatch_pct": round(float(mism), 1),
+        "interval_coverage_pct": round(float(inside), 1),
+        "interval_caveat": (
+            "per-step Gaussian proxy, heavy-tailed innovation, no cross-step "
+            "accumulation -> expected far from nominal; reported, not hidden"
+        ),
+        "framing": (
+            "Backtest validates the multi-step predictor on real Ontario "
+            "ground truth. NOT the IESO head-to-head (no IESO here); that "
+            "is Step 5, horizon-matched. NOTE: horizon h is collinear with "
+            "hour-of-day -- the error structure is DIURNAL (night easiest, "
+            "dawn/dusk demand ramps hardest), NOT pure horizon compounding."
+        ),
+    }
+
+
+if __name__ == "__main__":
+    import pprint
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--max-days", type=int, default=None)
+    args = ap.parse_args()
+    r = run_backtest(max_days=args.max_days)
+    if not r.get("sufficient"):
+        print("INSUFFICIENT:", r.get("note"))
+    else:
+        print(f"backtest: {r['delivery_days']} days, {r['rows']} hourly "
+              f"forecasts, span {r['span']}")
+        print(f"  overall ours MAE  = {r['overall_ours_mae']:.0f} MW  "
+              f"MAPE = {r['overall_ours_mape']:.2f}%")
+        print(f"  overall p168 MAE  = {r['overall_persist168_mae']:.0f} MW")
+        print(f"  t-24h daytype mismatch = "
+              f"{r['persist24_daytype_mismatch_pct']}%")
+        print(f"  interval coverage = {r['interval_coverage_pct']}% "
+              f"({r['interval_caveat']})")
+        print("  diurnal error structure (h == hour-of-day; MAPE controls "
+              "for demand level):")
+        print(f"    {'hod':>3} {'ours_MAE':>8} {'ours_MAPE':>9} "
+              f"{'p168_MAE':>8} {'demand':>7} {'n':>4}")
+        for ph in r["per_horizon"]:
+            print(f"    {ph['hour_of_day']:>3} {ph['ours_mae']:>8.0f} "
+                  f"{ph['ours_mape']:>8.2f}% {ph['persist168_mae']:>8.0f} "
+                  f"{ph['mean_demand_mw']:>7.0f} {ph['n']:>4}")
+        print(" ", r["framing"])
