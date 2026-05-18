@@ -15,7 +15,12 @@ and they must not be conflated (see ``mitacs-provenance-requirements``):
     recomputed on load. Pure tamper-evidence for *this artifact*, the
     analogue of ``freeze.load_verified()``.
 
-Both are independently verifiable; neither implies the other.
+The two are distinct concerns; neither implies the other. NOTE the
+asymmetry by design: ``load_verified_result()`` recomputes and checks
+``body_sha256`` on every read (runtime tamper-evidence), but
+``inputs_fingerprint`` is recorded as an audit trail and is NOT
+re-checked on load — reproducing the pinned inputs *is* its
+verification action, not a hash comparison.
 
 Integrity policy is **strict, mirroring freeze.py**: ``make_result``
 *refuses* to write from a dirty source tree, because a recorded

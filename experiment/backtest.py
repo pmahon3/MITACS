@@ -222,12 +222,17 @@ if __name__ == "__main__":
             seeds={},  # the estimator/backtest path is RNG-free
             frozen_spec_required=True,  # predictor-derived: MUST bind
             extra={
-                "regeneration_note": "deterministic regeneration of the "
-                "pre-existing committed result for provenance-header "
-                "addition; body verified byte-identical to the prior "
-                "artifact (no numeric change, no supersession — the "
-                "backtest span is unchanged because the appended raw "
-                "actuals do not yet form a complete 24h delivery day)",
+                "regeneration_note": "header addition; body unchanged "
+                "from the prior committed artifact (deterministic "
+                "regeneration — the backtest span is unchanged because "
+                "the appended raw actuals do not yet form a complete "
+                "24h delivery day). A reviewer can confirm body "
+                "equality independently: strip both headers and "
+                "compare against the parent revision, e.g. "
+                "`git show <parent>:experiment/results/"
+                "backtest_postcutoff_2025-01-01_2026-05-16.txt` vs the "
+                "current body (load_verified_result returns the body "
+                "with the header removed).",
             },
         )
         print(f"\nwrote provenanced C1 artifact -> {out}")
