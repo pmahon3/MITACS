@@ -1,0 +1,32 @@
+backtest: 500 days, 12000 hourly forecasts, span ('2025-01-01', '2026-05-16')
+  overall ours MAE  = 786 MW  MAPE = 4.78%
+  overall p168 MAE  = 1138 MW
+  t-24h daytype mismatch = 42.7%
+  interval coverage = 20.8% (per-step Gaussian proxy, heavy-tailed innovation, no cross-step accumulation -> expected far from nominal; reported, not hidden)
+  diurnal error structure (h == hour-of-day; MAPE controls for demand level):
+    hod ours_MAE ours_MAPE p168_MAE  demand    n
+      0      161     1.08%      972   14942  500
+      1      215     1.48%      945   14606  500
+      2      241     1.67%      914   14435  500
+      3      288     2.00%      905   14425  500
+      4      370     2.54%      922   14665  500
+      5      563     3.80%      960   15315  500
+      6      839     5.43%     1013   16232  500
+      7     1011     6.25%     1057   16911  500
+      8     1056     6.43%     1103   17137  500
+      9     1130     6.92%     1196   17217  500
+     10     1190     7.27%     1288   17275  500
+     11     1182     7.23%     1351   17297  500
+     12     1154     7.10%     1405   17317  500
+     13     1105     6.82%     1418   17316  500
+     14     1037     6.36%     1407   17415  500
+     15      959     5.72%     1347   17765  500
+     16      891     5.08%     1252   18274  500
+     17      886     4.89%     1200   18577  500
+     18      908     4.95%     1169   18590  500
+     19      893     4.93%     1144   18418  500
+     20      857     4.86%     1150   18002  500
+     21      745     4.40%     1120   17209  500
+     22      612     3.75%     1059   16299  500
+     23      579     3.67%     1007   15503  500
+  Backtest validates the multi-step predictor on real Ontario ground truth. NOT the IESO head-to-head (no IESO here); that is Step 5, horizon-matched. NOTE: horizon h is collinear with hour-of-day -- the error structure is DIURNAL (night easiest, dawn/dusk demand ramps hardest), NOT pure horizon compounding.
