@@ -1,3 +1,39 @@
+<<<PROVENANCE
+{
+  "body_sha256": "e405a121216345efe7439a5ffc28fd01303aa32555ff480299ae283c5d651432",
+  "extra": {
+    "regeneration_note": "deterministic regeneration of the pre-existing committed result for provenance-header addition; body verified byte-identical to the prior artifact (no numeric change, no supersession \u2014 the backtest span is unchanged because the appended raw actuals do not yet form a complete 24h delivery day)"
+  },
+  "generated_utc": "2026-05-18T19:13:42+00:00",
+  "git_clean": true,
+  "git_sha": "fd89543a95e88486f375ba8f9548b06a4fe6486f",
+  "grade": "CLAIM-GRADE",
+  "inputs_fingerprint": "5463ca272d2dd7d18b4715df83d86bb7451b80e7dc2fde9851a25fb9acdd379b",
+  "reproducibility": {
+    "frozen_spec_hash": "f0dd9c8795fda781fa8cab80ddd9ec9fb844af284cdb3077c0d1116b13e0536d",
+    "git_sha": "fd89543a95e88486f375ba8f9548b06a4fe6486f",
+    "inputs": {
+      "backtest_span": [
+        "2025-01-01",
+        "2026-05-16"
+      ],
+      "data_cutoff": "2024-12-31T23:00:00",
+      "delivery_days": 500,
+      "pre_cutoff_actuals_sha256": "a110d8eec48463bf5634e0f7248fdd321c39f2440f7d3c0bb153c1468f2bfe1a"
+    },
+    "lib_versions": {
+      "edynamics": "0.3.14",
+      "numpy": "2.2.4",
+      "pandas": "2.2.3",
+      "scipy": "1.15.2"
+    },
+    "seeds": {}
+  },
+  "schema": "mitacs.experiment.result_provenance/1",
+  "title": "Post-cutoff multi-step day-ahead backtest vs Ontario actuals (no IESO)"
+}
+PROVENANCE>>>
+
 backtest: 500 days, 12000 hourly forecasts, span ('2025-01-01', '2026-05-16')
   overall ours MAE  = 786 MW  MAPE = 4.78%
   overall p168 MAE  = 1138 MW
