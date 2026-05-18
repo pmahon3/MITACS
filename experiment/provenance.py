@@ -89,15 +89,24 @@ def _lib_versions() -> dict[str, str]:
     return out
 
 
-def _frozen_spec_hash() -> str | None:
-    """The registered experiment's spec hash if a frozen spec exists.
+def _frozen_spec_hash(*, required: bool) -> str | None:
+    """The registered experiment's spec hash.
 
     Recorded so a result is bound to the predictor registration it was
-    produced under. ``None`` for results that do not depend on the
-    frozen predictor (e.g. the synthetic validation gates)."""
-    try:
-        from .freeze import load_verified
+    produced under. A result that depends on the frozen predictor (the
+    C1 backtest) MUST carry it — ``required=True`` re-raises instead of
+    silently stamping ``null`` (a null spec hash on a predictor-derived
+    CLAIM artifact is an integrity hole). Results that do NOT depend on
+    the frozen predictor (the C4 synthetic gates) pass
+    ``required=False`` and legitimately get ``None``.
+    """
+    from .freeze import load_verified
 
+    if required:
+        # let a missing/tampered spec raise — the caller asked for the
+        # binding and must not get a result without it.
+        return load_verified()["spec_hash"]
+    try:
         return load_verified()["spec_hash"]
     except Exception:
         return None
@@ -110,6 +119,7 @@ def build_header(
     inputs: dict[str, Any] | None,
     seeds: dict[str, Any] | None,
     body: str,
+    frozen_spec_required: bool = False,
     extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Construct the provenance header dict (no I/O).
@@ -117,12 +127,16 @@ def build_header(
     ``inputs_fingerprint`` is a canonical hash over the reproducibility-
     determining inputs; ``body_sha256`` is a separate hash over the
     result text. The two hash fields are excluded from what they hash.
+
+    ``frozen_spec_required=True`` (set for predictor-derived results
+    like the C1 backtest) makes a missing/tampered frozen spec raise
+    rather than stamp ``frozen_spec_hash: null``.
     """
     sha = git_sha()
     clean = git_clean()
     repro = {
         "git_sha": sha,
-        "frozen_spec_hash": _frozen_spec_hash(),
+        "frozen_spec_hash": _frozen_spec_hash(required=frozen_spec_required),
         "lib_versions": _lib_versions(),
         "seeds": seeds or {},
         "inputs": inputs or {},
@@ -164,6 +178,7 @@ def make_result(
     body: str,
     inputs: dict[str, Any] | None = None,
     seeds: dict[str, Any] | None = None,
+    frozen_spec_required: bool = False,
     extra: dict[str, Any] | None = None,
     allow_dirty: bool = False,
 ) -> dict[str, Any]:
@@ -195,6 +210,7 @@ def make_result(
         inputs=inputs,
         seeds=seeds,
         body=body,
+        frozen_spec_required=frozen_spec_required,
         extra=extra,
     )
     path.parent.mkdir(parents=True, exist_ok=True)

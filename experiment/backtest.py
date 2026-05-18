@@ -147,31 +147,90 @@ def run_backtest(max_days: int | None = None, anchor_h: int = 7) -> dict:
     }
 
 
-if __name__ == "__main__":
-    import pprint
+def render_body(r: dict) -> str:
+    """The human-readable backtest report. ONE renderer so the stdout
+    view and the provenanced artifact are byte-identical by
+    construction (no second formatting path to drift)."""
+    L = [
+        f"backtest: {r['delivery_days']} days, {r['rows']} hourly "
+        f"forecasts, span {r['span']}",
+        f"  overall ours MAE  = {r['overall_ours_mae']:.0f} MW  "
+        f"MAPE = {r['overall_ours_mape']:.2f}%",
+        f"  overall p168 MAE  = {r['overall_persist168_mae']:.0f} MW",
+        f"  t-24h daytype mismatch = "
+        f"{r['persist24_daytype_mismatch_pct']}%",
+        f"  interval coverage = {r['interval_coverage_pct']}% "
+        f"({r['interval_caveat']})",
+        "  diurnal error structure (h == hour-of-day; MAPE controls "
+        "for demand level):",
+        f"    {'hod':>3} {'ours_MAE':>8} {'ours_MAPE':>9} "
+        f"{'p168_MAE':>8} {'demand':>7} {'n':>4}",
+    ]
+    for ph in r["per_horizon"]:
+        L.append(
+            f"    {ph['hour_of_day']:>3} {ph['ours_mae']:>8.0f} "
+            f"{ph['ours_mape']:>8.2f}% {ph['persist168_mae']:>8.0f} "
+            f"{ph['mean_demand_mw']:>7.0f} {ph['n']:>4}"
+        )
+    L.append("  " + r["framing"])
+    return "\n".join(L) + "\n"
 
+
+if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--max-days", type=int, default=None)
+    ap.add_argument(
+        "--emit-result", action="store_true",
+        help="write the provenanced CLAIM-grade artifact (C1) via "
+             "experiment.provenance.make_result (refuses a dirty tree)",
+    )
     args = ap.parse_args()
     r = run_backtest(max_days=args.max_days)
     if not r.get("sufficient"):
         print("INSUFFICIENT:", r.get("note"))
-    else:
-        print(f"backtest: {r['delivery_days']} days, {r['rows']} hourly "
-              f"forecasts, span {r['span']}")
-        print(f"  overall ours MAE  = {r['overall_ours_mae']:.0f} MW  "
-              f"MAPE = {r['overall_ours_mape']:.2f}%")
-        print(f"  overall p168 MAE  = {r['overall_persist168_mae']:.0f} MW")
-        print(f"  t-24h daytype mismatch = "
-              f"{r['persist24_daytype_mismatch_pct']}%")
-        print(f"  interval coverage = {r['interval_coverage_pct']}% "
-              f"({r['interval_caveat']})")
-        print("  diurnal error structure (h == hour-of-day; MAPE controls "
-              "for demand level):")
-        print(f"    {'hod':>3} {'ours_MAE':>8} {'ours_MAPE':>9} "
-              f"{'p168_MAE':>8} {'demand':>7} {'n':>4}")
-        for ph in r["per_horizon"]:
-            print(f"    {ph['hour_of_day']:>3} {ph['ours_mae']:>8.0f} "
-                  f"{ph['ours_mape']:>8.2f}% {ph['persist168_mae']:>8.0f} "
-                  f"{ph['mean_demand_mw']:>7.0f} {ph['n']:>4}")
-        print(" ", r["framing"])
+        raise SystemExit(1)
+
+    body = render_body(r)
+    print(body, end="")
+
+    if args.emit_result:
+        from pathlib import Path
+
+        from config import PROJECT_ROOT
+
+        from ._actuals import actuals_fingerprint
+        from .provenance import Grade, make_result
+
+        cutoff = pd.Timestamp("2024-12-31T23:00:00")
+        s0, s1 = r["span"]
+        out = (
+            PROJECT_ROOT / "experiment" / "results"
+            / f"backtest_postcutoff_{s0}_{s1}.txt"
+        )
+        hdr = make_result(
+            path=out,
+            grade=Grade.CLAIM,
+            title="Post-cutoff multi-step day-ahead backtest vs Ontario "
+                  "actuals (no IESO)",
+            body=body,
+            inputs={
+                "data_cutoff": cutoff.isoformat(),
+                "pre_cutoff_actuals_sha256": actuals_fingerprint(cutoff),
+                "backtest_span": list(r["span"]),
+                "delivery_days": r["delivery_days"],
+            },
+            seeds={},  # the estimator/backtest path is RNG-free
+            frozen_spec_required=True,  # predictor-derived: MUST bind
+            extra={
+                "supersedes": "backtest_postcutoff_2025-01-01_"
+                              "2026-05-16.txt",
+                "supersede_reason": "tracked actuals extended; this is "
+                "a clean supersession (overlap verified byte-identical), "
+                "not a correction — old file retained in git history",
+            },
+        )
+        print(f"\nwrote provenanced C1 artifact -> {out}")
+        print(f"  inputs_fingerprint = {hdr['inputs_fingerprint'][:16]}…")
+        print(f"  body_sha256        = {hdr['body_sha256'][:16]}…")
+        print(f"  frozen_spec_hash   = "
+              f"{hdr['reproducibility']['frozen_spec_hash'][:16]}…")

@@ -110,6 +110,35 @@ def test_strict_dirty_policy():
             assert p.exists(), "INSPECTION allow_dirty should write"
 
 
+def test_frozen_spec_required_binding():
+    # required=True must propagate a missing/tampered frozen spec
+    # instead of silently stamping frozen_spec_hash: null on a
+    # predictor-derived CLAIM artifact.
+    with mock.patch(
+        "experiment.freeze.load_verified",
+        side_effect=ValueError("frozen spec hash mismatch"),
+    ):
+        # not required -> tolerated, stamps None
+        h = build_header(
+            grade=Grade.METHOD, title="t", inputs={}, seeds={},
+            body=_BODY, frozen_spec_required=False,
+        )
+        assert h["reproducibility"]["frozen_spec_hash"] is None, (
+            "non-required should tolerate a missing spec"
+        )
+        # required -> must raise (the integrity binding)
+        try:
+            build_header(
+                grade=Grade.CLAIM, title="t", inputs={}, seeds={},
+                body=_BODY, frozen_spec_required=True,
+            )
+            raise AssertionError(
+                "frozen_spec_required must re-raise a bad spec"
+            )
+        except ValueError as e:
+            assert "mismatch" in str(e), f"wrong error: {e}"
+
+
 def main():
     ok = True
     ok &= _run("roundtrip_and_tamper", test_roundtrip_and_tamper)
@@ -117,6 +146,9 @@ def main():
         "two_hashes_distinct", test_two_hashes_are_distinct_concerns
     )
     ok &= _run("strict_dirty_policy", test_strict_dirty_policy)
+    ok &= _run(
+        "frozen_spec_required", test_frozen_spec_required_binding
+    )
     print("ALL PASS" if ok else "FAILURES")
     raise SystemExit(0 if ok else 1)
 

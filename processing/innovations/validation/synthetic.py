@@ -346,30 +346,51 @@ def test_multistep_composition() -> None:
     assert des[-1] >= des[0], "drift error should grow with horizon"
 
 
-if __name__ == "__main__":
+# Seed manifest for the C4 provenance artifact: every RNG seed that
+# determines this gate's numbers. Hardcoded here AND in the calls below
+# (single source would obscure the gate logic); kept in lockstep.
+GATE_SEEDS = {
+    "non_gaussianity_var1_params": 11,
+    "non_gaussianity_simulate": 12,
+    "non_gaussianity_anchors": 1,
+    "non_gaussianity_student_t_df": 5,
+    "recover_and_multistep": "see recover()/multistep_recovery() "
+    "internal seeds (fixed, deterministic)",
+}
+
+
+def report() -> tuple[str, bool]:
+    """Run all three gates, returning (human-readable text, all_pass).
+
+    ONE renderer: the stdout view and the provenanced C4 artifact are
+    byte-identical by construction. The gate computations are unchanged
+    — only routed through a buffer instead of bare ``print``."""
+    out: list[str] = []
+    p = lambda *a: out.append(" ".join(str(x) for x in a))
+
     result, A, Q = recover()
-    print("VAR(1) recovery:")
-    print(f"  anchors evaluated  : {result.n_anchors}")
-    print(f"  drift  rel err     : {result.drift_rel_err:.4f}  (tol {DRIFT_TOL})")
-    print(f"  diff   rel err     : {result.diffusion_rel_err:.4f}  (tol {DIFFUSION_TOL})")
-    print(f"  eig(Σ) rel err     : {result.eig_rel_err:.4f}  (tol {EIG_TOL})")
+    p("VAR(1) recovery:")
+    p(f"  anchors evaluated  : {result.n_anchors}")
+    p(f"  drift  rel err     : {result.drift_rel_err:.4f}  (tol {DRIFT_TOL})")
+    p(f"  diff   rel err     : {result.diffusion_rel_err:.4f}  (tol {DIFFUSION_TOL})")
+    p(f"  eig(Σ) rel err     : {result.eig_rel_err:.4f}  (tol {EIG_TOL})")
     ok = (
         result.n_anchors > 0
         and result.drift_rel_err < DRIFT_TOL
         and result.diffusion_rel_err < DIFFUSION_TOL
         and result.eig_rel_err < EIG_TOL
     )
-    print("RESULT:", "PASS" if ok else "FAIL")
+    p("RESULT: " + ("PASS" if ok else "FAIL"))
 
-    print()
-    print("Non-Gaussianity gate (production innovation_diagnostics):")
+    p("")
+    p("Non-Gaussianity gate (production innovation_diagnostics):")
     A2, Q2 = make_var1_params(d=3, seed=11)
     Xg = simulate_var1(A2, Q2, n=6000, burn=500, seed=12)
     Xt = simulate_var1_t(A2, Q2, n=6000, burn=500, seed=12, df=5)
     gk, gt = _innov_kurt_over_anchors(Xg, 40, seed=1)
     tk, tt = _innov_kurt_over_anchors(Xt, 40, seed=1)
-    print(f"  Gaussian noise : excess_kurt={gk:6.3f}  tail_ratio={gt:5.3f}")
-    print(f"  Student-t(df=5): excess_kurt={tk:6.3f}  tail_ratio={tt:5.3f}")
+    p(f"  Gaussian noise : excess_kurt={gk:6.3f}  tail_ratio={gt:5.3f}")
+    p(f"  Student-t(df=5): excess_kurt={tk:6.3f}  tail_ratio={tt:5.3f}")
     ng_ok = (
         gk < GAUSS_KURT_MAX
         and gt < GAUSS_TAIL_MAX
@@ -378,22 +399,64 @@ if __name__ == "__main__":
         and (tk - gk) > KURT_SEP_MIN
         and (tt - gt) > TAIL_SEP_MIN
     )
-    print("RESULT:", "PASS" if ng_ok else "FAIL")
+    p("RESULT: " + ("PASS" if ng_ok else "FAIL"))
 
-    print()
-    print("Multi-step composition gate (iterated Pi_Delta vs VAR(1) "
-          "closed-form; error growth shown, not hidden):")
+    p("")
+    p("Multi-step composition gate (iterated Pi_Delta vs VAR(1) "
+      "closed-form; error growth shown, not hidden):")
     ms = multistep_recovery()
-    print(f"  {'H':>3} {'drift_relerr':>13} {'(tol)':>7} "
-          f"{'diff_relerr':>12} {'(tol)':>7}")
+    p(f"  {'H':>3} {'drift_relerr':>13} {'(tol)':>7} "
+      f"{'diff_relerr':>12} {'(tol)':>7}")
     ms_ok = True
     for H, de, se in ms:
         dt_, st_ = _MS_DRIFT_TOL[H], _MS_DIFF_TOL[H]
-        ok = de < dt_ and se < st_
-        ms_ok &= ok
-        print(f"  {H:>3} {de:>13.4f} {dt_:>7.2f} {se:>12.4f} {st_:>7.2f}"
-              f"  {'ok' if ok else 'FAIL'}")
-    print("RESULT:", "PASS" if ms_ok else "FAIL")
-    print("  (drift error compounds with horizon BY CONSTRUCTION -- this "
-          "is the honest error-growth characterization, not a defect "
-          "unless it breaches tolerance)")
+        row_ok = de < dt_ and se < st_
+        ms_ok &= row_ok
+        p(f"  {H:>3} {de:>13.4f} {dt_:>7.2f} {se:>12.4f} {st_:>7.2f}"
+          f"  {'ok' if row_ok else 'FAIL'}")
+    p("RESULT: " + ("PASS" if ms_ok else "FAIL"))
+    p("  (drift error compounds with horizon BY CONSTRUCTION -- this "
+      "is the honest error-growth characterization, not a defect "
+      "unless it breaches tolerance)")
+    return "\n".join(out) + "\n", bool(ok and ng_ok and ms_ok)
+
+
+if __name__ == "__main__":
+    import argparse
+
+    ap = argparse.ArgumentParser(description="synthetic validation gates")
+    ap.add_argument(
+        "--emit-result", action="store_true",
+        help="write the provenanced METHOD-grade artifact (C4) via "
+             "experiment.provenance.make_result (refuses a dirty tree)",
+    )
+    args = ap.parse_args()
+
+    text, all_pass = report()
+    print(text, end="")
+
+    if args.emit_result:
+        from config import PROJECT_ROOT
+        from experiment.provenance import Grade, make_result
+
+        out_path = (
+            PROJECT_ROOT / "experiment" / "results"
+            / "synthetic_validation_gates.txt"
+        )
+        hdr = make_result(
+            path=out_path,
+            grade=Grade.METHOD,
+            title="Estimator validation gates: VAR(1) recovery + "
+                  "non-Gaussianity + multi-step composition "
+                  "(production-path)",
+            body=text,
+            inputs={"all_gates_pass": all_pass},
+            seeds=GATE_SEEDS,
+            frozen_spec_required=False,  # synthetic VAR(1), not the
+            #                              frozen Ontario predictor
+        )
+        print(f"\nwrote provenanced C4 artifact -> {out_path}")
+        print(f"  all_gates_pass     = {all_pass}")
+        print(f"  inputs_fingerprint = {hdr['inputs_fingerprint'][:16]}…")
+        print(f"  body_sha256        = {hdr['body_sha256'][:16]}…")
+        raise SystemExit(0 if all_pass else 1)
