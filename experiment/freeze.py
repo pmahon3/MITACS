@@ -25,9 +25,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import subprocess
 from importlib import metadata
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -35,6 +33,9 @@ import pandas as pd
 from config import PROJECT_ROOT, load_config
 
 from ._actuals import actuals_fingerprint as _actuals_fingerprint
+from ._prov_core import canonical as _prov_canonical
+from ._prov_core import git_clean as _git_clean
+from ._prov_core import git_sha as _git_sha
 
 SPEC_PATH = PROJECT_ROOT / "experiment" / "frozen_spec.json"
 
@@ -43,45 +44,10 @@ SPEC_PATH = PROJECT_ROOT / "experiment" / "frozen_spec.json"
 DATA_CUTOFF = pd.Timestamp("2024-12-31T23:00:00")
 
 
-def _git_sha() -> str:
-    return subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=PROJECT_ROOT, text=True
-    ).strip()
-
-
-_FREEZE_IGNORE = (".DS_Store", ".pyc", ".pyo")
-
-
-def _git_clean() -> bool:
-    """True iff no uncommitted changes to files that affect predictor
-    reproducibility.
-
-    The recorded ``git_sha`` must reproduce the *predictor*. OS/editor
-    cruft (``.DS_Store``), bytecode (``.pyc``), and untracked IDE dirs
-    (``.idea/``) do not affect it, so they are excluded -- otherwise
-    pre-existing tracked junk in this repo would block every freeze
-    forever. Any modified/added/deleted *source* path makes it dirty.
-    """
-    out = subprocess.check_output(
-        ["git", "status", "--porcelain"], cwd=PROJECT_ROOT, text=True
-    )
-    for line in out.splitlines():
-        path = line[3:].strip().strip('"')
-        # status of a rename is "old -> new"; check the destination
-        if " -> " in path:
-            path = path.split(" -> ", 1)[1]
-        if path.endswith(_FREEZE_IGNORE):
-            continue
-        if path.endswith("/") or path.startswith(".idea/"):
-            continue  # untracked dir (e.g. .idea/) -- not source
-        return False
-    return True
-
-
 def _canonical(spec: dict[str, Any]) -> bytes:
-    """Deterministic bytes for hashing: drop the hash field, sort keys."""
-    body = {k: v for k, v in spec.items() if k != "spec_hash"}
-    return json.dumps(body, sort_keys=True, separators=(",", ":")).encode()
+    """Deterministic bytes for hashing the frozen spec (excludes the
+    ``spec_hash`` field). Thin wrapper over the shared primitive."""
+    return _prov_canonical(spec, exclude="spec_hash")
 
 
 def build_spec() -> dict[str, Any]:
