@@ -27,9 +27,21 @@ directly-verified blockers:
    No Ontario-demand field exists in either
    (MarketQuantity = Total Energy/Loss/Load/Dispatchable/10S/10N/30R).
 
+SCOPE OF REVIEW: all 133 directories at reports-public.ieso.ca/public/
+were enumerated and every plausible demand/load-forecast candidate
+directly inspected. Non-obvious candidates checked & ruled out:
+  - HourlyLFDA      : loss-factor / LFDC $/MWh rate, not a load forecast
+  - OntarioElectEnergy: stale energy summary (CreatedAt 2025-05-01)
+  - DAHourlyZonal   : day-ahead but ZONAL PRICE (LMP), not demand
+  - PredispHourlyZonal: zonal, predispatch -- price/zonal, not Ont demand
+Demand-bearing day-ahead products (DATotals, PredispTotals) are
+market-Total-Load basis only (see blocker 2).
+
 No PUBLIC IESO archive is BOTH Ontario-demand-basis AND day-ahead-issued
-for historical dates. (A direct IESO data request / privileged feed
-might surface it; out of scope here.)
+for historical dates. (Verified by full directory enumeration, not a
+sampled subset. A direct IESO data request / privileged feed might
+surface it; out of scope here -- writeup must say "public archives",
+not "any source".)
 
 DISCARDED (product/quantity mismatches, NOT recorded as results):
   - vs Adequacy3 end-of-D final : ours 5.60% / "IESO" 1.88% MAPE
