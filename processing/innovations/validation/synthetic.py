@@ -262,6 +262,90 @@ def test_innovation_nongaussianity() -> None:
     )
 
 
+# ──────────────────────────────────────────────────────────────────────────
+# Multi-step composition gate (Task 23) -- the THEORY-touching validation.
+#
+# Iterating the one-step Pi_Delta H steps is the explicitly-unbuilt
+# semigroup (Chapman-Kolmogorov never established for this estimator;
+# theory-correspondence qualifier 3). For VAR(1) the H-step map has a
+# CLOSED FORM, so any deviation of the composed estimate is a real
+# composition defect, not model misspecification:
+#   true H-step drift      : A^H        (row-conv: C_true = (A^H).T = (A.T)^H)
+#   true H-step diffusion  : sum_{k=0}^{H-1} A^k Q (A^k).T
+# The gate composes the PRODUCTION one-step estimate and checks recovery,
+# AND reports the error-growth curve (compounding is EXPECTED -- shown,
+# never averaged away).
+# ──────────────────────────────────────────────────────────────────────────
+_HORIZONS = (1, 2, 4, 8, 12, 24)
+# Composition compounds estimation error geometrically; tolerances widen
+# with H accordingly. These bracket "sound composition", not "perfect".
+_MS_DRIFT_TOL = {1: 0.10, 2: 0.15, 4: 0.25, 8: 0.40, 12: 0.55, 24: 0.90}
+_MS_DIFF_TOL = {1: 0.25, 2: 0.30, 4: 0.40, 8: 0.55, 12: 0.70, 24: 1.10}
+
+
+def _true_multistep(A: np.ndarray, Q: np.ndarray, H: int):
+    """Closed-form VAR(1) H-step drift A^H and accumulated diffusion."""
+    Ah = np.linalg.matrix_power(A, H)
+    S = np.zeros_like(Q)
+    Ak = np.eye(A.shape[0])
+    for _ in range(H):
+        S = S + Ak @ Q @ Ak.T
+        Ak = Ak @ A
+    return Ah, S
+
+
+def multistep_recovery(d: int = 3, seed: int = 7, n_anchors: int = 60):
+    """Compose the production one-step estimate H steps; compare to the
+    closed-form VAR(1) H-step truth. Returns per-horizon rel-errors."""
+    A, Q = make_var1_params(d, seed)
+    X = simulate_var1(A, Q, n=4000, burn=500, seed=seed + 1)
+    embedding, idx = build_embedding(X)
+    rng = np.random.default_rng(seed + 2)
+    interior = idx[d + 1 : -2]
+    sel = np.sort(
+        rng.choice(len(interior), size=min(n_anchors, len(interior)), replace=False)
+    )
+    est = build_local_gaussian_semigroup(
+        embedding=embedding, anchors=pd.DatetimeIndex(interior[sel])
+    )
+    # one-step estimate, aggregated over anchors (median = robust point est)
+    C1 = np.median(est.coefficients, axis=0)   # ~ A.T  (row convention)
+    S1 = np.median(est.covariances, axis=0)    # ~ Q
+
+    rows = []
+    for H in _HORIZONS:
+        # compose drift: C1^H estimates (A^H).T ; compare to (A^H).T
+        CH = np.linalg.matrix_power(C1, H)
+        # compose diffusion via the same VAR recursion using the ESTIMATE:
+        # Sigma_H = sum_{k=0}^{H-1} (C1.T)^k S1 ((C1.T)^k).T  -- estimator-only
+        SH = np.zeros_like(S1)
+        Ak = np.eye(d)
+        for _ in range(H):
+            SH = SH + Ak @ S1 @ Ak.T
+            Ak = Ak @ C1.T
+        Ah_t, S_true = _true_multistep(A, Q, H)
+        CH_true = Ah_t.T
+        de = np.linalg.norm(CH - CH_true) / np.linalg.norm(CH_true)
+        se = np.linalg.norm(SH - S_true) / np.linalg.norm(S_true)
+        rows.append((H, float(de), float(se)))
+    return rows
+
+
+def test_multistep_composition() -> None:
+    rows = multistep_recovery()
+    for H, de, se in rows:
+        assert de < _MS_DRIFT_TOL[H], (
+            f"H={H}: drift composition rel err {de:.3f} >= {_MS_DRIFT_TOL[H]} "
+            f"-- iterated Pi_Delta does NOT recover the VAR(1) H-step map"
+        )
+        assert se < _MS_DIFF_TOL[H], (
+            f"H={H}: diffusion composition rel err {se:.3f} >= {_MS_DIFF_TOL[H]}"
+        )
+    # error must be monotone-ish non-decreasing in H (compounding is real)
+    des = [de for _, de, _ in rows]
+    assert des[-1] >= des[0], "drift error should grow with horizon"
+
+
 if __name__ == "__main__":
     result, A, Q = recover()
     print("VAR(1) recovery:")
@@ -295,3 +379,21 @@ if __name__ == "__main__":
         and (tt - gt) > TAIL_SEP_MIN
     )
     print("RESULT:", "PASS" if ng_ok else "FAIL")
+
+    print()
+    print("Multi-step composition gate (iterated Pi_Delta vs VAR(1) "
+          "closed-form; error growth shown, not hidden):")
+    ms = multistep_recovery()
+    print(f"  {'H':>3} {'drift_relerr':>13} {'(tol)':>7} "
+          f"{'diff_relerr':>12} {'(tol)':>7}")
+    ms_ok = True
+    for H, de, se in ms:
+        dt_, st_ = _MS_DRIFT_TOL[H], _MS_DIFF_TOL[H]
+        ok = de < dt_ and se < st_
+        ms_ok &= ok
+        print(f"  {H:>3} {de:>13.4f} {dt_:>7.2f} {se:>12.4f} {st_:>7.2f}"
+              f"  {'ok' if ok else 'FAIL'}")
+    print("RESULT:", "PASS" if ms_ok else "FAIL")
+    print("  (drift error compounds with horizon BY CONSTRUCTION -- this "
+          "is the honest error-growth characterization, not a defect "
+          "unless it breaches tolerance)")
