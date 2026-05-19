@@ -22,23 +22,27 @@ Uses the production weekday z-score embedding and the production-
 faithful iteration (rebuild lag vector each step, score scalar z_next
 vs true future z, exactly predict_multistep).
 
-RESULT (2026-05-18, real pre-cutoff Ontario weekday z-scores, median
-over 25 origins, production-faithful iteration). MIXED — resolves
-NEITHER box cleanly:
-  h=1  argmin 0/15  edge(monotone)   — one-step degeneracy confirmed
-  h=2  argmin 0/15  edge(monotone)
-  h=4  argmin 5/15  INTERIOR-MIN
-  h=8  argmin 3/15  INTERIOR-MIN
-  h=16 argmin 6/15  INTERIOR-MIN
-  h=24 argmin 0/15  edge(monotone)   — collapses back at full day
-Ontario locality is WEAKLY + NON-MONOTONICALLY recoverable: absent at
-h=1-2, present at mid-horizons h=4-16, gone again at h=24 (iteration
-variance likely dominating by 24 steps). NOT the logistic pattern
-(monotone drift toward localization), NOT regime-switch (interior at
-h=1), NOT pure near-global ("characterize") either. Its own regime: a
-fragile mid-horizon locality signal. Fix-vs-characterize NOT decided
-by this alone -> advisor reconcile with this evidence, do not force a
-box.
+‼️ RESULT — STATISTICALLY NULL (2026-05-18, advisor-directed bootstrap
+SE check across the 25 anchors; the prior "mixed/interior" read was a
+phantom from reporting argmin POSITION without a variance check —
+exactly the slip the mechanism investigation already warned about).
+For EVERY horizon the gap between the apparent interior optimum and the
+grid edge is SMALLER than 2*(combined bootstrap SE across anchors):
+  h= 1  r0  gap +0.021  SE~0.024+0.020  meaningful=False
+  h= 2  r0  gap +0.027  SE~0.052+0.026  meaningful=False
+  h= 4  r5  gap +0.048  SE~0.059+0.066  meaningful=False
+  h= 8  r3  gap +0.054  SE~0.104+0.077  meaningful=False
+  h=16  r6  gap +0.068  SE~0.232+0.204  meaningful=False
+  h=24  r0  gap +0.115  SE~0.153+0.157  meaningful=False (+6 NaN
+        anchors: 24-step iteration diverged)
+=> On real Ontario data the multi-step CV objective is FLAT-WITHIN-
+NOISE at ALL horizons; NO statistically separated interior theta
+optimum exists. Multi-step CV does NOT rescue localization on Ontario.
+Clean conclusion: Ontario's conditional mean is effectively near-
+globally-linear at this (d=2 z-score lag) embedding; locality is not
+recoverable by ANY prediction-error CV objective tested. Tips #41
+firmly to CHARACTERIZE (not engineer a selector); raises whether the
+real lever is the EMBEDDING, not the bandwidth rule (advisor).
 
 PROVENANCE-GRADE: INSPECTION-ONLY — exploratory dev probe on the real
 pre-cutoff Ontario series; calls production _gauss_w. Informs (does
