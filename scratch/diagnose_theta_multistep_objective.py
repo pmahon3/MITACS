@@ -21,28 +21,32 @@ mechanism is right and multi-step is the fix family:
 If multi-step is ALSO monotone-to-edge at all h -> multi-step is NOT
 the fix; report that and reconsider (plug-in / locality-targeted).
 
-RESULT (2026-05-18, production-faithful iteration — rebuilds the lag
-vector each step exactly as predict_multistep, scores the scalar
-z_next vs the true future scalar; h=1 sanity gate PASSES: 0.194,
-monotone-to-edge, reproduces the known one-step failure — the earlier
-1e-32 was a diagnostic bug, advisor-caught: old code scored the
-trivially-shifted coord of an embedded target):
-  h=1  argmin 15/15  edge(monotone)   — known failure reproduced
-  h=2  argmin 14/15  INTERIOR-MIN
-  h=4  argmin 12/15  INTERIOR-MIN
-  h=8  argmin  8/15  INTERIOR-MIN
-  h=16 argmin  7/15  INTERIOR-MIN
-=> CONFIRMED: a MULTI-STEP CV objective restores an interior theta
-optimum where one-step does not, and theta* moves progressively toward
-localization as h grows — the mechanism-predicted signature (locality
-bias compounds over the iterated forecast). Multi-step CV IS a viable
-fix family, and the principled one (it matches production, which IS an
-iterated 24-step forecaster).
-OPEN (advisor-flagged, for the fix design — NOT decided here): theta*
-DRIFTS with h (rank 14->12->8->7), i.e. multi-step CV picks a
-horizon-dependent bandwidth. The fix must choose which horizon /
-aggregate the criterion targets (production forecasts a full 24-step
-day). That is the next decision, on this evidence.
+‼️ RESULT SUPERSEDED — DOES NOT REPLICATE (2026-05-18, second system
+added per advisor pushback #4: a single synthetic was a discipline
+violation). Two systems, production-faithful iteration:
+
+  logistic      : h=1 edge(15) -> h=2..16 interior 14,12,8,7
+                  (one-step monotone; theta* drifts toward localization)
+  regime-switch : h=1 INTERIOR(2) -> h=2..16 interior 2,1,1,6
+                  (one-step NOT monotone; theta* ~h-INVARIANT)
+
+The two earlier "findings" are BOTH logistic-specific:
+  (1) "one-step CV is monotone/degenerate" — FALSE on regime-switch
+      (it has an interior optimum already at h=1).
+  (2) "theta* drifts monotonically with h" — FALSE on regime-switch
+      (theta* ~h-invariant: ranks 2,2,1,1,6).
+The smooth continuously-varying slope of the logistic map (r(1-2x))
+interacts with one-step prediction error very differently than the
+regime map's discontinuous slope. The kappa_Q-vs-{Pi_t} / theta-drift
+theory narrative generalized from logistic SMOOTHNESS, not a general
+estimator/localization property. Advisor pushback #4 confirmed
+empirically; the theory framing is NOT supported across systems.
+NEXT: do NOT build the layer-disentangle synthetic (its premise is
+gone). Reframe #41 around what IS robust: one-step CV degeneracy is
+NOT universal (regime-switch resolves it) — so the Ontario degeneracy
+may be an Ontario-data property, not a pure rule defect. Re-open the
+branch-A-vs-B question with this two-system evidence; reconcile w/
+advisor.
 
 PROVENANCE-GRADE: INSPECTION-ONLY — exploratory dev probe; calls the
 production _gauss_w + iterates as production does. Establishes the fix
@@ -105,49 +109,71 @@ def _hstep_loo(s, sid_t, th, d, h):
     return tot / cnt if cnt else np.nan
 
 
-def main() -> None:
-    d = 2
-    s = logistic_series(8000)
-    horizons = (1, 2, 4, 8, 16)
-    n_anchor = 20
-    ng = 16
+def regime_switch_scalar(n: int, seed: int = 0) -> np.ndarray:
+    """Scalar observable of a regime-switching AR process: the AR
+    coefficient flips by the sign of the recent value (state-dependent
+    dynamics, qualitatively different from the smooth logistic map).
+    Second system for replication — a single synthetic was a discipline
+    violation (advisor)."""
+    rng = np.random.default_rng(seed)
+    x = np.empty(n)
+    x[0] = 0.1
+    for t in range(1, n):
+        a = 0.7 if x[t - 1] > 0 else -0.6  # regime flips by half-line
+        x[t] = a * x[t - 1] + 0.15 * rng.standard_normal()
+    return x
+
+
+def _curves_for(s, d, horizons, n_anchor, ng):
     rng0 = np.random.default_rng(7)
-    # origin times t with d lags + max-horizon future available
     valid_t = np.arange(d, len(s) - max(horizons) - 1)
     anchors = rng0.choice(valid_t, n_anchor, replace=False)
-    # a representative distance scale for the theta grid: pairwise
-    # lag-vector distances on a sample of origins
     L = np.stack([s[i - d : i][::-1] for i in range(d, len(s) - 1)])
     samp = L[np.random.default_rng(1).choice(len(L), 400, replace=False)]
     from scipy.spatial.distance import pdist
 
     dd = pdist(samp)
     grid = np.geomspace(max(dd.min(), 1e-3), dd.max(), ng)
-
     curves = {h: np.full((n_anchor, ng), np.nan) for h in horizons}
     for a, t0 in enumerate(anchors):
         for g, th in enumerate(grid):
             for h in horizons:
                 curves[h][a, g] = _hstep_loo(s, [int(t0)], th, d, h)
+    return curves
 
-    print(f"logistic d={d}, median over {n_anchor} anchors; "
-          f"grid index = bandwidth rank (0=tightest, {ng - 1}=global)")
+
+def main() -> None:
+    d = 2
+    horizons = (1, 2, 4, 8, 16)
+    n_anchor = 20
+    ng = 16
+    systems = {
+        "logistic": logistic_series(8000),
+        "regime-switch": regime_switch_scalar(8000),
+    }
+    for sysname, s in systems.items():
+        print(f"\n########## SYSTEM: {sysname} (d={d}) ##########")
+        curves = _curves_for(s, d, horizons, n_anchor, ng)
+        _report(curves, horizons, ng)
+
+
+def _report(curves, horizons, ng):
+    print(f"  median over anchors; grid index = bandwidth rank "
+          f"(0=tightest, {ng - 1}=global)")
     print(f"{'idx':>3} " + " ".join(f"{'h=' + str(h):>11}" for h in horizons))
     med = {h: np.nanmedian(curves[h], axis=0) for h in horizons}
     for g in range(ng):
         print(f"{g:>3} " + " ".join(f"{med[h][g]:11.4e}" for h in horizons))
 
-    print("\n  argmin (bandwidth-rank index; INTERIOR if not 0/last):")
+    print("  argmin (bandwidth-rank index; INTERIOR if not 0/last):")
     for h in horizons:
-        c = med[h]
-        bi = int(np.nanargmin(c))
+        bi = int(np.nanargmin(med[h]))
         kind = "INTERIOR-MIN" if 0 < bi < ng - 1 else "edge(monotone)"
         print(f"   h={h:>2}: argmin {bi}/{ng - 1}  {kind}")
-    print("\nREAD: hypothesis = h=1 edge/monotone (reproduces failure); "
-          "as h grows an INTERIOR minimum appears & theta* moves off "
-          "the global ceiling => multi-step CV IS the fix family. If "
-          "all h stay edge/monotone => multi-step is NOT the fix; "
-          "report and reconsider (plug-in / locality-targeted).")
+    print("  READ: replication check — does the h=1-monotone -> "
+          "h>1-interior-min, theta*-drifts-with-h pattern hold on BOTH "
+          "systems? If only logistic shows it, the phenomenon is "
+          "system-specific and the theory framing rests on one point.")
 
 
 if __name__ == "__main__":
