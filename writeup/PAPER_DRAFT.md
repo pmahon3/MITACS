@@ -18,19 +18,27 @@ Status: method positioning + application methodology written; numeric
 results carry [PENDING] markers awaiting verified honed/full runs and
 forward-experiment calendar time.
 
-*** §2 UNDER REVIEW (2026-05-18) — DO NOT SHIP UNCHANGED. ***
-§2.1 ("bandwidth selected by true leave-one-out cross-validation") and
-§2.2 ("locally-Gaussian estimator") presuppose localization is
-operative. A dashboard-surfaced investigation (scratch/
-diagnose_theta_loo_railpin.py; memory mitacs-theta-rail-pinning PENDING
-block) found the selected θ rails to the grid ceiling on Ontario AND on
-the VAR(1) recovery gate, collapsing the kernel to ≈constant (weighted
-LS → ~OLS); separately a config grid ceiling (theta_max=60,
-config/pipeline.yaml) is ~4× the largest possible anchor distance.
-Whether the rule fails or the data is genuinely near-linear is
-UNRESOLVED pending a locality-probing synthetic. §2/§3 "locally"
-wording may need softening; the §3 Gaussian-proxy story may STRENGTHEN.
-Do not finalize §2 until resolved.
+*** §2/§3 REWRITE REQUIRED (2026-05-18, #41 RESOLVED) — DO NOT SHIP
+THE CURRENT §2 WORDING. ***
+Resolved (scratch/diagnose_theta_FINAL_summary.py; memory
+mitacs-theta-rail-pinning RESOLVED block): no prediction-error CV
+objective (one-step or multi-step, h∈{1..24}) yields a statistically
+separated interior θ optimum on ANY system tested (bootstrap-verified).
+The estimator AS RUN reduces to a single GLOBAL linear drift at the
+d=2 z-score-lag embedding; θ does not localize. Required edits:
+• §2.1 "bandwidth selected by true leave-one-out cross-validation" →
+  honest statement: no statistically meaningful locality scale is
+  recoverable at this embedding via prediction-error CV; the drift is
+  effectively a single global linear operator.
+• §2.2 "locally-Gaussian estimator" → soften "locally" (it reduces to
+  global here); the κ_Q correspondence holds at the embedding layer
+  but the locality is not empirically operative on Ontario.
+• §3 is STRENGTHENED and now LOAD-BEARING: Σ_j / the non-Gaussian
+  innovation carries κ_Q's structure because C_j is globally linear —
+  state this as the central characterization, not a caveat.
+The lever for genuine locality is the EMBEDDING (#30), not the
+bandwidth rule. §2/§3 may be finalized once reworded per the above
+(no longer blocked on investigation — the finding is settled).
 -->
 
 # Empirical conditional-kernel forecasting of Ontario electricity demand: a registered prediction experiment
