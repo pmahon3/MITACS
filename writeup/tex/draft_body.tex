@@ -500,50 +500,84 @@ in the rebaseline (channel~2).
   improvement here is itself a finding refining the §3.2
   reconciliation).
 \end{enumerate}
-\todo[inline]{End-to-end within-harness comparison: both pipelines
-run through the same dev-window diagnostic at per-day-type
-elbow-selected dimensions on their respective series (seasonal-spec
-on \(z\), no-transform-spec on raw \(D\)). Four-channel result:
-(1) \(\MAE_{\mathrm{seasonal}} = [\ldots]\) MW vs.\
-\(\MAE_{\mathrm{raw}} = [\ldots]\) MW (\(\MAPE\) likewise);
-(2) fraction-finite-at-24-horizons: seasonal \([\ldots]\), raw
-\([\ldots]\);
-(3) demand-space \(95\%\) interval coverage, per-hour worst-gap
-\([\ldots]\) pp and average-gap \([\ldots]\) pp;
-(4) propagation-aware \(\nuhat\) seasonal \([\ldots]\) vs.\
-raw \([\ldots]\).
-Removal verdict per the pre-registered all-channel rule:
-\([\text{licensed} / \text{hold}]\). The production-frozen reference
-of \(\approx 786\) MW / \(4.78\%\) reported in
+
+\paragraph{Result of the four-channel comparison.} End-to-end
+within-harness comparison was run as
+\texttt{scratch/diagnose\_deseasonalisation\_removal.py} on the
+2021--22 development-set window (exploratory; not carried as a
+headline claim). Per-day-type elbow-rule dimensions:
+seasonal \(\{d_{\mathrm{wkdy}}, d_{\mathrm{sat}}, d_{\mathrm{sun}}\}
+= \{2, 4, 3\}\) on \(z\); no-transform \(\{3, 2, 4\}\) on raw \(D\).
+\(n = 3168\) hours per pipeline on the same dev window.
+\begin{enumerate}
+  \item Forecast: \(\MAE_{\mathrm{seasonal}} = 627\) MW,
+  \(\MAPE_{\mathrm{seasonal}} = 3.86\%\) vs.\
+  \(\MAE_{\mathrm{raw}} = 2317\) MW,
+  \(\MAPE_{\mathrm{raw}} = 13.57\%\): \(|\Delta\MAE| = 1690\) MW,
+  \(|\Delta\MAPE| = 9.71\) pp. \textbf{FAIL} (tolerances
+  \(<8\) MW, \(<0.05\) pp).
+  \item Diffusion viability: both pipelines fraction-finite-at-24-
+  horizons \(= 1.00\) on \(60/60\) anchors per day-type. \textbf{PASS}.
+  \item Demand-space \(95\%\) interval coverage (hour-stratified):
+  seasonal avg \(38.4\%\), raw avg \(24.2\%\); per-hour worst gap
+  \(38.6\) pp (h=16), average gap \(14.1\) pp; raw over-covers
+  overnight (h=0--4 in \(76\)--\(100\%\)) and crashes to
+  \(0\)--\(2\%\) at midday/peak (h=8--20), the signature of a
+  missing demand-space scale step. \textbf{FAIL} (tolerances
+  worst-hour \(<5\) pp, avg \(<2\) pp).
+  \item Heavy-tail strength: seasonal \(\nuhat = 5.93\) (excess
+  kurtosis \(3.10\)), raw \(\nuhat = \infty\) (excess kurtosis
+  \(-1.14\)). The raw value passes the pre-registered rule
+  \(\nuhat_{\mathrm{raw}} \ge \nuhat_{\mathrm{seasonal}}\), but is
+  an artefact of the same defect Ch3 detected: raw's standardised
+  residuals collapse because the predictive variance is mis-scaled
+  relative to demand-space residual scale, driving excess kurtosis
+  negative. Ch4 does not corroborate the result independently.
+  \textbf{PASS in form, artefact in substance}.
+\end{enumerate}
+\textbf{Verdict per the pre-registered all-channel rule: HOLD.}
+The within-harness 627 MW / 3.86\% is the comparator; the
+production-frozen \(\approx 786\) MW / \(4.78\%\) reported in
 Section~\ref{sec:backtest} is on a separate harness and is not the
-comparator here.}
+comparator here.
 
-\paragraph{Reading 1 (no-transform matches the seasonal pipeline).}
-De-seasonalisation contributes nothing to forecast performance that
-a comparably-tuned raw-demand pipeline would not also deliver. The
-\(z\)-score coupling is then a documented framework choice with a
-heavy-tail cost (Section~\ref{sec:caveat}) and no offsetting
-benefit. Removing it is on the table, and the
-Section~\ref{sec:caveat} caveat becomes specific to this parametric
-choice rather than structural.
+\paragraph{Reading 1 (no-transform matches the seasonal pipeline)
+did not fire.} The pre-registered conditions for licensing removal
+(forecast accuracy within tolerance; demand-space coverage hour-
+stratified within tolerance) were not met; reported as a worked
+trail rather than a finding.
 
-\paragraph{Reading 2 (no-transform is worse).}
-De-seasonalisation delivers forecast performance through a channel
-the phase-correlation test did not capture (the most plausible
-candidate is conditioning the diffusion \(\Sj\) on hour-of-day-scale
-variance structure that raw demand does not expose at \(d = 3\)).
-The next question becomes the original Q1'/Q2 line redirected at
-that channel: which sub-step of the de-seasonalisation parametrises
-the forecast-performance gap, and is the gap separable from the
-tail cost in a different family?
+\paragraph{Reading 2 (no-transform is worse) fired, and the
+forecast-performance channel localised at Ch3.} De-seasonalisation
+delivers forecast performance through the demand-space scale
+calibration: the seasonal pipeline's intervals (and the diffusion
+\(\Sj\) they rest on) track diurnal scale via \(\sigma_{m,h}\),
+while raw demand does not expose this scale at the embedding layer.
+The Ch3 per-hour coverage signature --- raw over-covers overnight
+(uniform-width intervals are too wide where demand is small and
+stable) and crashes to zero coverage at midday/peak (uniform-width
+intervals are not wide enough at the demand peaks the seasonal
+pipeline implicitly normalises against) --- is the mechanistic
+fingerprint of the missing scale step.
 
-The standing position, pending the end-to-end backtest, is that the
-\(z\)-score coupling carries a documented heavy-tail cost
-(Section~\ref{sec:caveat}) and a forecast-performance contribution
-of unknown size --- not zero, but not yet measured against a
-fairly-tuned raw-demand baseline. The phase-asymmetry finding that
-motivated this section's investigation is independent of which
-reading holds.
+The follow-up question therefore narrows. The forecast-performance
+contribution is not on the location axis (the phase-asymmetry signal
+was independent of de-seasonalisation, established earlier in this
+subsection) but on the scale axis. The concrete next question is
+whether the scale-calibration benefit can be delivered without the
+heavy-tail cost --- candidates: scale-only normalisation (divide by
+\(\sigma_{m,h}\) without level removal), an additive seasonal model
+that hands a separate scale-conditioning input to the diffusion fit,
+or a Fourier-decomposition scale layer. This is Q1' from earlier in
+this section, redirected at the now-identified channel.
+
+The standing position is that the \(z\)-score coupling carries a
+documented heavy-tail cost (Section~\ref{sec:caveat}) and a
+demand-space-scale-calibration contribution to forecast performance
+that a comparably-tuned raw-demand pipeline does not deliver. The
+phase-asymmetry finding that motivated this section's investigation
+is independent of the coupling and does not depend on the
+de-seasonalisation step.
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
