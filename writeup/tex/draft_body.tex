@@ -649,10 +649,35 @@ the additive sub-step is therefore partially confounded with the
 dimension shift (weekday \(+2\), saturday \(0\), sunday \(+1\)).
 The HOLD verdict on removal is robust to this confound --- whether
 the mechanism is missing-\(\mu\) or wrong-\(d\) or both, the practical
-conclusion is the same --- but a clean isolation of the additive
-sub-step's contribution would re-run scale-only at the seasonal
-dimensions \(\{2, 4, 3\}\) (not in scope here, flagged so the
-mechanistic claim is not over-read).
+conclusion is the same. To isolate the additive sub-step's
+contribution the scale-only pipeline is re-run with the embedding
+dimension forced to the seasonal assignment \(\{2, 4, 3\}\),
+making the additive step the only remaining difference between the
+two pipelines. Three outcomes are pre-stated for this disambiguation
+(D-i / D-ii / D-iii); thresholds are \(\MAPE\)-based and fixed
+before the experiment runs:
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{D-i (dimension was the dominant driver).}
+  \(\MAPE_{\{2,4,3\}} < 5\%\): scale-only at the seasonal
+  dimensions essentially recovers the forecast performance the
+  elbow-selected dimensions did not, and branch~(iii)'s
+  attribution to the additive sub-step is overclaimed. The
+  additive step's marginal contribution to forecast accuracy is
+  smaller than the candidate-A result suggested.
+  \item \textbf{D-ii (both contribute).}
+  \(5\% \le \MAPE_{\{2,4,3\}} < 9\%\): both the dimension shift
+  and the additive sub-step contribute substantively to the
+  candidate-A failure. Branch~(iii) is partially supported but
+  not the sole story.
+  \item \textbf{D-iii (additive step does the work; branch (iii)
+  confirmed).} \(\MAPE_{\{2,4,3\}} \ge 9\%\): forcing the
+  seasonal dimensions does not materially reduce the failure;
+  the additive step is doing real work independent of dimension.
+\end{itemize}
+\todo[inline]{Disambiguation result: scale-only at \(\{2,4,3\}\)
+gives \(\MAE_{\{2,4,3\}} = [\ldots]\) MW,
+\(\MAPE_{\{2,4,3\}} = [\ldots]\)\%; outcome falls on D-i / D-ii /
+D-iii; mechanistic attribution updated accordingly.}
 
 The other channels: Ch2 PASS (scale-only \(60/60\) finite per
 day-type, identical to seasonal); Ch3 average coverage \(41.10\%\)
