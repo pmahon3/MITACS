@@ -111,10 +111,14 @@ covariance is the unbiased local second moment, free of that
 collapse.
 
 \paragraph{Bandwidth: locality of \(\Cj\).}
-Two candidate rules for \(\theta\). The Goldenshluger--Lepski
-criterion in the supporting library is monotone in \(\theta\) for the
-normalised Gaussian kernel of Eq.~\ref{eq:weights}, with no interior
-optimum, so any grid reports its own ceiling. True leave-one-out
+Can the bandwidth \(\theta\) be chosen by data so that \(\Cj\) is
+genuinely local? Two candidate rules were investigated. The
+Goldenshluger--Lepski
+criterion in the supporting library predicts an interior optimum that
+balances bias against variance; for the normalised Gaussian
+kernel of Eq.~\ref{eq:weights} the GL score is monotone in \(\theta\)
+with no interior optimum, so any grid simply returns its own
+ceiling --- the GL prediction fails. True leave-one-out
 cross-validation on one-step squared error,
 \begin{equation}
 \label{eq:loocv}
@@ -124,25 +128,28 @@ cross-validation on one-step squared error,
 \bigl\lVert y_i - x_i \Cj^{(-i)}(\theta) \bigr\rVert^{2},
 \end{equation}
 where \(\Cj^{(-i)}(\theta)\) is the local fit at \(x_i\) computed
-\emph{without} the point \((x_i, y_i)\). On Ontario data
-\(\mathcal{R}_{\mathrm{LOO}}\) is flat-within-noise above a small
-\(\theta\): under bootstrap-SE testing across anchors (resampling
-library indices with replacement, \(B = 10^{3}\) replicates), the
-\(\theta\)-grid argmin is not statistically separated from any other
-grid point. The same non-discrimination holds for the multi-step
-analogue at every horizon
-\(h \in \{1, 2, 4, 8, 16, 24\}\) and reproduces on three independent
-controlled systems (a linear VAR(1), the logistic map, and a
-regime-switching AR): a property of the \emph{criterion}
-(prediction-error cross-validation does not identify a localisation
-bandwidth here), not of the Ontario data. \(\Cj\) is
-effectively a single global linear operator at the \(d = 2\)
-z-score-lag embedding.
+\emph{without} the point \((x_i, y_i)\), predicts a statistically
+separated interior minimum at the data's true bandwidth scale. To
+test this, \(\mathcal{R}_{\mathrm{LOO}}\) was evaluated across the
+anchor population under a bootstrap-SE procedure (resampling library
+indices with replacement, \(B = 10^{3}\) replicates), and the
+grid-argmin compared with the rest of the grid. The argmin is
+\emph{not} statistically separated from any other grid point: the
+LOO prediction fails as well.
+
+This could be a peculiarity of Ontario data. To distinguish that from
+a property of the criterion, the same procedure was run on three
+independent controlled systems (a linear VAR(1), the logistic map,
+and a regime-switching AR) and at every multi-step horizon
+\(h \in \{1, 2, 4, 8, 16, 24\}\); non-discrimination reproduces in
+all cases. The non-discrimination is a property of the criterion,
+not of Ontario data. \(\Cj\) is effectively a single global linear
+operator at the \(d = 2\) z-score-lag embedding.
 
 With \(\Cj\) effectively global and linear, the non-Dirac content of
-the predictive law is carried by \(\Sj\) and its departure
-from Gaussianity (Section~\ref{sec:caveat}). The available lever is
-the \emph{state representation} (richer embedding, explicit
+the predictive law is carried by \(\Sj\) and its departure from
+Gaussianity (Section~\ref{sec:caveat}). The available lever is the
+\emph{state representation} (richer embedding, explicit
 phase/derivative coordinate), not the bandwidth rule.
 
 \paragraph{The conditional law \(\kQ\) the estimator targets.}
@@ -231,14 +238,22 @@ the propagation-aware strength of that departure
 (Section~\ref{sec:caveat-propagation}) is what the diagnostic of
 Section~\ref{sec:caveat-decomposition} acts on.
 
-\paragraph{The conditional mean is phase-mis-centred.} The local
-linear map cannot distinguish a state rising through a demand level
-from one falling through it (the embedding lacks a phase coordinate),
-so it centres between the two regimes. The signed \(z\)-space error
-correlates with \(\dd z/\dd t\) at \(\mathrm{corr} = -0.246\)
-(bootstrap 95\% CI \([-0.283,\, -0.207]\), \(n = 3167\)), monotone
-across rising/falling phase. \(\Pij\)'s location, not only its shape,
-departs from \(\kQ\).
+\paragraph{The conditional mean is phase-mis-centred.}
+Is the conditional-mean factor faithful, leaving only the shape
+deficit above? The embedding gives the local linear map no phase
+information --- it cannot tell a state rising through a demand level
+from one falling through it. The simpler reading is that this
+matters little (real load dynamics are nearly time-reversible at
+the relevant lag); the alternative is that the map centres between
+rising and falling regimes and thereby carries a structured residual
+bias. Under the simpler reading, the signed \(z\)-space error
+should be uncorrelated with the demand derivative \(\dd z/\dd t\);
+under the alternative, it should be correlated and monotone across
+phase. The measured correlation is \(\mathrm{corr} = -0.246\)
+(bootstrap 95\%
+CI \([-0.283,\, -0.207]\), \(n = 3167\)), monotone across
+rising/falling phase. The simpler reading fails: \(\Pij\)'s location,
+not only its shape, departs from \(\kQ\).
 
 \paragraph{Decomposition.}
 \label{sec:caveat-decomposition}
@@ -297,21 +312,26 @@ Single-dim
 
 \paragraph{Propagation reconciliation.}
 \label{sec:caveat-propagation}
-Propagating predictive variance across the dimension-change boundary,
-rather than sidestepping it by dropping those days, attenuates the
-heavy-tail signal roughly four-fold:
+The simpler reading is that the heavy-tail strength measured one
+step at a time is a direct property of the innovation law. If so,
+the propagation-aware measurement (which feeds correctly-propagated
+predictive variance through each multi-step iteration before
+computing standardised residuals) should give the same answer to
+within sampling noise. On the same data,
 \begin{equation}
 \label{eq:kurt-attenuation}
 \nuhat \;:\; 5.0 \to 6.5,
 \qquad
-\mathrm{kurt}_{\mathrm{exc}} \;:\; 6.1 \to 2.4 \,.
+\mathrm{kurt}_{\mathrm{exc}} \;:\; 6.1 \to 2.4 \,,
 \end{equation}
-Earlier one-step measurements
+a roughly four-fold attenuation. The simpler reading fails: much
+of the apparent heavy-tail strength is a propagation artefact,
+and the earlier one-step measurements
 (re-baseline \(\mathrm{kurt}_{\mathrm{exc}} \approx 24\)--\(33\),
 without multi-step variance propagation) were partly a propagation
-artefact, not solely a property of the innovation law. Restricting
-to the single-dimension subpopulation (\(\approx 58\%\) of days)
-yields the same qualitative verdict.
+artefact, not solely a property of the innovation law. As a
+robustness check, restricting to the single-dimension subpopulation
+(\(\approx 58\%\) of days) yields the same qualitative verdict.
 
 \section{Application and results}
 \label{sec:application}
@@ -353,11 +373,10 @@ preprocessing step.
 
 Is the coupling \emph{benign} (an invertible change of coordinates,
 the dynamics unaffected) or \emph{leaky} (an implicit seasonal model
-whose error structure is folded into the dynamics)? The benign
-reading is the simpler one and the place to start. It makes a
-testable prediction: if it holds exactly, the error structure should
-not vary with the climatology's seasonal resolution. To test it, the
-pipeline was re-run under climatology specs of varying resolution
+whose error structure is folded into the dynamics)? Under the
+benign reading, the error structure should not vary with the
+climatology's seasonal resolution. To test this, the pipeline was
+re-run under climatology specs of varying resolution
 (monthly $\times$ hour-of-day, monthly only, hour-of-day only, and
 the no-transform extreme), and the per-axis error structure measured
 in demand space.
@@ -435,17 +454,30 @@ report once a sufficient settled window exists.}
 public archives}
 \label{sec:ieso}
 
-Full enumeration of all 133 public IESO report directories establishes
-that no public archive is \emph{both} Ontario-demand-basis \emph{and}
-day-ahead-issued for historical dates. Two independent blockers: the
-Ontario-demand-basis product (Adequacy3 \texttt{ForecastOntDemand})
-retains only the end-of-delivery-day version for days old enough to
-have settled actuals (wrong horizon); the day-ahead-issued products
-(DATotals, PredispTotals) publish only market totals, where ``Total
-Load'' carries a definitional \(\approx +2485~\mathrm{MW}\) offset
-over Ontario Demand (MarketQuantity enumeration: Total
+Can the forecast be compared retrospectively against IESO's own
+published forecast on historical settled days? A fair comparison
+requires two properties of an IESO archive: (i) the values reported
+must be on the Ontario-demand basis (matching the forecast target
+of this paper), and (ii) the values reported must be the day-ahead
+issue (matching its horizon). The simpler hypothesis is that some
+public IESO archive supplies both. To test it, all 133 public IESO
+report directories were enumerated and each checked against the two
+properties.
+
+The simpler hypothesis fails, via two independent blockers. The
+Ontario-demand-basis archive (Adequacy3
+\texttt{ForecastOntDemand}) retains, for days old enough to have
+settled actuals, only the end-of-delivery-day version --- so its
+horizon is wrong (property (ii) violated). The day-ahead-issued
+archives (DATotals, PredispTotals) publish only market totals --- so
+their basis is wrong (property (i) violated): ``Total Load'' carries
+a definitional \(\approx +2485~\mathrm{MW}\) offset over Ontario
+Demand (MarketQuantity enumeration: Total
 Energy/Loss/Load/Dispatchable/10S/10N/30R; none is Ontario demand).
-(Stated for public archives as of the recorded access date.)
+No archive satisfies both. The retrospective comparison is
+infeasible from public data; hence the registered forward design
+of Section~\ref{sec:registered}. (Stated for public archives as of
+the recorded access date.)
 
 \subsection{Validation against synthetic ground truth}
 \label{sec:synth}
