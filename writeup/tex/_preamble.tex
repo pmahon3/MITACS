@@ -41,3 +41,9 @@
 % normal \ensuremath{\int} dies. \textnormal switches out of \texttt
 % before entering math mode.
 \newunicodechar{∫}{\textnormal{\ensuremath{\int}}}
+
+% Visible TODO/PENDING/PLACEHOLDER markers in the typeset PDF (user
+% chose 'wrap in a visible LaTeX TODO-note style' for the gaps in this
+% working draft).
+\usepackage[colorinlistoftodos,textsize=footnotesize]{todonotes}
+\setlength{\marginparwidth}{2.4cm}
