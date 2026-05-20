@@ -47,3 +47,6 @@ writeup/tex/*.log
 writeup/tex/*.out
 writeup/tex/*.pdf
 writeup/tex/*.synctex.gz
+writeup/tex/*.bbl
+writeup/tex/*.blg
+writeup/tex/*.toc
