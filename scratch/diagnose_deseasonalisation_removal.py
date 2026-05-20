@@ -109,6 +109,21 @@ def _scale_seasonal(ts: pd.Timestamp, clim: dict) -> float:
     return float(clim["sd"][(ts.month, ts.hour)])
 
 
+# --- Candidate A: scale-only normalisation ---------------------------
+# z_A = D / sigma_{m,h}, no mean subtraction. Tests whether the additive
+# sub-step of the z-transform is the carrier of the heavy-tail cost
+# while preserving the demand-space scale step that Ch3 located as
+# load-bearing.
+
+def _z_scale_only(series: pd.Series, clim: dict) -> pd.Series:
+    sd = np.array([clim["sd"][(t.month, t.hour)] for t in series.index])
+    return pd.Series(series.values / sd, index=series.index)
+
+
+def _inv_scale_only(zval: float, ts: pd.Timestamp, clim: dict) -> float:
+    return zval * clim["sd"][(ts.month, ts.hour)]
+
+
 # =====================================================================
 # Per-day-type elbow rule (mirrors scratch/benchmark_2021_22_ieso.py)
 # =====================================================================
@@ -182,16 +197,25 @@ def _build_library(series: pd.Series, name: str, dim: int, daytype: str):
 def _backtest(act: pd.Series, dims: dict, kind: str) -> pd.DataFrame:
     """Iterated one-step day-ahead forecast over WIN_START..WIN_END.
 
-    kind: 'seasonal' -> z = (D - mu_mh) / sd_mh, forecast in z, invert.
-          'identity' -> operate on raw D.
+    kind: 'seasonal'   -> z = (D - mu_mh) / sd_mh, forecast in z, invert.
+          'identity'   -> operate on raw D.
+          'scale_only' -> z_A = D / sd_mh (Candidate A: scale-only
+                          normalisation, no mean subtraction).
 
     Returns DataFrame indexed by target hour with columns:
-      ours_mw, actual_mw, z_pred (or D_pred), sigma_mh, s2_one_step (z or D),
+      ours_mw, actual_mw, z_pred (or D_pred), sigma_mh, s2_one_step,
       daytype, horizon_h, delivery_date.
     Per-step Sigma_j[0,0] captured for Channel 3 / Channel 4.
     """
-    clim = _clim_monthhour(act) if kind == "seasonal" else None
-    series = _z_seasonal(act, clim) if kind == "seasonal" else act.copy()
+    if kind == "seasonal":
+        clim = _clim_monthhour(act)
+        series = _z_seasonal(act, clim)
+    elif kind == "scale_only":
+        clim = _clim_monthhour(act)            # only sd_mh is used
+        series = _z_scale_only(act, clim)
+    else:
+        clim = None
+        series = act.copy()
     name = "v"
 
     df = series.to_frame(name).asfreq("h")
@@ -232,6 +256,9 @@ def _backtest(act: pd.Series, dims: dict, kind: str) -> pd.DataFrame:
             if kind == "seasonal":
                 sd_mh = _scale_seasonal(t, clim)
                 ours = _inv_seasonal(v_next, t, clim)
+            elif kind == "scale_only":
+                sd_mh = _scale_seasonal(t, clim)
+                ours = _inv_scale_only(v_next, t, clim)
             else:
                 sd_mh = 1.0
                 ours = v_next
@@ -273,8 +300,14 @@ def channel_2(act: pd.Series, dims: dict, kind: str,
     Unit-invariant by construction: finiteness is a property of the
     matrix machinery, not of its absolute scale.
     """
-    clim = _clim_monthhour(act) if kind == "seasonal" else None
-    series = _z_seasonal(act, clim) if kind == "seasonal" else act.copy()
+    if kind == "seasonal":
+        clim = _clim_monthhour(act)
+        series = _z_seasonal(act, clim)
+    elif kind == "scale_only":
+        clim = _clim_monthhour(act)
+        series = _z_scale_only(act, clim)
+    else:
+        series = act.copy()
     df = series.to_frame("v").asfreq("h")
 
     # d_max for the augmented state (used uniformly across day-types
@@ -491,86 +524,155 @@ def main() -> None:
     print("\n=== Per-day-type elbow-rule dimensions ===")
     clim = _clim_monthhour(act)
     z_seasonal = _z_seasonal(act, clim)
+    z_scale_only = _z_scale_only(act, clim)
     dims_seasonal = _refrozen_dims(z_seasonal)
     dims_raw = _refrozen_dims(act)
-    print(f"  seasonal (on z):    {dims_seasonal}")
-    print(f"  no-transform (on D): {dims_raw}")
+    dims_scale_only = _refrozen_dims(z_scale_only)
+    print(f"  seasonal (on z):           {dims_seasonal}")
+    print(f"  no-transform (on D):       {dims_raw}")
+    print(f"  scale-only (on D/sigma):   {dims_scale_only}")
+
+    # Pre-registered confound check (§4.2): if the scale-only elbow rule
+    # lands a dim outside [2, 4] for any day-type, flag the result as
+    # confounded and withhold the candidate-A verdict.
+    scale_d_oor = {
+        dt: int(dims_scale_only[dt])
+        for dt in DAYTYPES
+        if not (2 <= int(dims_scale_only[dt]) <= 4)
+    }
+    if scale_d_oor:
+        print(f"  *** WARNING: scale-only dims outside [2,4] for "
+              f"{scale_d_oor}; candidate-A verdict will be flagged as "
+              f"CONFOUNDED per pre-registration. ***")
 
     print("\n=== Channel 1: end-to-end backtest ===")
     print("  (running seasonal pipeline...)")
     fc_seasonal = _backtest(act, dims_seasonal, "seasonal")
     print("  (running no-transform pipeline...)")
     fc_raw = _backtest(act, dims_raw, "identity")
+    print("  (running scale-only pipeline...)")
+    fc_scale = _backtest(act, dims_scale_only, "scale_only")
     ch1_s = channel_1(fc_seasonal)
     ch1_r = channel_1(fc_raw)
-    print(f"  seasonal: MAE = {ch1_s['MAE_MW']:.1f} MW, "
+    ch1_a = channel_1(fc_scale)
+    print(f"  seasonal:   MAE = {ch1_s['MAE_MW']:.1f} MW, "
           f"MAPE = {ch1_s['MAPE_pct']:.3f}%, n = {ch1_s['n']}")
-    print(f"  raw:      MAE = {ch1_r['MAE_MW']:.1f} MW, "
+    print(f"  no-transform: MAE = {ch1_r['MAE_MW']:.1f} MW, "
           f"MAPE = {ch1_r['MAPE_pct']:.3f}%, n = {ch1_r['n']}")
+    print(f"  scale-only: MAE = {ch1_a['MAE_MW']:.1f} MW, "
+          f"MAPE = {ch1_a['MAPE_pct']:.3f}%, n = {ch1_a['n']}")
 
     print("\n=== Channel 2: Sigma_j numerical viability (per pipeline) ===")
     rng = np.random.default_rng(42)
     ch2_s = channel_2(act, dims_seasonal, "seasonal", rng)
     rng = np.random.default_rng(42)
     ch2_r = channel_2(act, dims_raw, "identity", rng)
+    rng = np.random.default_rng(42)
+    ch2_a = channel_2(act, dims_scale_only, "scale_only", rng)
     for dt in DAYTYPES:
-        s, r = ch2_s[dt], ch2_r[dt]
-        s_frac = s.get("fraction_finite")
-        r_frac = r.get("fraction_finite")
-        print(f"  {dt:9s}: seasonal fraction-finite = "
-              f"{s_frac if s_frac is not None else 'n/a'} "
-              f"({s.get('n_finite', 0)}/{s.get('n_anchors', 0)}), "
-              f"raw fraction-finite = "
-              f"{r_frac if r_frac is not None else 'n/a'} "
-              f"({r.get('n_finite', 0)}/{r.get('n_anchors', 0)})")
+        s, r, a = ch2_s[dt], ch2_r[dt], ch2_a[dt]
+        print(f"  {dt:9s}: seasonal {s.get('n_finite', 0)}/{s.get('n_anchors', 0)}, "
+              f"no-transform {r.get('n_finite', 0)}/{r.get('n_anchors', 0)}, "
+              f"scale-only {a.get('n_finite', 0)}/{a.get('n_anchors', 0)}")
 
     print("\n=== Channel 3: demand-space 95% coverage, hour-stratified ===")
     ch3_s = channel_3(fc_seasonal)
     ch3_r = channel_3(fc_raw)
-    print(f"  seasonal: avg coverage = {ch3_s['average_coverage_pct']:.2f}%, "
+    ch3_a = channel_3(fc_scale)
+    print(f"  seasonal:   avg cov = {ch3_s['average_coverage_pct']:.2f}%, "
           f"median half-width = {ch3_s['median_halfwidth_MW']:.1f} MW")
-    print(f"  raw:      avg coverage = {ch3_r['average_coverage_pct']:.2f}%, "
+    print(f"  no-transform: avg cov = {ch3_r['average_coverage_pct']:.2f}%, "
           f"median half-width = {ch3_r['median_halfwidth_MW']:.1f} MW")
-    print("  per-hour |cov_raw - cov_seasonal| (pp):")
+    print(f"  scale-only: avg cov = {ch3_a['average_coverage_pct']:.2f}%, "
+          f"median half-width = {ch3_a['median_halfwidth_MW']:.1f} MW")
+    print("  per-hour |cov_scale - cov_seasonal| (pp):")
     s_ph = ch3_s["per_hour_coverage_pct"]
-    r_ph = ch3_r["per_hour_coverage_pct"]
-    for h in sorted(set(s_ph) & set(r_ph)):
-        gap = abs(r_ph[h] - s_ph[h])
-        print(f"    h={h:>2}: seasonal {s_ph[h]:5.1f}%  raw {r_ph[h]:5.1f}%  "
-              f"|gap| = {gap:4.1f}")
+    a_ph = ch3_a["per_hour_coverage_pct"]
+    for h in sorted(set(s_ph) & set(a_ph)):
+        gap = abs(a_ph[h] - s_ph[h])
+        print(f"    h={h:>2}: seasonal {s_ph[h]:5.1f}%  scale-only "
+              f"{a_ph[h]:5.1f}%  |gap| = {gap:4.1f}")
 
     print("\n=== Channel 4: propagation-aware nu_hat ===")
     ch4_s = channel_4(fc_seasonal)
     ch4_r = channel_4(fc_raw)
-    print(f"  seasonal: nu_hat = {ch4_s['nu_hat']}, "
-          f"excess kurt = {ch4_s['excess_kurt']}, n = {ch4_s['n']}")
-    print(f"  raw:      nu_hat = {ch4_r['nu_hat']}, "
-          f"excess kurt = {ch4_r['excess_kurt']}, n = {ch4_r['n']}")
+    ch4_a = channel_4(fc_scale)
+    print(f"  seasonal:   nu_hat = {ch4_s['nu_hat']}, excess kurt "
+          f"= {ch4_s['excess_kurt']}, n = {ch4_s['n']}")
+    print(f"  no-transform: nu_hat = {ch4_r['nu_hat']}, excess kurt "
+          f"= {ch4_r['excess_kurt']}, n = {ch4_r['n']}")
+    print(f"  scale-only: nu_hat = {ch4_a['nu_hat']}, excess kurt "
+          f"= {ch4_a['excess_kurt']}, n = {ch4_a['n']}")
 
-    # Decision
+    # Verdicts: keep the prior seasonal-vs-raw (already-resolved) and
+    # add the new seasonal-vs-scale-only (the candidate-A verdict).
     seasonal_pkg = {"ch1": ch1_s, "ch2": ch2_s, "ch3": ch3_s, "ch4": ch4_s}
     raw_pkg = {"ch1": ch1_r, "ch2": ch2_r, "ch3": ch3_r, "ch4": ch4_r}
-    v = decision(seasonal_pkg, raw_pkg)
+    scale_pkg = {"ch1": ch1_a, "ch2": ch2_a, "ch3": ch3_a, "ch4": ch4_a}
 
-    print("\n=== Pre-registered four-channel verdict ===")
-    print(f"  Ch1 (forecast):      "
-          f"|dMAE| = {v['ch1_dMAE']:.2f} MW, "
-          f"|dMAPE| = {v['ch1_dMAPE']:.4f} pp -- "
-          f"{'PASS' if v['ch1_pass'] else 'FAIL'}")
-    print(f"  Ch2 (Sigma viability): "
-          f"seasonal OK = {v['ch2_seasonal_ok']}, raw OK = {v['ch2_raw_ok']} -- "
-          f"{'PASS' if v['ch2_pass'] else 'FAIL'}")
-    wh = v['ch3_worst_hour_gap_pp']
+    print("\n=== Verdict: seasonal vs. scale-only (Candidate A) ===")
+    v_a = decision(seasonal_pkg, scale_pkg)
+    # Pre-registered Ch4-conditional-on-Ch3 rule (§4.2): if Ch3 fails,
+    # Ch4 reports "not interpretable" rather than PASS or FAIL.
+    ch4_interpretable = v_a["ch3_pass"]
+    ch4_status = (
+        ("PASS" if v_a["ch4_pass"] else "FAIL")
+        if ch4_interpretable
+        else "NOT INTERPRETABLE (Ch3 failed)"
+    )
+    print(f"  Ch1 (forecast):       |dMAE| = {v_a['ch1_dMAE']:.2f} MW, "
+          f"|dMAPE| = {v_a['ch1_dMAPE']:.4f} pp -- "
+          f"{'PASS' if v_a['ch1_pass'] else 'FAIL'}")
+    print(f"  Ch2 (Sigma viability): seasonal OK = "
+          f"{v_a['ch2_seasonal_ok']}, scale-only OK = "
+          f"{v_a['ch2_raw_ok']} -- "
+          f"{'PASS' if v_a['ch2_pass'] else 'FAIL'}")
+    wh = v_a['ch3_worst_hour_gap_pp']
     wh_str = f"{wh:.2f}" if wh is not None else "n/a"
-    print(f"  Ch3 (coverage):      "
-          f"worst-hour |gap| = {wh_str} pp, "
-          f"avg |gap| = {v['ch3_avg_gap_pp']:.2f} pp -- "
-          f"{'PASS' if v['ch3_pass'] else 'FAIL'}")
-    print(f"  Ch4 (heavy-tail):    "
-          f"nu_seasonal = {v['ch4_nu_seasonal']}, "
-          f"nu_raw = {v['ch4_nu_raw']} -- "
-          f"{'PASS' if v['ch4_pass'] else 'FAIL'}")
-    print(f"\n  VERDICT: {v['verdict']}")
+    print(f"  Ch3 (coverage):       worst-hour |gap| = {wh_str} pp, "
+          f"avg |gap| = {v_a['ch3_avg_gap_pp']:.2f} pp -- "
+          f"{'PASS' if v_a['ch3_pass'] else 'FAIL'}")
+    print(f"  Ch4 (heavy-tail):     nu_seasonal = "
+          f"{v_a['ch4_nu_seasonal']}, nu_scale-only = "
+          f"{v_a['ch4_nu_raw']} -- {ch4_status}")
+
+    # Candidate-A verdict applies the all-channel rule with the
+    # Ch4-conditional refinement and the d-confound flag.
+    if scale_d_oor:
+        verdict_A = "CONFOUNDED (scale-only elbow d outside [2,4])"
+    elif not ch4_interpretable:
+        # Ch3 fails -> Ch4 not interpretable -> outcome is by Ch1,Ch2,Ch3 alone;
+        # if any of those fails, HOLD; otherwise we don't have enough info.
+        if v_a["ch1_pass"] and v_a["ch2_pass"]:
+            # Ch3 fail with Ch1+Ch2 pass: HOLD with channel = Ch3 (scale-axis
+            # coverage failure even though scale step is preserved). This is
+            # mechanistically unexpected; surface as a separate note.
+            verdict_A = "HOLD (Ch3 fail under scale preservation; investigate)"
+        else:
+            verdict_A = "HOLD"
+    else:
+        verdict_A = ("LICENSED" if (v_a["ch1_pass"] and v_a["ch2_pass"]
+                                    and v_a["ch3_pass"] and v_a["ch4_pass"])
+                     else "HOLD")
+    print(f"\n  CANDIDATE-A VERDICT: {verdict_A}")
+
+    # Pre-registered three-branch outcome diagnosis (§4.2)
+    if scale_d_oor:
+        branch = "confound"
+    elif v_a["ch1_pass"] and v_a["ch2_pass"] and v_a["ch3_pass"] \
+            and (v_a["ch4_pass"] if ch4_interpretable else True):
+        branch = "(i) all-pass: additive sub-step is the removable lever"
+    elif v_a["ch3_pass"] and ch4_interpretable and not v_a["ch4_pass"]:
+        branch = ("(ii) Ch3 passes, Ch4 fails: heavy-tail cost lives "
+                  "with the multiplicative sigma_{m,h} step, not the "
+                  "additive one; scale-only not the lever")
+    elif not v_a["ch1_pass"]:
+        branch = ("(iii) Ch1 fails substantially: additive step is "
+                  "also conditioning the embedding-state input; "
+                  "decomposition not separable at this level")
+    else:
+        branch = "outcome not one of the pre-stated branches; report verbatim"
+    print(f"  Pre-stated branch: {branch}")
 
 
 if __name__ == "__main__":
