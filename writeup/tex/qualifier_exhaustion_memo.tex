@@ -1,0 +1,301 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\newcommand{\kQ}{\kappa_{Q}}
+\newcommand{\Pij}{\Pi_{ij}}
+\newcommand{\Sj}{\Sigma_{j}}
+\newcommand{\Cj}{C_{j}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Rb}{\mathbb{R}}
+\newcommand{\Nrm}{\mathcal{N}}
+\newcommand{\nuhat}{\hat\nu}
+\newcommand{\MAE}{\mathrm{MAE}}
+\newcommand{\MAPE}{\mathrm{MAPE}}
+
+\title{\textbf{Qualifier Exhaustion: Can the \(\kQ\)-framework
+Accommodate the Heavy-Tail / Forecast-Accuracy Coupling?}\\[4pt]
+\large A staged exhaustion memo: \(\kQ\)-only \(\to\) named extensions
+\(\to\) coherent generalisations}
+\author{MITACS dynamics project --- design memo, not a result artifact}
+\date{2026-05-20}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{\centering
+\textbf{PROVENANCE-GRADE: INSPECTION-ONLY.} This memo is a framework
+analysis; it issues no estimator change and no claim about Ontario
+data beyond what is already established and provenanced in the
+referenced result artifacts. Conclusions are statements about what
+the \(\kQ\) framework does and does not license, not about what the
+estimator produces.}}
+\end{center}
+
+\begin{abstract}
+The investigation in \S4.2 of the application paper closed three
+climatology-axis experiments (seasonal-vs-raw; scale-only @ elbow;
+scale-only @ forced seasonal dims) on the same parametric object
+\((\mu_{m,h}, \sigma_{m,h})\) and reached a HOLD verdict on
+de-seasonalisation removal with branch (iii) confirmed (the additive
+sub-step is doing real work independent of dimension). Two engineering
+candidates remain inside that family --- additive seasonal with
+exogenous scale (\(B\)); Fourier-decomposition scale layer (\(C\)) ---
+but both feed transformed series into the same Gaussian local kernel,
+so neither in principle reaches the heavy-tail cost; they can only
+redistribute it. The question this memo answers is whether the
+\(\kQ\) framework permits any method that accommodates the coupling,
+and if not, why.
+
+The exhaustion is \emph{staged}. At each stage we attempt to settle
+every one of the three qualifiers --- \textbf{Register},
+\textbf{Imposed Gaussianity}, \textbf{Single step} --- as
+\textsc{open} (the relaxation lives inside the stage's licensing),
+\textsc{foreclosed-at-stage} (the relaxation is incoherent at this
+stage but may live at the next), or \textsc{requires-experiment}
+(open in principle; needs a designed gate). We escalate only when all
+three reach a definite verdict at the current stage. The three stages
+are: (1) strict \(\kQ\)-only (no redefinition); (2) \(\kQ\) +
+extensions the framework's own language admits (e.g.\ law-agnostic
+local kernels); (3) any Markov-semigroup-coherent estimator class
+(may leave the \(\kQ\) register).
+
+The memo is paper-only --- experiments fall out of its gaps as
+separate work. Integration into the application paper (sibling tex
+vs.\ inline \S4.3) is deferred until the verdict shape is visible.
+\end{abstract}
+
+\section{Setup and inheritance}
+\label{sec:setup}
+
+\paragraph{What we inherit from the paper.} The application paper's
+\S2.2 defines \(\kQ\) via Rokhlin disintegration of the joint law
+\(Q\) over the coarsened \(\sigma\)-algebra induced by the delay
+embedding, gives the Chapman--Kolmogorov-derived Markov semigroup
+\(\{\Pi_t\}\), and states the Koopman--Perron duality. The estimator
+\(\Pij\) targets the one-step kernel: per anchor \(j\), a local
+linear drift \(\Cj\) and a Gaussian diffusion \(\Sj\) define
+\(\Pij(\cdot \mid x) = \Nrm(x\Cj,\; \Sj)\). The three qualifiers
+that \S2.2 documents as the ways \(\Pij\) departs from \(\kQ\) are:
+
+\begin{description}[leftmargin=2em]
+  \item[Register.] \(\kQ\) is a disclosure object (the conditional
+  law that exists by Rokhlin); \(\Pij\) is a parametric construction
+  inside that disclosure --- a specific local-linear-Gaussian
+  realisation. The framework permits other realisations.
+  \item[Imposed Gaussianity.] The conditional \emph{law} is fit as
+  Gaussian by estimator design (WLS gives \(\Cj\), residual
+  covariance gives \(\Sj\), and these together specify a Gaussian
+  predictive law). \(\kQ\) itself is law-agnostic --- whatever the
+  conditional distribution of \(Q\) is, that is what \(\kQ\)
+  discloses. Gaussianity is not a \(\kQ\)-side commitment.
+  \item[Single step.] \(\Pij\) targets \(\Pi_1\) only; multi-step
+  predictions are obtained by composition (\(\Pi_1^k\)), which carries
+  a propagation gate (Task~\#11/12) but does not refit per horizon.
+  \(\kQ\) supports the full semigroup \(\{\Pi_t\}\); the estimator
+  occupies only the one-step generator.
+\end{description}
+
+\paragraph{What we inherit from results.}
+\begin{itemize}[leftmargin=2em]
+  \item Rebaseline (\textsc{claim-grade}): one-step scalar
+  innovation excess kurtosis \(\approx 24\)--\(33\) across day-types
+  on the intra-day-conditioned residual; tail ratio \(\approx
+  2.4\)--\(3.8\). This is the heavy-tail evidence the memo is trying
+  to accommodate.
+  \item Error-decomposition (\textsc{method/design-grade}): on the
+  validated full population (132 days via \(d_{\max}\)-augmented
+  propagation), \(M_1 \approx 4.8\%\), \(M_2 \approx 2.3\%\); CIs
+  overlap; neither drift- nor diffusion-deficiency dominates.
+  \item \S4.2 disambiguation (\textsc{inspection-only}):
+  forecast-MAPE ranking at matched dim \(\{2,4,3\}\) is seasonal
+  \(3.86\% \to\) scale-only \(13.13\% \to\) no-transform \(13.57\%\).
+  The additive \(\mu_{m,h}\) step alone carries
+  \(\approx 9.3\) pp of the \(\approx 9.7\) pp total cost; the
+  scale step \(\approx 0.4\) pp; the dimension shift
+  \(\approx 1.1\) pp. Branch (iii) confirmed.
+  \item \#41 (\textsc{resolved}): no prediction-error
+  cross-validation localises a bandwidth on this estimator on any
+  tested system; the operator-as-run is a global linear drift. Any
+  Stage-2/3 lever that adds a hyperparameter is subject to this
+  failure mode if naively selected by CV.
+\end{itemize}
+
+\paragraph{The coupling the memo must accommodate.} The three
+empirical facts taken together --- strongly non-Gaussian one-step
+innovation; both drift and diffusion deficiencies materialise; the
+additive level step is irreducibly entangled with forecast accuracy
+in the parametric \((\mu, \sigma)\) family --- describe a regime in
+which a Gaussian local kernel fed a level-and-scale-stripped
+embedding is fundamentally a proxy. The question is whether the
+framework permits any escape from the proxy regime.
+
+\paragraph{Exit condition (locked).} Each stage produces a
+three-row table: \{Register, Imposed Gaussianity, Single step\}
+\(\times\) \{verdict, mechanism, evidence in hand, what would close
+it\}. We escalate to the next stage only when all three rows hold a
+definite verdict at the current stage.
+
+\section{Stage 1 --- Strict \(\kQ\)-only (no redefinition)}
+\label{sec:stage1}
+
+\paragraph{Licensing.} At this stage a relaxation is open only if it
+can be expressed without changing \S2.2's definition of \(\kQ\),
+\(\{\Pi_t\}\), or the estimator's residence inside the disclosure
+register. The estimator stays a local-linear-Gaussian realisation;
+what varies is the \emph{state} the realisation is built on, the
+\emph{conditioning} that defines anchors, or the way the
+\emph{disclosure} of \(\kQ\) is read.
+
+\todo[inline]{Stage 1 body: for each qualifier, the three-question
+analysis. Register: can we read \(\kQ\) at a different coarsening
+(richer embedding, derivative coordinate, exogenous covariate) while
+keeping the local-linear-Gaussian realisation? \emph{Open} if the
+disclosure permits richer states without redefinition; this is what
+\S6 of the paper already names. Imposed Gaussianity: can we keep
+Gaussian \(\Sj\) but make it adequate via the state, not via the
+kernel? Equivalent to Register at this stage. Single step: can we
+target a longer horizon without leaving \(\kQ\)? \(\Pi_t\) for
+\(t > 1\) is also in the disclosure; the question is whether direct
+multi-step fitting is permitted as a separate \(\Pij\) per horizon,
+or whether the one-step composition is the only \(\kQ\)-faithful
+route. Settle each verdict before escalating.}
+
+\paragraph{Stage-1 table.}
+\begin{center}\small
+\begin{tabular}{lll}
+\toprule
+Qualifier & Stage-1 verdict & Closing condition \\
+\midrule
+Register             & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+Imposed Gaussianity  & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+Single step          & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\todo[inline]{Stage-1 conclusion: state whether all three rows hold
+definite verdicts; if any is still ambiguous, the stage is incomplete
+and Stage 2 cannot run.}
+
+\section{Stage 2 --- \(\kQ\) plus named extensions}
+\label{sec:stage2}
+
+\paragraph{Licensing.} A relaxation is open at this stage if it
+lives inside an extension the framework's own language admits without
+changing the operator class. The clearest case is the law-agnostic
+content of \(\kQ\): the Rokhlin conditional distribution is whatever
+\(Q\) hands us, and Gaussianity was an estimator-side imposition.
+Replacing the Gaussian local kernel with a parametric heavy-tailed
+local kernel (e.g.\ local Student-\(t\) with estimated \(\nu\)) or a
+local non-parametric kernel is therefore an extension of the
+\emph{estimator}, not of \(\kQ\). At Stage 2 we are explicitly
+licensing this kind of move.
+
+\todo[inline]{Stage 2 body: re-examine each qualifier that was
+foreclosed-at-Stage-1, under the named extensions. Register: largely
+unchanged (state choice is independent of kernel form). Imposed
+Gaussianity: \emph{this is the qualifier the stage is designed to
+relax}. Local Student-\(t\) with anchor-level \(\nuhat\); local
+non-parametric kernel via residual empirical distribution; mixture
+locals. For each, is the relaxation framework-consistent? What does
+the validation gate look like? Does \#41 bite (CV on \(\nu\)?). Single
+step: under Stage-2 licensing, can we fit multiple-step \(\Pij\)
+directly? E.g.\ separate estimators per horizon, all law-agnostic.
+Verdict per row.}
+
+\paragraph{Stage-2 table.}
+\begin{center}\small
+\begin{tabular}{lll}
+\toprule
+Qualifier & Stage-2 verdict & Closing condition \\
+\midrule
+Register             & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+Imposed Gaussianity  & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+Single step          & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\todo[inline]{Stage-2 conclusion: as Stage 1.}
+
+\section{Stage 3 --- Any Markov-semigroup-coherent estimator}
+\label{sec:stage3}
+
+\paragraph{Licensing.} The \(\kQ\) register is dropped. A relaxation
+is open at this stage if it sits inside any class of estimators
+coherent with general Markov-semigroup theory --- including ones
+that change the operator class (e.g.\ from the Rokhlin disclosure
+register to a generator-based one; or to a non-Markovian
+state-space representation with auxiliary latent variables). The
+honest framing of this stage is: if no relaxation closes at Stages
+1 or 2, the framework's natural generality cannot accommodate the
+coupling without changing the object the paper is about.
+
+\todo[inline]{Stage 3 body: for each qualifier, what does a fully
+general estimator class permit? Register: full coordinate redesign
+(phase, derivative, exogenous), possibly with auxiliary latent
+states. Imposed Gaussianity: arbitrary local conditional law,
+including non-parametric. Single step: full semigroup
+parametrisation including operator-learning approaches. The question
+is which of these are framework-coherent in the sense that they still
+correspond to \emph{the same underlying \(Q\)}, not to a different
+modelling target. Verdict per row.}
+
+\paragraph{Stage-3 table.}
+\begin{center}\small
+\begin{tabular}{lll}
+\toprule
+Qualifier & Stage-3 verdict & Closing condition \\
+\midrule
+Register             & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+Imposed Gaussianity  & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+Single step          & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Synthesis and outcome}
+\label{sec:synthesis}
+
+\todo[inline]{Synthesis: aggregate the three stage tables. There
+are four plausible outcome shapes:
+\emph{(O-i)} Some qualifier opens at Stage 1 \(\Rightarrow\) the
+\(\kQ\) framework already permits the resolution; identify the
+experiment and design the gate.
+\emph{(O-ii)} All foreclosed at Stage 1; some opens at Stage 2
+\(\Rightarrow\) the resolution requires a named extension (likely
+the law-agnostic local kernel); identify the experiment and the
+\#41-safe selection rule.
+\emph{(O-iii)} All foreclosed at Stages 1 and 2; some opens at
+Stage 3 \(\Rightarrow\) the resolution exists but requires leaving
+the \(\kQ\) register the paper operates in; this is publishable as
+an honest scope statement.
+\emph{(O-iv)} All foreclosed at all three stages \(\Rightarrow\) no
+method can accommodate the coupling within the framework's natural
+generality; the conclusive answer is structural-not-estimator-local
+(the \S6 lever) and the paper has its definitive \emph{why}.}
+
+\todo[inline]{Recommendation block: experiments that follow from the
+shape; \#41-safe gate designs for any new hyperparameter; frozen-spec
+implications.}
+
+\section{Integration decision (deferred)}
+\label{sec:integration}
+
+Per the staging decision, integration into the application paper
+(sibling tex memo with a tight \S4.3 verdict reference, vs.\ inlining
+the full exhaustion as \S4.3) is decided after the verdict shape is
+visible. A clean (O-i) or (O-ii) recommends inline; a long
+(O-iii)/(O-iv) recommends sibling.
+
+\end{document}
