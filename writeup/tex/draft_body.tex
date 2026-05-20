@@ -406,67 +406,71 @@ questions in increasing concreteness; their resolution proceeds in
 reverse, each later question only earning its place if the prior one
 does not settle the issue.
 
-\paragraph{Q3 (inferential).} Under what assumptions on the joint
-demand-process distribution does intrinsic coupling between location
-benefit and tail leak follow from the joint observation that the
-location-axis error is invariant under seasonal-resolution variation
-while the tail-axis error moves with it? The observation is
-consistent with intrinsic coupling but does not on its own establish
-it: invariance of one channel and movement of the other under a
-shared parameter are joint phenomenology, not a coupling proof. The
-Q3 work is to state the assumptions (e.g.\ stationarity of the
-location-axis dynamics relative to the seasonal-resolution group;
-sufficient richness of the heavy-tail axis under those dynamics)
-under which intrinsic coupling does follow, and then to check whether
-they hold for Ontario demand. \todo[inline]{Q3 result: under named
-assumptions, the existing observations imply [intrinsic /
-separable / undetermined]; the assumptions are [plausible /
-implausible / untested] for Ontario demand.}
+\paragraph{Q3 resolves in an unexpected direction: there is no
+location benefit on the phase channel.} The Q3 question --- under
+what assumptions does intrinsic coupling follow from the joint
+observation of location invariance and tail movement --- presupposed
+a location benefit delivered by de-seasonalisation. The
+discriminating measurement (phase-asymmetry correlation in demand
+space, comparable across specs because reported in raw-demand
+units) was \(\mathrm{corr}(\dd D/\dd t,\, e) = -0.247,\, -0.250,\, -0.217\)
+for the global, month\,\(\times\)\,hour, and identity (no-transform)
+specs respectively --- a range of \(0.033\) on a baseline of
+\(-0.25\), including the no-transform extreme. The location-axis
+signal is therefore not \emph{delivered} by de-seasonalisation; it
+is already present in the raw demand at essentially the same
+magnitude. What de-seasonalisation does on the phase channel is
+leave the signal undisturbed; what it does on the tail channel is
+introduce a resolution-dependent leak. Q2 and Q1' as originally
+posed (which sub-step delivers the location benefit; can a different
+family separate the cost from the benefit) collapse on this
+channel: there is no benefit on the phase channel to separate from
+the cost.
 
-\paragraph{Q2 (structural).} If Q3 does not settle the issue, the
-question becomes mechanistic: \emph{which sub-step} of the
-de-seasonalisation (Eq.~\ref{eq:zscore}) parametrises the tail leak?
-The transform has three sub-steps: subtraction of \(\mu_{m,h}\)
-(additive level removal), division by \(\sigma_{m,h}\)
-(multiplicative scale removal), and the resolution of the
-\(m \times h\) climatology grid. Each can be varied independently
-while holding the others fixed. The two readings make different
-predictions: under intrinsic coupling, the sub-step that delivers
-the location benefit is the same one that drives the tail leak when
-its parameter is varied; under separable coupling, the location and
-tail effects are driven by distinct sub-steps. \todo[inline]{Q2
-result: holding additive / multiplicative / grid-resolution sub-steps
-fixed in turn, the location benefit is delivered by [...] and the
-tail leak is driven by [...]; the two are the [same /
-distinct] sub-step.}
+\paragraph{The genuine remaining question.} The phase-correlation
+result does not settle whether de-seasonalisation contributes to
+forecast performance through some other channel. The discriminating
+test held the embedding dimension fixed at \(d = 3\) across all four
+specs --- by design, to isolate the climatology effect --- and the
+no-transform pipeline was not run end-to-end through the production
+backtest (per-day-type elbow-selected dimensions, the registered
+evaluation, leakage guards). The honest next experiment is therefore
+end-to-end: re-fit the per-day-type embedding dimension to raw
+demand by the same elbow rule used for the z-score pipeline, run
+the full backtest from this configuration, and compare \(\MAE\) /
+\(\MAPE\) against the seasonal pipeline. The two possible outcomes
+each correspond to a definite reading.
+\todo[inline]{End-to-end no-transform backtest: with per-day-type
+elbow-selected dimensions on raw demand, \(\MAE = [\ldots]\) MW,
+\(\MAPE = [\ldots]\)\%, compared with \(\approx 786\) MW / \(4.78\%\)
+for the seasonal pipeline.}
 
-\paragraph{Q1' (engineering).} If Q2 identifies the location and tail
-effects as driven by the same sub-step \emph{of this particular
-parametric family} (additive--multiplicative gridded climatology),
-the question becomes whether a \emph{different} family of
-de-seasonalisations could deliver the location benefit without the
-tail cost. The benign prediction (location invariance under
-parameter variation) generalises: any family that delivers the
-location benefit invariantly under its own parameterisation, and
-whose tail-axis error is \emph{also} invariant under that
-parameterisation, separates the cost from the benefit at the family
-level. Candidates include additive seasonal models without scale
-normalisation, frequency-domain (Fourier) decompositions, and
-copula-style location--scale-residual splits. \todo[inline]{Q1'
-result: the family [...] delivers the location benefit with
-[parameter-invariant / parameter-coupled] tail-axis error; the cost
-is [separable from / intrinsic to] the location-delivering element
-across families tested.}
+\paragraph{Reading 1 (no-transform matches the seasonal pipeline).}
+De-seasonalisation contributes nothing to forecast performance that
+a comparably-tuned raw-demand pipeline would not also deliver. The
+\(z\)-score coupling is then a documented framework choice with a
+heavy-tail cost (Section~\ref{sec:caveat}) and no offsetting
+benefit. Removing it is on the table, and the
+Section~\ref{sec:caveat} caveat becomes specific to this parametric
+choice rather than structural.
 
-The standing position, pending these investigations, is that the
-\(z\)-score coupling delivers a location benefit \emph{accompanied}
-by a tail cost, and that the cost is provisionally treated as the
-price of the benefit. Section~\ref{sec:caveat}'s caveat is reported
-under that standing position; if the investigations above resolve
-intrinsic coupling, the caveat becomes structural and unavoidable
-within this family; if they resolve separability, the caveat is
-specific to this parametric choice and the family of
-de-seasonalisations becomes a tractable engineering lever.
+\paragraph{Reading 2 (no-transform is worse).}
+De-seasonalisation delivers forecast performance through a channel
+the phase-correlation test did not capture (the most plausible
+candidate is conditioning the diffusion \(\Sj\) on hour-of-day-scale
+variance structure that raw demand does not expose at \(d = 3\)).
+The next question becomes the original Q1'/Q2 line redirected at
+that channel: which sub-step of the de-seasonalisation parametrises
+the forecast-performance gap, and is the gap separable from the
+tail cost in a different family?
+
+The standing position, pending the end-to-end backtest, is that the
+\(z\)-score coupling carries a documented heavy-tail cost
+(Section~\ref{sec:caveat}) and a forecast-performance contribution
+of unknown size --- not zero, but not yet measured against a
+fairly-tuned raw-demand baseline. The phase-asymmetry finding that
+motivated this section's investigation is independent of which
+reading holds.
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
