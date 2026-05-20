@@ -434,16 +434,69 @@ test held the embedding dimension fixed at \(d = 3\) across all four
 specs --- by design, to isolate the climatology effect --- and the
 no-transform pipeline was not run end-to-end through the production
 backtest (per-day-type elbow-selected dimensions, the registered
-evaluation, leakage guards). The honest next experiment is therefore
-end-to-end: re-fit the per-day-type embedding dimension to raw
-demand by the same elbow rule used for the z-score pipeline, run
-the full backtest from this configuration, and compare \(\MAE\) /
-\(\MAPE\) against the seasonal pipeline. The two possible outcomes
-each correspond to a definite reading.
+evaluation, leakage guards). The honest next experiment is end-to-end:
+re-fit the per-day-type embedding dimension to raw demand by the same
+elbow rule used for the seasonal pipeline, run the full backtest from
+this configuration, and compare against the seasonal pipeline on a
+multi-channel criterion. A single-axis comparison (e.g.\ \(\MAE\)
+alone) is insufficient: de-seasonalisation acts on four estimator
+layers simultaneously, and the channels through which it could
+plausibly contribute to forecast value are not all summarised by
+average error.
+
+\paragraph{Pre-registered comparison criterion.} The four channels
+and their tolerances are fixed here, before the experiment runs;
+removal of de-seasonalisation is licensed only if \emph{all four}
+channels match within their tolerances. Tolerances are derived from
+the materiality framework of Section~\ref{sec:caveat} where possible
+(channel~1) and from the structural conditioning facts established
+in the rebaseline (channel~2).
+\begin{enumerate}
+  \item \textbf{Forecast accuracy.} Compare \(\MAE\) and \(\MAPE\)
+  on the same backtest window as the seasonal pipeline. Tolerance:
+  \(|\Delta\MAE| < 8~\mathrm{MW}\) and \(|\Delta\MAPE| < 0.05\)
+  percentage points (\(\approx 1\%\) of the seasonal pipeline's
+  baseline values, the scale of Section~\ref{sec:caveat}'s
+  materiality threshold \(\taumin\)).
+  \item \textbf{Diffusion conditioning.} Compare per-day-type
+  condition number \(\kappa(\Sj)\). The rebaseline established that
+  intra-day \(\kappa(\Sj) \in [6,\, 1072]\) across day-types in the
+  seasonal pipeline; full-process scales were catastrophically
+  ill-conditioned (up to \(\sim 10^{20}\)). Tolerance:
+  \(\max_{\mathrm{dt}} \kappa_{\mathrm{raw}}(\Sj) /
+  \kappa_{\mathrm{seasonal}}(\Sj) < 10\) (an
+  order-of-magnitude band; conditioning is log-scale, and the
+  relevant contrast is usable vs.\ unusable).
+  \item \textbf{Interval coverage.} Compare empirical coverage of
+  the nominal \(95\%\) Gaussian-proxy intervals on the same dev
+  window. The seasonal pipeline's intervals are calibrated in
+  z-space and re-multiplied by \(\sigma_{m,h}\) in demand-space; the
+  raw-demand pipeline has no scale step and would deliver
+  uniformly-scaled intervals. Tolerance: \(|\text{coverage}_{\mathrm{raw}}
+  - \text{coverage}_{\mathrm{seasonal}}| < 2\) percentage points
+  (comparing two miscalibrations to each other, not either to
+  nominal --- Section~\ref{sec:caveat}'s Gaussian-proxy caveat
+  already warns of under-coverage in the seasonal pipeline).
+  \item \textbf{Heavy-tail strength.} Compare propagation-aware
+  Student-\(t\) shape \(\nuhat\) (Section~\ref{sec:caveat}). The
+  seasonal pipeline gives \(\nuhat \approx 6.5\); the §3.2
+  reconciliation argues part of the apparent heavy tail was a
+  propagation artefact tied to the de-seasonalisation, so the raw
+  pipeline should give \(\nuhat\) at least as Gaussian. Tolerance:
+  \(\nuhat_{\mathrm{raw}} \ge \nuhat_{\mathrm{seasonal}}\) (the
+  direction-of-effect check; no upper bound --- substantial
+  improvement here is itself a finding refining the §3.2
+  reconciliation).
+\end{enumerate}
 \todo[inline]{End-to-end no-transform backtest: with per-day-type
-elbow-selected dimensions on raw demand, \(\MAE = [\ldots]\) MW,
-\(\MAPE = [\ldots]\)\%, compared with \(\approx 786\) MW / \(4.78\%\)
-for the seasonal pipeline.}
+elbow-selected dimensions on raw demand, four-channel comparison
+populated as: (1) \(\MAE = [\ldots]\) MW, \(\MAPE = [\ldots]\)\%
+(vs.\ \(\approx 786\) MW / \(4.78\%\)); (2) per-day-type
+\(\kappa(\Sj) = [\ldots]\) (vs.\ \([6, 1072]\)); (3) empirical
+\(95\%\) interval coverage \([\ldots]\) (vs.\ seasonal \([\ldots]\));
+(4) propagation-aware \(\nuhat = [\ldots]\) (vs.\ \(6.5\)).
+Removal verdict per the pre-registered all-channel rule:
+\([\text{licensed} / \text{hold}]\).}
 
 \paragraph{Reading 1 (no-transform matches the seasonal pipeline).}
 De-seasonalisation contributes nothing to forecast performance that
