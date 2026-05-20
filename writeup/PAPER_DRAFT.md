@@ -18,26 +18,19 @@ Status: method positioning + application methodology written; numeric
 results carry [PENDING] markers awaiting verified honed/full runs and
 forward-experiment calendar time.
 
-*** §2/§3 REWRITE REQUIRED (2026-05-18, #41 RESOLVED) — DO NOT SHIP
-THE CURRENT §2 WORDING. ***
-Resolved (scratch/diagnose_theta_FINAL_summary.py; memory
-mitacs-theta-rail-pinning RESOLVED block): no prediction-error CV
-objective (one-step or multi-step, h∈{1..24}) yields a statistically
-separated interior θ optimum on ANY system tested (bootstrap-verified).
-The estimator AS RUN reduces to a single GLOBAL linear drift at the
-d=2 z-score-lag embedding; θ does not localize. Required edits:
+*** §2/§3 REWRITE DONE (2026-05-19) — see UPDATE blocks below for the
+record. Originally written 2026-05-18 from the #41 resolution
+(prediction-error CV cannot localize the bandwidth at this embedding;
+drift reduces to a single global linear operator at d=2). Required
+edits were:
 • §2.1 "bandwidth selected by true leave-one-out cross-validation" →
   honest statement: no statistically meaningful locality scale is
-  recoverable at this embedding via prediction-error CV; the drift is
-  effectively a single global linear operator.
-• §2.2 "locally-Gaussian estimator" → soften "locally" (it reduces to
-  global here); the κ_Q correspondence holds at the embedding layer
-  but the locality is not empirically operative on Ontario.
-• §3 is STRENGTHENED and now LOAD-BEARING: Σ_j / the non-Gaussian
-  innovation carries κ_Q's structure because C_j is globally linear —
-  state this as the central characterization, not a caveat.
-The lever for genuine locality is the EMBEDDING (#30), not the
-bandwidth rule.
+  recoverable here; drift is effectively global. ✅ APPLIED 2026-05-19.
+• §2.2 "locally-Gaussian estimator" → drop "locally" in the headline
+  statement; κ_Q correspondence holds at the embedding layer; locality
+  not empirically operative on Ontario. ✅ APPLIED 2026-05-19.
+• §3 is STRENGTHENED and load-bearing: Σ_j / the non-Gaussian
+  innovation is the central characterization, not a side caveat.
 
 UPDATE 2026-05-19: §3 REWRITE DONE. §3 now documents BOTH factors as
 quantified limitations from the pre-registered error-decomposition
@@ -57,9 +50,14 @@ seam — partly a propagation artefact, reconciles against the
 re-baseline "exc kurt 24–33" (one-step, un-propagated). Trail
 (Option C falsified → Option A built/gated → all-days re-run):
 mitacs-error-decomposition-verdict.
-§2.1/§2.2 EDITS STILL REQUIRED (the global-drift wording above — not yet
-applied; §2 still says "bandwidth selected by true LOO-CV"). Do not ship
-§2 until reworded; §3 is current.
+§2.1/§2.2 EDITS DONE 2026-05-19: §2.1 now states the cross-validation
+non-discrimination finding and the effectively-global-drift consequence;
+§2.2 drops "locally" from the headline κ_Q characterization, updates
+Qualifier 2 to the materiality-bar-honest framing from §3, and Qualifier
+3 to record the one validated piece of the Π_t composition (variance
+propagation; gate-checked, used as the §3 instrument only). All three of
+§2.1/§2.2/§3 are now mutually consistent and reflect the central line of
+investigation through 2026-05-19.
 -->
 
 # Empirical conditional-kernel forecasting of Ontario electricity demand: a registered prediction experiment
@@ -141,16 +139,41 @@ state-dependent Gaussian Markov kernel
 
 on the embedding state space: `C_j` is the local conditional-mean
 (drift) estimate, `Σ_j` the local conditional second moment
-(diffusion). The neighbourhood bandwidth (`θ`) is selected by true
-leave-one-out cross-validation per anchor. (For the record: the
-Goldenshluger–Lepski-style selector in the supporting library is
-degenerate for the normalised Gaussian kernel used here — its criterion
-is monotone in bandwidth with no interior optimum — so it is not used;
-the LOO-CV rule is validated against synthetic ground truth, §7. The
-diffusion uses the plain, not residual-kernel-weighted, covariance
-because the weighted form collapses toward `≈ w²·Q` and is not the
-unbiased local second moment.) Estimator internals are detailed in
-Appendix A; the companion method paper treats them in full.
+(diffusion).
+
+**On the locality of `C_j`: what the data here actually supports.** The
+per-anchor neighbourhood bandwidth `θ` is the parameter that would
+select *how local* the drift is. Two candidate selection rules were
+investigated. The Goldenshluger–Lepski-style selector in the supporting
+library is degenerate for the normalised Gaussian kernel used here: its
+score is monotone in `θ` with no interior optimum, so any grid simply
+reports its own ceiling. True leave-one-out cross-validation on
+one-step squared error replaces it but, on this data, is also
+non-discriminating: under proper bootstrap-SE testing across anchors
+the LOO objective is flat-within-noise above a small `θ` and never
+returns a statistically separated interior minimum. The same
+non-discrimination holds for multi-step LOO at every horizon
+`h ∈ {1, 2, 4, 8, 16, 24}` and is reproduced on three independent
+controlled systems (linear VAR(1), the logistic map, and a regime-
+switching AR), so it is a property of the *criterion*
+(prediction-error cross-validation does not identify a localisation
+bandwidth here), not of the Ontario data. Empirically, then,
+**no statistically meaningful locality scale is recoverable at this
+embedding by prediction-error cross-validation**, and the drift `C_j`
+is effectively a single global linear operator at the `d = 2`
+z-score-lag embedding. The diffusion uses the plain, not
+residual-kernel-weighted, covariance because the weighted form
+collapses toward `≈ w²·Q` and is not the unbiased local second moment.
+
+This finding has a structural consequence rather than a methodological
+one: with `C_j` effectively global and linear, the non-Dirac content of
+the predictive law lives entirely in `Σ_j` and its departure from
+Gaussianity, which §3 quantifies as the load-bearing object. The lever
+that could produce genuinely local conditional-mean behaviour is the
+*state representation* (a richer embedding or an explicit phase/
+derivative coordinate), not the bandwidth rule. Estimator internals
+are detailed in Appendix A; the companion method paper treats them in
+full.
 
 ### 2.2 Relationship to the Resolvent_Framework kernel `κ_Q`
 
@@ -169,18 +192,27 @@ three layers notationally distinct: `κ_Q` (disintegration layer),
 
 The object §2.1 constructs is, stated plainly:
 
-> a finite-sample, parametric, single-step, *locally-Gaussian*
-> estimator of the conditional-regularity kernel `κ_Q` at the
-> embedding layer, from which the operator-layer objects `K_Δ / P_Δ^*`
-> are recoverable in the programme's non-Dirac regime (`Σ_j ≠ 0`).
+> a finite-sample, parametric, single-step, Gaussian-form estimator of
+> the conditional-regularity kernel `κ_Q` at the embedding layer, from
+> which the operator-layer objects `K_Δ / P_Δ^*` are recoverable in
+> the programme's non-Dirac regime (`Σ_j ≠ 0`).
+
+The qualifier "locally" is deliberately dropped from this statement.
+The construction is *locally-Gaussian by intent* — bandwidth `θ`
+indexes a kernel-weighted local fit — but as §2.1 establishes, no
+statistically meaningful locality scale is empirically recoverable at
+this embedding by prediction-error cross-validation; the drift reduces
+to a single global linear operator. The κ_Q correspondence still holds
+at the embedding layer; what is not empirically operative on Ontario
+is the *locality* of that estimator.
 
 The delay embedding corresponds to the programme's reconstruction
-object; `C_j` to a local linearisation of the minimal-sufficient
-factor; `Σ_j` to the second moment of `κ_Q`'s Gaussian projection.
-`Σ_j ≠ 0` is the non-Dirac regime; `Σ_j → 0` reproduces the
-classical-Koopman collapse. **Three qualifiers** bound this
-relationship and are stated as scope, not as commentary on its
-significance:
+object; `C_j` to a linearisation of the minimal-sufficient factor —
+intended locally but, on the data here, effectively global per §2.1;
+`Σ_j` to the second moment of `κ_Q`'s Gaussian projection. `Σ_j ≠ 0`
+is the non-Dirac regime; `Σ_j → 0` reproduces the classical-Koopman
+collapse. **Three qualifiers** bound this relationship and are stated
+as scope, not as commentary on its significance:
 
 1. **Register.** The programme *discloses* `κ_Q` from the measure; this
    work *constructs* a Gaussian proxy and fits it from finite data.
@@ -188,11 +220,19 @@ significance:
    not "instance of."
 2. **Imposed Gaussianity.** `Π^(j) = 𝒩(x C_j, Σ_j)` coincides with the
    true `κ_Q` only where the local conditional law is itself Gaussian.
-   §3 shows this is decisively operative here, not benign.
-3. **Single step.** The construction yields only `Π_Δ` (one sampling
-   interval). The full semigroup `{Π_t}` is neither composed nor
-   verified; in the programme `{Π_t}` is *derived*, whereas here only
-   the single-step slice exists.
+   §3 quantifies the departure: on the validated full population, the
+   gap is real but materially smaller than a one-step measurement of
+   the innovation alone would suggest, and below the pre-registered
+   bar for being an actionable deficiency.
+3. **Single step (with one validated composition).** The estimator
+   `Π^(j)` is constructed as the single-step slice `Π_Δ`; in the
+   programme `{Π_t}` is *derived* via Chapman–Kolmogorov, not assumed.
+   This work supplies one validated piece of that derivation —
+   multi-step predictive-variance propagation via a shift-aware state
+   Jacobian (gate-checked against the linear-Gaussian closed form to
+   machine precision; §3, companion paper) — used only as the
+   instrument for the §3 decomposition. The full semigroup is still
+   neither composed nor verified.
 
 The delay embedding, the drift as local linearisation, and the
 diffusion as the correct weighted conditional covariance require no
