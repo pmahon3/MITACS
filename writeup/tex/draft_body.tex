@@ -613,20 +613,69 @@ is not separable within this family at the level the four-channel
 diagnostic can probe, and the engineering question moves from
 ``which sub-step'' to ``is the additive-and-multiplicative
 combination irreducibly coupled.''
-\todo[inline]{Scale-only candidate A result: per-day-type elbow
-dim \([\ldots]\); four-channel verdict
-\([\text{licensed} / \text{hold}]\) with the outcome falling on
-branch (i) / (ii) / (iii); standing position updated accordingly.}
+\paragraph{Candidate-A result: branch (iii) fires; verdict HOLD.}
+Scale-only \(z_{\mathrm{A}} = D / \sigma_{m,h}\) was run end-to-end
+through the same diagnostic harness as the seasonal-vs-raw
+comparison
+(\texttt{scratch/run\_candidate\_A\_only.py}, dev 2021--22,
+\(n = 3168\)). Per-day-type elbow dimension is \(d = 4\) across all
+day-types, inside the pre-registered \([2,4]\) confound band.
+Three-pipeline forecast accuracy, side-by-side:
+\begin{center}\small
+\begin{tabular}{l r r}
+\toprule
+Pipeline & \(\MAE\) (MW) & \(\MAPE\) (\%) \\
+\midrule
+Seasonal      & \(627\) & \(3.86\) \\
+Scale-only    & \(1951\) & \(11.98\) \\
+No-transform & \(2317\) & \(13.57\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Scale-only recovers some of the gap closed by the seasonal pipeline
+(\(\Delta\MAPE\) reduced from \(9.71\) pp under no-transform to
+\(8.12\) pp under scale-only) but remains \(\approx 3.1\times\) the
+seasonal pipeline's error and well outside the pre-registered Ch1
+tolerance (\(|\Delta\MAE| < 8\) MW, \(|\Delta\MAPE| < 0.05\) pp).
+Branch (iii) fires: the additive sub-step is also conditioning the
+embedding-state input to the local-linear map, not just removing a
+level. The cost-vs-benefit decomposition is \emph{not separable at
+the four-channel diagnostic's resolution within this parametric
+family}.
 
-The standing position pending the scale-only experiment is that the
-\(z\)-score coupling carries a documented heavy-tail cost
-(Section~\ref{sec:caveat}) and a demand-space-scale-calibration
-contribution to forecast performance that a comparably-tuned
-raw-demand pipeline does not deliver; the §3 heavy-tail cost is real
-either way, and the open engineering question is only whether it can
-be detached from the scale benefit. The phase-asymmetry finding that
-motivated this section's investigation is independent of the coupling
-and does not depend on the de-seasonalisation step.
+The other channels: Ch2 PASS (scale-only \(60/60\) finite per
+day-type, identical to seasonal); Ch3 average coverage \(41.10\%\)
+vs.\ seasonal's \(38.35\%\), \(|\Delta\overline{\mathrm{cov}}|
+= 2.75\) pp, FAIL on the average-gap tolerance (worst-hour test
+deferred --- Ch1 already settled the verdict); Ch4
+\(\nuhat_{\mathrm{scale}} = 5.27\) vs.\ \(\nuhat_{\mathrm{seasonal}}
+= 5.93\), reported as a \emph{directional observation only}: the
+pre-registered Ch4-conditional-on-Ch3 rule applies (Ch3 failed, so
+Ch4 is not interpretable as a pass/fail signal). The directional
+sign --- scale-only is slightly more heavy-tailed than seasonal ---
+is contrary to the mechanistic story that the additive step
+\emph{carries} the heavy-tail cost; if anything, removing the
+additive step makes the tail slightly worse rather than better. This
+weakens (but does not by itself rule out) the original branch-(ii)
+hypothesis that the cost lives entirely in the multiplicative step.
+
+\paragraph{Resolved standing position.} The \(z\)-score coupling
+carries a documented heavy-tail cost (Section~\ref{sec:caveat}); a
+demand-space-scale-calibration contribution to forecast performance
+(localised at Ch3 in the seasonal-vs-raw experiment); and an
+additive-level-removal contribution to forecast performance
+(localised by this candidate-A experiment, branch (iii)). All three
+ride on the same parametric object \((\mu_{m,h}, \sigma_{m,h})\). At
+the four-channel diagnostic's resolution within this family, the
+cost and the two benefit channels are intertwined: removing either
+sub-step degrades Ch1 substantially. The engineering question
+therefore moves out of the additive-vs-multiplicative decomposition
+and into the next tier: candidates B (additive seasonal model with
+the scale handed exogenously to the diffusion fit) or C
+(Fourier-decomposition scale layer), or accepting the coupling and
+documenting it. The phase-asymmetry finding that motivated this
+section's investigation remains independent of the coupling and does
+not depend on the de-seasonalisation step.
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
