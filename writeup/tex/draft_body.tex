@@ -571,13 +571,62 @@ that hands a separate scale-conditioning input to the diffusion fit,
 or a Fourier-decomposition scale layer. This is Q1' from earlier in
 this section, redirected at the now-identified channel.
 
-The standing position is that the \(z\)-score coupling carries a
-documented heavy-tail cost (Section~\ref{sec:caveat}) and a
-demand-space-scale-calibration contribution to forecast performance
-that a comparably-tuned raw-demand pipeline does not deliver. The
-phase-asymmetry finding that motivated this section's investigation
-is independent of the coupling and does not depend on the
-de-seasonalisation step.
+\paragraph{Pre-registered candidate A: scale-only normalisation.}
+The minimal perturbation is to keep the scale step that the
+preceding experiment located as load-bearing and drop the level step
+that is the candidate carrier of the heavy-tail cost:
+\(z_{\mathrm{A}} = D / \sigma_{m,h}\), no mean subtraction. The fair
+comparison applies the same diagnostic harness used for the
+seasonal-vs-raw test: elbow-selected dimension per day-type on
+\(z_{\mathrm{A}}\), the same four-channel measurement at the same
+pre-registered tolerances.
+
+The pre-registered Ch4 interpretation rule from the preceding
+experiment is refined: \emph{Ch4 is informative only conditional on
+Ch3 passing}. Raw demand's Ch4 PASS was an artefact of the same
+mis-scaling Ch3 detected (the standardised residuals collapsed
+because the predictive variance was mis-scaled relative to the
+realised residual scale); this pattern is general. For the
+scale-only test and any future variant: if Ch3 fails, Ch4 reports
+``not interpretable'' rather than PASS or FAIL.
+
+The experiment is also pre-committed to flag a design confound:
+if the elbow rule picks a dimension for \(z_{\mathrm{A}}\) outside
+the range \([2, 4]\) that the seasonal and raw pipelines landed in,
+the comparison is contaminated by a dimension change rather than
+testing the additive-step removal, and the candidate-A verdict is
+withheld pending a decision on whether to constrain \(d\) or accept
+the confound.
+
+Three outcomes are pre-stated. \emph{(i)} All four channels pass:
+the additive sub-step is the removable lever; the scale-only pipeline
+delivers the scale-calibration benefit at reduced tail cost; the §3
+caveat becomes specific to the additive step. \emph{(ii)} Ch3 passes
+but Ch4 fails: the heavy-tail cost lives with the multiplicative
+\(\sigma_{m,h}\) step, not the additive one; scale-only is not the
+lever; the engineering question moves to candidates B/C.
+\emph{(iii)} Ch1 fails substantially (forecast accuracy noticeably
+worse despite Ch3 holding): the additive step is also conditioning
+the embedding-state input to the local-linear map (centring the lag
+state), not just removing a level; the cost-vs-benefit decomposition
+is not separable within this family at the level the four-channel
+diagnostic can probe, and the engineering question moves from
+``which sub-step'' to ``is the additive-and-multiplicative
+combination irreducibly coupled.''
+\todo[inline]{Scale-only candidate A result: per-day-type elbow
+dim \([\ldots]\); four-channel verdict
+\([\text{licensed} / \text{hold}]\) with the outcome falling on
+branch (i) / (ii) / (iii); standing position updated accordingly.}
+
+The standing position pending the scale-only experiment is that the
+\(z\)-score coupling carries a documented heavy-tail cost
+(Section~\ref{sec:caveat}) and a demand-space-scale-calibration
+contribution to forecast performance that a comparably-tuned
+raw-demand pipeline does not deliver; the §3 heavy-tail cost is real
+either way, and the open engineering question is only whether it can
+be detached from the scale benefit. The phase-asymmetry finding that
+motivated this section's investigation is independent of the coupling
+and does not depend on the de-seasonalisation step.
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
