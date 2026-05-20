@@ -9,9 +9,7 @@ infeasibility of a retrospective IESO head-to-head and the registered
 forward experiment built in response; (d) the structural caveat that
 \(\Pij\) departs from \(\kQ\) in both location and shape, with the
 recoverable loss of each quantified and shown to fall below the
-pre-registered actionability bar on the full population. The method's
-theoretical positioning relative to the Resolvent\_Framework programme
-is summarised here and treated in depth in a companion paper.}
+pre-registered actionability bar on the full population.}
 \end{abstract}
 
 \section{Introduction}
@@ -27,12 +25,10 @@ a hash-stamped registered forward experiment, and an explicit
 accounting of what can and cannot be compared against IESO's own
 published forecasts.
 
-The estimator has a precise relationship to the conditional-regularity
-kernel \(\kQ\) of the Resolvent\_Framework
-programme~\cite{ResolventFramework}; the correspondence and its
-numerical demonstration on controlled systems are the subject of a
-companion method paper in preparation. Section~\ref{sec:method}
-states only what is needed to interpret the Ontario results.
+The estimator targets the conditional-regularity kernel \(\kQ\)
+determined by the data measure via Rokhlin disintegration; the
+correspondence is stated in Section~\ref{sec:method} along with the
+three scope qualifiers that bound it.
 
 \emph{Positioning relative to prior work is deliberately deferred.}
 \todo[inline]{Prior-work context, for the author group to supply; this
@@ -91,53 +87,58 @@ Gaussianity (Section~\ref{sec:caveat}). The available lever is the
 phase/derivative coordinate), not the bandwidth rule. Estimator
 internals: Appendix~\ref{app:estimator}.
 
-\paragraph{Relationship to the Resolvent\_Framework kernel \(\kQ\).}
-The Resolvent\_Framework programme~[RF, \S``Conditional regularity and
-dynamics''] defines, by Rokhlin disintegration of two observations
-\(Q, F\), a Markov kernel
+\paragraph{The conditional law \(\kQ\) the estimator targets.}
+On a probability space \((\Omega, \mathcal{F}, P)\) with two
+observations \(Q, F\), the Rokhlin disintegration
+theorem~\cite{Rokhlin1952,Bogachev2007} produces a Markov kernel
 \begin{equation}
 \label{eq:kappaQ}
 \kQ(q, \cdot) \;=\; P(F \in \cdot \mid Q = q),
 \end{equation}
-``forced by the measure, not chosen,'' in a register the programme
-labels ``Disclosure, not construction. The structures are \emph{in}
-the measure.'' (\cite{ResolventFramework} lines 69--70 and 63).
-Indexing over time yields a Markov semigroup \(\{\Pi_t\}\)
-(Chapman--Kolmogorov \emph{derived}, not assumed) and Koopman--Perron
-duality
+determined by the measure --- not posited as an additional dynamical
+law. Under temporal indexing of the observations, finite-dimensional
+distributions are coherent, so the kernels compose: the
+Chapman--Kolmogorov equation is a consequence, not a hypothesis, and
+yields a Markov semigroup \(\{\Pi_t\}\)~\cite{Eisner2015}. The
+companion Koopman--Perron duality
 \begin{equation}
 \label{eq:KP}
-\int K_t\, g\, \dd\mu \;=\; \int g\, \dd(P_t^{*}\mu);
+\int K_t\, g\, \dd\mu \;=\; \int g\, \dd(P_t^{*}\mu)
 \end{equation}
-\(K_t\) collapses to the classical Koopman operator when the kernels
-are Dirac. Three layers are kept notationally distinct: \(\kQ\)
-(disintegration), \(\{\Pi_t\}\) (semigroup), \(K_t\) (operator).
+relates the Koopman operator \(K_t g = g \circ T_t\) (when the
+dynamics is deterministic, recovering the classical Koopman operator
+when the kernels are Dirac~\cite{LasotaMackey1994}) to its
+Perron--Frobenius adjoint \(P_t^{*}\) on densities. Three layers are
+useful to keep notationally distinct: \(\kQ\) (the disintegration
+kernel; a conditional law), \(\{\Pi_t\}\) (the time-indexed Markov
+semigroup), and \(K_t\) (the operator-layer object).
 
+\paragraph{The estimator's relationship to \(\kQ\).}
 The object Section~\ref{sec:construction} constructs is a
 finite-sample, parametric, single-step, Gaussian-form estimator of
-\(\kQ\) at the embedding layer, from which the operator-layer objects
-\(K_{\Delta} / P_{\Delta}^{*}\) are recoverable in the non-Dirac
-regime (\(\Sj \neq 0\)). The qualifier ``locally'' is dropped: per
-Section~\ref{sec:construction} no statistically meaningful locality
-scale is recoverable at this embedding; the drift reduces to a single
-global linear operator. The \(\kQ\) correspondence holds at the
-embedding layer; \emph{locality} of that estimator is not empirically
-operative on Ontario. The delay embedding corresponds to the
-programme's reconstruction object; \(\Cj\) to a linearisation of the
-minimal-sufficient factor (intended local, effectively global here);
-\(\Sj\) to the second moment of \(\kQ\)'s Gaussian projection.
-\(\Sj \to 0\) reproduces the classical-Koopman collapse. Three
-qualifiers bound this correspondence:
+\(\kQ\) at the delay-embedding layer, from which the operator-layer
+objects \(K_{\Delta} / P_{\Delta}^{*}\) are recoverable in the
+non-Dirac regime (\(\Sj \neq 0\)). The qualifier ``locally'' is
+deliberately omitted: per Section~\ref{sec:construction} no
+statistically meaningful locality scale is recoverable at this
+embedding, and the drift reduces to a single global linear operator.
+The \(\kQ\) correspondence holds at the embedding layer; \emph{locality}
+of that estimator is not empirically operative on Ontario.
+\(\Cj\) is a linearisation of the conditional-mean factor (intended
+local, effectively global here); \(\Sj\) is the second moment of
+\(\kQ\)'s Gaussian projection; \(\Sj \to 0\) reproduces the
+classical-Koopman (deterministic) collapse. Three qualifiers bound
+this correspondence:
 
 \begin{enumerate}
-  \item \textbf{Register.} The programme \emph{discloses} \(\kQ\) from
-  the measure; this work \emph{constructs} a Gaussian proxy and fits
-  it from finite data --- ``estimator of,'' not ``instance of.''
+  \item \textbf{Register.} \(\kQ\) is determined by the measure; this
+  work \emph{constructs} a Gaussian proxy and fits it from finite
+  data --- ``estimator of,'' not ``instance of.''
 
   \item \textbf{Imposed Gaussianity.} \(\Pij = \Nrm(x \Cj, \Sj)\)
   coincides with \(\kQ\) only where the local conditional law is
-  Gaussian. Section~\ref{sec:caveat} quantifies the gap as real but
-  below the pre-registered actionability bar.
+  itself Gaussian. Section~\ref{sec:caveat} quantifies the gap as
+  real but below the pre-registered actionability bar.
 
   \item \textbf{Single step.} \(\Pij\) is the single-step slice
   \(\Pidelta\); the semigroup \(\{\Pi_t\}\) is neither composed nor
@@ -146,9 +147,6 @@ qualifiers bound this correspondence:
   instrument for Section~\ref{sec:caveat}'s decomposition; it is not
   the semigroup.)
 \end{enumerate}
-
-Numerical demonstration on controlled systems is the subject of the
-companion method paper.
 
 \section{Structural caveat: a mis-centred conditional mean and a
 Gaussian-proxy diffusion}
@@ -375,17 +373,11 @@ the verified run.}
 
   \item \textbf{Single-step only.} The semigroup \(\{\Pi_t\}\) is not
   constructed; multi-step is iteration of \(\Pidelta\), validated for
-  error growth. (The companion method paper is the natural home for
-  the semigroup treatment.)
+  error growth. A semigroup treatment is open.
 
   \item \textbf{Exogenous information.} No weather/exogenous
   covariates; the backtest error structure suggests this is a
   model-scope ceiling, not a hyperparameter issue.
-
-  \item \textbf{[DEFER-RF] points.}
-  \todo[inline]{Residual theory-correspondence questions for resolution
-  with the Resolvent\_Framework authors; several are mooted by the
-  rank-1 finding.}
 \end{itemize}
 
 \paragraph{Provenance.} Every claim- or method-grade result is written
@@ -416,8 +408,7 @@ change.
 \label{app:estimator}
 
 \todo[inline]{WLS weighting, the LOO-CV \(\theta\) rule, the
-GL-degeneracy note in full. The companion method paper is the primary
-home for this; reproduce here only what the application reader needs.}
+GL-degeneracy note in full.}
 
 \section{Per-horizon backtest table}
 \label{app:backtest}
@@ -435,9 +426,3 @@ Reference: \texttt{experiment/results/PROVENANCE\_REQUIREMENTS.md}.
 \bibliographystyle{plain}
 \bibliography{references}
 \fi
-
-% (Additional citations: \nocite{CompanionMethodPaper} ensures the
-% companion-method-paper entry appears in the bibliography even before
-% it is cited in the body; remove the \nocite once a body \cite{} is
-% in place.)
-\nocite{CompanionMethodPaper}
