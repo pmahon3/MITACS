@@ -641,7 +641,18 @@ Branch (iii) fires: the additive sub-step is also conditioning the
 embedding-state input to the local-linear map, not just removing a
 level. The cost-vs-benefit decomposition is \emph{not separable at
 the four-channel diagnostic's resolution within this parametric
-family}.
+family}. \emph{Mechanistic-attribution caveat:} the scale-only elbow
+rule selected \(d = 4\) uniformly across day-types while the
+seasonal pipeline uses \(\{d_{\mathrm{wkdy}}, d_{\mathrm{sat}},
+d_{\mathrm{sun}}\} = \{2, 4, 3\}\); branch (iii)'s attribution to
+the additive sub-step is therefore partially confounded with the
+dimension shift (weekday \(+2\), saturday \(0\), sunday \(+1\)).
+The HOLD verdict on removal is robust to this confound --- whether
+the mechanism is missing-\(\mu\) or wrong-\(d\) or both, the practical
+conclusion is the same --- but a clean isolation of the additive
+sub-step's contribution would re-run scale-only at the seasonal
+dimensions \(\{2, 4, 3\}\) (not in scope here, flagged so the
+mechanistic claim is not over-read).
 
 The other channels: Ch2 PASS (scale-only \(60/60\) finite per
 day-type, identical to seasonal); Ch3 average coverage \(41.10\%\)
