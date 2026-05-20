@@ -18,18 +18,16 @@ pre-registered actionability bar on the full population.}
 This paper frames short-horizon Ontario electricity-demand forecasting
 as a question about the \emph{conditional law of a reconstructed
 dynamical state}: given a delay embedding of recent demand, what is
-the distribution of the next state? We instantiate a local-Gaussian
-conditional-kernel estimator of that law on IESO data and evaluate it
-as a \emph{prediction experiment} --- with an out-of-sample backtest,
-a registered forward experiment, and an explicit accounting of what
-can and cannot be compared against IESO's own published forecasts.
+the distribution of the next state? A local-Gaussian
+conditional-kernel estimator of that law is instantiated on IESO data
+and evaluated as a \emph{prediction experiment} --- with an
+out-of-sample backtest, a registered forward experiment, and an
+accounting of comparability against IESO's own published forecasts.
 
 The estimator targets the conditional-regularity kernel \(\kQ\)
-determined by the data measure via Rokhlin disintegration; the
-correspondence is stated in Section~\ref{sec:method} along with the
-three scope qualifiers that bound it.
+determined by the data measure via Rokhlin disintegration
+(Section~\ref{sec:method}).
 
-\emph{Positioning relative to prior work is deliberately deferred.}
 \todo[inline]{Prior-work context, for the author group to supply; this
 draft makes no comparative-novelty claims.}
 
@@ -142,11 +140,10 @@ effectively a single global linear operator at the \(d = 2\)
 z-score-lag embedding.
 
 With \(\Cj\) effectively global and linear, the non-Dirac content of
-the predictive law is carried entirely by \(\Sj\) and its departure
+the predictive law is carried by \(\Sj\) and its departure
 from Gaussianity (Section~\ref{sec:caveat}). The available lever is
 the \emph{state representation} (richer embedding, explicit
-phase/derivative coordinate), not the bandwidth rule. Estimator
-internals: Appendix~\ref{app:estimator}.
+phase/derivative coordinate), not the bandwidth rule.
 
 \paragraph{The conditional law \(\kQ\) the estimator targets.}
 On a probability space \((\Omega, \mathcal{F}, P)\) with two
@@ -179,12 +176,10 @@ The object Section~\ref{sec:construction} constructs is a
 finite-sample, parametric, single-step, Gaussian-form estimator of
 \(\kQ\) at the delay-embedding layer, from which the operator-layer
 objects \(K_{\Delta} / P_{\Delta}^{*}\) are recoverable in the
-non-Dirac regime (\(\Sj \neq 0\)). The qualifier ``locally'' is
-deliberately omitted: per Section~\ref{sec:construction} no
-statistically meaningful locality scale is recoverable at this
-embedding, and the drift reduces to a single global linear operator.
+non-Dirac regime (\(\Sj \neq 0\)).
 The \(\kQ\) correspondence holds at the embedding layer; \emph{locality}
-of that estimator is not empirically operative on Ontario.
+of that estimator is not empirically operative on Ontario
+(Section~\ref{sec:construction}).
 \(\Cj\) is a linearisation of the conditional-mean factor (intended
 local, effectively global here); \(\Sj\) is the second moment of
 \(\kQ\)'s Gaussian projection; \(\Sj \to 0\) reproduces the
@@ -224,10 +219,9 @@ delay embedding, coordinates \(2, \ldots, d\) of the one-step image
 are deterministic shifts of the input coordinates
 (\(Y_{[:,\,1:]} = X_{[:,\,:-1]}\) exactly). The only stochastic
 content of the one-step map is the scalar coordinate-0 innovation;
-therefore \(\Sj\) has exactly rank one, independent of data --- the
-multivariate diffusion is structurally a single scalar innovation
-variance embedded in \(\Rb^{d \times d}\). Any ``multi-mode'' reading
-of \(\Sj\) is incoherent for this embedding and is not reported.
+therefore \(\Sj\) is rank-1 by construction, independent of data ---
+the multivariate diffusion is structurally a single scalar innovation
+variance embedded in \(\Rb^{d \times d}\).
 
 \paragraph{That scalar innovation is non-Gaussian.} The
 non-Gaussianity question is therefore \emph{univariate}. The
@@ -275,7 +269,7 @@ interval includes zero}; on the single-dimension subpopulation
 the CIs overlapped. The full-population verdict is therefore the
 catch-all ``neither dominates'' --- not because the effects are real
 and tied, but because on the complete, correctly-propagated data
-neither is established at all. Document both, engineer neither.
+neither is established at all.
 
 \begin{table}[h]
 \centering
@@ -315,14 +309,9 @@ heavy-tail signal roughly four-fold:
 Earlier one-step measurements
 (re-baseline \(\mathrm{kurt}_{\mathrm{exc}} \approx 24\)--\(33\),
 without multi-step variance propagation) were partly a propagation
-artefact, not solely a property of the innovation law. Propagation is
-a fixed-maximum-dimension state augmentation carrying unused lag
-coordinates as deterministic, zero-innovation components, validated
-to machine precision against the closed-form linear-Gaussian
-reference and bit-identical to the unaugmented recursion on
-single-dimension days. Restricting to the single-dimension
-subpopulation (\(\approx 58\%\) of days) yields the same qualitative
-verdict.
+artefact, not solely a property of the innovation law. Restricting
+to the single-dimension subpopulation (\(\approx 58\%\) of days)
+yields the same qualitative verdict.
 
 \section{Application and results}
 \label{sec:application}
@@ -446,23 +435,17 @@ have settled actuals (wrong horizon); the day-ahead-issued products
 Load'' carries a definitional \(\approx +2485~\mathrm{MW}\) offset
 over Ontario Demand (MarketQuantity enumeration: Total
 Energy/Loss/Load/Dispatchable/10S/10N/30R; none is Ontario demand).
-This is \emph{why} the registered forward experiment
-(Section~\ref{sec:registered}) is the methodologically correct
-comparison. (Stated for public archives as of the recorded access
-date.)
+(Stated for public archives as of the recorded access date.)
 
 \subsection{Validation against synthetic ground truth}
 \label{sec:synth}
 
-Three gates call the same estimator code used elsewhere in the paper
-(not reimplementations); their structure is summarised in
-Table~\ref{tab:gates}. All three pass.
+Three gates, summarised in Table~\ref{tab:gates}, all pass.
 
 \begin{table}[h]
 \centering
 \small
-\caption{Synthetic-ground-truth validation gates. Each calls the
-same estimator code as the main pipeline.}
+\caption{Synthetic-ground-truth validation gates.}
 \label{tab:gates}
 \begin{tabular}{l l l}
 \toprule
@@ -548,8 +531,7 @@ hour-of-day from one week prior.
 \begin{table}[h]
 \centering
 \caption{Per-horizon backtest error and ratio to the
-seasonal-persistence baseline. Rows are to be filled with the
-verified backtest output.}
+seasonal-persistence baseline.}
 \label{tab:backtest-horizons}
 \begin{tabular}{c c c c}
 \toprule
