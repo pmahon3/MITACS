@@ -351,16 +351,26 @@ state, the drift fit, the diffusion (\(\Sj\) is the covariance of
 implicit seasonal model coupled into \(\kQ\), not a benign
 preprocessing step.
 
-Re-running under climatology specs of varying resolution (including
-no-transform) tested two hypotheses about the coupling: either it is
-a benign invertible coordinate change, or it is a leaky implicit
-seasonal model that corrupts the dynamics. The phase/asymmetry
-structure was \textbf{invariant} across specs --- the conditional-mean
-structure is genuine demand dynamics, favouring the benign-coordinate
-reading on the location axis. The tail structure \emph{did} move with
-seasonal resolution --- the leaky-seasonal reading partially applies
-on the heavy-tail axis, which is the Section~\ref{sec:caveat} caveat,
-not a separate defect.
+Is the coupling \emph{benign} (an invertible change of coordinates,
+the dynamics unaffected) or \emph{leaky} (an implicit seasonal model
+whose error structure is folded into the dynamics)? The benign
+reading is the simpler one and the place to start. It makes a
+testable prediction: if it holds exactly, the error structure should
+not vary with the climatology's seasonal resolution. To test it, the
+pipeline was re-run under climatology specs of varying resolution
+(monthly $\times$ hour-of-day, monthly only, hour-of-day only, and
+the no-transform extreme), and the per-axis error structure measured
+in demand space.
+
+The result has two parts. On the location axis (phase/asymmetry
+structure), the error was \textbf{invariant} across all specs ---
+the benign prediction is met exactly, and the conditional-mean
+structure is genuine demand dynamics rather than a transform
+artefact. On the heavy-tail axis, however, the error structure
+\emph{did} move with seasonal resolution --- the benign prediction
+fails, and the coupling acts there as a partially leaky seasonal
+model. This is Section~\ref{sec:caveat}'s heavy-tail caveat showing
+up at the coordinate layer, not a separate defect.
 \todo[inline]{Development-set investigation; its role here is
 methodological --- establishing the coordinate is sound before any
 subsequent re-specification.}
