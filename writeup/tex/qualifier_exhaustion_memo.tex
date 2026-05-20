@@ -206,42 +206,73 @@ kurtosis of the standardised \(h\)-step residual and of the raw
 skeptical ``\(s_k^2\) grows and over-scales'' reading).
 
 The check, run on the augmented-scope cache
-(\texttt{scratch/hstep\_kurtosis.py}):
+(\texttt{scratch/hstep\_kurtosis.py}; CIs added by
+\texttt{scratch/hstep\_kurtosis\_stress.py}):
 \begin{center}\small
-\begin{tabular}{r r r r}
+\begin{tabular}{r r r r r r}
 \toprule
-\(h\) & \(n\) & excess kurt (std) & excess kurt (raw) \\
+\(h\) & \(n\) & kurt (std) & kurt (raw) & 95\% CI (day-bootstrap, pooled) & reading \\
 \midrule
-1  & 131 & 8.60  & 8.58  \\
-2  & 132 & 2.60  & 2.62  \\
-3  & 132 & 1.13  & 1.09  \\
-4  & 132 & 1.06  & 1.10  \\
-6  & 132 & 2.12  & 2.27  \\
-8  & 132 & -0.34 & -0.35 \\
-12 & 132 & -0.59 & -0.62 \\
-24 & 132 & -0.33 & -0.29 \\
+1  & 131 & 8.60  & 8.58  & \([0.75,\ 13.57]\) & heavy-tail consistent \\
+2  & 132 & 2.60  & 2.62  & \([-0.05,\ 4.76]\) & uncertain \\
+3  & 132 & 1.13  & 1.09  & \([-0.04,\ 2.29]\) & uncertain \\
+4  & 132 & 1.06  & 1.10  & \([-0.40,\ 2.28]\) & uncertain \\
+6  & 132 & 2.12  & 2.27  & \([\phantom{-}0.31,\ 3.65]\) & uncertain \\
+8  & 132 & -0.34 & -0.35 & \([-0.83,\ 0.32]\) & approx-Gaussian \\
+12 & 132 & -0.59 & -0.62 & \([-1.00,\ -0.13]\) & approx-Gaussian \\
+24 & 132 & -0.29 & -0.33 & \([-0.75,\ 0.32]\) & approx-Gaussian \\
 \bottomrule
 \end{tabular}
 \end{center}
-Standardised and raw kurt move together (line-for-line agreement to
-two decimals), so the charitable reading holds and the propagation
-\(s_k^2\) is not over-scaling: the underlying compounded innovation
-genuinely becomes approximately Gaussian at \(h \geq 3\) (Fisher
-excess kurt drops from \(8.60\) at \(h{=}1\) to \(1.13\) at \(h{=}3\),
-then fluctuates near zero through \(h{=}24\)). The \(h{=}1\) value
-itself is more moderate than the per-day-type-slab rebaseline kurt
-(\(\approx 24\)--\(33\)) because this cache is the full-population
-\(d_{\max}\)-augmented dev forecast rather than per-day-type
-intra-day slabs; the \emph{shape} of \(\mathrm{kurt}(h)\) versus \(h\)
-is the load-bearing finding, and the shape is monotone-rapid decay.
+Three observations bound what the check supports.
 
-\textbf{Verdict: OPEN, responsive.} Direct fitting of \(\Pi_h\) for
-\(h \geq 3\) with a Gaussian local kernel is framework-consistent and
-the kernel form is approximately adequate at the horizon being
-forecast. Closing condition: a designed multi-horizon estimator that
-fits a separate \((C_j^{(h)}, \Sigma_j^{(h)})\) per horizon and a
-gate measuring the per-horizon residual non-Gaussianity to confirm
-the cache pattern survives a full re-estimation.
+\emph{(a) Trend versus magnitude.} The point estimates trend
+downward with \(h\): \(8.60 \to 2.60 \to 1.13\) over \(h = 1{,}2{,}3\)
+and then fluctuate near zero. Standardised and raw kurt agree
+line-for-line, so the propagation \(s_k^2\) is not over-scaling. The
+\emph{trend} is real. But the bootstrap CIs at \(h = 2,3,4,6\) all
+straddle \(1.0\); the magnitude reading ``kurt drops to
+\(\approx 0\) at \(h = 3\)'' is a point-estimate claim the CI does
+not support. Only at \(h \geq 8\) do the CIs cleanly exclude
+moderate heavy-tailedness.
+
+\emph{(b) Pooling vs.\ composition.} The rebaseline established
+\(\mathrm{kurt} \approx 24\)--\(33\) per day-type slab on the
+intra-day-conditioned one-step residual; the \(h{=}1\) cache reading
+here is \(8.6\) (pooled) and \(10.2\) (weekday slab; \(n = 94\)).
+The gap is the difference between the per-day-type intra-day-slab
+diagnostic (heavily heavy-tailed) and the dev-set forecast cache
+(which the augmented propagation conditions and scales differently).
+The pooling decomposition shows the kurt-decay pattern is
+weekday-driven --- weekday \(h{=}1 \to h{=}3\): \(10.20 \to 1.14\),
+monotone --- while saturday (\(n = 19\); qualitative only) is
+non-monotone (peaks at \(h{=}6\)) and sunday is noisy. The
+composition-launders-the-tail reading holds within the weekday slab;
+on the smaller-\(n\) day-types it is unmeasured.
+
+\emph{(c) Negative kurt at \(h \geq 8\).} Three readings:
+genuinely-platykurtic recursion behaviour (residuals saturate as
+\(s_k^2\) grows); finite-sample artefact at \(n = 132\); or
+over-scaling already ruled out by the raw\(\,=\,\)std agreement. The
+bootstrap CI excludes the kurt being \(\geq 1\) at \(h \geq 8\) but
+does not pin down which of the first two readings holds. For Stage-1
+purposes, the load-bearing claim is only that the kernel form is
+\emph{approximately} adequate at long horizons; whether it is exactly
+Gaussian or slightly thin-tailed does not change that.
+
+\textbf{Verdict: OPEN, responsive (with hedged magnitude).} Direct
+fitting of \(\Pi_h\) with a Gaussian local kernel is
+framework-consistent and the cached evidence supports approximate
+adequacy at long horizons (\(h \geq 8\), CI-clean) and is consistent
+with adequacy at medium horizons (\(h = 3\)--\(6\), trend present but
+CI uncertain). Two important closing conditions: \emph{(i)}~the
+\(h\)-step residual property here is a property of \(\Pi_1^h\) under
+the current one-step estimator, not of a directly-fit
+\((C_j^{(h)}, \Sigma_j^{(h)})\) --- whether direct h-step fitting
+preserves the property is \emph{plausible by the same compositional
+reasoning} but unmeasured; \emph{(ii)}~a designed multi-horizon
+estimator with a per-horizon non-Gaussianity gate is needed to
+confirm the pattern survives a full re-estimation.
 
 \paragraph{Stage-1 table.}
 \begin{center}\small
@@ -261,98 +292,229 @@ deferred to Stage~2; within Stage 1 the only route is via Register)
 & Stage 2 (substantive verdict on relaxing the local kernel) \\
 \midrule
 Single step
-& OPEN, responsive (\(\mathrm{kurt}(h){\downarrow} \to 0\) for
-\(h \geq 3\) in the augmented cache; charitable reading
-empirically confirmed)
+& OPEN, responsive with hedged magnitude (trend
+\(\mathrm{kurt}(h){\downarrow}\) is real and weekday-driven; CIs
+clean at \(h{\geq}8\), uncertain at \(h = 3\)--\(6\); the property
+is measured under composition of the current one-step estimator,
+not under direct h-step fitting)
 & Multi-horizon estimator with separate
 \((C_j^{(h)}, \Sigma_j^{(h)})\) per \(h\), with a per-horizon
-non-Gaussianity gate \\
+non-Gaussianity gate; verify direct-h fitting preserves the
+compositional property \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \paragraph{Stage-1 conclusion.} All three qualifiers hold definite
-verdicts; the exit condition is met. Two qualifiers (Register, Single
-step) opened with responsive levers --- the framework already permits
-accommodation under the Stage-1 partition. Imposed Gaussianity is
-deferred to Stage 2 by construction. Stage 2 still has to run to
-give Imposed Gaussianity its substantive (non-partition-induced)
-verdict, which the locked exit rule requires regardless of whether
-Stage 1 already identified responsive levers.
+verdicts; the exit condition is met. Two qualifiers opened with
+responsive levers --- Register cleanly (state augmentation is
+framework-permitted; the §6 lever) and Single step with hedged
+magnitude (the kurt-decay trend is real and CI-clean at long
+horizons; medium-horizon magnitude is uncertain and direct-h fitting
+remains unmeasured). Imposed Gaussianity is foreclosed at this stage
+by the partition's class restriction; Stage 2 is designed to give it
+the substantive verdict on relaxing the kernel form. The locked exit
+rule requires Stage 2 to run regardless of how many levers Stage 1
+already identified.
 
 \section{Stage 2 --- \(\kQ\) plus named extensions}
 \label{sec:stage2}
 
-\paragraph{Licensing.} A relaxation is open at this stage if it
-lives inside an extension the framework's own language admits without
-changing the operator class. The clearest case is the law-agnostic
-content of \(\kQ\): the Rokhlin conditional distribution is whatever
-\(Q\) hands us, and Gaussianity was an estimator-side imposition.
-Replacing the Gaussian local kernel with a parametric heavy-tailed
-local kernel (e.g.\ local Student-\(t\) with estimated \(\nu\)) or a
-local non-parametric kernel is therefore an extension of the
-\emph{estimator}, not of \(\kQ\). At Stage 2 we are explicitly
-licensing this kind of move.
+\paragraph{Licensing.} Stage 2 relaxes the partition: the estimator
+class may now change. A relaxation is open if it lives inside the
+\emph{law-agnostic content of \(\kQ\)} --- the Rokhlin conditional
+distribution is whatever \(Q\) discloses; Gaussianity was an
+estimator-side imposition. Replacing the Gaussian local kernel with
+a parametric heavy-tailed local kernel (e.g.\ local Student-\(t\) with
+estimated \(\nu\)) or a local non-parametric kernel (KDE / empirical
+CDF of local residuals) is an extension of the estimator, not of
+\(\kQ\). The framework permits this directly. \(\{\Pi_t\}\), the
+disclosure register, and the state-side conditioning are unchanged
+from Stage 1; what varies is the parametric form of the local
+predictive law.
 
-\todo[inline]{Stage 2 body: re-examine each qualifier that was
-foreclosed-at-Stage-1, under the named extensions. Register: largely
-unchanged (state choice is independent of kernel form). Imposed
-Gaussianity: \emph{this is the qualifier the stage is designed to
-relax}. Local Student-\(t\) with anchor-level \(\nuhat\); local
-non-parametric kernel via residual empirical distribution; mixture
-locals. For each, is the relaxation framework-consistent? What does
-the validation gate look like? Does \#41 bite (CV on \(\nu\)?). Single
-step: under Stage-2 licensing, can we fit multiple-step \(\Pij\)
-directly? E.g.\ separate estimators per horizon, all law-agnostic.
-Verdict per row.}
+\paragraph{Imposed Gaussianity at Stage 2 --- the qualifier the
+stage is designed for.} Three concrete relaxations sit inside the
+stage's licensing:
+\begin{enumerate}[leftmargin=2em]
+  \item \emph{Local Student-\(t\)} with anchor-level \(\nuhat_j\).
+  Fit \((\Cj, \Sj)\) as now; replace the Gaussian predictive
+  likelihood with Student-\(t(\nuhat_j,\; x\Cj,\; \Sj)\). The shape
+  of the data already supports the right parametric choice ---
+  rebaseline kurt \(\approx 24\)--\(33\) is exactly the regime where
+  a Student-\(t\) tail with low \(\nu\) (around \(4\)--\(5\)) is the
+  canonical fit. The existing error-decomposition memo
+  (\texttt{run\_error\_decomposition.py} line 353) already uses the
+  method-of-moments \(\nuhat = 6/\kappa + 4\) construction; \(M_2\)
+  reports the relative-loss reduction \(dB \approx 2.3\%\), CI
+  overlaps the drift counterfactual but is non-zero. The framework
+  evidence is in hand; the gating evidence is partial.
+  \item \emph{Local non-parametric kernel.} Use the empirical
+  distribution of the local residuals (KDE for densities; empirical
+  CDF for intervals) as the predictive law directly. Maximal
+  flexibility, no parametric assumption on the conditional law. Cost:
+  a residual-KDE bandwidth that \emph{cannot} be selected by
+  prediction-error CV (\#41 RESOLVED bars this), so a plug-in
+  selector (Silverman, scaled-MAD) is mandatory; and predictive
+  moments do not compose cleanly through the rank-1 \(J\) for
+  multi-step propagation, so multi-step would require either
+  bootstrap-resample propagation or a parametric proxy for the
+  recursion.
+  \item \emph{Mixture locals} --- per-anchor finite Gaussian
+  mixture. Captures bi-modal local conditional laws if the dynamics
+  flips between regimes (the \(j\)-th anchor's neighbourhood contains
+  examples from two distinct local linearisations). Framework-
+  consistent. Cost: per-anchor mixture-component count and weight
+  selection, same \#41 caveat.
+\end{enumerate}
+All three are framework-permitted; relaxation~1 has the most
+existing evidence (the rebaseline kurt directly supports a low-\(\nu\)
+Student-\(t\); the \(\nuhat\) machinery is already implemented; the
+\(M_2\) sub-result is non-zero), is the cheapest to implement (drop-in
+likelihood swap), and propagates through the multi-step recursion
+without leaving closed-form analytics. \textbf{Verdict: OPEN,
+responsive.} Closing condition: a designed local-\(t\) estimator
+with a non-CV \(\nu\)-selection rule (per-anchor method-of-moments
+\(\nuhat_j\), or a global \(\hat\nu\) from the pooled standardised
+residual), a \#41-safe gate (no prediction-error CV in the selection
+loop), and a re-measurement of \(M_1/M_2\) with the new likelihood to
+see whether the diffusion-deficiency contribution \(dB\) clears
+\(\tau_{\min}\).
+
+\paragraph{Register at Stage 2.} The estimator-class relaxation is
+orthogonal to the state choice. Stage 2 leaves Register's Stage-1
+verdict intact (OPEN, responsive, estimand changes). But the
+estimator-class licensing opens a \emph{combined} lever: state
+augmentation + non-Gaussian local kernel. State augmentation
+(richer embedding) reduces the conditional-law non-Gaussianity by
+exposing the latent variable that was driving it; the non-Gaussian
+local kernel handles whatever residual heavy-tailedness state
+augmentation does not kill. Framework-consistency: both moves are
+independent dimensions of the Stage-2 licensing (one varies the
+\((Q, F)\) coarsening, the other varies the parametric form of the
+local law); their composition is permitted. \textbf{Verdict: OPEN,
+responsive (unchanged from Stage 1); combined lever now also open
+as the richest Stage-2 design.}
+
+\paragraph{Single step at Stage 2.} Stage 1 found OPEN, responsive
+with hedged magnitude. Stage 2's relaxation could in principle
+refine this in two ways: (i)~direct-h fitting with a non-Gaussian
+local kernel at each horizon; (ii)~hybrid --- direct-h fitting at
+short horizons where the per-step kurt is high (\(h = 1, 2\)) with
+local-\(t\), then composition with Gaussian local kernels at long
+horizons where the cached kurt-decay says Gaussian is approximately
+adequate. The cached kurt evidence is sufficient \emph{shape}-wise
+to motivate the hybrid design but not magnitude-wise to declare it
+adequate at \(h = 3\)--\(6\) (the CIs straddle 1.0). A theoretical
+caveat: composition of Student-\(t\) local kernels does not in
+general yield a Student-\(t\) marginal; the moment behaviour of the
+composed law is qualitatively different from the per-step law and
+must be measured rather than assumed. \textbf{Verdict: OPEN,
+responsive (unchanged from Stage 1; the hybrid design is now also
+open).} Closing condition adds: per-horizon residual non-Gaussianity
+measurement \emph{under} the relaxed kernel (not just the current
+Gaussian's composed residuals).
 
 \paragraph{Stage-2 table.}
 \begin{center}\small
-\begin{tabular}{lll}
+\begin{tabular}{p{0.20\linewidth} p{0.34\linewidth} p{0.36\linewidth}}
 \toprule
 Qualifier & Stage-2 verdict & Closing condition \\
 \midrule
-Register             & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
-Imposed Gaussianity  & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
-Single step          & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+Register
+& OPEN, responsive (unchanged from Stage 1); combined lever
+\emph{state augmentation + non-Gaussian kernel} additionally open
+& Designed state-augmentation experiment; optionally combined with
+a local-\(t\) likelihood under the augmented state \\
+\midrule
+Imposed Gaussianity
+& OPEN, responsive (the stage's load-bearing finding): local
+Student-\(t\), local non-parametric, and mixture locals are all
+framework-permitted; rebaseline kurt directly supports the
+Student-\(t\) shape with \(\nu \approx 4\)--\(5\); the
+\texttt{run\_error\_decomposition.py} \(M_2\) machinery already
+implements \(\nuhat\) and gives a partial gating signal
+(\(dB \approx 2.3\%\), CI overlaps the drift counterfactual but
+non-zero)
+& Local-\(t\) estimator with non-CV \(\nuhat\) selection
+(method-of-moments per-anchor or pooled-residual global) and a
+\#41-safe gate; re-measure \(M_1/M_2\) under the new likelihood \\
+\midrule
+Single step
+& OPEN, responsive (unchanged from Stage 1); hybrid design
+(direct-h with local-\(t\) at \(h = 1, 2\); composition with
+Gaussian at \(h \geq 8\); medium-horizon strategy TBD by
+measurement) additionally open
+& As Stage 1, plus per-horizon residual non-Gaussianity
+measurement \emph{under} the relaxed kernel \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\todo[inline]{Stage-2 conclusion: as Stage 1.}
+\paragraph{Stage-2 conclusion.} All three qualifiers hold definite
+verdicts; the exit condition is met. The substantive (non-partition-
+induced) verdict on Imposed Gaussianity is OPEN, responsive --- the
+framework's law-agnostic content directly permits the kernel-form
+relaxations the paper's heavy-tail finding calls for, and the most
+practical of them (local Student-\(t\)) already has partial
+implementation and a non-zero gating signal. With Stage 2 settled,
+the memo's primary question is answered: \emph{the \(\kQ\) framework
+permits at least three substantively-distinct levers}
+(state augmentation; direct-h fitting with appropriate per-horizon
+kernel choice; local kernel-form relaxation), and a combined design
+across two or more axes. Stage 3 would be needed only if Stage 2
+had foreclosed everything; it has not.
 
-\section{Stage 3 --- Any Markov-semigroup-coherent estimator}
+\section{Stage 3 --- Any Markov-semigroup-coherent estimator
+(not load-bearing)}
 \label{sec:stage3}
+
+\paragraph{Status.} Stages 1 and 2 each identified responsive levers
+open within their licensing. The locked exit rule requires every
+stage to deliver three definite verdicts before the next stage can
+run, and Stage 2 has done so. \emph{Stage 3 is not load-bearing for
+the memo's primary question}: ``Can the \(\kQ\) framework
+accommodate the coupling?'' is settled in the affirmative at Stage 2.
+The remainder of this section is included only to make the
+exhaustion structurally complete; it is short by design.
 
 \paragraph{Licensing.} The \(\kQ\) register is dropped. A relaxation
 is open at this stage if it sits inside any class of estimators
-coherent with general Markov-semigroup theory --- including ones
-that change the operator class (e.g.\ from the Rokhlin disclosure
-register to a generator-based one; or to a non-Markovian
-state-space representation with auxiliary latent variables). The
-honest framing of this stage is: if no relaxation closes at Stages
-1 or 2, the framework's natural generality cannot accommodate the
-coupling without changing the object the paper is about.
+coherent with general Markov-semigroup theory, including ones that
+change the operator class (e.g.\ generator-based parametrisations;
+non-Markovian state-space with auxiliary latent variables; deep
+operator-learning).
 
-\todo[inline]{Stage 3 body: for each qualifier, what does a fully
-general estimator class permit? Register: full coordinate redesign
-(phase, derivative, exogenous), possibly with auxiliary latent
-states. Imposed Gaussianity: arbitrary local conditional law,
-including non-parametric. Single step: full semigroup
-parametrisation including operator-learning approaches. The question
-is which of these are framework-coherent in the sense that they still
-correspond to \emph{the same underlying \(Q\)}, not to a different
-modelling target. Verdict per row.}
+\paragraph{Stage-3 verdicts (summary).} All three qualifiers remain
+OPEN at this stage by inheritance --- anything permitted at Stages 1
+or 2 is permitted here. Additional levers Stage 3 \emph{adds}:
+operator-learning approaches that parametrise \(\{\Pi_t\}\) jointly
+rather than per-horizon (these change the modelling target away from
+the Rokhlin disclosure register, so they sit outside the paper's
+register; they are framework-coherent in the general
+Markov-semigroup sense but not \(\kQ\)-faithful); latent-variable
+augmentations that the original \((Q, F)\) pair does not contain.
+These are not preferred over the Stage-1/Stage-2 levers because they
+incur framework cost (departing from the disclosure register) for
+benefits that the Stage-1/Stage-2 levers already deliver.
 
-\paragraph{Stage-3 table.}
+\paragraph{Stage-3 table (brief).}
 \begin{center}\small
-\begin{tabular}{lll}
+\begin{tabular}{p{0.20\linewidth} p{0.34\linewidth} p{0.36\linewidth}}
 \toprule
-Qualifier & Stage-3 verdict & Closing condition \\
+Qualifier & Stage-3 verdict & Note \\
 \midrule
-Register             & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
-Imposed Gaussianity  & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
-Single step          & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
+Register & OPEN (inherits Stage 1/2; Stage 3 adds latent-variable
+augmentations outside \((Q, F)\))
+& Not preferred over Stage 1; same lever at higher framework cost \\
+\midrule
+Imposed Gaussianity & OPEN (inherits Stage 2; Stage 3 adds
+operator-learning likelihoods)
+& Not preferred over Stage 2; same lever at higher framework cost \\
+\midrule
+Single step & OPEN (inherits Stage 1/2; Stage 3 adds joint
+parametrisation of \(\{\Pi_t\}\))
+& Outside the disclosure register \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -360,27 +522,107 @@ Single step          & \textit{TODO: verdict} & \textit{TODO: what closes it} \\
 \section{Synthesis and outcome}
 \label{sec:synthesis}
 
-\todo[inline]{Synthesis: aggregate the three stage tables. There
-are four plausible outcome shapes:
-\emph{(O-i)} Some qualifier opens at Stage 1 \(\Rightarrow\) the
-\(\kQ\) framework already permits the resolution; identify the
-experiment and design the gate.
-\emph{(O-ii)} All foreclosed at Stage 1; some opens at Stage 2
-\(\Rightarrow\) the resolution requires a named extension (likely
-the law-agnostic local kernel); identify the experiment and the
-\#41-safe selection rule.
-\emph{(O-iii)} All foreclosed at Stages 1 and 2; some opens at
-Stage 3 \(\Rightarrow\) the resolution exists but requires leaving
-the \(\kQ\) register the paper operates in; this is publishable as
-an honest scope statement.
-\emph{(O-iv)} All foreclosed at all three stages \(\Rightarrow\) no
-method can accommodate the coupling within the framework's natural
-generality; the conclusive answer is structural-not-estimator-local
-(the \S6 lever) and the paper has its definitive \emph{why}.}
+\paragraph{Outcome shape.} Both Stage 1 and Stage 2 identified
+responsive levers; Stage 3 inherits all of them at higher framework
+cost. The memo's primary question is answered: \textbf{the \(\kQ\)
+framework permits accommodation of the heavy-tail / forecast-accuracy
+coupling}, via at least three substantively-distinct levers and
+their combinations. The natural generality of the framework holds:
+no foreclosure is required, the answer is constructive rather than
+``no method can exist.''
 
-\todo[inline]{Recommendation block: experiments that follow from the
-shape; \#41-safe gate designs for any new hyperparameter; frozen-spec
-implications.}
+\paragraph{Options inventory.} Four design options sit inside the
+union of Stages 1 and 2; each is framework-consistent. The table
+records framework cost (which qualifier(s) the option relaxes;
+whether the estimand changes; whether the disclosure register is
+preserved), implementation cost, evidence in hand, and the
+\#41-bite risk (whether the option introduces a hyperparameter that
+prediction-error CV cannot select).
+
+\begin{center}\small
+\begin{tabular}{p{0.18\linewidth} p{0.22\linewidth} p{0.18\linewidth} p{0.17\linewidth} p{0.13\linewidth}}
+\toprule
+Option & Mechanism & Framework cost & Evidence in hand & \#41 risk \\
+\midrule
+\textbf{S} (state)
+& Augment embedding with derivative, phase, or exogenous covariate;
+keep local-linear-Gaussian estimator
+& Stage 1; estimand changes (new \(\kappa_{Q,\mathrm{new}}\));
+disclosure register preserved
+& \S6 of the paper names it; no direct experiment yet
+& Low (state choice is structural, not CV-selected) \\
+\midrule
+\textbf{H} (horizon)
+& Fit \((C_j^{(h)}, \Sigma_j^{(h)})\) per horizon; keep Gaussian
+local kernel
+& Stage 1; estimand unchanged; disclosure register preserved
+& kurt\((h)\) cache: trend present, CIs clean at \(h{\geq}8\),
+uncertain at \(h{=}3\)--\(6\); under composition of current
+estimator only
+& Low (no new hyperparameter) \\
+\midrule
+\textbf{K} (kernel)
+& Replace Gaussian local likelihood with Student-\(t(\nuhat_j)\);
+keep state and \(\Pi_1\)
+& Stage 2; estimand unchanged; disclosure register preserved
+& Rebaseline kurt directly supports the shape; \(\nuhat\) machinery
+already implemented; \(M_2\)'s \(dB \approx 2.3\%\) (CI overlaps,
+non-zero)
+& Medium (\(\nu\) selection must be non-CV: per-anchor
+method-of-moments or pooled-residual global) \\
+\midrule
+\textbf{S+K} (combined)
+& State augmentation + non-Gaussian local kernel
+& Stages 1 and 2; estimand changes; disclosure register preserved
+& Inherits S and K
+& Medium (inherits K's selection rule) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Recommendation block.} The performance-comparison plan
+the user has asked for naturally falls out of this inventory. A
+sensible ordering:
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Implement Option K first} as a head-to-head against
+  the current Gaussian estimator on the same dev set. It is the
+  cheapest move (drop-in likelihood swap; no new pipeline, no new
+  state, no new propagation), has the strongest existing evidence
+  (rebaseline kurt + \(\nuhat\) + non-zero \(dB\)), and isolates the
+  kernel-form lever. The discriminating measurement is \(M_1/M_2\)
+  under the new likelihood plus log-score and interval coverage on
+  the dev set. \#41-safe \(\nu\) selection: per-anchor
+  method-of-moments \(\nuhat_j = 6/\hat{\kappa}_j + 4\) (already
+  implemented; constant per anchor; not CV-selected) or pooled-
+  residual global \(\hat\nu\).
+  \item \textbf{Implement Option S as the structural-lever
+  comparator.} The \S6 lever is named but unmeasured. Adding a
+  derivative coordinate to the embedding (the simplest of the three
+  state-augmentations) gives the strongest discriminating signal
+  against K --- if S alone reduces the kurt to \(K\)-level adequacy,
+  the kernel-form lever may be unnecessary; if S only reduces it
+  partially, S+K is the natural design.
+  \item \textbf{Option H is informative but lower-priority.}
+  Per-horizon refitting is most useful if the K head-to-head is
+  inconclusive and the cached kurt-decay is the load-bearing
+  signal. Defer pending the K result.
+  \item \textbf{Option S+K is the upper-bound design.} Not run until
+  S and K individual signals are in hand --- combined experiments
+  with two confounded mechanisms repeat the \S4.2 disambiguation
+  trap.
+\end{enumerate}
+
+\paragraph{Common requirements for any of the above.} Each option
+above introduces (at most) one hyperparameter and lives inside the
+existing pipeline; none requires a new validation-gate architecture.
+\#41-class CV-selection is foreclosed for all of them and the
+selection rule must be plug-in (method-of-moments, Silverman, scaled-
+MAD) or structural (state choice). Frozen-spec implications: any
+option that changes the estimator class is a new frozen spec; the
+existing spec is the Gaussian-\(\Pi_1\) baseline. The empirical fork --- S
+vs.\ K vs.\ S+K --- is precisely the kind of comparison the user has
+asked for, run head-to-head against the existing frozen spec.
 
 \section{Integration decision (deferred)}
 \label{sec:integration}
