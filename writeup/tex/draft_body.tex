@@ -21,9 +21,8 @@ dynamical state}: given a delay embedding of recent demand, what is
 the distribution of the next state? We instantiate a local-Gaussian
 conditional-kernel estimator of that law on IESO data and evaluate it
 as a \emph{prediction experiment} --- with an out-of-sample backtest,
-a hash-stamped registered forward experiment, and an explicit
-accounting of what can and cannot be compared against IESO's own
-published forecasts.
+a registered forward experiment, and an explicit accounting of what
+can and cannot be compared against IESO's own published forecasts.
 
 The estimator targets the conditional-regularity kernel \(\kQ\)
 determined by the data measure via Rokhlin disintegration; the
@@ -52,14 +51,17 @@ Per day-type \(\mathrm{dt} \in \{\mathrm{weekday},
 \mathrm{saturday}, \mathrm{sunday}\}\) the embedding dimension
 \(d = d(\mathrm{dt})\) is selected on pre-cutoff library data by the
 elbow rule on the one-step in-sample prediction-skill curve
-\(\rho \mapsto d\), with the day-anchor seam excluded (one-step
-targets falling on the rollover hour are dropped from the fit; see
-Section~\ref{sec:pipeline}). The pre-cutoff library is
+\(\rho \mapsto d\), with the \emph{day-type seam} excluded --- here
+defined as the 07:00 hour at which the active day-type changes; a
+one-step pair \((x_t, x_{t+1})\) whose target time \(t+1\) falls on
+that hour crosses to a different day-type's library and is dropped
+from the fit (see Section~\ref{sec:pipeline}). The pre-cutoff library
+is
 \begin{equation}
 \label{eq:library}
 \mathcal{L} \;=\; \{\,(x_t, x_{t+1}) : t \le t_{\mathrm{cut}},\;
 t \text{ on the day-type } \mathrm{dt},\;
-t+1 \notin \text{rollover seam}\,\} \,,
+t+1 \notin \text{day-type seam}\,\} \,,
 \end{equation}
 with \(t_{\mathrm{cut}}\) the model-specification cutoff.
 
@@ -212,8 +214,9 @@ Gaussian-proxy diffusion}
 \label{sec:caveat}
 
 The two estimator factors \(\Cj\) and \(\Sj\) each carry a quantified
-limitation. A pre-registered dev-set decomposition (below), on the
-full population with predictive variance correctly propagated, finds
+limitation. A pre-registered decomposition on the 2021--22
+development-set benchmark (below), with predictive variance correctly
+propagated over the full delivery-day population, finds
 \textbf{neither effect clears the materiality bar}.
 
 \paragraph{\(\Sj\) is rank-1 by construction.} For a single-variable
@@ -227,9 +230,9 @@ variance embedded in \(\Rb^{d \times d}\). Any ``multi-mode'' reading
 of \(\Sj\) is incoherent for this embedding and is not reported.
 
 \paragraph{That scalar innovation is non-Gaussian.} The
-non-Gaussianity question is therefore \emph{univariate}. Through the
-production estimator, validated against synthetic ground truth
-(Section~\ref{sec:synth}), the one-step innovation is heavy-tailed;
+non-Gaussianity question is therefore \emph{univariate}. The
+estimator, validated against synthetic ground truth
+(Section~\ref{sec:synth}), gives a heavy-tailed one-step innovation;
 the propagation-aware strength of that departure
 (Section~\ref{sec:caveat-propagation}) is what the diagnostic of
 Section~\ref{sec:caveat-decomposition} acts on.
@@ -245,9 +248,10 @@ departs from \(\kQ\).
 
 \paragraph{Decomposition.}
 \label{sec:caveat-decomposition}
-A pre-registered dev-set diagnostic (2021--22 inspection benchmark;
-inspection-only, not claim-grade) bounds the recoverable loss of
-each factor by oracle counterfactuals on the multi-step forecast
+A pre-registered diagnostic on the 2021--22 development-set
+benchmark (exploratory; results not carried as headline claims)
+bounds the recoverable loss of each factor by oracle counterfactuals
+on the multi-step forecast
 log-loss \(\Lbar\), over all delivery days, with predictive variance
 correctly propagated across the embedding-dimension change.
 The recoverable-loss factors are
@@ -257,10 +261,11 @@ The recoverable-loss factors are
 \qquad
 \DB \;:=\; \frac{\Lbar - \Lbar^{(B)}}{\Lbar},
 \end{equation}
-where \(\Lbar^{(A)}\) is the dev log-loss under the oracle that
-removes the phase-conditional mean bias, and \(\Lbar^{(B)}\) is the
-dev log-loss under the oracle that replaces the Gaussian innovation
-law with a Student-\(t\) fitted on the residuals (shape \(\nuhat\)).
+where \(\Lbar^{(A)}\) is the development-set log-loss under the
+oracle that removes the phase-conditional mean bias, and
+\(\Lbar^{(B)}\) is the same loss under the oracle that replaces the
+Gaussian innovation law with a Student-\(t\) fitted on the residuals
+(shape \(\nuhat\)).
 With \(\taumin = 0.01\) the pre-registered materiality threshold,
 \begin{equation}
 \label{eq:results}
@@ -313,8 +318,8 @@ Stages: \textbf{acquire} IESO public \texttt{PUB\_Demand};
 \textbf{de-seasonalise} (Section~\ref{sec:zscore}) hourly demand to a
 stationary \(z\)-score; \textbf{day-type tag}
 \(\{\mathrm{weekday}, \mathrm{saturday}, \mathrm{sunday}\}\) using a
-configurable 07:00 day-anchor offset (transitions whose one-step
-target crosses the day-type rollover seam are excluded --- without
+configurable 07:00 day-anchor offset (transitions across the day-type
+seam are excluded as in Section~\ref{sec:construction} --- without
 this \(\Sj\) is catastrophically ill-conditioned, so the estimand is
 effectively forced to be \emph{intra-day}); \textbf{embedding
 dimension} selected per day-type by an elbow rule on the
@@ -339,17 +344,18 @@ implicit seasonal model coupled into \(\kQ\), not a benign
 preprocessing step.
 
 Re-running under climatology specs of varying resolution (including
-no-transform) tested whether the coupling corrupts the dynamics
-(leaky implicit seasonal model --- ``Reading 2'') or is a benign
-invertible coordinate change (``Reading 1''). The phase/asymmetry
-structure was \textbf{invariant} across specs --- Reading 1 for the
-phase axis: the conditional-mean structure is genuine demand
-dynamics. The tail structure \emph{did} move with seasonal resolution
---- a partial Reading 2 confined to the heavy-tail axis, which is the
-Section~\ref{sec:caveat} caveat, not a separate defect.
+no-transform) tested two hypotheses about the coupling: either it is
+a benign invertible coordinate change, or it is a leaky implicit
+seasonal model that corrupts the dynamics. The phase/asymmetry
+structure was \textbf{invariant} across specs --- the conditional-mean
+structure is genuine demand dynamics, favouring the benign-coordinate
+reading on the location axis. The tail structure \emph{did} move with
+seasonal resolution --- the leaky-seasonal reading partially applies
+on the heavy-tail axis, which is the Section~\ref{sec:caveat} caveat,
+not a separate defect.
 \todo[inline]{Development-set investigation; its role here is
 methodological --- establishing the coordinate is sound before any
-state-representation honing.}
+subsequent re-specification.}
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
@@ -373,15 +379,13 @@ and scoring truth. With forecast \(\hat{y}_{d,h}\) and actual
 \end{equation}
 In a day-ahead forecast, horizon \(h\) is collinear with hour-of-day,
 so the error structure is \emph{diurnal} (deep night easiest;
-dawn/dusk ramps hardest), not pure horizon compounding. The committed
-provenanced C1 artifact gives
-\(\MAE \approx 786~\mathrm{MW}\),
+dawn/dusk ramps hardest), not pure horizon compounding. The recorded
+backtest gives \(\MAE \approx 786~\mathrm{MW}\),
 \(\MAPE \approx 4.78\%\) over \(|\mathcal{D}| = 500\) out-of-sample
-days, \(\approx 1.5\times\) better than seasonal persistence at every
-hour.
-\todo[inline]{Current CLAIM-grade values from the committed
-provenanced artifact; the artifact hash will be restated after any
-honing re-freeze. Per-horizon table will appear in
+days, \(\approx 1.5\times\) better than seasonal persistence at
+every hour.
+\todo[inline]{The recorded backtest result will be restated with its
+content hash once finalised; per-horizon table will appear in
 Appendix~\ref{app:backtest}.}
 Interval coverage carries the Section~\ref{sec:caveat} Gaussian-proxy
 caveat: a Gaussian interval around a heavy-tailed innovation
@@ -391,13 +395,16 @@ under-covers.
 \label{sec:registered}
 
 A fair retrospective IESO comparison is not recoverable
-(Section~\ref{sec:ieso}), so the comparison is run forward. A
-hash-stamped frozen specification captures estimator identity,
-resolved hyperparameters, data cutoff, code commit, and a content
-fingerprint of pre-cutoff actuals, and is verified on load. The
-predictor is local/lazy (per-anchor fit at prediction time from
-\(\le\)-cutoff library data), so the freeze pins the function and
-its inputs, and a cutoff guard blocks post-cutoff data from any fit.
+(Section~\ref{sec:ieso}), so the comparison is run forward. The model
+specification (estimator identity, resolved hyperparameters, data
+cutoff \(t_{\mathrm{cut}}\), code commit, and a content hash of the
+\(\le t_{\mathrm{cut}}\) actuals) is committed before any forecast
+is issued, and the same content hash is re-checked at every
+prediction-time load so the recorded specification cannot be silently
+edited. The predictor is local/lazy (per-anchor fit at prediction
+time from \(\le t_{\mathrm{cut}}\) library data), so the committed
+specification pins the function and its inputs; a cutoff guard blocks
+any post-\(t_{\mathrm{cut}}\) data from entering a fit.
 Forecasts issue forward; scraped actuals settle into an append-only
 ledger (IESO restates recent demand --- revisions appended, never
 overwritten); scoring runs against persistence baselines with IESO
@@ -445,7 +452,7 @@ reimplementations):
 \end{enumerate}
 
 All three gates pass.
-\todo[inline]{Cite the provenanced gate artifact + its numbers from
+\todo[inline]{Cite the recorded gate result with its numbers from
 the verified run.}
 
 \section{Limitations and reproducibility}
@@ -473,15 +480,12 @@ the verified run.}
   model-scope ceiling, not a hyperparameter issue.
 \end{itemize}
 
-\paragraph{Provenance.} Every claim- or method-grade result is written
-through a single envelope stamping each artifact with two hashes ---
-an inputs fingerprint (git commit + frozen-spec hash + library
-versions + RNG seeds + declared inputs) and a body hash recomputed on
-read --- refuses to write from a dirty source tree, and carries a
-mandatory grade banner (CLAIM / METHOD / INSPECTION-ONLY).
-Predictor-derived claim artifacts additionally bind the frozen-spec
-hash. Inspection-only material is banner-marked and not cited as a
-result.
+\paragraph{Reproducibility.} Recorded results carry two content
+hashes: an inputs hash (git commit, model-specification hash, library
+versions, RNG seeds, declared inputs) and a body hash recomputed at
+read time. The recording refuses to write from a dirty source tree.
+Exploratory development-set material is marked as such and is not
+cited as a result elsewhere in the paper.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -506,13 +510,7 @@ GL-degeneracy note in full.}
 \section{Per-horizon backtest table}
 \label{app:backtest}
 
-\todo[inline]{From the C1 artifact.}
-
-\section{Provenance requirements matrix}
-\label{app:provenance}
-
-Reference: \texttt{experiment/results/PROVENANCE\_REQUIREMENTS.md}.
-
+\todo[inline]{Per-horizon table from the recorded backtest result.}
 
 % ---------- References ----------
 \ifstandalone
