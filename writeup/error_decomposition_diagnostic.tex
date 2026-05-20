@@ -1,0 +1,617 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+\newcommand{\kQ}{\kappa_{Q}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Rb}{\mathbb{R}}
+\newcommand{\Nrm}{\mathcal{N}}
+\newcommand{\defA}{\textsf{A}}
+\newcommand{\defB}{\textsf{B}}
+
+\title{\textbf{An Error-Decomposition Diagnostic for the\\
+Drift-vs-Diffusion Honing Choice}\\[4pt]
+\large A design memo: theory context, implemented method, and a
+pre-registered decision rule}
+\author{MITACS dynamics project --- design memo (not a result artifact)}
+\date{2026-05-18}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We face a fork in honing the predictive estimator. Two deficiencies have
+been independently established: \textbf{Deficiency \defA} --- the
+conditional \emph{mean} is mis-centred by demand phase (rising vs.\
+falling) --- the one candidate deficiency that survived a prior
+bootstrap-strength re-test (a separate investigation that retracted
+several earlier under-tested claims and established that no
+prediction-error cross-validation can recover a localization
+bandwidth here, so the drift is effectively a single global linear
+map); and \textbf{Deficiency \defB} --- the conditional \emph{law}
+is modelled as Gaussian but the true scalar innovation is strongly
+heavy-tailed (production-validated excess kurtosis ${\approx}25\text{--}33$).
+They live on different axes of the same object and one does not fix the
+other. This memo (i) places both deficiencies inside the
+Resolvent\_Framework programme's kernel picture, (ii) states precisely
+what the implemented estimator does and where each deficiency enters it,
+and (iii) specifies a dev-only, variance-checked decomposition diagnostic
+with a decision rule \emph{fixed before any numbers are seen}, so the
+\defA-vs-\defB\ choice is made on evidence rather than intuition. The
+diagnostic is not yet run; this document is its design.
+\end{abstract}
+
+\section{Why this memo exists}
+
+The honing thread began from a concrete symptom: on the 2021--22
+inspection benchmark the forecast error is not noise --- it is
+systematically structured by the daily demand cycle. The investigation
+into \emph{why} repeatedly elevated under-tested observations to
+``findings'' that later inverted under stricter testing (the prior
+investigation referred to above retracted four such over-reaches in
+sequence, each from reading a point estimate without a variance or
+replication check). The discipline that
+emerged, and that this memo obeys, is: \emph{no diagnostic informs a
+build decision unless it carries a variance/replication check and a
+decision rule pre-registered before the numbers are seen.}
+
+Two candidate deficiencies now survive at different evidentiary
+strengths. Choosing which to engineer (or whether to engineer at all) is
+not an intuition call. This memo designs the test that decides it.
+
+\section{Theory context: the kernel has a location and a shape}
+\label{sec:theory}
+
+\subsection{The programme's kernel}
+
+The Resolvent\_Framework programme (Paper~II) shows that, given a
+probability measure on the observable $\sigma$-algebra, the dynamics are
+\emph{disclosed} by the measure rather than constructed by the observer.
+The Rokhlin disintegration of two observations $Q,F$ yields a Markov
+kernel
+\[
+  \kQ(q,\cdot) \;=\; \mathbb{P}\!\left(F \in \cdot \,\middle|\, Q = q\right),
+\]
+\emph{forced by the measure, not chosen}. Temporal indexing forces
+Chapman--Kolmogorov, yielding a semigroup $\{\Pi_t\}$ and the operator
+layer $K_t$. These three layers ($\kQ$, $\{\Pi_t\}$, $K_t$) are kept
+notationally distinct. Reconstruction (Paper~II, Part~2) states that if
+the observable algebra $\mathcal{O}_h = \sigma(\{h\circ T^n\})$ generates
+the full $\sigma$-algebra mod $\mu$, the delay map $\Phi_h$ \emph{is} a
+measure-theoretic embedding --- the state space is recovered from the
+delayed scalar observable alone.
+
+\subsection{What the code is, in that language}
+
+The implemented estimator is a finite-sample, parametric, single-step,
+\emph{locally-Gaussian} estimator of $\kQ$ at the delay-embedding layer.
+Per anchor state $x_j$ it produces a pair $(C_j,\Sigma_j)$ defining
+\begin{equation}
+\label{eq:kernel}
+  \widehat{\kQ}(x_j,\cdot) \;=\; \Nrm\!\big(\,x_j C_j,\ \Sigma_j\,\big)
+  \qquad\text{on the delay-embedding state space.}
+\end{equation}
+Three honest qualifiers attach to this correspondence and must not be
+dropped: \textbf{(Q1)} register --- the programme \emph{discloses} $\kQ$
+from the measure; the code \emph{constructs} a Gaussian proxy and fits it
+(``estimator of,'' not ``instance of''); \textbf{(Q2)} Gaussianity is
+\emph{imposed}, exact only where the local conditional law is actually
+Gaussian; \textbf{(Q3)} single-step only --- $\{\Pi_t\}$ is neither
+constructed nor verified, so this is the slice $\Pi_\Delta$, not the
+semigroup.
+
+\subsection{The fork, stated in the kernel}
+\label{sec:fork}
+
+Equation~\eqref{eq:kernel} makes the fork precise. A conditional law has,
+at minimum, a \emph{location} and a \emph{shape}. The estimator
+factorises these into two distinct objects:
+\begin{itemize}[leftmargin=2em]
+  \item the \textbf{drift} $C_j$ sets the conditional \emph{location}
+        $\E[x' \mid x_j] = x_j C_j$;
+  \item the \textbf{diffusion} $\Sigma_j$ (with the imposed Gaussian
+        form) sets the conditional \emph{shape/spread}.
+\end{itemize}
+The two established deficiencies are deficiencies of these two distinct
+factors:
+
+\begin{center}
+\begin{tabular}{@{}p{0.10\linewidth}p{0.40\linewidth}p{0.40\linewidth}@{}}
+\toprule
+ & \textbf{Deficiency \defA} & \textbf{Deficiency \defB}\\
+\midrule
+Factor & Drift $C_j$ (location) & Diffusion $\Sigma_j$ (shape) \\[3pt]
+Claim  & The location is \emph{mis-placed}: a single global-ish
+         linear map cannot separate rising-through-a-level from
+         falling-through-a-level, so it centres between them.
+       & The shape is \emph{mis-modelled}: a Gaussian is imposed on a
+         scalar innovation that is strongly heavy-tailed. \\[3pt]
+Programme reading
+       & The conditional-mean estimate of $\kQ$ is biased on a
+         phase coordinate. Same target $\kQ$, location wrong.
+       & Directly qualifier \textbf{Q2}: $\Sigma_j$ is a Gaussian
+         second-moment \emph{proxy} of a non-Gaussian law. Same target
+         $\kQ$, shape wrong. \\[3pt]
+Evidence
+       & \textbf{The phase-structure finding}: the signed forecast
+         error correlates with the demand derivative,
+         $\mathrm{corr}(\mathrm{d}z/\mathrm{d}t,\ z_{\mathrm{err}})
+         = -0.246$, bootstrap 95\% CI $[-0.283,-0.207]$
+         ($n=3167$) --- survived the same bootstrap-strength
+         re-test that retracted the other honing leads.
+       & Production re-baseline: intra-day scalar-innovation excess
+         kurtosis ${\approx}24\text{--}33$, tail-ratio
+         ${\approx}2.4\text{--}3.8$ (Gaussian $=0$ and $1$; clean
+         VAR(1) reference ${\approx}0$ and ${\approx}1$). \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Crucially, neither fixes the other.} A heavy-tailed
+innovation law leaves $x_j C_j$ exactly where it was --- it does not
+re-centre a mis-placed conditional mean. A phase-aware drift sharpens the
+location but says nothing about whether the residual law around it is
+Gaussian. \defA\ and \defB\ are orthogonal in the factorisation of
+\eqref{eq:kernel}. Both are ``same-$\kQ$'' estimator-class improvements
+(neither changes $\Phi_h$ or $\mathcal{O}_h$, so the reconstruction
+object is untouched); they differ only in \emph{which factor} of the
+Gaussian proxy is made more honest. That is exactly why the choice
+between them needs evidence about \emph{which factor's error dominates
+the forecast loss we care about}.
+
+\section{The implemented method (what we are decomposing the error of)}
+\label{sec:method}
+
+The diagnostic must read the \emph{production} estimator, not a
+re-implementation (the project's hardest-won discipline: a diagnostic
+that re-implements production logic is a hypothesis, not a finding, until
+confirmed through the production path). The relevant production facts:
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Embedding.} A single-variable delay embedding of the
+        de-seasonalised $z$-score, $d$ lags per day-type (the elbow-rule
+        dimensions). $\Sigma_j$ is therefore \emph{rank-1 by
+        construction}: coordinates $2..d$ of the one-step image are
+        deterministic shifts of the input, so the only stochastic content
+        is the scalar coordinate-0 innovation
+        $r_0 = z_{t+1} - (xC)_0$. Non-Gaussianity (\defB) is correctly a
+        \emph{univariate} question on $r_0$.
+  \item \textbf{Drift $C_j$.} Weighted least squares with a normalised
+        Gaussian kernel; the bandwidth $\theta_j$ is selected per anchor
+        by true leave-one-out one-step CV. The prior investigation
+        established that this CV objective has no statistically
+        separated interior optimum on any system tested, so in effect
+        the drift is a
+        \emph{single global-ish linear map}. Deficiency \defA\ is a
+        statement about \emph{this map's} conditional-mean placement.
+  \item \textbf{Diffusion $\Sigma_j$.} The $\mu$-centred \emph{plain}
+        covariance of the locally-fitted residuals $Y - XC$ (no residual
+        kernel). It is the unbiased local second moment --- and, under
+        Gaussianity, the maximum-likelihood shape. Deficiency \defB\
+        says this second-moment object is a Gaussian stand-in for a
+        heavy-tailed law.
+  \item \textbf{Estimand.} The intra-day-conditioned $\kQ$: full-process
+        $\Sigma_j$ is numerically unusable (the day-anchor seam wrecks
+        conditioning), so transitions whose one-step target lands on the
+        day-anchor hour are masked. All numbers here are intra-day.
+  \item \textbf{Use.} Production forecasting iterates the one-step
+        kernel into a 24-step daily trajectory. The error we ultimately
+        care about is the \emph{multi-step} forecast error on the
+        2021--22 dev benchmark --- which is what the phase-structure
+        finding was measured on, and what this decomposition must
+        target.
+\end{enumerate}
+
+\section{The diagnostic: decomposing forecast loss into location vs.\ shape}
+\label{sec:diag}
+
+\subsection{Principle}
+
+For each scored dev forecast point we have a predictive law
+$\widehat{\kQ}(x,\cdot)=\Nrm(\,\widehat{m},\widehat{s}^{\,2})$ for the
+scalar quantity of interest (coordinate-0 $z$, mapped back as needed) and
+a realised actual $y$. The forecast loss decomposes, in expectation, into
+a part driven by \emph{where the law is centred} and a part driven by
+\emph{the law's shape/spread}. We make this operational two ways and
+require them to agree before drawing a conclusion (cross-method
+replication is itself part of the discipline).
+
+\paragraph{Obtaining $\widehat{s}^{\,2}$ at every horizon (resolved).}
+The production estimator emits only the \emph{one-step} local diffusion
+$\Sigma$; the benchmark forecast is iterated to $24$ horizons, so the
+predictive \emph{law} at horizon $k$ is not $\Nrm(\widehat{m}_k,
+\Sigma[0,0])$. We therefore propagate the predictive covariance through
+the iteration: with the shift-aware state Jacobian
+$J_i = [\,C_i[:,0]\mid\text{shift block}\,]$ and the rank-1 per-step
+innovation $\Sigma_{\text{step},i}=\mathrm{diag}(\Sigma_i[0,0],0,\dots)$
+(the true iterated-forecast semantics; the rank-1 form is structural,
+not assumed), the predictive covariance obeys
+$P_{i+1}=J_i^{\!\top}P_iJ_i+\Sigma_{\text{step},i}$, $P_0=0$, and
+$\widehat{s}^{\,2}_k=P_k[0,0]$. This composition is the programme's
+$\{\Pi_t\}$ layer, which qualifier \textbf{Q3} flags as not previously
+constructed; it is therefore \emph{gate-validated against the VAR(1)
+closed form $\Sigma_k=\sum_{i<k}(A^{\!\top})^iQA^i$ to machine precision
+(including the production rank-1 shift-Jacobian shape) before it is
+allowed to inform this diagnostic} --- the same validate-before-use bar
+the estimator itself meets. Linearisation around the realised path is
+the standard EKF-style scheme; for a linear local model it is exact
+within the iteration, the only unpropagated term being $C_i$'s own
+dependence on the local state, which is exactly what the production
+point forecast also does.
+
+\paragraph{The embedding-dimension-change boundary (a real fork).}
+The composition $P_{i+1}=J_i^{\!\top}P_iJ_i+\Sigma_{\text{step},i}$ is
+only \emph{defined} when the state dimension is constant across the
+step. It is not: the per-day-type embedding dimensions differ
+($\text{weekday}=2$, $\text{saturday}=4$, $\text{sunday}=3$) and the
+day-type rolls at the $07{:}00$ anchor, so \textbf{${\approx}42\%$ of
+delivery days cross a dimension change within their $24$-hour forecast}
+(the \emph{point} forecast is unaffected --- it rebuilds the lag state
+each step; only the covariance composition $J^{\!\top}PJ$ breaks across
+$d_i\neq d_{i+1}$). There is no closed-form ground truth for the
+predictive covariance across an embedding-induced dimension change, so
+this is genuinely a choice, not a derivation. Four handlers are
+considered; only the first is a validated, trustworthy verdict, the
+other three are \emph{exploratory robustness probes} (unvalidated
+approximations, inspection-only) whose sole purpose is to test whether
+the conclusion depends on this choice:
+
+\begin{center}
+\begin{tabular}{@{}p{0.13\linewidth}p{0.50\linewidth}p{0.30\linewidth}@{}}
+\toprule
+\textbf{Scope} & \textbf{Boundary handling} & \textbf{Status}\\
+\midrule
+\texttt{clean}
+ & Restrict to delivery days whose entire $24$h forecast stays at one
+   dimension; $P_{i+1}=J^{\!\top}P_iJ+\Sigma_{\text{step}}$ is exactly
+   defined throughout.
+ & \textbf{The verdict.} No approximation, no statable bias. Pays an
+   exclusion of the ${\approx}42\%$ rollover days (caveat below). \\[10pt]
+\texttt{reset}
+ & On a dimension change set $P\!\to\!0$ and re-accumulate.
+ & Exploratory. \emph{Known signed bias}: understates
+   $\widehat{s}^{\,2}_k$ after any seam (discards accumulated forecast
+   uncertainty) --- inflates apparent calibration on the shape axis. \\[10pt]
+\texttt{project}
+ & On a dimension change map $P$ across by truncation (dim drop) /
+   zero-pad (dim rise) of the leading block.
+ & Exploratory. An \emph{assumption} about cross-dimension state
+   covariance with no ground truth; cannot be gate-validated as the
+   in-dimension recursion was. \\[10pt]
+\texttt{h1}
+ & Ignore propagation; $\widehat{s}^{\,2}=\Sigma_0[0,0]$ (the exact
+   one-step law).
+ & Exploratory. No boundary issue at all, but tests only horizon~$1$,
+   not the multi-step error the phase-structure finding was measured
+   across. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Exclusion caveat (load-bearing, travels with the
+verdict).} The \texttt{clean} scope drops every day-type-rollover day.
+If Deficiency \defA\ (phase mis-centring) \emph{concentrates at
+day-type seams} --- plausible, since seams are where the asymmetric
+ramp is most violent --- the \texttt{clean} verdict \emph{under-counts}
+\defA. The conclusion is therefore conditional on the single-dimension
+subpopulation. The three exploratory scopes exist precisely to probe
+this: if every handler yields the same A-vs-B verdict, the exclusion is
+materially de-risked; if they diverge, the exclusion is load-bearing
+and the divergence is itself the finding. Either way, only
+\texttt{clean} is reported as a validated verdict --- the probes are
+sensitivity context, never elevated to a result (the project's
+inspection-only discipline; per the recording decision they are recorded
+in the verdict memo with this caveat, not stamped through
+\texttt{make\_result}).
+
+\paragraph{(M1) Mean/variance decomposition of squared error.}
+With signed error $e=\widehat{m}-y$, write the conditional mean-squared
+error as
+\[
+  \E[e^2 \mid \text{stratum}]
+   \;=\; \underbrace{\big(\E[e\mid\text{stratum}]\big)^2}_{\text{bias}^2\ \to\ \defA}
+   \;+\; \underbrace{\Var[e\mid\text{stratum}]}_{\text{dispersion}\ \to\ \defB}.
+\]
+Stratify by the phase coordinate $\mathrm{d}z/\mathrm{d}t$ (the same
+demand-derivative coordinate the phase-structure finding used; in
+quintiles) and by hour-of-day. A large,
+phase-structured $\mathrm{bias}^2$ fraction implicates the
+\emph{location} factor (\defA); a dispersion term whose \emph{magnitude}
+is dominated by rare large $|e|$ implicates the \emph{shape} factor
+(\defB). The bias term is the \defA\ signature; the bias-removed loss is
+the ceiling that only a shape change (\defB) could further reduce.
+
+\paragraph{(M2) Counterfactual log-loss / CRPS under each fix.}
+Evaluate the predictive law's proper score (Gaussian log-loss and CRPS)
+on the dev set under three predictive laws built \emph{only from
+production outputs}:
+\begin{enumerate}[label=(\alph*),leftmargin=2.2em]
+  \item \textbf{baseline}: $\Nrm(\widehat{m},\widehat{s}^{\,2})$ as
+        produced;
+  \item \textbf{\defA-counterfactual}: subtract the dev-estimated
+        phase-conditional bias from $\widehat{m}$ (an \emph{oracle}
+        upper bound on what perfect re-centring could buy --- not a
+        proposed fix, a bound), keep $\widehat{s}^{\,2}$;
+  \item \textbf{\defB-counterfactual}: keep $\widehat{m}$, replace the
+        Gaussian shape by a heavy-tailed fit (Student-$t$ with dev-fitted
+        $\nu$) matched to $\widehat{s}^{\,2}$.
+\end{enumerate}
+The score improvement of (b) over (a) bounds the \defA\ lever; of (c)
+over (a) bounds the \defB\ lever, \emph{on the loss the production system
+is actually graded on}. These are diagnostic counterfactuals, not the
+builds themselves --- they answer ``which axis has more recoverable
+loss,'' nothing more.
+
+\subsection{Pre-registered decision rule (fixed before any numbers)}
+\label{sec:rule}
+
+The statistic is the \textbf{bootstrapped difference in dev forecast
+loss} between each counterfactual and baseline, resampling whole forecast
+\emph{days} with replacement ($B=1000$; day-level resampling respects the
+24-step iteration dependence). Let
+$\Delta_\defA$ and $\Delta_\defB$ be the per-bootstrap loss reductions
+(positive $=$ improvement) under M2, with 95\% percentile CIs; M1's
+$\mathrm{bias}^2$ fraction is reported with a day-bootstrap CI as the
+corroborating second method.
+
+\begin{center}
+\begin{tabular}{@{}p{0.30\linewidth}p{0.62\linewidth}@{}}
+\toprule
+\textbf{Outcome} & \textbf{Pre-registered conclusion}\\
+\midrule
+$\Delta_\defA$ CI lower bound $>0$ \emph{and}
+excludes $\Delta_\defB$'s CI (non-overlapping, $\defA$ larger)
+ & \defA\ dominates: the \emph{drift/location} lever is the
+   higher-leverage honing target. Pursue a phase-aware conditional mean;
+   \defB\ remains a documented Q2 caveat. \\[4pt]
+$\Delta_\defB$ CI lower bound $>0$ \emph{and}
+excludes $\Delta_\defA$'s CI (non-overlapping, $\defB$ larger)
+ & \defB\ dominates: the \emph{diffusion/shape} lever is higher-leverage.
+   Pursue dropping local-Gaussian (heavy-tailed innovation law); \defA\
+   becomes a documented limitation. \\[4pt]
+CIs overlap, \emph{or} neither lower bound clears
+$1\%$ relative loss reduction
+ & \textbf{Neither lever is decisively supported.} Default to the
+   standing honest-characterisation option: document \emph{both} \defA\
+   and \defB\ as limitations of the univariate local-Gaussian $\kQ$
+   estimator and proceed to the registered forward experiment unchanged.
+   (This is the project's repeatedly-chosen ``characterise, don't
+   over-engineer'' resolution; the prior bandwidth investigation
+   ended the same way.) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The relative-loss threshold ($1\%$ of baseline dev loss) and
+the non-overlapping-CI requirement are fixed here, before execution. M1
+and M2 must \emph{agree in direction}; if they disagree the result is
+declared inconclusive (not adjudicated post-hoc) and the disagreement
+itself is the finding.
+
+\subsection{What this diagnostic does \emph{not} establish}
+
+Honest scope, mirroring the phase-structure finding's own caveat:
+\begin{itemize}[leftmargin=2em]
+  \item It bounds the \emph{recoverable loss} on each axis via oracle
+        counterfactuals. It does \emph{not} prove that any \emph{specific}
+        buildable model (e.g.\ piecewise-linear-in-$\mathrm{sign}(\mathrm{d}z/\mathrm{d}t)$
+        drift, or a Student-$t$ innovation) attains that bound. The
+        counterfactual is an upper bound on the lever, not a guarantee a
+        feasible estimator reaches it.
+  \item It is a \emph{dev-set} measurement (2021--22, $\le$ cutoff fit /
+        dev-window evaluation). Per the integrity rule, any model change
+        it motivates must be re-derived dev-only and locked into a new
+        hash-stamped frozen spec before any forward scoring.
+  \item It does not re-open the embedding-layer ($\Phi_h$) or
+        observable-algebra ($\mathcal{O}_h$) options; by construction
+        both counterfactuals are same-$\kQ$ estimator-class moves. The
+        scope-expanding option (exogenous covariates) is deliberately
+        out of frame here.
+\end{itemize}
+
+\section{Results}
+\label{sec:results}
+
+\subsection{\texttt{clean} scope --- the validated verdict}
+
+Run on the regenerated 2021--22 dev benchmark with the gate-validated
+variance propagation, \texttt{clean} scope (single-embedding-dimension
+delivery days: $76$ kept, $56$ day-type-rollover days excluded),
+day-level bootstrap $B=1000$:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Statistic} & \textbf{Estimate} & \textbf{95\% CI} \\
+\midrule
+M1: bias$^2$ fraction of MSE & $0.377$ & $[0.358,\ 0.484]$ \\
+M2: \defA-counterfactual (oracle re-centre)
+   & $+6.11\%$ rel.\ log-loss & $[+3.42\%,\ +8.72\%]$ \\
+M2: \defB-counterfactual (Student-$t$, $\nu\approx4.98$)
+   & $+9.04\%$ rel.\ log-loss & $[+5.44\%,\ +12.81\%]$ \\
+\multicolumn{2}{@{}l}{M2: fitted $\nu$ / std.-resid.\ excess kurtosis}
+   & $4.98$ / $6.14$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Pre-registered verdict: NEITHER dominates.} Both
+oracle counterfactuals clear the $1\%$ relative-loss bar and are
+statistically separated from zero --- so \emph{both} Deficiency \defA\
+and \defB\ are real and non-trivial. But the two CIs \emph{overlap}
+($[3.4,8.7]\%$ vs.\ $[5.4,12.8]\%$), so the pre-registered
+non-overlapping-CI requirement for declaring a dominant lever is not
+met; M1 corroborates ($0.38$ bias-fraction, neither CI clearing the
+$0.5$ line --- it points at \emph{both}, decisively at \emph{neither}).
+This is \emph{not} ``no deficiency'': it is ``both deficiencies are
+real and comparable in magnitude; the evidence does not separate them,''
+and $\defB$'s central estimate is the larger of the two. The
+pre-registered outcome is therefore to document \emph{both} \defA\ and
+\defB\ as quantified limitations of the univariate local-Gaussian
+$\kQ$ estimator, build nothing, and proceed to the registered forward
+experiment unchanged.
+
+\subsection{Robustness sweep over the dimension-change scopes}
+
+To test whether ``neither dominates'' is an artifact of the
+${\approx}42\%$ rollover-day exclusion, the diagnostic was first re-run
+under three \emph{exploratory} boundary handlers (\texttt{reset},
+\texttt{project}, \texttt{h1}; unvalidated approximations, no
+closed-form ground truth) and then, decisively, under a \emph{validated}
+all-days path (\texttt{augmented}). The pre-registered reading rule for
+the exploratory sweep was binary and fixed before its numbers were
+seen: \emph{if any exploratory scope diverges from \texttt{clean}, the
+exclusion is load-bearing and only the validated path settles it}. The
+exploratory sweep \textbf{failed} that rule (\texttt{h1} diverged) ---
+which is precisely why the validated \texttt{augmented} path was built;
+its result (top row) is the resolution and is discussed after the
+sweep.
+
+\begin{center}
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\textbf{Scope} & \textbf{M1 bias$^2$ (CI)}
+ & \textbf{M2 \defA\ rel.\ (CI)} & \textbf{M2 \defB\ rel.\ (CI)}
+ & $\nu$ / \textbf{Verdict} \\
+\midrule
+\texttt{augmented} (\textbf{valid, all days})
+ & $0.330\ [.30,.42]$ & $+4.8\%\ [0.7,8.6]$
+ & $+2.3\%\ [-0.0,4.8]$ & $6.48$ / \textbf{NEITHER} \\
+\texttt{clean} (\emph{valid, single-dim})
+ & $0.377\ [.36,.48]$ & $+6.1\%\ [3.4,8.6]$
+ & $+9.1\%\ [5.5,12.9]$ & $4.98$ / NEITHER \\
+\texttt{reset} \emph{(expl.)}
+ & $0.330\ [.29,.43]$ & $+15.1\%\ [8.6,20.7]$
+ & $+21.8\%\ [16.7,26.6]$ & $4.51$ / NEITHER \\
+\texttt{project} \emph{(expl.)}
+ & $0.330\ [.30,.42]$ & $+5.1\%\ [0.9,9.1]$
+ & $+2.2\%\ [-0.1,4.5]$ & $6.60$ / NEITHER \\
+\texttt{h1} \emph{(expl.)}
+ & $0.330\ [.30,.42]$ & $+15.7\%\ [9.2,21.4]$
+ & $+28.7\%\ [25.9,31.6]$ & $57.95$ / \textbf{B} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{The sweep FAILED its pre-registered robustness rule:
+the exclusion is load-bearing.} The rule fixed in advance was binary
+--- if \emph{any} scope diverges from \texttt{clean}, the
+rollover-day exclusion is load-bearing and only \texttt{clean} stands.
+\texttt{h1} diverges (``\defB\ dominates''). Per the pre-registered
+rule the outcome is therefore \textbf{NOT robust}; the divergence
+\emph{is} the finding. (An earlier draft of this subsection re-narrated
+the sweep as ``robust where it matters'' by explaining \texttt{h1}
+away --- that was a post-hoc rationalisation that failed its own
+arithmetic and is retracted in full; it is recorded here as a worked
+example of exactly the failure mode the pre-registered rule exists to
+block.)
+
+\emph{Why the retracted explanation was wrong.} It claimed
+$\nu\approx58$ made the \defB\ counterfactual ``nearly vacuous'' at
+\texttt{h1} --- but \texttt{h1}'s \defB\ effect is $+28.7\%$, the
+\emph{largest} of any scope; a vacuous counterfactual cannot be the
+largest. The true mechanism: \texttt{h1}'s $\widehat{s}^{\,2}_k$
+(median ${\approx}0.015$) underestimates the realised residual
+variance (${\approx}0.27$) by ${\approx}17\times$, so the baseline
+Gaussian log-loss is catastrophic (${\approx}8.2$ vs ${\approx}0.67$
+at \texttt{clean}); the variance-matched Student-$t$ merely rescues
+that gross overconfidence. \texttt{h1}'s ``\defB\ dominates'' is an
+artefact of a degenerate predictive variance, \emph{not} evidence
+about Deficiency \defB. (The companion claim that \defA\ has ``almost
+no phase bias at \texttt{h1}'' was also false: \defA\ at \texttt{h1} is
+$+15.7\%$, larger than \texttt{clean}'s $+6.1\%$.)
+
+\emph{And the three ``agreeing'' scopes do not corroborate.}
+\texttt{reset} ($\defB=+21.8\%$) and \texttt{project}
+($\defB=+2.2\%$, CI $[-0.1,4.5]$ including zero) disagree on the \defB\
+magnitude by ${\approx}10\times$ via opposite internal stories; they
+share the ``NEITHER'' label only because it is the catch-all bin
+(returned on CI-overlap \emph{or} sub-$1\%$). Shared-label is not
+shared-evidence: the agreement carries ${\approx}$zero probative
+weight.
+
+\noindent\textbf{Resolution: the load-bearing exclusion was
+subsequently closed by the validated all-days path.} The conclusion
+above (only \texttt{clean} validated; the exclusion load-bearing; the
+only honest route is a propagation that genuinely handles the
+dimension-change boundary) stood as written --- and that propagation
+was then built. A fixed-$d_{\max}$ state augmentation
+(\texttt{augmented}) carries the lower-dimensional day-types' unused
+lag coordinates as deterministic, zero-innovation components, so the
+covariance recursion is exactly defined across a dimension change. It
+was validated to the project's standard before use: machine-precision
+agreement with the VAR(1) closed form on the active block, and
+\emph{bit-identical} ($\max|\Delta|=2.8\times10^{-15}$) to the
+existing single-dimension recursion on single-dimension days. (A
+cheaper scalar-recursion candidate was \emph{falsified first} by a
+deterministic known-answer check --- the propagated covariance is not
+rank-one, so a scalar channel misses cross-term feedback and diverges
+by the third step --- and was discarded rather than shipped.)
+
+Re-running the diagnostic over \emph{all $132$ delivery days} through
+this validated path (the \texttt{augmented} row above) yields
+\textbf{NEITHER dominates}, in agreement with the single-dimension
+\texttt{clean} verdict. A discriminating per-row check confirms
+\texttt{augmented} is genuinely distinct from the unvalidated
+\texttt{project} probe (identical to machine precision on
+single-dimension days as the gate guarantees, but differing by up to
+$7\times10^{-2}$ on dimension-change days --- the close aggregate is
+coincidental averaging, not the same arithmetic). The
+${\approx}42\%$ exclusion is therefore \textbf{resolved, not merely
+caveated}: the validated full-population result and the validated
+sub-population result agree. The earlier worry that Deficiency \defA\
+might concentrate at day-type seams is not borne out --- including the
+seam days slightly \emph{lowers} the apparent \defA\ effect
+($+4.8\%$ vs.\ $+6.1\%$), it does not raise it.
+
+\textbf{The two ``NEITHER''s are different evidentiary states --- the
+full-population one is stronger.} On \texttt{clean} both effects'
+CI lower bounds clear the pre-registered $1\%$ materiality bar
+($3.4\%$, $5.5\%$): ``NEITHER'' there means \emph{both real but
+statistically tied}. On the validated \texttt{augmented} full
+population \emph{neither} lower bound clears the bar (\defA\ $0.7\%$,
+\defB\ $-0.0\%$, the \defB\ interval including zero): ``NEITHER'' there
+is the \emph{catch-all} --- neither effect is materially established at
+all. Same label, stronger conclusion: the evidence does not establish
+either deficiency as actionable on the complete, correctly-propagated
+data. Relatedly, the heavy-tail signal attenuated ${\approx}4\times$
+(Student-$t$ $\nu\approx5.0\to6.5$; implied standardised-residual
+excess kurtosis ${\approx}6.1\to2.4$) once predictive variance was
+\emph{propagated} across the seam rather than sidestepped by
+exclusion --- indicating part of the previously-reported strong
+heavy tail (one-step re-baseline excess kurtosis ${\approx}24$--$33$,
+measured without multi-step variance propagation) was a propagation
+artefact, not solely an innovation-law property. The substantive
+outcome is unchanged and strengthened on the full population:
+document both \defA\ and \defB\ as quantified limitations of the
+univariate local-Gaussian $\kQ$ estimator, build nothing, proceed to
+the
+registered forward experiment unchanged. \texttt{augmented} and
+\texttt{clean} are both validated; \texttt{reset}/\texttt{project}/%
+\texttt{h1} remain superseded inspection-only probes (\texttt{h1}'s
+``\defB\ dominates'' is the degenerate-predictive-variance artefact
+diagnosed above). All rows are inspection-only, recorded in the
+verdict memo, never stamped through \texttt{make\_result}.
+
+\section{Summary}
+
+The fork is not ``which feature to add.'' In the programme's kernel
+picture it is: \emph{is the Gaussian proxy of $\kQ$ failing more at its
+location ($C_j$, Deficiency \defA) or at its shape ($\Sigma_j$,
+Deficiency \defB)?} Both are honest same-target estimator improvements;
+they are orthogonal and one cannot substitute for the other. This memo
+specifies a dev-only, production-path, day-bootstrapped, cross-validated
+(M1$\,\wedge\,$M2) decomposition with a decision rule fixed in
+advance --- including an explicit, pre-committed ``neither dominates
+$\Rightarrow$ document both and do not engineer'' branch, because that is
+a real and defensible outcome, not a failure of the test. Nothing is
+built until this returns a verdict under its own pre-registered standard.
+
+\end{document}

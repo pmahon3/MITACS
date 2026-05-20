@@ -37,8 +37,29 @@ d=2 z-score-lag embedding; θ does not localize. Required edits:
   innovation carries κ_Q's structure because C_j is globally linear —
   state this as the central characterization, not a caveat.
 The lever for genuine locality is the EMBEDDING (#30), not the
-bandwidth rule. §2/§3 may be finalized once reworded per the above
-(no longer blocked on investigation — the finding is settled).
+bandwidth rule.
+
+UPDATE 2026-05-19: §3 REWRITE DONE. §3 now documents BOTH factors as
+quantified limitations from the pre-registered error-decomposition
+diagnostic (inspection-only). VALIDATED FULL-POPULATION result (all
+132 days, via gate-validated d_max-augmented variance propagation):
+phase-mis-centred conditional mean ≈4.8% recoverable dev log-loss
+[0.7,8.6]; heavy-tailed-innovation oracle ≈2.3% [-0.0,4.8], ν≈6.5.
+**Neither lower bound clears the pre-registered 1% materiality bar; B
+includes zero** → catch-all "neither dominates" (NOT the single-dim
+"both real but tied" case where both cleared at ≈6%/≈9%) → document
+both, engineer neither (stronger don't-engineer result). The
+dimension-change exclusion was closed by the validated augmentation;
+single-dim sub-result (≈6.1%/≈9.1%) corroborates the verdict label.
+KEY FINDING: the heavy-tail effect attenuated ≈4× (ν 5.0→6.5, implied
+excess kurt 6.1→2.4) once variance was correctly propagated across the
+seam — partly a propagation artefact, reconciles against the
+re-baseline "exc kurt 24–33" (one-step, un-propagated). Trail
+(Option C falsified → Option A built/gated → all-days re-run):
+mitacs-error-decomposition-verdict.
+§2.1/§2.2 EDITS STILL REQUIRED (the global-drift wording above — not yet
+applied; §2 still says "bandwidth selected by true LOO-CV"). Do not ship
+§2 until reworded; §3 is current.
 -->
 
 # Empirical conditional-kernel forecasting of Ontario electricity demand: a registered prediction experiment
@@ -181,10 +202,16 @@ paper carries only what is needed to interpret the Ontario results.*
 
 ---
 
-## 3. Structural caveat: rank-1 diffusion and the Gaussian-proxy gap
+## 3. Structural caveat: a mis-centred conditional mean and a Gaussian-proxy diffusion
 
 This bounds every predictive number in this paper and is stated up
-front, not buried in limitations.
+front, not buried in limitations. The estimator's two factors — the
+conditional mean `C_j` and the conditional law summarised by `Σ_j` —
+each carry a quantified limitation. They are independent: neither is a
+restatement of the other, and a pre-registered dev-set decomposition
+(below), run on the full population with predictive variance correctly
+propagated, finds **neither effect clears the materiality bar** — a
+documented-limitation, engineer-neither outcome.
 
 **`Σ_j` is rank-1 by construction.** For a single-variable delay
 embedding, coordinates `2..d` of the one-step image are deterministic
@@ -207,14 +234,90 @@ production-path values; the slot will be updated with the re-confirmed
 figure and artifact hash from the verified honed/full run — the finding
 and its order of magnitude are established, not pending.]
 
+**The conditional mean is phase-mis-centred.** Independently of the
+diffusion, the conditional-mean factor `C_j` carries a structured
+deficiency. The local linear map cannot distinguish a state that is
+rising through a demand level from one falling through the same level
+(the embedding lacks an explicit phase coordinate), so it centres
+between the two regimes. This is a directly measured residual
+structure, not an inference: the signed `z`-space error correlates with
+the demand derivative `dz/dt` at `corr = −0.246` (bootstrap 95% CI
+`[−0.283, −0.207]`, n = 3167), with a monotone error gradient across
+rising/falling phase. The estimator therefore does *not* faithfully
+recover the conditional mean where phase matters; `Π^(j)`'s location,
+not only its shape, departs from `κ_Q`.
+
+**On the full population, neither limitation clears the materiality
+bar — a stronger "don't engineer" result than a tie.** A pre-registered
+dev-set error-decomposition diagnostic (2021–22 inspection benchmark;
+inspection-only, not a claim-grade artifact) bounds the loss
+recoverable on each factor via oracle counterfactuals on multi-step
+forecast log-loss, over **all delivery days**, with the predictive
+variance correctly propagated across the embedding-dimension change
+(below). An oracle that removes the phase-conditional mean bias
+recovers ≈ 4.8 % of dev log-loss (95 % CI `[0.7 %, 8.6 %]`); an oracle
+that replaces the Gaussian innovation law with a fitted heavy-tailed
+law (Student-*t*, ν ≈ 6.5) recovers ≈ 2.3 % (95 % CI `[−0.0 %,
+4.8 %]`). **Neither lower bound clears the pre-registered 1 %
+materiality threshold, and the heavy-tail interval includes zero.**
+Under the pre-registered rule this is the *catch-all* "neither
+dominates" — reached not because the two effects are real and
+statistically tied (that was the case on the single-dimension
+subpopulation, where both cleared the bar at ≈ 6 %/≈ 9 %), but because
+on the complete, correctly-propagated data neither effect is
+materially established at all. The disciplined consequence is the same
+and is in fact strengthened: document both as honest scope limitations
+and engineer neither — the evidence does not establish either as an
+actionable deficiency, not merely that it cannot rank them.
+
+**The apparent heavy-tail was partly a propagation artefact.** The
+heavy-tail signal attenuated roughly four-fold (single-dimension
+Student-*t* ν ≈ 5.0, implied standardised-residual excess kurtosis
+≈ 6.1 → full-population ν ≈ 6.5, excess kurtosis ≈ 2.4) once the
+predictive variance was correctly propagated across the
+dimension-change boundary rather than sidestepped by excluding those
+days. Larger, correctly-propagated predictive variance on rollover
+days yields smaller standardised residuals and hence a smaller
+apparent departure from Gaussian. This means part of what the earlier
+single-dimension and re-baseline analyses characterised as a *strongly*
+heavy-tailed innovation law (re-baseline excess kurtosis ≈ 24–33,
+measured one-step without multi-step variance propagation) reflects
+under-propagated predictive variance, not solely a property of the
+innovation law itself. The conditional law is still not exactly
+Gaussian, but the strength of that departure is materially smaller
+once variance is propagated honestly, and on the full population it is
+below the pre-registered actionability bar. This reconciliation is
+itself a finding and is carried as such, not buried.
+
+**Scope of the decomposition (resolved).** The multi-step
+predictive-variance composition is undefined across an
+embedding-dimension change (the per-day-type embedding dimension
+changes at the day-type rollover, affecting ≈ 42 % of delivery days).
+This was handled by a fixed-maximum-dimension state augmentation that
+carries the lower-dimensional day-types' unused lag coordinates as
+deterministic, zero-innovation components, making the composition
+exactly defined across the boundary. It was validated to the same
+standard as the rest of the pipeline before use: machine-precision
+agreement with the closed-form linear-Gaussian reference, and
+bit-identical results to the unaugmented recursion on
+single-dimension days. The figures above are the validated
+**full-population** result. As a cross-check, restricting to the
+single-dimension subpopulation (≈ 58 % of days) independently yields
+the same qualitative verdict (recoverable losses ≈ 6.1 % and ≈ 9.1 %,
+again overlapping CIs, neither dominant): the conclusion does not
+depend on the dimension-change handling. The figures are
+order-of-magnitude honest limitations, not precise universal
+constants.
+
 **Consequence.** `Σ_j` is a Gaussian second-moment *proxy* of a
-strongly heavy-tailed scalar innovation law. The estimator faithfully
-captures the conditional mean (`C_j`) and variance (`Σ_j`), but the
-conditional *law* is not Gaussian, so `Π^(j)` is not `κ_Q` itself even
-in the large-sample limit — it is the best Gaussian summary of it. We
-report and quantify this rather than hide it, and carry it as a
-standing caveat wherever `Π^(j)` is used predictively (notably the
-interval coverage in §5).
+strongly heavy-tailed scalar innovation law, and `C_j` is a
+phase-blind conditional mean. The estimator captures *a* conditional
+mean and *a* second moment, but `Π^(j)` departs from `κ_Q` in **both**
+its location (phase-mis-centring) and its shape (non-Gaussian law),
+even in the large-sample limit — it is the best phase-blind Gaussian
+summary of `κ_Q`. We report and quantify both rather than hide them,
+and carry them as standing caveats wherever `Π^(j)` is used
+predictively (notably the interval coverage in §5).
 
 ---
 
@@ -369,13 +472,29 @@ this document.
 
 ## 9. Limitations and open questions
 
-- **Gaussian-proxy gap (§3).** The standing caveat: `Π^(j)` captures
-  conditional mean and variance but not the heavy-tailed conditional
-  law. Open: a non-Gaussian local conditional model for `κ_Q`.
-- **State representation.** A possible reach limit of the univariate
-  estimator at demand ramps is described, with its lower evidentiary
-  grade explicitly fenced, in §10 — *not* a claim-grade limitation and
-  deliberately not stated as one here.
+- **Two documented estimator limitations (§3).** `Π^(j)` departs from
+  `κ_Q` in both its location and its shape: the conditional mean `C_j`
+  is phase-mis-centred (rising vs. falling demand at the same level),
+  and `Σ_j` is a Gaussian proxy of a heavy-tailed innovation. A
+  pre-registered dev-set decomposition (inspection-only, not
+  claim-grade — see §3) bounds the recoverable loss of each, over all
+  delivery days with variance correctly propagated, at ≈ 4.8 % and
+  ≈ 2.3 % of dev log-loss; **neither lower bound clears the
+  pre-registered 1 % materiality bar** (the heavy-tail interval
+  includes zero), so neither is an actionable deficiency on the full
+  population — both documented, neither engineered. The heavy-tail
+  effect attenuated ≈ 4× once variance was propagated across the
+  dimension-change boundary, indicating it was partly a propagation
+  artefact rather than purely an innovation-law property (see §3).
+  Open: a phase-aware conditional mean and/or a non-Gaussian local
+  conditional model for
+  `κ_Q` — neither licensed by current evidence as the higher-leverage
+  lever.
+- **State representation.** The phase-mis-centring above is the
+  mechanism behind the demand-ramp reach limit; its lower-grade
+  exploratory exploration (per-hour dimension, etc.) is fenced in §10.
+  §3 states only what the pre-registered dev diagnostic supports;
+  speculative remedies are not asserted as claim-grade here.
 - **Single-step only (Qualifier 3).** The semigroup `{Π_t}` is not
   constructed; multi-step is iteration of `Π_Δ`, validated for error
   growth but not a Chapman–Kolmogorov-verified semigroup. (The
