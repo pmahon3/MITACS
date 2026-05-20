@@ -20,7 +20,7 @@ A standalone treatment of the local-Gaussian conditional-kernel
 estimator and its relationship to the Resolvent_Framework `κ_Q`,
 **demonstrated with purpose-built numerical examples on controlled
 systems** — not the Ontario application (that is the separate
-application paper, `writeup/application/draft.tex`).
+application paper, `writeup/tex/draft.tex`).
 
 ## The load-bearing requirement (do not lose this)
 
