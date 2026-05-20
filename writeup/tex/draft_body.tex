@@ -40,50 +40,109 @@ draft makes no comparative-novelty claims.}
 \subsection{Construction}
 \label{sec:construction}
 
-Let a scalar observable (here, de-seasonalised hourly demand;
-Section~\ref{sec:pipeline}) be delay-embedded into \(\Rb^{d}\) by lags
-\(x_t = (s_t, s_{t-1}, \ldots, s_{t-(d-1)})\). For a query state \(x\)
-we form a local neighbourhood in the embedding space and fit, by
-weighted least squares, a local linear one-step map
+\paragraph{Embedding and library.}
+Let \(s_t\) be a scalar observable (here, de-seasonalised hourly
+demand; Section~\ref{sec:pipeline}) sampled on a regular grid
+\(t \in \mathbb{Z}\). The delay embedding into \(\Rb^{d}\) is
+\begin{equation}
+\label{eq:embed}
+x_t \;=\; (s_t,\; s_{t-1},\; \ldots,\; s_{t-(d-1)}) \,.
+\end{equation}
+Per day-type \(\mathrm{dt} \in \{\mathrm{weekday},
+\mathrm{saturday}, \mathrm{sunday}\}\) the embedding dimension
+\(d = d(\mathrm{dt})\) is selected on pre-cutoff library data by the
+elbow rule on the one-step in-sample prediction-skill curve
+\(\rho \mapsto d\), with the day-anchor seam excluded (one-step
+targets falling on the rollover hour are dropped from the fit; see
+Section~\ref{sec:pipeline}). The pre-cutoff library is
+\begin{equation}
+\label{eq:library}
+\mathcal{L} \;=\; \{\,(x_t, x_{t+1}) : t \le t_{\mathrm{cut}},\;
+t \text{ on the day-type } \mathrm{dt},\;
+t+1 \notin \text{rollover seam}\,\} \,,
+\end{equation}
+with \(t_{\mathrm{cut}}\) the model-specification cutoff.
+
+\paragraph{Local linear fit.}
+For a query state \(x \in \Rb^{d}\), form the kernel weights
+\begin{equation}
+\label{eq:weights}
+w_i(x;\theta) \;=\; (2\pi)^{-d/2}\,\theta^{-d}\,
+\exp\!\left(-\frac{\lVert x_i - x \rVert^{2}}{2\theta^{2}}\right),
+\qquad (x_i, y_i) \in \mathcal{L} \,,
+\end{equation}
+with bandwidth \(\theta > 0\) and \(y_i \equiv x_{t_i + 1}\). The
+weighted least-squares local linear one-step map
 \begin{equation}
 \label{eq:drift}
-x_{\text{next}} \;\approx\; x \cdot \Cj \,,
-\qquad\text{(row convention)}
+x_{\text{next}} \;\approx\; x \cdot \Cj \qquad
+\text{(row convention; \(j\) indexes the query state)}
 \end{equation}
-with \(\Cj \in \Rb^{d \times d}\) per anchor \(j\). Residuals
-\(Y - X \Cj\) over the local neighbourhood define a diffusion
+solves
+\begin{equation}
+\label{eq:wls}
+\Cj \;=\; \arg\min_{C \in \Rb^{d \times d}}
+\sum_{i \in \mathcal{L}} w_i(x;\theta) \, \lVert y_i - x_i C \rVert^{2}
+\;=\; \bigl(X^{\top} W X\bigr)^{-1} X^{\top} W Y \,,
+\end{equation}
+where \(X, Y\) stack the library pairs and
+\(W = \operatorname{diag}(w_i)\). The plain (unweighted)
+residual covariance defines the diffusion,
 \begin{equation}
 \label{eq:diff}
-\Sj \;=\; \text{plain $\mu$-centred covariance of }\bigl(Y - X \Cj\bigr) \,,
+\Sj \;=\; \frac{1}{|\mathcal{L}|}
+\sum_{i \in \mathcal{L}} \bigl(r_i - \bar r\bigr)
+\bigl(r_i - \bar r\bigr)^{\!\top},
+\qquad r_i := y_i - x_i \Cj,
+\quad \bar r := \tfrac{1}{|\mathcal{L}|}\sum_i r_i \,.
 \end{equation}
-\emph{without} a residual kernel. The pair defines a state-dependent
-Gaussian Markov kernel on the embedding space
+The pair defines the state-dependent Gaussian Markov kernel
 \begin{equation}
 \label{eq:kernel}
-\Pij(x, \cdot) \;=\; \Nrm\bigl(x \Cj,\; \Sj\bigr).
+\Pij(x, \cdot) \;=\; \Nrm\!\bigl(x \Cj,\; \Sj\bigr) \,.
 \end{equation}
 
-\paragraph{Locality of \(\Cj\).} The Goldenshluger--Lepski selector in
-the supporting library is degenerate for the normalised Gaussian
-kernel: its score is monotone in \(\theta\) with no interior optimum.
-True leave-one-out CV on one-step squared error is also
-non-discriminating --- under bootstrap-SE testing across anchors the
-LOO objective is flat-within-noise above a small \(\theta\), with no
-statistically separated interior minimum. This extends to multi-step
-LOO at every horizon \(h \in \{1, 2, 4, 8, 16, 24\}\) and reproduces
-on three controlled systems (linear VAR(1), logistic map,
-regime-switching AR), so it is a property of the \emph{criterion}
-(prediction-error CV does not identify a localisation bandwidth here),
-not of the Ontario data. Consequently, \(\Cj\) is effectively a
-single global linear operator at the \(d = 2\) z-score-lag embedding.
-The
-plain (not residual-kernel-weighted) covariance is used for \(\Sj\)
-because the weighted form collapses toward \(\approx w^{2} \cdot Q\).
+\paragraph{Why the plain (unweighted) covariance.}
+The kernel-weighted residual covariance
+\(\Sj^{w} = \sum_i w_i\,(r_i - \bar r)(r_i - \bar r)^{\!\top}
+/ \sum_i w_i\) collapses toward \(\approx w^{2}\!\cdot Q\) for the
+normalised Gaussian kernel of Eq.~\ref{eq:weights}; the plain
+covariance is the unbiased local second moment, free of that
+collapse.
+
+\paragraph{Bandwidth: locality of \(\Cj\).}
+Two candidate rules for \(\theta\). The Goldenshluger--Lepski
+criterion in the supporting library is monotone in \(\theta\) for the
+normalised Gaussian kernel of Eq.~\ref{eq:weights}, with no interior
+optimum, so any grid reports its own ceiling. True leave-one-out
+cross-validation on one-step squared error,
+\begin{equation}
+\label{eq:loocv}
+\mathcal{R}_{\mathrm{LOO}}(\theta)
+\;=\; \frac{1}{|\mathcal{L}|}
+\sum_{i \in \mathcal{L}}
+\bigl\lVert y_i - x_i \Cj^{(-i)}(\theta) \bigr\rVert^{2},
+\end{equation}
+where \(\Cj^{(-i)}(\theta)\) is the local fit at \(x_i\) computed
+\emph{without} the point \((x_i, y_i)\). On Ontario data
+\(\mathcal{R}_{\mathrm{LOO}}\) is flat-within-noise above a small
+\(\theta\): under bootstrap-SE testing across anchors (resampling
+library indices with replacement, \(B = 10^{3}\) replicates), the
+\(\theta\)-grid argmin is not statistically separated from any other
+grid point. The same non-discrimination holds for the multi-step
+analogue at every horizon
+\(h \in \{1, 2, 4, 8, 16, 24\}\) and reproduces on three independent
+controlled systems (a linear VAR(1), the logistic map, and a
+regime-switching AR): a property of the \emph{criterion}
+(prediction-error cross-validation does not identify a localisation
+bandwidth here), not of the Ontario data. \(\Cj\) is
+effectively a single global linear operator at the \(d = 2\)
+z-score-lag embedding.
 
 With \(\Cj\) effectively global and linear, the non-Dirac content of
-the predictive law lives entirely in \(\Sj\) and its departure from
-Gaussianity (Section~\ref{sec:caveat}). The available lever is the
-\emph{state representation} (richer embedding, explicit
+the predictive law is carried entirely by \(\Sj\) and its departure
+from Gaussianity (Section~\ref{sec:caveat}). The available lever is
+the \emph{state representation} (richer embedding, explicit
 phase/derivative coordinate), not the bandwidth rule. Estimator
 internals: Appendix~\ref{app:estimator}.
 
@@ -187,33 +246,53 @@ departs from \(\kQ\).
 \paragraph{Decomposition.}
 \label{sec:caveat-decomposition}
 A pre-registered dev-set diagnostic (2021--22 inspection benchmark;
-inspection-only, not claim-grade) bounds the recoverable loss of each
-factor via oracle counterfactuals on multi-step forecast log-loss
-over all delivery days, with predictive variance propagated across
-the embedding-dimension change (below). The phase-bias oracle
-recovers \(\approx 4.8\%\) of dev log-loss (95\% CI
-\([0.7\%,\, 8.6\%]\)); the Student-\(t\) (\(\nu \approx 6.5\))
-innovation oracle recovers \(\approx 2.3\%\) (95\% CI
-\([-0.0\%,\, 4.8\%]\)). \textbf{Neither lower bound clears the
-pre-registered 1\% materiality threshold, and the heavy-tail interval
-includes zero.} The verdict is the \emph{catch-all} ``neither
-dominates'' --- not because the effects are real and tied (which was
-the single-dimension subpopulation case, where both cleared the bar
-at \(\approx 6\%\) / \(\approx 9\%\)), but because on the complete,
-correctly-propagated data neither is established at all. Document
-both, engineer neither.
+inspection-only, not claim-grade) bounds the recoverable loss of
+each factor by oracle counterfactuals on the multi-step forecast
+log-loss \(\Lbar\), over all delivery days, with predictive variance
+correctly propagated across the embedding-dimension change.
+The recoverable-loss factors are
+\begin{equation}
+\label{eq:DA-DB}
+\DA \;:=\; \frac{\Lbar - \Lbar^{(A)}}{\Lbar},
+\qquad
+\DB \;:=\; \frac{\Lbar - \Lbar^{(B)}}{\Lbar},
+\end{equation}
+where \(\Lbar^{(A)}\) is the dev log-loss under the oracle that
+removes the phase-conditional mean bias, and \(\Lbar^{(B)}\) is the
+dev log-loss under the oracle that replaces the Gaussian innovation
+law with a Student-\(t\) fitted on the residuals (shape \(\nuhat\)).
+With \(\taumin = 0.01\) the pre-registered materiality threshold,
+\begin{equation}
+\label{eq:results}
+\DA \;\approx\; 0.048 \;\;[0.007,\,0.086], \qquad
+\DB \;\approx\; 0.023 \;\;[-0.000,\,0.048], \qquad
+\nuhat \;\approx\; 6.5,
+\end{equation}
+(95\% day-bootstrap CIs in brackets). \textbf{Neither lower bound
+clears \(\taumin\), and the \(\DB\) interval includes zero.} The
+verdict is the catch-all ``neither dominates'' --- not because the
+effects are real and tied (the single-dimension subpopulation case,
+where both cleared \(\taumin\) at \(\DA \approx 0.061\) and
+\(\DB \approx 0.091\)) but because on the complete,
+correctly-propagated data neither is established at all.
+Document both, engineer neither.
 
 \paragraph{Propagation reconciliation.}
 \label{sec:caveat-propagation}
-The heavy-tail signal attenuated roughly four-fold
-(\(\nu \approx 5.0 \to 6.5\); implied excess kurtosis
-\(\approx 6.1 \to 2.4\)) once predictive variance was propagated
-across the dimension-change boundary rather than sidestepped by
-excluding those days. Earlier one-step measurements
-(re-baseline excess kurtosis \(\approx 24\)--\(33\), without
-multi-step variance propagation) were partly a propagation artefact,
-not solely a property of the innovation law. Propagation is supplied
-by a fixed-maximum-dimension state augmentation carrying unused lag
+Propagating predictive variance across the dimension-change boundary,
+rather than sidestepping it by dropping those days, attenuates the
+heavy-tail signal roughly four-fold:
+\begin{equation}
+\label{eq:kurt-attenuation}
+\nuhat \;:\; 5.0 \to 6.5,
+\qquad
+\mathrm{kurt}_{\mathrm{exc}} \;:\; 6.1 \to 2.4 \,.
+\end{equation}
+Earlier one-step measurements
+(re-baseline \(\mathrm{kurt}_{\mathrm{exc}} \approx 24\)--\(33\),
+without multi-step variance propagation) were partly a propagation
+artefact, not solely a property of the innovation law. Propagation is
+a fixed-maximum-dimension state augmentation carrying unused lag
 coordinates as deterministic, zero-innovation components, validated
 to machine precision against the closed-form linear-Gaussian
 reference and bit-identical to the unaugmented recursion on
@@ -279,13 +358,27 @@ The iterated one-step predictor is backtested on Ontario ground truth
 for complete delivery days strictly after the model-specification
 cutoff. Leakage guard: fits and \(z\)-score climatology use only
 \(\le\)-cutoff data; post-cutoff actuals enter only as query history
-and scoring truth. Error is reported per horizon \(h = 1, \ldots, 24\);
-in a day-ahead forecast, horizon is collinear with hour-of-day, so
-the error structure is \emph{diurnal} (deep night easiest; dawn/dusk
-ramps hardest), not pure horizon compounding. The committed
-provenanced C1 artifact gives \(\mathrm{MAE} \approx 786~\mathrm{MW}\),
-\(\mathrm{MAPE} \approx 4.78\%\) over 500 out-of-sample days,
-\(\approx 1.5\times\) better than seasonal persistence at every hour.
+and scoring truth. With forecast \(\hat{y}_{d,h}\) and actual
+\(y_{d,h}\) over delivery days \(d \in \mathcal{D}\) and horizons
+\(h \in \{1, \ldots, 24\}\),
+\begin{equation}
+\label{eq:mae-mape}
+\MAE \;=\; \frac{1}{|\mathcal{D}|\cdot 24}
+\sum_{d \in \mathcal{D}} \sum_{h=1}^{24}
+\bigl| \hat{y}_{d,h} - y_{d,h} \bigr|,
+\qquad
+\MAPE \;=\; \frac{1}{|\mathcal{D}|\cdot 24}
+\sum_{d \in \mathcal{D}} \sum_{h=1}^{24}
+\frac{\bigl| \hat{y}_{d,h} - y_{d,h} \bigr|}{y_{d,h}} \,.
+\end{equation}
+In a day-ahead forecast, horizon \(h\) is collinear with hour-of-day,
+so the error structure is \emph{diurnal} (deep night easiest;
+dawn/dusk ramps hardest), not pure horizon compounding. The committed
+provenanced C1 artifact gives
+\(\MAE \approx 786~\mathrm{MW}\),
+\(\MAPE \approx 4.78\%\) over \(|\mathcal{D}| = 500\) out-of-sample
+days, \(\approx 1.5\times\) better than seasonal persistence at every
+hour.
 \todo[inline]{Current CLAIM-grade values from the committed
 provenanced artifact; the artifact hash will be restated after any
 honing re-freeze. Per-horizon table will appear in
