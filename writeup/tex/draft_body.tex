@@ -35,16 +35,6 @@ this paper states the correspondence compactly
 (Section~\ref{sec:method}) only insofar as it is needed to interpret
 the applied object honestly, and is otherwise self-contained.
 
-The paper proceeds: Section~\ref{sec:method} the estimator and its
-compact theoretical positioning; Section~\ref{sec:caveat} the
-structural caveat (a mis-centred conditional mean and a Gaussian-proxy
-diffusion) that bounds every predictive number here;
-Section~\ref{sec:application} the Ontario pipeline, the backtest, the
-registered forward experiment, the IESO-head-to-head infeasibility
-finding, and synthetic-ground-truth validation;
-Section~\ref{sec:limits} limitations and reproducibility;
-Section~\ref{sec:conclusion} a short conclusion.
-
 \emph{Positioning relative to prior work is deliberately deferred.}
 \todo[inline]{Prior-work context, for the author group to supply; this
 draft makes no comparative-novelty claims.}
@@ -82,11 +72,9 @@ on the embedding state space: \(\Cj\) is the local conditional-mean
 (drift) estimate, \(\Sj\) the local conditional second moment
 (diffusion).
 
-\paragraph{On the locality of \(\Cj\): what the data here actually
-supports.} The per-anchor neighbourhood bandwidth \(\theta\) is the
-parameter that would select \emph{how local} the drift is. Two
-candidate selection rules were investigated. The
-Goldenshluger--Lepski-style selector in the supporting library is
+\paragraph{Locality of \(\Cj\).} The per-anchor bandwidth \(\theta\)
+selects how local the drift is. Two candidate rules were investigated.
+The Goldenshluger--Lepski-style selector in the supporting library is
 degenerate for the normalised Gaussian kernel used here: its score is
 monotone in \(\theta\) with no interior optimum, so any grid simply
 reports its own ceiling. True leave-one-out cross-validation on
@@ -186,16 +174,13 @@ scope, not as commentary on its significance:
   alone would suggest, and below the pre-registered bar for being an
   actionable deficiency.
 
-  \item \textbf{Single step (with one validated composition).} The
-  estimator \(\Pij\) is constructed as the single-step slice
-  \(\Pidelta\); in the programme \(\{\Pi_t\}\) is \emph{derived} via
-  Chapman--Kolmogorov, not assumed. This work supplies one validated
-  piece of that derivation --- multi-step predictive-variance
-  propagation via a shift-aware state Jacobian (gate-checked against
-  the linear-Gaussian closed form to machine precision;
-  Section~\ref{sec:caveat}, companion paper) --- used only as the
-  instrument for the Section~\ref{sec:caveat} decomposition. The full
-  semigroup is still neither composed nor verified.
+  \item \textbf{Single step.} \(\Pij\) is the single-step slice
+  \(\Pidelta\); the full semigroup \(\{\Pi_t\}\), which the programme
+  \emph{derives} via Chapman--Kolmogorov, is neither composed nor
+  verified here. (One piece of that derivation --- a multi-step
+  predictive-variance propagation via a shift-aware state Jacobian
+  --- is built and gate-validated as the instrument for
+  Section~\ref{sec:caveat}'s decomposition; it is not the semigroup.)
 \end{enumerate}
 
 The delay embedding, the drift as local linearisation, and the
@@ -208,15 +193,12 @@ paper carries only what is needed to interpret the Ontario results.}
 Gaussian-proxy diffusion}
 \label{sec:caveat}
 
-This bounds every predictive number in this paper and is stated up
-front, not buried in limitations. The estimator's two factors --- the
-conditional mean \(\Cj\) and the conditional law summarised by \(\Sj\)
---- each carry a quantified limitation. They are independent: neither
-is a restatement of the other, and a pre-registered dev-set
-decomposition (below), run on the full population with predictive
-variance correctly propagated, finds \textbf{neither effect clears the
-materiality bar} --- a documented-limitation, engineer-neither
-outcome.
+This bounds every predictive number in this paper. The estimator's
+two factors --- the conditional mean \(\Cj\) and the conditional law
+summarised by \(\Sj\) --- each carry a quantified limitation. They
+are independent, and a pre-registered dev-set decomposition (below),
+run on the full population with predictive variance correctly
+propagated, finds \textbf{neither effect clears the materiality bar}.
 
 \paragraph{\(\Sj\) is rank-1 by construction.} For a single-variable
 delay embedding, coordinates \(2, \ldots, d\) of the one-step image
@@ -232,16 +214,10 @@ of \(\Sj\) is incoherent for this embedding and is not reported.
 non-Gaussianity question is therefore \emph{univariate} (the rank-1
 fact makes the multivariate question vacuous). Measured through the
 production estimator and validated against synthetic ground truth
-(Section~\ref{sec:synth}), the one-step innovation is heavy-tailed:
-the production-path re-baseline gives excess kurtosis \(\approx 24\)--\(33\)
-and tail ratio \(\approx 2.4\)--\(3.8\), against a clean VAR(1)
-reference of \(\approx 0\) and \(\approx 1\). \todo[inline]{Current
-authoritative production-path values; slot will be updated with the
-re-confirmed figure and artifact hash from the verified honed/full run
---- the finding and its order of magnitude are established, not
-pending.} As Section~\ref{sec:caveat-propagation} shows, the
-\emph{propagation-aware} strength of this departure is materially
-smaller than the one-step measurement suggests.
+(Section~\ref{sec:synth}), the one-step innovation is heavy-tailed;
+the propagation-aware strength of that departure
+(Section~\ref{sec:caveat-propagation}) is what the diagnostic of
+Section~\ref{sec:caveat-decomposition} acts on.
 
 \paragraph{The conditional mean is phase-mis-centred.} Independently
 of the diffusion, the conditional-mean factor \(\Cj\) carries a
@@ -257,87 +233,55 @@ across rising/falling phase. The estimator therefore does \emph{not}
 faithfully recover the conditional mean where phase matters;
 \(\Pij\)'s location, not only its shape, departs from \(\kQ\).
 
-\subsection{Decomposition: on the full population, neither limitation
-clears the materiality bar}
+\paragraph{Decomposition.}
 \label{sec:caveat-decomposition}
-
 A pre-registered dev-set error-decomposition diagnostic
-(2021--22 inspection benchmark; inspection-only, not a claim-grade
-artifact) bounds the loss recoverable on each factor via oracle
-counterfactuals on multi-step forecast log-loss, over \textbf{all
-delivery days}, with the predictive variance correctly propagated
-across the embedding-dimension change
-(Section~\ref{sec:caveat-propagation}). An oracle that removes the
+(2021--22 inspection benchmark; inspection-only, not claim-grade)
+bounds the loss recoverable on each factor via oracle counterfactuals
+on multi-step forecast log-loss, over all delivery days, with
+predictive variance correctly propagated across the
+embedding-dimension change (below). An oracle that removes the
 phase-conditional mean bias recovers \(\approx 4.8\%\) of dev
 log-loss (95\% CI \([0.7\%,\, 8.6\%]\)); an oracle that replaces the
 Gaussian innovation law with a fitted heavy-tailed law
 (Student-\(t\), \(\nu \approx 6.5\)) recovers \(\approx 2.3\%\)
 (95\% CI \([-0.0\%,\, 4.8\%]\)). \textbf{Neither lower bound clears
 the pre-registered 1\% materiality threshold, and the heavy-tail
-interval includes zero.} Under the pre-registered rule this is the
-\emph{catch-all} ``neither dominates'' --- reached not because the two
-effects are real and statistically tied (that was the case on the
-single-dimension subpopulation, where both cleared the bar at
-\(\approx 6\%\) / \(\approx 9\%\)), but because on the complete,
-correctly-propagated data neither effect is materially established at
-all. The disciplined consequence is the same and is in fact
-strengthened: document both as honest scope limitations and engineer
-neither --- the evidence does not establish either as an actionable
-deficiency, not merely that it cannot rank them.
+interval includes zero.} The verdict is the \emph{catch-all}
+``neither dominates'' --- reached not because both effects are real
+and statistically tied (which was the single-dimension subpopulation
+case, where both cleared the bar at \(\approx 6\%\) / \(\approx 9\%\)),
+but because on the complete, correctly-propagated data neither is
+materially established at all. Document both, engineer neither.
 
-\subsection{The apparent heavy-tail was partly a propagation artefact}
+\paragraph{Propagation reconciliation.}
 \label{sec:caveat-propagation}
+The heavy-tail signal attenuated roughly four-fold (Student-\(t\)
+\(\nu \approx 5.0 \to 6.5\); implied standardised-residual excess
+kurtosis \(\approx 6.1 \to 2.4\)) once predictive variance was
+correctly propagated across the dimension-change boundary rather than
+sidestepped by excluding those days. Larger, correctly-propagated
+predictive variance on rollover days yields smaller standardised
+residuals and a smaller apparent departure from Gaussian. Part of what
+the earlier single-dimension and re-baseline analyses characterised as
+a strongly heavy-tailed innovation law (re-baseline excess kurtosis
+\(\approx 24\)--\(33\), measured one-step without multi-step variance
+propagation) was partly a propagation artefact, not solely a property
+of the innovation law itself; the propagation is supplied by a
+fixed-maximum-dimension state augmentation that carries the
+lower-dimensional day-types' unused lag coordinates as deterministic,
+zero-innovation components, validated to machine precision against the
+closed-form linear-Gaussian reference and bit-identical to the
+unaugmented recursion on single-dimension days. As a cross-check,
+restricting to that single-dimension subpopulation (\(\approx 58\%\)
+of days) independently yields the same qualitative verdict.
 
-The heavy-tail signal attenuated roughly four-fold (single-dimension
-Student-\(t\) \(\nu \approx 5.0\), implied standardised-residual
-excess kurtosis \(\approx 6.1\) \(\to\) full-population
-\(\nu \approx 6.5\), excess kurtosis \(\approx 2.4\)) once the
-predictive variance was correctly propagated across the
-dimension-change boundary rather than sidestepped by excluding those
-days. Larger, correctly-propagated predictive variance on rollover
-days yields smaller standardised residuals and hence a smaller
-apparent departure from Gaussian. This means part of what the earlier
-single-dimension and re-baseline analyses characterised as a
-\emph{strongly} heavy-tailed innovation law (re-baseline excess
-kurtosis \(\approx 24\)--\(33\), measured one-step without multi-step
-variance propagation) reflects under-propagated predictive variance,
-not solely a property of the innovation law itself. The conditional
-law is still not exactly Gaussian, but the strength of that departure
-is materially smaller once variance is propagated honestly, and on
-the full population it is below the pre-registered actionability bar.
-This reconciliation is itself a finding and is carried as such, not
-buried.
-
-\paragraph{Scope of the decomposition (resolved).} The multi-step
-predictive-variance composition is undefined across an
-embedding-dimension change (the per-day-type embedding dimension
-changes at the day-type rollover, affecting \(\approx 42\%\) of
-delivery days). This was handled by a fixed-maximum-dimension state
-augmentation that carries the lower-dimensional day-types' unused lag
-coordinates as deterministic, zero-innovation components, making the
-composition exactly defined across the boundary. It was validated to
-the same standard as the rest of the pipeline before use:
-machine-precision agreement with the closed-form linear-Gaussian
-reference, and bit-identical results to the unaugmented recursion on
-single-dimension days. The figures above are the validated
-\textbf{full-population} result. As a cross-check, restricting to the
-single-dimension subpopulation (\(\approx 58\%\) of days)
-independently yields the same qualitative verdict (recoverable losses
-\(\approx 6.1\%\) and \(\approx 9.1\%\), again overlapping CIs,
-neither dominant): the conclusion does not depend on the
-dimension-change handling. The figures are order-of-magnitude honest
-limitations, not precise universal constants.
-
-\paragraph{Consequence.} \(\Sj\) is a Gaussian second-moment
-\emph{proxy} of a (modestly) heavy-tailed scalar innovation law, and
-\(\Cj\) is a phase-blind conditional mean. The estimator captures
-\emph{a} conditional mean and \emph{a} second moment, but \(\Pij\)
-departs from \(\kQ\) in \textbf{both} its location (phase-mis-centring)
-and its shape (non-Gaussian law), even in the large-sample limit ---
-it is the best phase-blind Gaussian summary of \(\kQ\). We report and
-quantify both rather than hide them, and carry them as standing
-caveats wherever \(\Pij\) is used predictively (notably the interval
-coverage in Section~\ref{sec:backtest}).
+\paragraph{Consequence.} \(\Sj\) is a Gaussian second-moment proxy of
+a (modestly) heavy-tailed scalar innovation law, and \(\Cj\) is a
+phase-blind conditional mean. \(\Pij\) departs from \(\kQ\) in
+\textbf{both} its location (phase-mis-centring) and its shape
+(non-Gaussian law), even in the large-sample limit. The interval
+coverage reported in Section~\ref{sec:backtest} carries this caveat.
 
 \section{Application and results}
 \label{sec:application}
@@ -516,13 +460,6 @@ the verified run.}
   and/or a non-Gaussian local conditional model for \(\kQ\) --- neither
   licensed by current evidence as the higher-leverage lever.
 
-  \item \textbf{State representation.} The phase-mis-centring above is
-  the mechanism behind the demand-ramp reach limit; its lower-grade
-  exploratory exploration (per-hour dimension, etc.) is fenced in
-  Section~\ref{sec:inspection}. Section~\ref{sec:caveat} states only
-  what the pre-registered dev diagnostic supports; speculative
-  remedies are not asserted as claim-grade here.
-
   \item \textbf{Single-step only (Qualifier 3).} The semigroup
   \(\{\Pi_t\}\) is not constructed; multi-step is iteration of
   \(\Pidelta\), validated for error growth but not a
@@ -555,76 +492,27 @@ this machinery was built. Inspection-only exploratory material is
 banner-marked and is \emph{not} cited as a result anywhere in this
 document.
 
-\subsection{Preliminary observations (INSPECTION-ONLY --- not
-claim-grade)}
-\label{sec:inspection}
-
-\begin{quote}
-\textbf{Evidentiary grade.} Everything in this subsection is from
-development-set exploratory investigation. It has \emph{not} been
-established through the production-validated code path on claim-grade
-data and is \emph{not} cited as a result anywhere else in this
-document. It is recorded here for collaborator visibility and to
-motivate an open decision --- nothing in
-Sections~\ref{sec:intro}--\ref{sec:limitations} depends on it. Per the
-project's discipline rule, a diagnostic that has not been confirmed
-through the production path is a hypothesis, not a finding.
-\end{quote}
-
-\paragraph{Phase-centred conditional-mean bias at demand ramps.} A
-development-set diagnostic on a separate (2021--22) inspection window
-indicates a systematic, phase-dependent conditional-mean bias: the
-local linear map appears to centre between rising and falling demand
-phases, under-predicting overnight troughs and over-predicting evening
-peaks. The working interpretation is under-embedding / missing phase
-state at the ramps (a single per-day-type embedding dimension may be
-simultaneously over-embedded at simple overnight hours and
-under-embedded at the complex evening ramp). A complementary dev-set
-check found a state-space-adaptive bandwidth to be a weak, high-risk
-lever that does not touch this bias.
-
-\paragraph{Status / open decision.} Whether to address this by a
-phase/derivative-augmented embedding, a per-hour embedding dimension,
-or to accept and document it as a reach limit of the univariate
-estimator is an open decision. Any change would be derived strictly
-on the development set and locked into a \emph{new} hash-stamped
-frozen specification (superseding the current registration)
-\emph{before} any forward forecast is scored with the changed model
---- the freeze mechanism is the wall between development and the
-registered test.
-\todo[inline]{Status: investigation recorded; decision pending --- see
-project tasks \#30/\#31.}
-
 \section{Conclusion}
 \label{sec:conclusion}
 
-We instantiated a delay-embedding local-Gaussian conditional-kernel
-predictor on Ontario IESO electricity demand and evaluated it as a
-prediction experiment with an out-of-sample backtest and a
-hash-stamped registered forward experiment. The methodologically
-correct retrospective comparison to IESO's published forecast was
-directly verified to be infeasible from the public archives, and the
-registered forward design is the response. The estimator's
-relationship to the conditional-regularity kernel \(\kQ\) of the
-Resolvent\_Framework programme was stated compactly, with three
-standing scope qualifiers: register (estimator-of, not instance-of),
-imposed Gaussianity, and single-step. Two structural limitations
-were quantified through a pre-registered dev-set decomposition: a
-phase-mis-centred conditional mean and a Gaussian proxy of a
-non-Gaussian innovation. On the validated full population, neither
-limitation clears the pre-registered materiality bar; both are
-documented and neither is engineered. A side-finding from the
-decomposition --- that the apparent strength of the heavy-tailed
-innovation attenuates \(\approx 4\times\) when predictive variance
-is correctly propagated across the embedding-dimension boundary, so
-part of the prior single-step heavy-tail signal is a propagation
-artefact rather than purely a property of the innovation law ---
-is reported in its own right and reconciled against the earlier
-re-baseline number. The forecasting model's standing shortcomings
-are structural (univariate state, no exogenous information,
-phase-blind embedding) rather than tuning issues, and on present
-evidence each is individually too small to license a targeted
-engineering response.
+A delay-embedding local-Gaussian conditional-kernel predictor was
+instantiated on Ontario IESO demand and evaluated with an
+out-of-sample backtest and a hash-stamped registered forward
+experiment, the retrospective IESO head-to-head having been directly
+verified infeasible from the public archives. Two structural
+limitations were quantified by a pre-registered dev-set decomposition
+--- a phase-mis-centred conditional mean and a Gaussian proxy of a
+non-Gaussian innovation --- and on the validated full population
+neither clears the pre-registered materiality bar; both are
+documented and neither is engineered. A side-finding: the apparent
+strength of the heavy-tailed innovation attenuates \(\approx 4\times\)
+once predictive variance is correctly propagated across the
+embedding-dimension boundary, so part of the prior single-step signal
+was a propagation artefact rather than purely a property of the
+innovation law. The standing shortcomings are structural --- univariate
+state, no exogenous information, phase-blind embedding --- not tuning
+issues, and on present evidence each is individually too small to
+license a targeted engineering response.
 
 \appendix
 
