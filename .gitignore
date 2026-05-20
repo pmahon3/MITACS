@@ -29,7 +29,10 @@ archive/
 # once real data accrues -- it is then irreplaceable like settled_actuals.csv.
 data/ontario/forecast/experiment_ledger.csv
 
-# LaTeX build artifacts (generated from the .tex source; do not track)
+# LaTeX build artifacts (generated from the .tex source; do not track).
+# Patterns match writeup/ AND writeup/tex/ (the canonical .tex home as of
+# 2026-05-19; the legacy writeup/*.aux patterns are kept because that
+# location may still see ad-hoc builds).
 writeup/*.aux
 writeup/*.fdb_latexmk
 writeup/*.fls
@@ -37,3 +40,10 @@ writeup/*.log
 writeup/*.out
 writeup/*.pdf
 writeup/*.synctex.gz
+writeup/tex/*.aux
+writeup/tex/*.fdb_latexmk
+writeup/tex/*.fls
+writeup/tex/*.log
+writeup/tex/*.out
+writeup/tex/*.pdf
+writeup/tex/*.synctex.gz
