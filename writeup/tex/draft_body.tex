@@ -280,29 +280,23 @@ neither is established at all. Document both, engineer neither.
 \begin{table}[h]
 \centering
 \caption{Error-decomposition verdict on the 2021--22 development-set
-benchmark. \(\DA\), \(\DB\) are the relative recoverable losses
-defined in Eq.~\ref{eq:DA-DB}; brackets give 95\% day-bootstrap CIs.
-\(\nuhat\) is the Student-\(t\) shape fitted on the residuals. The
-materiality threshold is \(\taumin = 0.01\).}
+benchmark; \(\DA\), \(\DB\) per Eq.~\ref{eq:DA-DB} with 95\%
+day-bootstrap CIs; \(\taumin = 0.01\).}
 \label{tab:verdict}
 \begin{tabular}{l c c c l}
 \toprule
-Population
-  & \(\DA\) (95\% CI)
-  & \(\DB\) (95\% CI)
-  & \(\nuhat\)
-  & Verdict \\
+Population & \(\DA\) (95\% CI) & \(\DB\) (95\% CI) & \(\nuhat\) & Verdict \\
 \midrule
-Full delivery-day population
+Full
   & \(0.048\;[0.007,\,0.086]\)
   & \(0.023\;[-0.000,\,0.048]\)
   & \(6.5\)
   & neither clears \(\taumin\) \\
-Single-dimension subpopulation
+Single-dim
   & \(\approx 0.061\)
   & \(\approx 0.091\)
   & ---
-  & both clear \(\taumin\); CIs overlap \\
+  & both clear \(\taumin\); tied \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -466,23 +460,23 @@ Table~\ref{tab:gates}. All three pass.
 
 \begin{table}[h]
 \centering
-\caption{Synthetic-ground-truth validation gates. Each calls the same
-estimator code used in the main pipeline (not a reimplementation),
-which is what makes its pass a check on the estimator itself.}
+\small
+\caption{Synthetic-ground-truth validation gates. Each calls the
+same estimator code as the main pipeline.}
 \label{tab:gates}
 \begin{tabular}{l l l}
 \toprule
-Gate & System tested & Check \\
+Gate & System & Check \\
 \midrule
 Recovery
-  & VAR(1) with known \((A, Q)\)
-  & drift and diffusion recovered within tolerance \\
+  & Known-\((A,Q)\) VAR(1)
+  & drift, diffusion within tolerance \\
 Non-Gaussianity
-  & Gaussian- vs.\ Student-\(t\)-innovation VAR(1)
-  & Gaussian reads \(\approx\)Gaussian; Student-\(t\) flagged heavy-tailed \\
-Multi-step composition
-  & Iterated \(\Pidelta\) vs.\ VAR(1) closed form
-  & error-growth curve within tolerance \\
+  & Gaussian / \(t\)-innov.\ VAR(1)
+  & \(\approx\)Gaussian / heavy-tail flag \\
+Multi-step
+  & \(\Pidelta^{k}\) vs.\ VAR(1) closed form
+  & error growth within tolerance \\
 \bottomrule
 \end{tabular}
 \end{table}
