@@ -267,20 +267,45 @@ oracle that removes the phase-conditional mean bias, and
 Gaussian innovation law with a Student-\(t\) fitted on the residuals
 (shape \(\nuhat\)).
 With \(\taumin = 0.01\) the pre-registered materiality threshold,
-\begin{equation}
-\label{eq:results}
-\DA \;\approx\; 0.048 \;\;[0.007,\,0.086], \qquad
-\DB \;\approx\; 0.023 \;\;[-0.000,\,0.048], \qquad
-\nuhat \;\approx\; 6.5,
-\end{equation}
-(95\% day-bootstrap CIs in brackets). \textbf{Neither lower bound
-clears \(\taumin\), and the \(\DB\) interval includes zero.} The
-verdict is the catch-all ``neither dominates'' --- not because the
-effects are real and tied (the single-dimension subpopulation case,
-where both cleared \(\taumin\) at \(\DA \approx 0.061\) and
-\(\DB \approx 0.091\)) but because on the complete,
-correctly-propagated data neither is established at all.
-Document both, engineer neither.
+the diagnostic yields the verdicts in
+Table~\ref{tab:verdict}: on the full delivery-day population
+\textbf{neither lower bound clears \(\taumin\), and the \(\DB\)
+interval includes zero}; on the single-dimension subpopulation
+(used here as a robustness comparison) both cleared \(\taumin\) but
+the CIs overlapped. The full-population verdict is therefore the
+catch-all ``neither dominates'' --- not because the effects are real
+and tied, but because on the complete, correctly-propagated data
+neither is established at all. Document both, engineer neither.
+
+\begin{table}[h]
+\centering
+\caption{Error-decomposition verdict on the 2021--22 development-set
+benchmark. \(\DA\), \(\DB\) are the relative recoverable losses
+defined in Eq.~\ref{eq:DA-DB}; brackets give 95\% day-bootstrap CIs.
+\(\nuhat\) is the Student-\(t\) shape fitted on the residuals. The
+materiality threshold is \(\taumin = 0.01\).}
+\label{tab:verdict}
+\begin{tabular}{l c c c l}
+\toprule
+Population
+  & \(\DA\) (95\% CI)
+  & \(\DB\) (95\% CI)
+  & \(\nuhat\)
+  & Verdict \\
+\midrule
+Full delivery-day population
+  & \(0.048\;[0.007,\,0.086]\)
+  & \(0.023\;[-0.000,\,0.048]\)
+  & \(6.5\)
+  & neither clears \(\taumin\) \\
+Single-dimension subpopulation
+  & \(\approx 0.061\)
+  & \(\approx 0.091\)
+  & ---
+  & both clear \(\taumin\); CIs overlap \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \paragraph{Propagation reconciliation.}
 \label{sec:caveat-propagation}
@@ -435,23 +460,32 @@ date.)
 \subsection{Validation against synthetic ground truth}
 \label{sec:synth}
 
-Three gates call the \emph{production} code path (not
-reimplementations):
+Three gates call the same estimator code used elsewhere in the paper
+(not reimplementations); their structure is summarised in
+Table~\ref{tab:gates}. All three pass.
 
-\begin{enumerate}
-  \item \textbf{Recovery} --- a VAR(1) system with known \((A, Q)\) is
-  recovered within tolerance (drift and diffusion).
-  \item \textbf{Non-Gaussianity} --- a Gaussian-innovation VAR(1)
-  reads approximately Gaussian; a Student-\(t\)-innovation VAR(1) is
-  flagged heavy-tailed, validating the Section~\ref{sec:caveat}
-  diagnostic against ground truth.
-  \item \textbf{Multi-step composition} --- iterated \(\Pidelta\) is
-  checked against the VAR(1) closed form; drift error compounds with
-  horizon \emph{by construction} and is reported as an error-growth
-  curve within tolerance.
-\end{enumerate}
-
-All three gates pass.
+\begin{table}[h]
+\centering
+\caption{Synthetic-ground-truth validation gates. Each calls the same
+estimator code used in the main pipeline (not a reimplementation),
+which is what makes its pass a check on the estimator itself.}
+\label{tab:gates}
+\begin{tabular}{l l l}
+\toprule
+Gate & System tested & Check \\
+\midrule
+Recovery
+  & VAR(1) with known \((A, Q)\)
+  & drift and diffusion recovered within tolerance \\
+Non-Gaussianity
+  & Gaussian- vs.\ Student-\(t\)-innovation VAR(1)
+  & Gaussian reads \(\approx\)Gaussian; Student-\(t\) flagged heavy-tailed \\
+Multi-step composition
+  & Iterated \(\Pidelta\) vs.\ VAR(1) closed form
+  & error-growth curve within tolerance \\
+\bottomrule
+\end{tabular}
+\end{table}
 \todo[inline]{Cite the recorded gate result with its numbers from
 the verified run.}
 
@@ -510,7 +544,35 @@ GL-degeneracy note in full.}
 \section{Per-horizon backtest table}
 \label{app:backtest}
 
-\todo[inline]{Per-horizon table from the recorded backtest result.}
+Table~\ref{tab:backtest-horizons} reports per-horizon backtest error
+on the out-of-sample delivery days
+(\(|\mathcal{D}| = 500\) days, horizons \(h = 1, \ldots, 24\)).
+\(\MAE\) and \(\MAPE\) are defined in Eq.~\ref{eq:mae-mape}; the
+persistence baseline is the seasonal-persistence value at the same
+hour-of-day from one week prior.
+
+\begin{table}[h]
+\centering
+\caption{Per-horizon backtest error and ratio to the
+seasonal-persistence baseline. Rows are to be filled with the
+verified backtest output.}
+\label{tab:backtest-horizons}
+\begin{tabular}{c c c c}
+\toprule
+Horizon \(h\) & \(\MAE_h\) (MW) & \(\MAPE_h\) (\%) & \(\MAE_h /\MAE_h^{\mathrm{persist}}\) \\
+\midrule
+\(1\)   & --- & --- & --- \\
+\(2\)   & --- & --- & --- \\
+\(\vdots\) & \(\vdots\) & \(\vdots\) & \(\vdots\) \\
+\(23\)  & --- & --- & --- \\
+\(24\)  & --- & --- & --- \\
+\midrule
+overall & \(\approx 786\) & \(\approx 4.78\) & \(\approx 1/1.5\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\todo[inline]{Fill horizon rows from the recorded backtest result.}
 
 % ---------- References ----------
 \ifstandalone
