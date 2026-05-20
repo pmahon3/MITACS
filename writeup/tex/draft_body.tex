@@ -674,10 +674,24 @@ before the experiment runs:
   seasonal dimensions does not materially reduce the failure;
   the additive step is doing real work independent of dimension.
 \end{itemize}
-\todo[inline]{Disambiguation result: scale-only at \(\{2,4,3\}\)
-gives \(\MAE_{\{2,4,3\}} = [\ldots]\) MW,
-\(\MAPE_{\{2,4,3\}} = [\ldots]\)\%; outcome falls on D-i / D-ii /
-D-iii; mechanistic attribution updated accordingly.}
+\paragraph{Disambiguation result: D-iii.} Scale-only at the
+seasonal dimensions \(\{2,4,3\}\) gives \(\MAE_{\{2,4,3\}} =
+2158.6\) MW, \(\MAPE_{\{2,4,3\}} = 13.13\%\) on the same dev set ---
+\emph{worse} than scale-only at the elbow-selected \(\{4,4,4\}\)
+(\(\MAPE = 11.98\%\)), and only \(0.4\) pp better than the
+no-transform pipeline (\(\MAPE = 13.57\%\)). The pre-registered
+branch is D-iii: the additive sub-step does real work independent
+of dimension. The four-point ranking at matched dimensions is
+\(3.86\% \to 13.13\% \to 13.57\%\) as one drops first the additive
+\(\mu_{m,h}\) step and then the multiplicative \(\sigma_{m,h}\)
+step --- the additive step alone accounts for \(\approx 9.3\) pp
+of the \(\approx 9.7\) pp total cost. Forcing the elbow's preferred
+\(d = 4\) on weekday and sunday recovers \(\approx 1.1\) pp; that
+is small relative to the additive step's contribution and does not
+overturn the branch-(iii) reading. The mechanistic-attribution
+caveat in the preceding paragraph is therefore resolved: branch
+(iii)'s attribution to the additive sub-step is not a dimension
+artifact.
 
 The other channels: Ch2 PASS (scale-only \(60/60\) finite per
 day-type, identical to seasonal); Ch3 average coverage \(41.10\%\)
