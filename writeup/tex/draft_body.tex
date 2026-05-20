@@ -394,6 +394,80 @@ up at the coordinate layer, not a separate defect.
 methodological --- establishing the coordinate is sound before any
 subsequent re-specification.}
 
+The benign/leaky test established that de-seasonalisation
+\emph{delivers} the location benefit (the conditional mean is
+recovered as genuine demand dynamics) and \emph{drives} the tail
+leak (heavy-tail strength moves with seasonal resolution). The
+sharper question this opens, and the one whose answer determines
+whether the leak can be engineered around, is whether the
+\emph{element of the de-seasonalisation that delivers the location
+benefit is the element driving the tail leak}. We pose it as three
+questions in increasing concreteness; their resolution proceeds in
+reverse, each later question only earning its place if the prior one
+does not settle the issue.
+
+\paragraph{Q3 (inferential).} Under what assumptions on the joint
+demand-process distribution does intrinsic coupling between location
+benefit and tail leak follow from the joint observation that the
+location-axis error is invariant under seasonal-resolution variation
+while the tail-axis error moves with it? The observation is
+consistent with intrinsic coupling but does not on its own establish
+it: invariance of one channel and movement of the other under a
+shared parameter are joint phenomenology, not a coupling proof. The
+Q3 work is to state the assumptions (e.g.\ stationarity of the
+location-axis dynamics relative to the seasonal-resolution group;
+sufficient richness of the heavy-tail axis under those dynamics)
+under which intrinsic coupling does follow, and then to check whether
+they hold for Ontario demand. \todo[inline]{Q3 result: under named
+assumptions, the existing observations imply [intrinsic /
+separable / undetermined]; the assumptions are [plausible /
+implausible / untested] for Ontario demand.}
+
+\paragraph{Q2 (structural).} If Q3 does not settle the issue, the
+question becomes mechanistic: \emph{which sub-step} of the
+de-seasonalisation (Eq.~\ref{eq:zscore}) parametrises the tail leak?
+The transform has three sub-steps: subtraction of \(\mu_{m,h}\)
+(additive level removal), division by \(\sigma_{m,h}\)
+(multiplicative scale removal), and the resolution of the
+\(m \times h\) climatology grid. Each can be varied independently
+while holding the others fixed. The two readings make different
+predictions: under intrinsic coupling, the sub-step that delivers
+the location benefit is the same one that drives the tail leak when
+its parameter is varied; under separable coupling, the location and
+tail effects are driven by distinct sub-steps. \todo[inline]{Q2
+result: holding additive / multiplicative / grid-resolution sub-steps
+fixed in turn, the location benefit is delivered by [...] and the
+tail leak is driven by [...]; the two are the [same /
+distinct] sub-step.}
+
+\paragraph{Q1' (engineering).} If Q2 identifies the location and tail
+effects as driven by the same sub-step \emph{of this particular
+parametric family} (additive--multiplicative gridded climatology),
+the question becomes whether a \emph{different} family of
+de-seasonalisations could deliver the location benefit without the
+tail cost. The benign prediction (location invariance under
+parameter variation) generalises: any family that delivers the
+location benefit invariantly under its own parameterisation, and
+whose tail-axis error is \emph{also} invariant under that
+parameterisation, separates the cost from the benefit at the family
+level. Candidates include additive seasonal models without scale
+normalisation, frequency-domain (Fourier) decompositions, and
+copula-style location--scale-residual splits. \todo[inline]{Q1'
+result: the family [...] delivers the location benefit with
+[parameter-invariant / parameter-coupled] tail-axis error; the cost
+is [separable from / intrinsic to] the location-delivering element
+across families tested.}
+
+The standing position, pending these investigations, is that the
+\(z\)-score coupling delivers a location benefit \emph{accompanied}
+by a tail cost, and that the cost is provisionally treated as the
+price of the benefit. Section~\ref{sec:caveat}'s caveat is reported
+under that standing position; if the investigations above resolve
+intrinsic coupling, the caveat becomes structural and unavoidable
+within this family; if they resolve separability, the caveat is
+specific to this parametric choice and the family of
+de-seasonalisations becomes a tractable engineering lever.
+
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
 
