@@ -45,6 +45,8 @@ from processing.innovations.estimator import _local_fit_at
 from . import freeze
 from ._actuals import (
     load_actuals,
+    mu_at,
+    sigma_at,
     zscore_params,
     zscore_params_fingerprint,
     zscore_transform,
@@ -79,8 +81,17 @@ def generate(targets: pd.DatetimeIndex) -> pd.DataFrame:
     cutoff = pd.Timestamp(spec["data_cutoff"])
     anchor_h = spec["predictor"]["day_anchor_hour"]
     dims = spec["predictor"]["embedding_dims"]
-    zp = zscore_params(cutoff)
-    zfp = zscore_params_fingerprint(cutoff)
+    clim_method = spec["predictor"].get("climatology_method", "month_hour")
+    fourier_k_year = spec["predictor"].get("fourier_k_year")
+    fourier_k_day = spec["predictor"].get("fourier_k_day")
+    zp = zscore_params(
+        cutoff, method=clim_method,
+        k_year=fourier_k_year, k_day=fourier_k_day,
+    )
+    zfp = zscore_params_fingerprint(
+        cutoff, method=clim_method,
+        k_year=fourier_k_year, k_day=fourier_k_day,
+    )
 
     # Full actuals: pre-cutoff rows form the fit library; post-cutoff
     # rows ONLY ever serve as query states (recent history), never a fit.
@@ -110,15 +121,16 @@ def generate(targets: pd.DatetimeIndex) -> pd.DataFrame:
 
         C, Sigma, mu, theta, _ = _local_fit_at(X, Y, x_query, d)
         z_next = float(x_query @ C[:, 0]) if C.ndim == 2 else float(x_query @ C)
-        # de-z-score back to MW using the frozen climatology at hour t
-        key = (t.month, t.hour)
-        mu_mh = float(zp["mu_mh"].loc[key])
-        sd_mh = float(zp["sigma_mh"].loc[key])
-        fc_mw = z_next * sd_mh + mu_mh
+        # de-z-score back to MW using the frozen climatology at hour t.
+        # mu_at/sigma_at dispatch on params['method'] (month_hour vs fourier)
+        t_idx = pd.DatetimeIndex([t])
+        mu_t = float(mu_at(zp, t_idx)[0])
+        sd_t = float(sigma_at(zp, t_idx)[0])
+        fc_mw = z_next * sd_t + mu_t
         sd_z = float(np.sqrt(max(Sigma[0, 0], 0.0)))
         # 1-sigma Gaussian-proxy band (miscalibrated under heavy tails)
-        lo_mw = (z_next - sd_z) * sd_mh + mu_mh
-        hi_mw = (z_next + sd_z) * sd_mh + mu_mh
+        lo_mw = (z_next - sd_z) * sd_t + mu_t
+        hi_mw = (z_next + sd_z) * sd_t + mu_t
 
         rows.append(
             {

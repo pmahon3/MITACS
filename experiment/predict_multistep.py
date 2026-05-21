@@ -33,7 +33,14 @@ import pandas as pd
 from processing.innovations.estimator import _local_fit_at
 
 from . import freeze
-from ._actuals import load_actuals, zscore_params, zscore_params_fingerprint, zscore_transform
+from ._actuals import (
+    load_actuals,
+    mu_at,
+    sigma_at,
+    zscore_params,
+    zscore_params_fingerprint,
+    zscore_transform,
+)
 from .predict import _build_pre_cutoff, _daytype
 
 ISSUE_HOUR_OFFSET = pd.Timedelta(hours=1)  # last known actual = D-1 23:00
@@ -50,8 +57,17 @@ def day_ahead(delivery_dates: pd.DatetimeIndex) -> pd.DataFrame:
     cutoff = pd.Timestamp(spec["data_cutoff"])
     anchor_h = spec["predictor"]["day_anchor_hour"]
     dims = spec["predictor"]["embedding_dims"]
-    zp = zscore_params(cutoff)
-    zfp = zscore_params_fingerprint(cutoff)
+    clim_method = spec["predictor"].get("climatology_method", "month_hour")
+    fourier_k_year = spec["predictor"].get("fourier_k_year")
+    fourier_k_day = spec["predictor"].get("fourier_k_day")
+    zp = zscore_params(
+        cutoff, method=clim_method,
+        k_year=fourier_k_year, k_day=fourier_k_day,
+    )
+    zfp = zscore_params_fingerprint(
+        cutoff, method=clim_method,
+        k_year=fourier_k_year, k_day=fourier_k_day,
+    )
 
     raw_full = load_actuals(cutoff=None)
     z_full = zscore_transform(raw_full, zp)  # z-scored with frozen climatology
@@ -104,18 +120,19 @@ def day_ahead(delivery_dates: pd.DatetimeIndex) -> pd.DataFrame:
             z_next = float(x_query @ (C[:, 0] if C.ndim == 2 else C))
             zhist[t] = z_next  # feed forward (NOT the actual)
 
-            key = (t.month, t.hour)
-            mu_mh = float(zp["mu_mh"].loc[key])
-            sd_mh = float(zp["sigma_mh"].loc[key])
+            # de-z-score back to MW via mu_at/sigma_at (method-dispatched)
+            t_idx = pd.DatetimeIndex([t])
+            mu_t = float(mu_at(zp, t_idx)[0])
+            sd_t = float(sigma_at(zp, t_idx)[0])
             sd_z = float(np.sqrt(max(Sigma[0, 0], 0.0)))
             rows.append(
                 {
                     "delivery_date": D,
                     "target_dt": t,
                     "horizon_h": int((t - targets[0]) / pd.Timedelta(hours=1)) + 1,
-                    "our_forecast_mw": z_next * sd_mh + mu_mh,
-                    "our_pi_lo_mw": (z_next - sd_z) * sd_mh + mu_mh,
-                    "our_pi_hi_mw": (z_next + sd_z) * sd_mh + mu_mh,
+                    "our_forecast_mw": z_next * sd_t + mu_t,
+                    "our_pi_lo_mw": (z_next - sd_z) * sd_t + mu_t,
+                    "our_pi_hi_mw": (z_next + sd_z) * sd_t + mu_t,
                     "daytype": dt,
                     "embedding_dim": d,
                     "theta_star": theta,

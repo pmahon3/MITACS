@@ -10,16 +10,34 @@ Date+Hour-1 -> timestamp, "Ontario Demand").
 The cutoff is enforced as a HARD guard: any row dated strictly after it
 is dropped before any statistic is computed, so post-cutoff data can
 never enter the predictor's input representation (the leakage guard).
+
+Two climatology methods are supported:
+
+  ``method='month_hour'`` (default): piecewise-constant lookup keyed by
+    (month, hour-of-day). The historical production method.
+
+  ``method='fourier'``: continuous Fourier basis in (day-of-year,
+    hour-of-day). Eliminates the month-boundary lookup discontinuity
+    by construction. Parameters (K_YEAR, K_DAY) live in
+    ``experiment.fourier_climatology``.
+
+Both methods produce the same downstream interface (``params`` dict
+tagged with a ``method`` key; ``mu_at``/``sigma_at`` helpers dispatch
+internally) so call sites that need destandardisation -- ``predict.py``,
+``predict_multistep.py`` -- are method-agnostic.
 """
 from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
 
 from config import load_config
+
+from .fourier_climatology import FourierParams, fit_fourier_params
 
 
 def _load_raw_actuals() -> pd.Series:
@@ -60,28 +78,81 @@ def load_pre_cutoff_actuals(cutoff: pd.Timestamp) -> pd.Series:
     return load_actuals(cutoff)
 
 
-def zscore_params(cutoff: pd.Timestamp) -> dict[str, pd.Series]:
-    """Month+hour-of-day mean/std climatology from pre-cutoff actuals.
+def zscore_params(
+    cutoff: pd.Timestamp,
+    method: str = "month_hour",
+    k_year: int | None = None,
+    k_day: int | None = None,
+) -> dict[str, Any]:
+    """Climatology params derived strictly from ``<= cutoff`` data.
 
-    This is the de-seasonalisation the embedded ``zscore`` variable uses
-    (``mu_mh``/``sigma_mh`` in pre_processing). Derived strictly from
-    ``<= cutoff`` data -- never recomputed against post-cutoff actuals.
+    Returns a dict tagged with ``method``. The downstream callers
+    (``zscore_transform``, ``mu_at``, ``sigma_at``) dispatch on this
+    tag, so call sites don't need to know which method is in use.
+
+    ``method='month_hour'``: returns
+        ``{"method": "month_hour", "mu_mh": pd.Series, "sigma_mh":
+        pd.Series}``
+    where ``mu_mh``/``sigma_mh`` are MultiIndex-keyed by (month, hour).
+
+    ``method='fourier'``: returns
+        ``{"method": "fourier", "fourier": FourierParams}``
+    with ``k_year``/``k_day`` defaulting to the production constants
+    from ``experiment.fourier_climatology`` (8, 8).
     """
-    h = load_pre_cutoff_actuals(cutoff)
-    by = [h.index.month, h.index.hour]
-    mu_mh = h.groupby(by).mean()
-    sigma_mh = h.groupby(by).std()
-    return {"mu_mh": mu_mh, "sigma_mh": sigma_mh}
+    if method == "month_hour":
+        h = load_pre_cutoff_actuals(cutoff)
+        by = [h.index.month, h.index.hour]
+        mu_mh = h.groupby(by).mean()
+        sigma_mh = h.groupby(by).std()
+        return {"method": "month_hour", "mu_mh": mu_mh, "sigma_mh": sigma_mh}
+    if method == "fourier":
+        h = load_pre_cutoff_actuals(cutoff)
+        # Fit with defaults if k_year / k_day not supplied.
+        kwargs: dict[str, int] = {}
+        if k_year is not None:
+            kwargs["k_year"] = k_year
+        if k_day is not None:
+            kwargs["k_day"] = k_day
+        fp = fit_fourier_params(h, cutoff, **kwargs)
+        return {"method": "fourier", "fourier": fp}
+    raise ValueError(
+        f"unknown climatology method {method!r}; "
+        f"expected 'month_hour' or 'fourier'"
+    )
+
+
+def mu_at(params: dict[str, Any], idx: pd.DatetimeIndex) -> np.ndarray:
+    """Climatology mean at each timestamp; dispatches on ``params['method']``."""
+    method = params.get("method", "month_hour")
+    if method == "month_hour":
+        keys = list(zip(idx.month, idx.hour))
+        return params["mu_mh"].reindex(keys).to_numpy()
+    if method == "fourier":
+        mu, _ = params["fourier"].evaluate(idx)
+        return mu
+    raise ValueError(f"unknown climatology method {method!r}")
+
+
+def sigma_at(params: dict[str, Any], idx: pd.DatetimeIndex) -> np.ndarray:
+    """Climatology std at each timestamp; dispatches on ``params['method']``."""
+    method = params.get("method", "month_hour")
+    if method == "month_hour":
+        keys = list(zip(idx.month, idx.hour))
+        return params["sigma_mh"].reindex(keys).to_numpy()
+    if method == "fourier":
+        _, sigma = params["fourier"].evaluate(idx)
+        return sigma
+    raise ValueError(f"unknown climatology method {method!r}")
 
 
 def zscore_transform(
-    raw: pd.Series, params: dict[str, pd.Series]
+    raw: pd.Series, params: dict[str, Any]
 ) -> pd.Series:
-    """Apply frozen month+hour climatology to raw demand -> zscore."""
+    """Apply the frozen climatology to raw demand -> zscore."""
     idx = raw.index
-    keys = list(zip(idx.month, idx.hour))
-    mu = params["mu_mh"].reindex(keys).to_numpy()
-    sd = params["sigma_mh"].reindex(keys).to_numpy()
+    mu = mu_at(params, idx)
+    sd = sigma_at(params, idx)
     return pd.Series((raw.to_numpy() - mu) / sd, index=idx, name="zscore")
 
 
@@ -99,14 +170,33 @@ def actuals_fingerprint(cutoff: pd.Timestamp) -> str:
     return hashlib.sha256(buf.tobytes()).hexdigest()
 
 
-def zscore_params_fingerprint(cutoff: pd.Timestamp) -> str:
-    """Content hash of the derived z-score climatology -- recorded with
-    every forecast so post-hoc drift is detectable even though the values
-    are not stored in the spec."""
-    p = zscore_params(cutoff)
-    parts = []
-    for name in ("mu_mh", "sigma_mh"):
-        s = p[name].sort_index()
-        parts.append(name.encode())
-        parts.append(np.ascontiguousarray(s.to_numpy(dtype="float64")).tobytes())
+def zscore_params_fingerprint(
+    cutoff: pd.Timestamp,
+    method: str = "month_hour",
+    k_year: int | None = None,
+    k_day: int | None = None,
+) -> str:
+    """Content hash of the derived climatology -- recorded with every
+    forecast so post-hoc drift is detectable even though the values are
+    not stored in the spec."""
+    p = zscore_params(cutoff, method=method, k_year=k_year, k_day=k_day)
+    parts: list[bytes] = [p["method"].encode()]
+    if p["method"] == "month_hour":
+        for name in ("mu_mh", "sigma_mh"):
+            s = p[name].sort_index()
+            parts.append(name.encode())
+            parts.append(np.ascontiguousarray(
+                s.to_numpy(dtype="float64")
+            ).tobytes())
+    elif p["method"] == "fourier":
+        fp: FourierParams = p["fourier"]
+        parts.append(f"k_year={fp.k_year},k_day={fp.k_day}".encode())
+        parts.append(b"beta_mu")
+        parts.append(np.ascontiguousarray(
+            fp.beta_mu.astype("float64")
+        ).tobytes())
+        parts.append(b"beta_sigma")
+        parts.append(np.ascontiguousarray(
+            fp.beta_sigma.astype("float64")
+        ).tobytes())
     return hashlib.sha256(b"".join(parts)).hexdigest()

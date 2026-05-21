@@ -50,26 +50,44 @@ def _canonical(spec: dict[str, Any]) -> bytes:
     return _prov_canonical(spec, exclude="spec_hash")
 
 
-def build_spec() -> dict[str, Any]:
+def build_spec(
+    climatology_method: str = "month_hour",
+    fourier_k_year: int | None = None,
+    fourier_k_day: int | None = None,
+) -> dict[str, Any]:
     cfg = load_config()
+    predictor: dict[str, Any] = {
+        # method identity -- the estimator's resolved behaviour
+        "estimator": "build_local_gaussian_semigroup",
+        "drift_bandwidth_rule": "true_loo_cv",
+        "diffusion": "plain_mu_centred_residual_covariance_no_kernel",
+        "day_anchor_hour": cfg.data.day_anchor_hours,
+        "dim_selection": cfg.embedding.dim_selection,
+        "elbow_tol": cfg.embedding.elbow_tol,
+        "grid_spacing": cfg.theta.grid_spacing,
+        "variable_name": cfg.data.variable_name,
+        "estimand": "intra_day",  # full_process Sigma is singular
+        "embedding_dims": {
+            dt: cfg.embedding_dim(dt) for dt in cfg.data.daytypes
+        },
+        "horizon": "one_step",  # multi-step is the unbuilt semigroup
+        # de-seasonalisation: month_hour is the historical default;
+        # fourier is the smooth alternative.
+        "climatology_method": climatology_method,
+    }
+    if climatology_method == "fourier":
+        # Default to the production constants from
+        # experiment.fourier_climatology if not overridden.
+        from .fourier_climatology import K_YEAR, K_DAY
+        predictor["fourier_k_year"] = (
+            int(fourier_k_year) if fourier_k_year is not None else K_YEAR
+        )
+        predictor["fourier_k_day"] = (
+            int(fourier_k_day) if fourier_k_day is not None else K_DAY
+        )
     spec: dict[str, Any] = {
         "schema": "mitacs.experiment.frozen_spec/1",
-        "predictor": {
-            # method identity -- the estimator's resolved behaviour
-            "estimator": "build_local_gaussian_semigroup",
-            "drift_bandwidth_rule": "true_loo_cv",
-            "diffusion": "plain_mu_centred_residual_covariance_no_kernel",
-            "day_anchor_hour": cfg.data.day_anchor_hours,
-            "dim_selection": cfg.embedding.dim_selection,
-            "elbow_tol": cfg.embedding.elbow_tol,
-            "grid_spacing": cfg.theta.grid_spacing,
-            "variable_name": cfg.data.variable_name,
-            "estimand": "intra_day",  # full_process Sigma is singular
-            "embedding_dims": {
-                dt: cfg.embedding_dim(dt) for dt in cfg.data.daytypes
-            },
-            "horizon": "one_step",  # multi-step is the unbuilt semigroup
-        },
+        "predictor": predictor,
         "data_cutoff": DATA_CUTOFF.isoformat(),
         "provenance": {
             "git_sha": _git_sha(),
@@ -89,14 +107,23 @@ def build_spec() -> dict[str, Any]:
     return spec
 
 
-def create(force: bool = False) -> dict[str, Any]:
+def create(
+    force: bool = False,
+    climatology_method: str = "month_hour",
+    fourier_k_year: int | None = None,
+    fourier_k_day: int | None = None,
+) -> dict[str, Any]:
     if SPEC_PATH.exists() and not force:
         raise SystemExit(
             f"{SPEC_PATH} already exists. A frozen spec is immutable by "
             f"design; use --force only to deliberately re-register (this "
             f"invalidates all prior forecasts' provenance)."
         )
-    spec = build_spec()
+    spec = build_spec(
+        climatology_method=climatology_method,
+        fourier_k_year=fourier_k_year,
+        fourier_k_day=fourier_k_day,
+    )
     if not spec["provenance"]["git_clean"]:
         raise SystemExit(
             "refusing to freeze from a dirty tree: the recorded git_sha "
@@ -135,14 +162,40 @@ if __name__ == "__main__":
     ap.add_argument(
         "--verify", action="store_true", help="recompute + check the hash"
     )
+    ap.add_argument(
+        "--climatology", default="month_hour",
+        choices=["month_hour", "fourier"],
+        help="de-seasonalisation method (default: month_hour)",
+    )
+    ap.add_argument(
+        "--fourier-k-year", type=int, default=None,
+        help="Fourier day-of-year harmonics (default: K_YEAR from "
+             "experiment.fourier_climatology)",
+    )
+    ap.add_argument(
+        "--fourier-k-day", type=int, default=None,
+        help="Fourier hour-of-day harmonics (default: K_DAY)",
+    )
     args = ap.parse_args()
 
     if args.create:
-        s = create(force=args.force)
+        s = create(
+            force=args.force,
+            climatology_method=args.climatology,
+            fourier_k_year=args.fourier_k_year,
+            fourier_k_day=args.fourier_k_day,
+        )
         print(f"froze predictor spec -> {SPEC_PATH}")
-        print(f"  spec_hash = {s['spec_hash']}")
-        print(f"  git_sha   = {s['provenance']['git_sha']}")
-        print(f"  dims      = {s['predictor']['embedding_dims']}")
+        print(f"  spec_hash         = {s['spec_hash']}")
+        print(f"  git_sha           = {s['provenance']['git_sha']}")
+        print(f"  dims              = {s['predictor']['embedding_dims']}")
+        print(f"  climatology_method = "
+              f"{s['predictor']['climatology_method']}")
+        if s['predictor']['climatology_method'] == 'fourier':
+            print(f"  fourier_k_year    = "
+                  f"{s['predictor']['fourier_k_year']}")
+            print(f"  fourier_k_day     = "
+                  f"{s['predictor']['fourier_k_day']}")
     elif args.verify:
         s = load_verified()
         print(f"frozen spec OK (hash verified): {s['spec_hash']}")
