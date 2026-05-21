@@ -26,6 +26,7 @@ import argparse
 import hashlib
 import json
 from importlib import metadata
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -50,12 +51,46 @@ def _canonical(spec: dict[str, Any]) -> bytes:
     return _prov_canonical(spec, exclude="spec_hash")
 
 
+def _embedding_dim_from(dims_dir: Path, daytype: str,
+                        tol: float, rule: str) -> int:
+    """Apply the production elbow rule to a results CSV at an arbitrary
+    path -- mirrors ``cfg.embedding_dim`` but takes the directory
+    explicitly so the Fourier spec can consult ``params_fourier/``."""
+    series = pd.read_csv(
+        dims_dir / f"results_{daytype}.csv", index_col=0
+    ).iloc[:, 0]
+    if rule == "idxmax":
+        return int(series.idxmax())
+    if rule == "elbow":
+        peak = series.max()
+        thr = peak - tol * abs(peak)
+        return int(series.index[series >= thr][0])
+    raise ValueError(f"unknown dim_selection {rule!r}")
+
+
 def build_spec(
     climatology_method: str = "month_hour",
     fourier_k_year: int | None = None,
     fourier_k_day: int | None = None,
 ) -> dict[str, Any]:
     cfg = load_config()
+    # Pick the dimension-curve directory matching the climatology:
+    # month-hour reads from the production params/; fourier reads from
+    # params_fourier/ (populated by experiment.refit_dims_fourier).
+    if climatology_method == "fourier":
+        dims_dir = (
+            PROJECT_ROOT / "processing" / "dimensions" / "params_fourier"
+        )
+        dims = {
+            dt: _embedding_dim_from(
+                dims_dir, dt, cfg.embedding.elbow_tol,
+                cfg.embedding.dim_selection,
+            )
+            for dt in cfg.data.daytypes
+        }
+    else:
+        dims = {dt: cfg.embedding_dim(dt) for dt in cfg.data.daytypes}
+
     predictor: dict[str, Any] = {
         # method identity -- the estimator's resolved behaviour
         "estimator": "build_local_gaussian_semigroup",
@@ -67,9 +102,7 @@ def build_spec(
         "grid_spacing": cfg.theta.grid_spacing,
         "variable_name": cfg.data.variable_name,
         "estimand": "intra_day",  # full_process Sigma is singular
-        "embedding_dims": {
-            dt: cfg.embedding_dim(dt) for dt in cfg.data.daytypes
-        },
+        "embedding_dims": dims,
         "horizon": "one_step",  # multi-step is the unbuilt semigroup
         # de-seasonalisation: month_hour is the historical default;
         # fourier is the smooth alternative.
