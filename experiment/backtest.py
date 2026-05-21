@@ -199,19 +199,27 @@ if __name__ == "__main__":
         from config import PROJECT_ROOT
 
         from ._actuals import actuals_fingerprint
+        from .freeze import load_verified
         from .provenance import Grade, make_result
 
         cutoff = pd.Timestamp("2024-12-31T23:00:00")
         s0, s1 = r["span"]
+        # Tag the artifact filename with the climatology method so
+        # multiple frozen specs can coexist as parallel CLAIM-GRADE
+        # artifacts on disk. month_hour is the historical default;
+        # any other method produces a suffixed filename.
+        spec = load_verified()
+        clim_method = spec["predictor"].get("climatology_method", "month_hour")
+        suffix = "" if clim_method == "month_hour" else f"_{clim_method}"
         out = (
             PROJECT_ROOT / "experiment" / "results"
-            / f"backtest_postcutoff_{s0}_{s1}.txt"
+            / f"backtest_postcutoff_{s0}_{s1}{suffix}.txt"
         )
         hdr = make_result(
             path=out,
             grade=Grade.CLAIM,
-            title="Post-cutoff multi-step day-ahead backtest vs Ontario "
-                  "actuals (no IESO)",
+            title=f"Post-cutoff multi-step day-ahead backtest vs Ontario "
+                  f"actuals (no IESO; climatology={clim_method})",
             body=body,
             inputs={
                 "data_cutoff": cutoff.isoformat(),
@@ -222,17 +230,13 @@ if __name__ == "__main__":
             seeds={},  # the estimator/backtest path is RNG-free
             frozen_spec_required=True,  # predictor-derived: MUST bind
             extra={
-                "regeneration_note": "header addition; body unchanged "
-                "from the prior committed artifact (deterministic "
-                "regeneration — the backtest span is unchanged because "
-                "the appended raw actuals do not yet form a complete "
-                "24h delivery day). A reviewer can confirm body "
-                "equality independently: strip both headers and "
-                "compare against the parent revision, e.g. "
-                "`git show <parent>:experiment/results/"
-                "backtest_postcutoff_2025-01-01_2026-05-16.txt` vs the "
-                "current body (load_verified_result returns the body "
-                "with the header removed).",
+                "climatology_method": clim_method,
+                "note": (
+                    f"Backtest under climatology_method={clim_method}. "
+                    f"Parallel artifacts under alternative climatologies "
+                    f"(if present) carry the climatology suffix in the "
+                    f"filename (e.g. backtest_postcutoff_<span>_fourier.txt)."
+                ),
             },
         )
         print(f"\nwrote provenanced C1 artifact -> {out}")
