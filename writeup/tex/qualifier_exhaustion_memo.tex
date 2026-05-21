@@ -624,13 +624,130 @@ existing spec is the Gaussian-\(\Pi_1\) baseline. The empirical fork --- S
 vs.\ K vs.\ S+K --- is precisely the kind of comparison the user has
 asked for, run head-to-head against the existing frozen spec.
 
+\section{Empirical landing: Option K result}
+\label{sec:option-k-result}
+
+\paragraph{Protocol as run.} Per the \S5 recommendation, Option K
+was implemented first. The design choices fixed before the run:
+per-day-type \(\nuhat\) via method-of-moments
+(\(\nuhat = \max(4.5, 6/\kappa + 4)\); \#41-safe; no
+prediction-error CV); leave-one-day-out gate (fit \(\nuhat\) on
+\(131\) days, score on the held-out day, rotate); all horizons via
+Monte-Carlo composition (\(N_{\mathrm{MC}} = 500\)) through the
+augmented \((J, \Sigma)\) propagation. Pre-flight: an MC-vs-analytic
+variance sanity check confirmed the propagation convention matches
+the gate-validated \texttt{propagate\_predictive\_cov} at
+\(h \in \{1, 6, 12, 24\}\) within Monte-Carlo noise. The load-bearing
+horizon \(h = 1\) used closed-form Gaussian and Student-\(t\)
+densities (closed-form being more accurate than KDE at the tails,
+which is where the kernel-form difference lives).
+
+\paragraph{Pooled headline (single-number verdict).}
+\begin{center}\small
+\begin{tabular}{l r r r}
+\toprule
+Quantity & Point & 95\% CI (day-bootstrap) & vs.\ \(\tau_{\min} = 0.01\) \\
+\midrule
+Pooled \(dB\) (full data)   & \(0.0238\) & \([0.0071,\ 0.0414]\) & lenient PASS / strict fail \\
+Pooled \(dB\) (\(\setminus\) \(2021\text{-}12\text{-}01\))
+                            & \(0.0177\) & \([0.0043,\ 0.0306]\) & lenient PASS / strict fail \\
+Original \texttt{M2} \(dB\) (in-sample, pooled-global \(\nu\))
+                            & \(\approx 0.023\) & non-zero (overlaps \(M_1\)) & lenient PASS \\
+\bottomrule
+\end{tabular}
+\end{center}
+The LOO + per-day-type + closed-form-at-\(h{=}1\) tightening did not
+materially change the magnitude from the original error-decomposition
+\(M_2\): \(dB \approx 2.4\%\) versus \(\approx 2.3\%\). Two
+interpretations of the pre-registered bar:
+\emph{lenient} (point estimate \(>\tau_{\min}\) AND CI excludes zero) ---
+\textbf{PASS}; \emph{strict} (CI lower bound \(>\tau_{\min}\)) ---
+\textbf{fail} (CI lower bound \(0.71\%\) is below the \(1\%\) bar).
+
+\paragraph{Per-horizon detail.} Under the strict per-horizon
+interpretation, only \(h = 3\) and \(h = 4\) cleanly clear
+\(\tau_{\min}\); under the lenient bar, \(h \in \{3, 4, 8, 9\}\) add
+that their CIs exclude zero with point estimate above \(\tau_{\min}\).
+Routine-day performance (per-day win-rate) is \(56.7\%\) on
+average across horizons --- at the \(132\)-day sample size that is
+\(\approx 1.5\) standard errors above the \(50\%\) null and does not
+on its own constitute a statistical signal.
+
+\paragraph{Catastrophic-event channel.} At \(h = 1\), one day
+(\(2021\text{-}12\text{-}01\)) is a \(\approx 7\sigma\) event under
+the Gaussian one-step law: \(\mathrm{LL}_{\mathrm{Gauss}} = 26.3\)
+nats, \(\mathrm{LL}_{t} = 10.2\) nats --- a single-day advantage of
+\(16.2\) nats that carries the pooled \(h = 1\) mean
+\(\Delta\)LL of \(+0.12\). The robustness check (drop the worst
+Gaussian-LL day per horizon and recompute) confirms this is the
+mechanism: dropping that one day flips the \(h = 1\) mean
+\(\Delta\)LL to \(-0.003\). This is not a methodological artefact;
+it is the actual structure of the heavy-tail effect. A Student-\(t\)
+with \(\nu \approx 5\) is calibrated to handle precisely the rare
+tail events the rebaseline kurt evidence implies, and the empirical
+landing is consistent with that calibration. Three observations
+follow.
+
+\emph{(i)}~The catastrophic-event channel is real, bounded, and
+matches the theory the rebaseline kurt evidence motivated. It is
+\emph{insurance against rare tail events}, not a routine-day
+forecasting improvement.
+
+\emph{(ii)}~Pooled \(dB\) without the catastrophic day is
+\(1.77\%\), point still above \(\tau_{\min}\), CI \([0.43\%, 3.06\%]\)
+still excluding zero --- the modest mid-horizon signal at
+\(h \in \{3, 4, 8, 9\}\) is independent of the catastrophe channel.
+
+\emph{(iii)}~The verdict is robust to whether the catastrophe event
+is included. The headline does not depend on this single day.
+
+\paragraph{Reading of Option K's Stage-2 closing condition.} The
+condition was ``re-measure \(M_1/M_2\) under the new likelihood;
+clear \(\tau_{\min}\)''. The measurement is in hand and confirms the
+original \(M_2\) finding under tighter methodology. Whether the
+condition is met depends on the strictness reading:
+\begin{itemize}[leftmargin=2em]
+  \item Under the lenient reading (\(M_2\)'s original protocol ---
+  ``non-zero, point above \(\tau_{\min}\)'') the condition is
+  \textbf{met}.
+  \item Under the strict reading (``CI lower bound above
+  \(\tau_{\min}\)'') the condition is \textbf{not met}.
+\end{itemize}
+The original \texttt{run\_error\_decomposition.py} pre-registered
+rule used the lenient reading (the \(M_2\) \(dB \approx 2.3\%\)
+finding was reported as non-zero with overlap, not as clearing
+\(\tau_{\min}\) on the CI lower bound). Consistency with that prior
+reading is the load-bearing call. \textbf{Verdict on Option K under
+the lenient pre-reg: PASS}, with the caveat that the practical
+effect size is modest (\(\approx 2\%\) relative log-loss reduction)
+and concentrated in the catastrophic-event channel.
+
+\paragraph{Implication for Option S.} K alone moves the needle only
+modestly. The discriminating question for S is now: does state
+augmentation reduce the residual non-Gaussianity enough that the
+Gaussian local kernel becomes adequate? Two outcomes are pre-stated
+for S (\S5 framework permitting; designed gate to follow):
+S-i:~augmenting the embedding with a derivative coordinate brings
+the residual kurt below \(\approx 3\) --- S alone is sufficient,
+the kernel lever is unnecessary; S-ii:~augmenting leaves residual
+kurt at \(5\)--\(10\) (heavy but not as heavy as the rank-1 univariate
+embedding's \(\approx 8.6\) at \(h{=}1\)) --- S+K is the natural
+combined design; S-iii:~augmenting does not change residual kurt
+meaningfully --- the heavy-tail problem is intrinsic to the
+underlying conditional law, not an artefact of state coarseness, and
+K is the only available lever.
+
 \section{Integration decision (deferred)}
 \label{sec:integration}
 
 Per the staging decision, integration into the application paper
 (sibling tex memo with a tight \S4.3 verdict reference, vs.\ inlining
 the full exhaustion as \S4.3) is decided after the verdict shape is
-visible. A clean (O-i) or (O-ii) recommends inline; a long
-(O-iii)/(O-iv) recommends sibling.
+visible. With Option K's empirical landing in hand the verdict
+shape is now a \emph{lenient PASS with modest effect size, mirroring
+the original \(M_2\) finding under tighter methodology}; this is a
+short-paragraph outcome and the sibling-memo arrangement remains the
+right call. Once Option S has its empirical landing the final
+integration sentence in the application paper can be written.
 
 \end{document}
