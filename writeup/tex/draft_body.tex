@@ -332,7 +332,7 @@ object, not of the underlying conditional law. The rebaseline
 \(\mathrm{kurt}_{\mathrm{exc}} \approx 24\)--\(33\) is measured at
 the per-anchor library-residual level (one-step, locally, no
 propagation involved), and is preprocessing-independent at that
-level. The qualifier-exhaustion analysis
+level. The framework-level analysis of available relaxations
 (Section~\ref{sec:qualifier-verdict}) quantifies the mass of this
 one-step departure directly via a Patra--Sen consistent contamination
 estimator and links the empirical lever-comparison findings to it.
@@ -405,19 +405,24 @@ leak (heavy-tail strength moves with seasonal resolution). The
 sharper question this opens, and the one whose answer determines
 whether the leak can be engineered around, is whether the
 \emph{element of the de-seasonalisation that delivers the location
-benefit is the element driving the tail leak}. We pose it as three
-questions in increasing concreteness; their resolution proceeds in
-reverse, each later question only earning its place if the prior one
-does not settle the issue.
+benefit is the element driving the tail leak}. Three sub-questions
+arise, in increasing concreteness: under what assumptions does
+intrinsic coupling follow from the joint observation of location
+invariance and tail movement; which sub-step of de-seasonalisation
+delivers the location benefit; and whether a different family of
+preprocessing could separate the cost from the benefit. They resolve
+in reverse, each later question only earning its place if the prior
+one does not settle the issue.
 
-\paragraph{Q3 resolves in an unexpected direction: there is no
-location benefit on the phase channel.} The Q3 question --- under
-what assumptions does intrinsic coupling follow from the joint
-observation of location invariance and tail movement --- presupposed
-a location benefit delivered by de-seasonalisation. The
-discriminating measurement (phase-asymmetry correlation in demand
-space, comparable across specs because reported in raw-demand
-units) was \(\mathrm{corr}(\dd D/\dd t,\, e) = -0.247,\, -0.250,\, -0.217\)
+\paragraph{The assumptions question resolves in an unexpected
+direction: there is no location benefit on the phase channel.}
+The first sub-question --- the conditions under which the joint
+observation of location invariance and tail movement implies
+intrinsic coupling --- presupposed a location benefit delivered by
+de-seasonalisation. The discriminating measurement (phase-asymmetry
+correlation in demand space, comparable across specs because reported
+in raw-demand units) was
+\(\mathrm{corr}(\dd D/\dd t,\, e) = -0.247,\, -0.250,\, -0.217\)
 for the global, month\,\(\times\)\,hour, and identity (no-transform)
 specs respectively --- a range of \(0.033\) on a baseline of
 \(-0.25\), including the no-transform extreme. The location-axis
@@ -425,11 +430,10 @@ signal is therefore not \emph{delivered} by de-seasonalisation; it
 is already present in the raw demand at essentially the same
 magnitude. What de-seasonalisation does on the phase channel is
 leave the signal undisturbed; what it does on the tail channel is
-introduce a resolution-dependent leak. Q2 and Q1' as originally
-posed (which sub-step delivers the location benefit; can a different
-family separate the cost from the benefit) collapse on this
-channel: there is no benefit on the phase channel to separate from
-the cost.
+introduce a resolution-dependent leak. The two later sub-questions
+(which sub-step delivers the location benefit; whether a different
+family separates the cost from the benefit) collapse on this channel:
+there is no benefit on the phase channel to separate from the cost.
 
 \paragraph{The genuine remaining question.} The phase-correlation
 result does not settle whether de-seasonalisation contributes to
@@ -533,10 +537,11 @@ seasonal \(\{d_{\mathrm{wkdy}}, d_{\mathrm{sat}}, d_{\mathrm{sun}}\}
   kurtosis \(3.10\)), raw \(\nuhat = \infty\) (excess kurtosis
   \(-1.14\)). The raw value passes the pre-registered rule
   \(\nuhat_{\mathrm{raw}} \ge \nuhat_{\mathrm{seasonal}}\), but is
-  an artefact of the same defect Ch3 detected: raw's standardised
-  residuals collapse because the predictive variance is mis-scaled
-  relative to demand-space residual scale, driving excess kurtosis
-  negative. Ch4 does not corroborate the result independently.
+  an artefact of the same defect the coverage channel detected:
+  raw's standardised residuals collapse because the predictive
+  variance is mis-scaled relative to demand-space residual scale,
+  driving excess kurtosis negative. The heavy-tail channel does not
+  corroborate the result independently.
   \textbf{PASS in form, artefact in substance}.
 \end{enumerate}
 \textbf{Verdict per the pre-registered all-channel rule: HOLD.}
@@ -545,21 +550,21 @@ production-frozen \(\approx 786\) MW / \(4.78\%\) reported in
 Section~\ref{sec:backtest} is on a separate harness and is not the
 comparator here.
 
-\paragraph{Reading 1 (no-transform matches the seasonal pipeline)
-did not fire.} The pre-registered conditions for licensing removal
-(forecast accuracy within tolerance; demand-space coverage hour-
-stratified within tolerance) were not met; reported as a worked
-trail rather than a finding.
+\paragraph{The no-transform-matches-seasonal reading did not fire.}
+The pre-registered conditions for licensing removal (forecast
+accuracy within tolerance; demand-space coverage hour-stratified
+within tolerance) were not met; reported as a worked trail rather
+than a finding.
 
-\paragraph{Reading 2 (no-transform is worse) fired, and the
-forecast-performance channel localised at Ch3.} De-seasonalisation
-delivers forecast performance through the demand-space scale
-calibration: the seasonal pipeline's intervals (and the diffusion
-\(\Sj\) they rest on) track diurnal scale via \(\sigma_{m,h}\),
-while raw demand does not expose this scale at the embedding layer.
-The Ch3 per-hour coverage signature --- raw over-covers overnight
-(uniform-width intervals are too wide where demand is small and
-stable) and crashes to zero coverage at midday/peak (uniform-width
+\paragraph{The no-transform-is-worse reading fired, and the
+forecast-performance channel localised at the interval-coverage
+channel.} De-seasonalisation delivers forecast performance through
+the demand-space scale calibration: the seasonal pipeline's intervals
+(and the diffusion \(\Sj\) they rest on) track diurnal scale via
+\(\sigma_{m,h}\), while raw demand does not expose this scale at the
+embedding layer. The per-hour coverage signature --- raw over-covers
+overnight (uniform-width intervals are too wide where demand is small
+and stable) and crashes to zero coverage at midday/peak (uniform-width
 intervals are not wide enough at the demand peaks the seasonal
 pipeline implicitly normalises against) --- is the mechanistic
 fingerprint of the missing scale step.
@@ -572,8 +577,9 @@ whether the scale-calibration benefit can be delivered without the
 heavy-tail cost --- candidates: scale-only normalisation (divide by
 \(\sigma_{m,h}\) without level removal), an additive seasonal model
 that hands a separate scale-conditioning input to the diffusion fit,
-or a Fourier-decomposition scale layer. This is Q1' from earlier in
-this section, redirected at the now-identified channel.
+or a Fourier-decomposition scale layer. This is the
+different-family question from earlier in this section, redirected
+at the now-identified channel.
 
 \paragraph{Pre-registered candidate A: scale-only normalisation.}
 The minimal perturbation is to keep the scale step that the
@@ -585,14 +591,16 @@ seasonal-vs-raw test: elbow-selected dimension per day-type on
 \(z_{\mathrm{A}}\), the same four-channel measurement at the same
 pre-registered tolerances.
 
-The pre-registered Ch4 interpretation rule from the preceding
-experiment is refined: \emph{Ch4 is informative only conditional on
-Ch3 passing}. Raw demand's Ch4 PASS was an artefact of the same
-mis-scaling Ch3 detected (the standardised residuals collapsed
-because the predictive variance was mis-scaled relative to the
-realised residual scale); this pattern is general. For the
-scale-only test and any future variant: if Ch3 fails, Ch4 reports
-``not interpretable'' rather than PASS or FAIL.
+The pre-registered heavy-tail-channel interpretation rule from the
+preceding experiment is refined: \emph{the heavy-tail channel is
+informative only conditional on the coverage channel passing}. Raw
+demand's heavy-tail-channel PASS was an artefact of the same
+mis-scaling the coverage channel detected (the standardised residuals
+collapsed because the predictive variance was mis-scaled relative to
+the realised residual scale); this pattern is general. For the
+scale-only test and any future variant: if the coverage channel
+fails, the heavy-tail channel reports ``not interpretable'' rather
+than PASS or FAIL.
 
 The experiment is also pre-committed to flag a design confound:
 if the elbow rule picks a dimension for \(z_{\mathrm{A}}\) outside
@@ -602,22 +610,24 @@ testing the additive-step removal, and the candidate-A verdict is
 withheld pending a decision on whether to constrain \(d\) or accept
 the confound.
 
-Three outcomes are pre-stated. \emph{(i)} All four channels pass:
-the additive sub-step is the removable lever; the scale-only pipeline
-delivers the scale-calibration benefit at reduced tail cost; the §3
-caveat becomes specific to the additive step. \emph{(ii)} Ch3 passes
-but Ch4 fails: the heavy-tail cost lives with the multiplicative
-\(\sigma_{m,h}\) step, not the additive one; scale-only is not the
-lever; the engineering question moves to candidates B/C.
-\emph{(iii)} Ch1 fails substantially (forecast accuracy noticeably
-worse despite Ch3 holding): the additive step is also conditioning
-the embedding-state input to the local-linear map (centring the lag
-state), not just removing a level; the cost-vs-benefit decomposition
-is not separable within this family at the level the four-channel
-diagnostic can probe, and the engineering question moves from
-``which sub-step'' to ``is the additive-and-multiplicative
-combination irreducibly coupled.''
-\paragraph{Candidate-A result: branch (iii) fires; verdict HOLD.}
+Three outcomes are pre-stated. The \emph{all-channels-pass outcome}:
+the additive sub-step is the removable lever; the scale-only
+pipeline delivers the scale-calibration benefit at reduced tail
+cost; the §3 caveat becomes specific to the additive step. The
+\emph{coverage-passes-but-tail-fails outcome}: the heavy-tail cost
+lives with the multiplicative \(\sigma_{m,h}\) step, not the
+additive one; scale-only is not the lever; the engineering question
+moves to alternative scale-conditioning candidates. The
+\emph{accuracy-fails outcome} (forecast accuracy noticeably worse
+despite the coverage channel holding): the additive step is also
+conditioning the embedding-state input to the local-linear map
+(centring the lag state), not just removing a level; the
+cost-vs-benefit decomposition is not separable within this family
+at the level the four-channel diagnostic can probe, and the
+engineering question moves from ``which sub-step'' to ``is the
+additive-and-multiplicative combination irreducibly coupled.''
+\paragraph{Candidate-A result: the accuracy-fails outcome fires;
+verdict HOLD.}
 Scale-only \(z_{\mathrm{A}} = D / \sigma_{m,h}\) was run end-to-end
 through the same diagnostic harness as the seasonal-vs-raw
 comparison
@@ -639,99 +649,106 @@ No-transform & \(2317\) & \(13.57\) \\
 Scale-only recovers some of the gap closed by the seasonal pipeline
 (\(\Delta\MAPE\) reduced from \(9.71\) pp under no-transform to
 \(8.12\) pp under scale-only) but remains \(\approx 3.1\times\) the
-seasonal pipeline's error and well outside the pre-registered Ch1
-tolerance (\(|\Delta\MAE| < 8\) MW, \(|\Delta\MAPE| < 0.05\) pp).
-Branch (iii) fires: the additive sub-step is also conditioning the
-embedding-state input to the local-linear map, not just removing a
-level. The cost-vs-benefit decomposition is \emph{not separable at
-the four-channel diagnostic's resolution within this parametric
-family}. \emph{Mechanistic-attribution caveat:} the scale-only elbow
-rule selected \(d = 4\) uniformly across day-types while the
-seasonal pipeline uses \(\{d_{\mathrm{wkdy}}, d_{\mathrm{sat}},
-d_{\mathrm{sun}}\} = \{2, 4, 3\}\); branch (iii)'s attribution to
-the additive sub-step is therefore partially confounded with the
-dimension shift (weekday \(+2\), saturday \(0\), sunday \(+1\)).
-The HOLD verdict on removal is robust to this confound --- whether
-the mechanism is missing-\(\mu\) or wrong-\(d\) or both, the practical
-conclusion is the same. To isolate the additive sub-step's
-contribution the scale-only pipeline is re-run with the embedding
-dimension forced to the seasonal assignment \(\{2, 4, 3\}\),
-making the additive step the only remaining difference between the
-two pipelines. Three outcomes are pre-stated for this disambiguation
-(D-i / D-ii / D-iii); thresholds are \(\MAPE\)-based and fixed
-before the experiment runs:
+seasonal pipeline's error and well outside the pre-registered
+accuracy-channel tolerance (\(|\Delta\MAE| < 8\) MW,
+\(|\Delta\MAPE| < 0.05\) pp). The accuracy-fails outcome fires: the
+additive sub-step is also conditioning the embedding-state input to
+the local-linear map, not just removing a level. The cost-vs-benefit
+decomposition is \emph{not separable at the four-channel diagnostic's
+resolution within this parametric family}.
+\emph{Mechanistic-attribution caveat:} the scale-only elbow rule
+selected \(d = 4\) uniformly across day-types while the seasonal
+pipeline uses \(\{d_{\mathrm{wkdy}}, d_{\mathrm{sat}},
+d_{\mathrm{sun}}\} = \{2, 4, 3\}\); the attribution to the additive
+sub-step is therefore partially confounded with the dimension shift
+(weekday \(+2\), saturday \(0\), sunday \(+1\)). The HOLD verdict on
+removal is robust to this confound --- whether the mechanism is
+missing-\(\mu\) or wrong-\(d\) or both, the practical conclusion is
+the same. To isolate the additive sub-step's contribution the
+scale-only pipeline is re-run with the embedding dimension forced to
+the seasonal assignment \(\{2, 4, 3\}\), making the additive step
+the only remaining difference between the two pipelines. Three
+outcomes are pre-stated for this disambiguation, with thresholds
+\(\MAPE\)-based and fixed before the experiment runs:
 \begin{itemize}[leftmargin=2em]
-  \item \textbf{D-i (dimension was the dominant driver).}
+  \item \textbf{Dimension-driven outcome.}
   \(\MAPE_{\{2,4,3\}} < 5\%\): scale-only at the seasonal
   dimensions essentially recovers the forecast performance the
-  elbow-selected dimensions did not, and branch~(iii)'s
-  attribution to the additive sub-step is overclaimed. The
-  additive step's marginal contribution to forecast accuracy is
-  smaller than the candidate-A result suggested.
-  \item \textbf{D-ii (both contribute).}
+  elbow-selected dimensions did not, and the attribution to the
+  additive sub-step is overclaimed. The additive step's marginal
+  contribution to forecast accuracy is smaller than the
+  candidate-A result suggested.
+  \item \textbf{Both-contribute outcome.}
   \(5\% \le \MAPE_{\{2,4,3\}} < 9\%\): both the dimension shift
   and the additive sub-step contribute substantively to the
-  candidate-A failure. Branch~(iii) is partially supported but
-  not the sole story.
-  \item \textbf{D-iii (additive step does the work; branch (iii)
-  confirmed).} \(\MAPE_{\{2,4,3\}} \ge 9\%\): forcing the
-  seasonal dimensions does not materially reduce the failure;
-  the additive step is doing real work independent of dimension.
+  candidate-A failure. The additive-step attribution is partially
+  supported but not the sole story.
+  \item \textbf{Additive-step-driven outcome.}
+  \(\MAPE_{\{2,4,3\}} \ge 9\%\): forcing the seasonal dimensions
+  does not materially reduce the failure; the additive step is
+  doing real work independent of dimension.
 \end{itemize}
-\paragraph{Disambiguation result: D-iii.} Scale-only at the
-seasonal dimensions \(\{2,4,3\}\) gives \(\MAE_{\{2,4,3\}} =
-2158.6\) MW, \(\MAPE_{\{2,4,3\}} = 13.13\%\) on the same dev set ---
-\emph{worse} than scale-only at the elbow-selected \(\{4,4,4\}\)
-(\(\MAPE = 11.98\%\)), and only \(0.4\) pp better than the
-no-transform pipeline (\(\MAPE = 13.57\%\)). The pre-registered
-branch is D-iii: the additive sub-step does real work independent
-of dimension. The four-point ranking at matched dimensions is
-\(3.86\% \to 13.13\% \to 13.57\%\) as one drops first the additive
-\(\mu_{m,h}\) step and then the multiplicative \(\sigma_{m,h}\)
-step --- the additive step alone accounts for \(\approx 9.3\) pp
-of the \(\approx 9.7\) pp total cost. Forcing the elbow's preferred
-\(d = 4\) on weekday and sunday recovers \(\approx 1.1\) pp; that
-is small relative to the additive step's contribution and does not
-overturn the branch-(iii) reading. The mechanistic-attribution
-caveat in the preceding paragraph is therefore resolved: branch
-(iii)'s attribution to the additive sub-step is not a dimension
-artifact.
+\paragraph{Disambiguation result: additive-step-driven outcome.}
+Scale-only at the seasonal dimensions \(\{2,4,3\}\) gives
+\(\MAE_{\{2,4,3\}} = 2158.6\) MW, \(\MAPE_{\{2,4,3\}} = 13.13\%\) on
+the same dev set --- \emph{worse} than scale-only at the
+elbow-selected \(\{4,4,4\}\) (\(\MAPE = 11.98\%\)), and only
+\(0.4\) pp better than the no-transform pipeline
+(\(\MAPE = 13.57\%\)). The pre-registered outcome is the
+additive-step-driven one: the additive sub-step does real work
+independent of dimension. The four-point ranking at matched
+dimensions is \(3.86\% \to 13.13\% \to 13.57\%\) as one drops first
+the additive \(\mu_{m,h}\) step and then the multiplicative
+\(\sigma_{m,h}\) step --- the additive step alone accounts for
+\(\approx 9.3\) pp of the \(\approx 9.7\) pp total cost. Forcing the
+elbow's preferred \(d = 4\) on weekday and sunday recovers
+\(\approx 1.1\) pp; that is small relative to the additive step's
+contribution and does not overturn the accuracy-fails reading. The
+mechanistic-attribution caveat in the preceding paragraph is
+therefore resolved: the additive-sub-step attribution is not a
+dimension artifact.
 
-The other channels: Ch2 PASS (scale-only \(60/60\) finite per
-day-type, identical to seasonal); Ch3 average coverage \(41.10\%\)
-vs.\ seasonal's \(38.35\%\), \(|\Delta\overline{\mathrm{cov}}|
+The other channels: the diffusion-viability channel PASSes
+(scale-only \(60/60\) finite per day-type, identical to seasonal);
+the coverage channel reports average coverage \(41.10\%\) vs.\
+seasonal's \(38.35\%\), \(|\Delta\overline{\mathrm{cov}}|
 = 2.75\) pp, FAIL on the average-gap tolerance (worst-hour test
-deferred --- Ch1 already settled the verdict); Ch4
-\(\nuhat_{\mathrm{scale}} = 5.27\) vs.\ \(\nuhat_{\mathrm{seasonal}}
-= 5.93\), reported as a \emph{directional observation only}: the
-pre-registered Ch4-conditional-on-Ch3 rule applies (Ch3 failed, so
-Ch4 is not interpretable as a pass/fail signal). The directional
-sign --- scale-only is slightly more heavy-tailed than seasonal ---
-is contrary to the mechanistic story that the additive step
-\emph{carries} the heavy-tail cost; if anything, removing the
-additive step makes the tail slightly worse rather than better. This
-weakens (but does not by itself rule out) the original branch-(ii)
-hypothesis that the cost lives entirely in the multiplicative step.
+deferred --- the accuracy channel already settled the verdict); the
+heavy-tail channel gives \(\nuhat_{\mathrm{scale}} = 5.27\) vs.\
+\(\nuhat_{\mathrm{seasonal}} = 5.93\), reported as a
+\emph{directional observation only}: the pre-registered
+coverage-conditional rule applies (the coverage channel failed, so
+the heavy-tail channel is not interpretable as a pass/fail signal).
+The directional sign --- scale-only is slightly more heavy-tailed
+than seasonal --- is contrary to the mechanistic story that the
+additive step \emph{carries} the heavy-tail cost; if anything,
+removing the additive step makes the tail slightly worse rather
+than better. This weakens (but does not by itself rule out) the
+original coverage-passes-but-tail-fails hypothesis that the cost
+lives entirely in the multiplicative step.
 
 \paragraph{Resolved standing position.} The \(z\)-score coupling
 carries a documented heavy-tail cost (Section~\ref{sec:caveat}); a
 demand-space-scale-calibration contribution to forecast performance
-(localised at Ch3 in the seasonal-vs-raw experiment); and an
-additive-level-removal contribution to forecast performance
-(localised by this candidate-A experiment, branch (iii)). All three
+(localised at the coverage channel in the seasonal-vs-raw experiment);
+and an additive-level-removal contribution to forecast performance
+(localised by this candidate-A experiment under the
+accuracy-fails outcome). All three
 ride on the same parametric object \((\mu_{m,h}, \sigma_{m,h})\). At
 the four-channel diagnostic's resolution within this family, the
 cost and the two benefit channels are intertwined: removing either
-sub-step degrades Ch1 substantially. The engineering question moves
-out of the additive-vs-multiplicative decomposition; the next-tier
-analysis (a separate continuous-climatology preprocessing, and the
-framework-level enumeration of the available levers against the
-heavy-tail cost) is the subject of
-Section~\ref{sec:qualifier-verdict}. The phase-asymmetry finding
-that motivated this section's investigation remains independent of
-the coupling and does not depend on the de-seasonalisation step.
+sub-step degrades the accuracy channel substantially. The
+engineering question moves out of the additive-vs-multiplicative
+decomposition; the next-tier analysis (a separate
+continuous-climatology preprocessing, and the framework-level
+enumeration of the available levers against the heavy-tail cost) is
+the subject of Section~\ref{sec:qualifier-verdict}. The
+phase-asymmetry finding that motivated this section's investigation
+remains independent of the coupling and does not depend on the
+de-seasonalisation step.
 
-\subsection{Qualifier-exhaustion verdict}
+\subsection{Available levers against the heavy-tail cost: framework
+enumeration and empirical landing}
 \label{sec:qualifier-verdict}
 
 The Section~\ref{sec:caveat} caveat documents two ways \(\Pij\)
@@ -739,21 +756,20 @@ departs from \(\kQ\) (phase-mis-centred mean; Gaussian-proxy
 diffusion). The Section~\ref{sec:zscore} investigation establishes
 the \(z\)-score as a framework coupling rather than benign
 preprocessing, and ends at the question of how to engineer around
-the heavy-tail cost. This subsection enumerates the available
-levers at the framework level, reports the empirical landing of
-each, and quantifies the underlying contamination. The analysis
-has three layers, and conflating them misreads either the framework
-or the empirical landing.
+the heavy-tail cost. This subsection enumerates the available levers
+at the framework level, reports the empirical landing of each, and
+quantifies the underlying contamination. The analysis has three
+layers, and conflating them misreads either the framework or the
+empirical landing.
 
 \emph{Framework.} The \(\kQ\) programme permits kernel-form,
 state-augmentation, and per-horizon relaxations; its law-agnostic
-content supports four design options --- \textsf{K} (Student-\(t\)
-local kernel), \textsf{S} (state augmentation within lagged \(z\)),
-\textsf{H} (per-horizon direct fit), and the combined
-\textsf{S+K} --- under the qualifier exhaustion. Rebaseline-grade
-evidence (per-anchor library kurt \(24\)--\(33\)) of heavy-tailedness
-motivates the search; the framework verdict is
-\emph{permits-accommodation}.
+content supports four design options --- a Student-\(t\) local
+kernel; state augmentation within the lagged-\(z\) embedding;
+per-horizon direct fitting; and the combined state-augmentation +
+kernel-form variant. Rebaseline-grade evidence (per-anchor library
+kurt \(24\)--\(33\)) of heavy-tailedness motivates the search; the
+framework permits each of these relaxations.
 
 \emph{Empirical contamination magnitude.} A Patra--Sen
 consistent two-component-mixture estimator~\cite{PatraSen2016},
@@ -775,18 +791,19 @@ continuous Fourier-of-(day-of-year, hour-of-day) climatology
 adopted as the cleaner preprocessing default (which by construction
 eliminates the month-boundary lookup discontinuity the
 \((\mu_{m,h}, \sigma_{m,h})\) lookup introduces at twelve
-delivery days per year), none of \textsf{K}, \textsf{S},
-\textsf{S+K}, \textsf{H} delivers a statistically clean
-forecast-accuracy improvement on routine-day data at \(n = 132\).
-\textsf{K} alone gives a modest mid-horizon log-loss gain
-(\(\approx 1.8\%\), CI excludes zero); the others are null. The
-only consistent reading of large contamination mass alongside null
-empirical levers is that the contamination is structurally
-orthogonal to the lagged-\(z\) state on which all four levers
-operate. The licensed direction is exogenous information ---
-temperature, weather regime, calendar event flags --- not
-state-augmentation or kernel-form changes within the past-\(z\)
-information set.
+delivery days per year), none of the four relaxations --- the
+Student-\(t\) kernel-form lever, the state-augmentation lever, their
+combination, or per-horizon direct fitting --- delivers a
+statistically clean forecast-accuracy improvement on routine-day
+data at \(n = 132\). The Student-\(t\) kernel-form lever alone gives
+a modest mid-horizon log-loss gain (\(\approx 1.8\%\), CI excludes
+zero); the others are null. The only consistent reading of large
+contamination mass alongside null empirical levers is that the
+contamination is structurally orthogonal to the lagged-\(z\) state
+on which all four levers operate. The licensed direction is
+exogenous information --- temperature, weather regime, calendar
+event flags --- not state-augmentation or kernel-form changes within
+the past-\(z\) information set.
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
