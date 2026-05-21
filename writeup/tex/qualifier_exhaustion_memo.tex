@@ -673,81 +673,354 @@ average across horizons --- at the \(132\)-day sample size that is
 \(\approx 1.5\) standard errors above the \(50\%\) null and does not
 on its own constitute a statistical signal.
 
-\paragraph{Catastrophic-event channel.} At \(h = 1\), one day
-(\(2021\text{-}12\text{-}01\)) is a \(\approx 7\sigma\) event under
-the Gaussian one-step law: \(\mathrm{LL}_{\mathrm{Gauss}} = 26.3\)
-nats, \(\mathrm{LL}_{t} = 10.2\) nats --- a single-day advantage of
-\(16.2\) nats that carries the pooled \(h = 1\) mean
-\(\Delta\)LL of \(+0.12\). The robustness check (drop the worst
-Gaussian-LL day per horizon and recompute) confirms this is the
-mechanism: dropping that one day flips the \(h = 1\) mean
-\(\Delta\)LL to \(-0.003\). This is not a methodological artefact;
-it is the actual structure of the heavy-tail effect. A Student-\(t\)
-with \(\nu \approx 5\) is calibrated to handle precisely the rare
-tail events the rebaseline kurt evidence implies, and the empirical
-landing is consistent with that calibration. Three observations
-follow.
+\paragraph{The apparent catastrophic-event channel was a pipeline
+artefact (retraction).} A first reading of this experiment
+identified a prominent \(h = 1\) channel: one day
+(\(2021\text{-}12\text{-}01\)) was a \(\approx 7\sigma\) event under
+the Gaussian one-step law (\(\mathrm{LL}_{\mathrm{Gauss}} = 26.3\)
+nats, \(\mathrm{LL}_{t} = 10.2\); single-day advantage \(16.2\)
+nats), and that one day carried the pooled \(h = 1\) mean
+\(\Delta\mathrm{LL}\) of \(+0.12\) under the Gaussian \(\to\) Student-\(t\)
+swap. Section~\ref{sec:option-k-seam-audit} below documents that
+this was driven by a separable pipeline issue (month-boundary
+climatology lookup discontinuity), not by an intrinsic heavy-tail
+property of the conditional law. The \(h = 1\) signal does not
+survive seam exclusion: pooled \(h = 1\) \(\Delta\mathrm{LL}\) drops
+from \(+0.12\) to \(-0.02\) with CI straddling zero. The narrative
+``Student-\(t\) provides insurance against rare \(7\sigma\) events
+at \(h = 1\)'' is therefore \emph{retracted}; what Student-\(t\)
+provides is a modest mid-horizon improvement (Section~\ref{sec:option-k-seam-audit}).
 
-\emph{(i)}~The catastrophic-event channel is real, bounded, and
-matches the theory the rebaseline kurt evidence motivated. It is
-\emph{insurance against rare tail events}, not a routine-day
-forecasting improvement.
-
-\emph{(ii)}~Pooled \(dB\) without the catastrophic day is
-\(1.77\%\), point still above \(\tau_{\min}\), CI \([0.43\%, 3.06\%]\)
-still excluding zero --- the modest mid-horizon signal at
-\(h \in \{3, 4, 8, 9\}\) is independent of the catastrophe channel.
-
-\emph{(iii)}~The verdict is robust to whether the catastrophe event
-is included. The headline does not depend on this single day.
+\paragraph{The mid-horizon signal is what's real.} Per-horizon
+day-bootstrap excluding first-of-month delivery days: \(h = 3\)
+PASS strict (CI \([+0.16, +25.65]\); the dB ratio is degenerate at
+\(h = 3\) because the baseline LL is near zero, but the raw
+\(\Delta\mathrm{LL}\) of \(+0.03\) nats is real), \(h = 4\) PASS
+strict (\(dB = 0.15\); CI \([+0.05, +0.32]\)); \(h = 8, 9\) PASS
+lenient (\(dB \approx 0.02\); CI cleanly above zero); all other
+horizons tied. Pooled excl-first-of-month \(dB = 0.018\) (CI
+\([0.005, 0.031]\)); pooled excl-first-of-month AND excl-\(h = 1\)
+\(dB = 0.018\) (CI \([0.004, 0.031]\)) --- the pooled signal does
+not depend on the \(h = 1\) contribution at all. The improvement is
+concentrated where the kurt-decay analysis (Section~\ref{sec:stage1})
+predicted the kernel-form gap to live: mid-horizons (\(h = 3\)--\(9\))
+where the compositional kurt is dropping but not yet near zero.
 
 \paragraph{Reading of Option K's Stage-2 closing condition.} The
 condition was ``re-measure \(M_1/M_2\) under the new likelihood;
-clear \(\tau_{\min}\)''. The measurement is in hand and confirms the
-original \(M_2\) finding under tighter methodology. Whether the
-condition is met depends on the strictness reading:
+clear \(\tau_{\min}\)''. With seam exclusion as the operative
+measurement (the catastrophe-channel narrative being retracted),
+the answer depends on strictness reading:
 \begin{itemize}[leftmargin=2em]
   \item Under the lenient reading (\(M_2\)'s original protocol ---
-  ``non-zero, point above \(\tau_{\min}\)'') the condition is
-  \textbf{met}.
+  ``non-zero, point above \(\tau_{\min}\)''): pooled excl-first-of-month
+  \(dB = 1.8\%\) clears, condition \textbf{met}.
   \item Under the strict reading (``CI lower bound above
-  \(\tau_{\min}\)'') the condition is \textbf{not met}.
+  \(\tau_{\min}\)''): pooled excl-first-of-month CI lower bound is
+  \(0.5\%\), below the \(1\%\) bar; condition \textbf{not met}.
 \end{itemize}
 The original \texttt{run\_error\_decomposition.py} pre-registered
-rule used the lenient reading (the \(M_2\) \(dB \approx 2.3\%\)
-finding was reported as non-zero with overlap, not as clearing
-\(\tau_{\min}\) on the CI lower bound). Consistency with that prior
-reading is the load-bearing call. \textbf{Verdict on Option K under
-the lenient pre-reg: PASS}, with the caveat that the practical
-effect size is modest (\(\approx 2\%\) relative log-loss reduction)
-and concentrated in the catastrophic-event channel.
+rule used the lenient reading. Consistency with that prior reading is
+the load-bearing call. \textbf{Verdict on Option K under the lenient
+pre-reg: PASS}, with the effect size small (\(\approx 1.8\%\)
+relative log-loss reduction) and localised at mid-horizons.
 
-\paragraph{Implication for Option S.} K alone moves the needle only
-modestly. The discriminating question for S is now: does state
-augmentation reduce the residual non-Gaussianity enough that the
-Gaussian local kernel becomes adequate? Two outcomes are pre-stated
-for S (\S5 framework permitting; designed gate to follow):
-S-i:~augmenting the embedding with a derivative coordinate brings
-the residual kurt below \(\approx 3\) --- S alone is sufficient,
-the kernel lever is unnecessary; S-ii:~augmenting leaves residual
-kurt at \(5\)--\(10\) (heavy but not as heavy as the rank-1 univariate
-embedding's \(\approx 8.6\) at \(h{=}1\)) --- S+K is the natural
-combined design; S-iii:~augmenting does not change residual kurt
-meaningfully --- the heavy-tail problem is intrinsic to the
-underlying conditional law, not an artefact of state coarseness, and
-K is the only available lever.
+\section{Empirical landing: Option K seam audit}
+\label{sec:option-k-seam-audit}
 
-\section{Integration decision (deferred)}
+\paragraph{The discovery.} An attempt to extend the dev window from
+\(n = 132\) to \(n = 365\) days (motivated by the wide
+day-bootstrap CIs at \(n = 132\)) surfaced a structural issue in
+the deseasonalisation pipeline. At \(n = 365\) the pooled \(h = 1\)
+standardised-residual kurt rises to \(19.1\); excluding the \(12\)
+first-of-month delivery days (\(3.3\%\) of the sample) drops it to
+\(0.46\). The mechanism, verified by direct inspection of the raw
+demand and \(z\)-series on \(2022\text{-}04\text{-}01\): raw demand
+fell normally from \(13\,808\) MW at \(23\):\(00\) on
+\(2022\text{-}03\text{-}31\) to \(13\,534\) MW at \(00\):\(00\) on
+\(2022\text{-}04\text{-}01\) (an unremarkable early-morning trough),
+but the \(z\)-score jumped from \(-0.87\) to \(+0.48\) because
+\(z\) at \(23\):\(00\) uses \((\mu_{\mathrm{Mar},23}, \sigma_{\mathrm{Mar},23})\)
+and \(z\) at \(00\):\(00\) uses
+\((\mu_{\mathrm{Apr},0}, \sigma_{\mathrm{Apr},0})\). The local-linear
+model treats \(z\) as a continuous series and has no machinery for
+this discontinuity; the production estimator handles an analogous
+day-anchor seam at hour \(7\) (\texttt{day\_anchor\_hour} masks
+transitions whose target lands on that hour) but has no analogous
+month-boundary mask.
+
+\paragraph{The programme premise is unaffected.} The premise the
+qualifier-exhaustion programme rests on --- the local conditional
+law of the one-step innovation is strongly heavy-tailed (rebaseline
+kurt \(24\)--\(33\)) --- is rebaseline-grade and was the production-path
+diagnostic on which the entire framework analysis was motivated.
+Direct check (\texttt{scratch/check\_rebaseline\_seam.py}, mirroring
+\texttt{processing/innovations/validation/rebaseline.py}'s exact
+machinery, additionally masking transitions whose target falls on
+first-of-month at \(00\):\(00\)):
+\begin{center}\small
+\begin{tabular}{l r r r r}
+\toprule
+day-type & median \(\kappa\) all & median \(\kappa\) seam-excl & \(\Delta\kappa\) & seam frac of library \\
+\midrule
+weekday  & \(32.56\) & \(33.35\) & \(-0.78\) & \(0.15\%\) \\
+saturday & \(24.09\) & \(24.75\) & \(-0.67\) & \(0.15\%\) \\
+sunday   & \(27.21\) & \(27.72\) & \(-0.51\) & \(0.16\%\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Seam-excluded medians are \emph{slightly higher} than the full
+medians; the seam contributes \(\sim 0.15\%\) of each anchor's
+kernel-weighted library and is statistically inconsequential at the
+per-anchor kurt level. The rebaseline finding is robust; the heavy
+tail is a genuine property of \(\kappa_Q\), not a seam artefact.
+
+\paragraph{The forecast-cache evidence is partially contaminated.}
+The Option K forward iteration cache covers \(n = 132\) days with
+\(4\) first-of-month delivery days (\(3.0\%\) of the dev window).
+Re-running the LOO + MC scoring with those days excluded:
+\begin{center}\small
+\begin{tabular}{l r r}
+\toprule
+Quantity & all days & excl-first-of-month \\
+\midrule
+Pooled \(dB\)                              & \(0.024\) & \(0.018\) \\
+Pooled \(dB\) CI                           & \([0.007, 0.041]\) & \([0.005, 0.031]\) \\
+\(h = 1\) raw \(\Delta\mathrm{LL}\)        & \(+0.119\) & \(-0.017\) \\
+\(h = 1\) raw \(\Delta\mathrm{LL}\) CI     & \([-0.034, +0.388]\) & \([-0.056, +0.019]\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+The pooled K verdict is robust: under either reading of the
+operative bar (lenient or strict), the conclusion is unchanged at
+the pooled level (lenient PASS under both; strict fail under both).
+The catastrophe-channel narrative at \(h = 1\), which was prominent
+in the initial reading, is the part that does not survive
+exclusion --- and bootstrap CIs straddle zero \emph{with or without}
+the seam day, so the narrative was not statistically supported in
+either case. The pooled \(1.8\%\) lenient-PASS signal localises at
+\(h = 3, 4, 8, 9\) (mid-horizons; per-horizon table above), which
+matches the kurt-decay analysis that motivated Stage-1's
+``approximate Gaussianity at long horizons'' reading.
+
+\paragraph{Pipeline-level disposition.} The month-boundary seam is
+a known, fixable issue in the deseasonalisation/forecast interface
+(the production pipeline would mask first-of-month \(00\):\(00\)
+targets, analogous to the existing \texttt{day\_anchor\_hour}
+mask). It is documented as a separable concern for the application
+paper's limitations section; it does not change the framework
+verdict and the K result is reported with seam exclusion as the
+operative primary.
+
+\section{Empirical landing: Option S (state augmentation)}
+\label{sec:option-s-result}
+
+\paragraph{Protocol as run.} A first-pass design used a derivative
+coordinate \(\dot z_t = z_t - z_{t-1}\) added to the lag state;
+the advisor flagged --- correctly --- that under a linear WLS fit,
+the derivative lives in the linear span of \((z_t, z_{t-1})\) and
+augmenting with it is mathematically equivalent to enriching the
+lag depth (no discriminating power for the Register lever). The
+revised design uses
+\(\phi_t = \tanh\!\bigl((z_t - z_{t-1}) / s_{\mathrm{dt}}\bigr)\)
+where \(s_{\mathrm{dt}}\) is the dev-set median \(|\dot z|\) per
+day-type --- a nonlinear function of past \(z\) that the linear
+WLS fit cannot recover from raw lags. A confound-control side arm
+(``\textsf{lag}'') uses pure delay coordinates at the same
+augmented dimension \(d + 1\), to check whether any kurt change is
+specifically attributable to the nonlinear coordinate or merely
+to a larger state. Scope is \(h = 1\) (the load-bearing horizon
+for the kernel-form question); multi-step propagation under a
+nonlinear \(\phi_{t+1}\) would require EKF-style linearisation,
+which is deferred.
+
+\paragraph{Pooled and per-day-type residual kurt.}
+\begin{center}\small
+\begin{tabular}{l r r r}
+\toprule
+arm & pooled kurt & weekday kurt (\(n \approx 95\)) & saturday/sunday (\(n = 19\) each, qualitative) \\
+\midrule
+baseline (cache, \(d\) per elbow) & \(8.60\) & \(10.24\) & \(1.50\) / \(2.72\) \\
+\textsf{phi} (lag + \(\phi_t\), \(d+1\)) & \(9.77\) & \(8.55\) & \(3.29\) / \(8.59\) \\
+\textsf{lag} (\(d + 1\) lags, no \(\phi\)) & \(10.13\) & \(8.65\) & \(3.70\) / \(9.39\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+Pooled-kurt CIs are wide (\(\approx [1, 15]\)) and overlap across
+arms. Weekday point estimates suggest a small (\(\approx 1.5\)-unit)
+reduction under both \textsf{phi} and \textsf{lag}, but the
+bootstrap noise is large relative to the difference. \textsf{phi}
+and \textsf{lag} agree to within \(0.5\) units everywhere --- the
+nonlinear \(\phi\) coordinate is not contributing distinguishable
+work beyond what bigger state alone delivers.
+
+\textbf{Verdict on the kurt gate: S-iii.} The residual kurt is
+statistically unchanged by either augmentation. The heavy-tail
+property of the per-step conditional law is not removable by
+state augmentation within this family at this measurement resolution.
+
+\paragraph{The apparent \(dB(K | S)\) drop was seam-driven
+(retraction).} A first reading of the S experiment observed that
+pooled \(dB(K)\) under the \textsf{phi}-augmented state dropped
+\(16\times\) (\(4.56\%\) baseline \(\to 0.28\%\) phi), and proposed
+a mechanism (the augmented WLS produces \(\sigma_{00} \approx 2\times\)
+baseline, which deflates the catastrophe day's \(z_{\mathrm{std}}\)
+from \(-7.4\) to \(-5.3\)). Both observations were factually
+correct, but the seam audit changes their interpretation:
+\begin{center}\small
+\begin{tabular}{l r r r}
+\toprule
+arm & all-days \(dB\) & excl-first-of-month \(dB\) & excl-first \(dB\) CI \\
+\midrule
+baseline & \(+4.56\)  & \(-0.008\) & \([-0.066, +0.045]\) \\
+\textsf{phi} & \(+0.28\) & \(+0.028\) & \([-0.003, +0.052]\) \\
+\textsf{lag} & \(+0.31\) & \(+0.026\) & \([-0.009, +0.051]\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+The \(16\times\) drop \emph{dissolves} under seam exclusion. On
+routine days, all three arms have \(dB \in [-0.008, +0.028]\) with
+CIs straddling zero. \(\sigma_{00}\) median is \(0.0154\) for
+baseline and \(\approx 0.0287\) for both augmented arms ---
+\emph{uniform} across all anchors, not concentrated at seam-near
+ones. The original mechanistic story (``\(\sigma\)-inflation tames
+catastrophe events'') is therefore \textbf{retracted}: the
+\(\sigma\)-doubling is a global property of the higher-dim WLS fit,
+not a seam-responsive property, and its observable consequence on
+\(dB\) was specifically the deflation of seam-event extremes.
+
+\paragraph{Open mechanism question.} The \(\sigma_{00}\) doubling
+under state augmentation is itself unexplained at this scope. Three
+candidate mechanisms are plausible: (i) curse-of-dimensionality on
+the local-residual variance estimate (a sparser local neighbourhood
+gives a higher variance estimate of the residuals); (ii) a genuinely
+worse-on-average WLS fit under augmented state, producing
+genuinely larger residuals; (iii) the LOO-CV bandwidth selection
+responding differently to richer state. Distinguishing them
+requires a designed experiment outside this memo's scope; the open
+question is flagged for follow-up.
+
+\section{Cross-option synthesis}
+\label{sec:synthesis}
+
+\paragraph{Three layers, kept distinct.} The empirical work in
+\S\S\,\ref{sec:option-k-result}--\ref{sec:option-s-result} produces
+findings at three different levels of the question
+``does the \(\kappa_Q\) framework permit a method that accommodates
+the heavy-tail / forecast-accuracy coupling?''. Conflating them
+would misread either the framework verdict or the empirical
+landing.
+
+\paragraph{Layer 1 --- programme: the framework verdict is
+unchanged.} The qualifier-exhaustion analysis in \S\S\,2--5
+identified four framework-consistent design options
+(\textsf{S, H, K, S+K}) under Stages 1 and 2; all are licensed by
+\(\kappa_Q\)'s law-agnostic content. The premise that motivated
+the exhaustion --- a strongly heavy-tailed conditional law
+(rebaseline kurt \(24\)--\(33\)) --- is production-path-validated
+and now additionally verified seam-independent
+(\S\,\ref{sec:option-k-seam-audit}). The framework permits
+accommodation; that conclusion is robust.
+
+\paragraph{Layer 2 --- empirical: per-arm landings on the
+\(n = 132\) dev set, with seam exclusion as primary.}
+\begin{center}\small
+\begin{tabular}{l p{0.45\linewidth} l}
+\toprule
+Option & Empirical landing (excl-first-of-month primary) & Verdict \\
+\midrule
+\textsf{K} (Student-\(t\) local kernel)
+& Pooled \(dB = 1.8\%\), CI \([0.5\%, 3.1\%]\); signal localised
+at \(h = 3, 4, 8, 9\) (mid-horizons); the \(h = 1\)
+catastrophe-channel reading was the seam.
+& Lenient PASS, modest effect. \\
+\midrule
+\textsf{S} (state augmentation, \(\phi_t\) coord or enrich-\(d\))
+& Pooled residual kurt unchanged within bootstrap noise
+(\(\sim 9\)--\(10\) for all arms); \(dB(K | S)\) collapses to
+\([-0.01, +0.03]\) under seam exclusion; \(\phi\) and lag-enriched
+give identical kurt and \(dB\) (the \(\phi\) coord is not
+contributing distinguishable work).
+& S-iii at kurt gate; routine-day advantage seam-driven. \\
+\midrule
+\textsf{S+K} (combined)
+& \(\phi\)\textsf{-t} variant has the best point estimate of
+absolute log-loss (\(-0.31\) nats vs.\ baseline-Gaussian's
+\(-0.05\)), but all five non-baseline variants overlap each other
+to within \(\sim 0.08\) nats with CIs straddling zero against
+baseline. No statistical separation.
+& Not distinguishable from \textsf{K} alone or \textsf{S} alone
+on routine days. \\
+\midrule
+\textsf{H} (direct \(\Pi_h\) per horizon)
+& Per-horizon residual kurt under direct fitting mirrors composed
+kurt at \(h \in \{1, 3, 8\}\) within bootstrap noise (direct
+\(8.70 / 1.80 / -0.46\); composed \(8.60 / 1.13 / -0.34\)).
+& Framework-permitted; not differentially valuable vs.\
+composition. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Layer 3 --- pipeline: a new finding, documented as
+limitation.} The month-boundary climatology lookup discontinuity
+(\S\,\ref{sec:option-k-seam-audit}) is a structural issue in the
+deseasonalisation pipeline that is separable from the framework
+verdict but observably contaminates forecast-cache evidence at
+\(\sim 12\) events per year. The production fix is a target-side
+mask analogous to \texttt{day\_anchor\_hour}; out of scope for this
+memo but documented as a known limitation entering the application
+paper's limitations section.
+
+\paragraph{Overall reading.} The framework permits accommodation;
+the empirical magnitude on this dataset is modest. At \(n = 132\)
+days with the seam-exclusion-as-primary reading, Student-\(t\) local
+kernel (\textsf{K}) delivers a small but bootstrap-robust mid-horizon
+log-loss improvement (\(\sim 1.8\%\) pooled; CI clean above zero
+under the lenient interpretation of \(\tau_{\min}\)). State
+augmentation (\textsf{S}) does not change the residual kurt
+meaningfully on routine days. \textsf{S+K} does not improve over
+\textsf{K} alone. The pattern matches the kurt-decay finding from
+Stage~1: the kernel-form gap is concentrated at mid-horizons
+(\(h = 3\)--\(9\)), where the composed innovation is still
+heavy-tailed but the per-step innovation distribution dominates;
+at long horizons the central-limit-style averaging brings the
+composed law toward Gaussian and the kernel-form lever has little
+to do.
+
+\paragraph{What this leaves unresolved.} Two questions remain
+flagged for future work: \emph{(a)} the \(\sigma_{00}\) doubling
+under state augmentation
+(\S\,\ref{sec:option-s-result}, three candidate mechanisms); and
+\emph{(b)} whether at \(n \gg 132\) (with the seam fixed in the
+pipeline) the cross-arm differences become statistically
+resolvable --- the CIs at \(n = 132\) span zero on cross-arm
+comparisons by a meaningful margin, and the per-day-type drift SEs
+estimated earlier in this analysis suggest that even \(n = 365\) is
+unlikely to cleanly resolve them without pipeline-level changes.
+
+\section{Integration decision}
 \label{sec:integration}
 
-Per the staging decision, integration into the application paper
-(sibling tex memo with a tight \S4.3 verdict reference, vs.\ inlining
-the full exhaustion as \S4.3) is decided after the verdict shape is
-visible. With Option K's empirical landing in hand the verdict
-shape is now a \emph{lenient PASS with modest effect size, mirroring
-the original \(M_2\) finding under tighter methodology}; this is a
-short-paragraph outcome and the sibling-memo arrangement remains the
-right call. Once Option S has its empirical landing the final
-integration sentence in the application paper can be written.
+With all four design options' empirical landings in hand, the
+verdict shape is clear: framework-level the question is
+constructively answered (multiple levers permitted; rebaseline
+premise robust); empirically the magnitude is modest (pooled
+\textsf{K} lenient PASS at \(\sim 1.8\%\); other options not
+distinguishable from baseline under day-bootstrap on routine days);
+pipeline-level a new separable issue (the month-boundary seam) has
+been surfaced and is fixable but out of scope here.
+
+The application paper's integration is a short paragraph: the
+qualifier-exhaustion analysis identifies the framework as
+permitting kernel-form, state-augmentation, and per-horizon
+relaxations; the empirical comparison on the \(n = 132\) dev set
+selects the kernel-form lever (\textsf{K}, Student-\(t\)) as the
+single licensed option with a modest mid-horizon log-loss gain,
+with the magnitude of the gain reported under seam exclusion and
+the seam itself documented as a known limitation. The sibling-memo
+arrangement (this document) is the right place for the detailed
+exhaustion analysis; the application paper's \S4.3 inherits the
+one-paragraph verdict statement.
 
 \end{document}
