@@ -761,18 +761,14 @@ and sample-kurt-matched checks, is \(0.26\). The contamination is
 mixture-structured, not a small heavy-tail perturbation, and is
 preprocessing-independent.
 
-\emph{Empirical activation of the framework levers.} Under a
-continuous Fourier-of-(day-of-year, hour-of-day) climatology
-adopted as the cleaner preprocessing default (which by construction
-eliminates the month-boundary lookup discontinuity the
-\((\mu_{m,h}, \sigma_{m,h})\) lookup introduces at twelve
-delivery days per year), only the Student-\(t\) kernel-form lever
-delivers a statistically clean log-loss improvement on routine-day
-data at \(n = 132\) (\(\approx 1.8\%\) mid-horizon, CI excludes
-zero); state augmentation, per-horizon direct fitting, and the
-combined variant are null. The improvement is modest --- well
-below the contamination magnitude the previous paragraph reports.
-The only consistent reading of large contamination mass alongside
+\emph{Empirical activation of the framework levers.} On the
+development set at \(n = 132\), only the Student-\(t\) kernel-form
+lever delivers a statistically clean log-loss improvement on
+routine-day data (\(\approx 1.8\%\) mid-horizon, CI excludes zero);
+state augmentation, per-horizon direct fitting, and the combined
+variant are null. The improvement is modest --- well below the
+contamination magnitude the previous paragraph reports. The only
+consistent reading of large contamination mass alongside
 modest-to-null empirical levers is that the contamination is
 structurally orthogonal to the lagged-\(z\) state on which all four
 levers operate. The licensed direction is exogenous information ---
@@ -803,16 +799,67 @@ and scoring truth. With forecast \(\hat{y}_{d,h}\) and actual
 In a day-ahead forecast, horizon \(h\) is collinear with hour-of-day,
 so the error structure is \emph{diurnal} (deep night easiest;
 dawn/dusk ramps hardest), not pure horizon compounding. The recorded
-backtest gives \(\MAE \approx 786~\mathrm{MW}\),
-\(\MAPE \approx 4.78\%\) over \(|\mathcal{D}| = 500\) out-of-sample
+backtest gives \(\MAE = 786~\mathrm{MW}\),
+\(\MAPE = 4.78\%\) over \(|\mathcal{D}| = 500\) out-of-sample
 days, \(\approx 1.5\times\) better than seasonal persistence at
-every hour.
-\todo[inline]{The recorded backtest result will be restated with its
-content hash once finalised; per-horizon table will appear in
+every hour. The number is bound to the recorded artifact by its
+content hash;\footnote{Body sha256 \texttt{e405a121\(\ldots\)};
+recorded under frozen-spec hash \texttt{f0dd9c87\(\ldots\)}
+(\(\mu_{m,h}\) climatology). The per-horizon table appears in
 Appendix~\ref{app:backtest}.}
-Interval coverage carries the Section~\ref{sec:caveat} Gaussian-proxy
-caveat: a Gaussian interval around a heavy-tailed innovation
-under-covers.
+interval coverage carries the Section~\ref{sec:caveat}
+Gaussian-proxy caveat: a Gaussian interval around a heavy-tailed
+innovation under-covers.
+
+\paragraph{Climatology comparison.} The seasonal coupling
+(Section~\ref{sec:zscore}) raised an engineering question: does the
+\((\mu_{m,h}, \sigma_{m,h})\) lookup's piecewise-constant structure,
+which produces discrete climatology jumps at month boundaries
+(twelve delivery days per year), impose a forecast-accuracy cost
+relative to a continuous alternative? An end-to-end Fourier
+climatology --- the continuous basis in (day-of-year, hour-of-day)
+with \(K_{\mathrm{year}} = K_{\mathrm{day}} = 8\), no
+interaction terms --- was re-frozen as an alternative predictor
+spec and re-run on the same \(500\)-day post-cutoff span. The
+two CLAIM-grade backtest artifacts compare as follows:
+\begin{center}\small
+\begin{tabular}{l r r r}
+\toprule
+metric & \(\mu_{m,h}\) lookup & Fourier (\(K_y=K_d=8\)) & \(\Delta\) \\
+\midrule
+overall \(\MAE\)            & \(786\)~MW   & \(904\)~MW   & \(+118\)~MW \\
+overall \(\MAPE\)           & \(4.78\%\)   & \(5.42\%\)   & \(+0.64\)~pp \\
+persistence-168h \(\MAE\)   & \(1138\)~MW  & \(1138\)~MW  & --- \\
+interval coverage           & \(20.8\%\)   & \(21.8\%\)   & \(+1.0\)~pp \\
+\bottomrule
+\end{tabular}
+\end{center}
+The \(\mu_{m,h}\) lookup wins overall by \(\sim 15\%\) in \(\MAE\)
+and \(0.64\) percentage points in \(\MAPE\). Diurnal breakdown
+locates the difference: Fourier wins on the dawn ramp (h~=~7--9:
+\(-57, -118, -48\) MW) but loses substantially during the daytime
+peak (h~=~11--16: \(+161\) to \(+361\) MW). The daytime-peak losses
+dominate because demand --- and therefore the absolute error in
+megawatts --- is high there. The mechanism is straightforward: the
+\((\mu_{m,h}, \sigma_{m,h})\) lookup has \(288\) independent cells,
+which carry the day-of-year \(\times\) hour-of-day interaction
+explicitly (March-12:00 differs from June-12:00 because the
+seasonal peak-load shape varies by month). The Fourier model
+without cross-interaction terms cannot represent this structure
+(\(17\) day-of-year \(\times\) \(17\) hour-of-day independent
+parameters, no products). The seam contamination identified in
+Section~\ref{sec:zscore} is real but small in operational
+consequence: at production scale, the \(\sim 12\) month-boundary
+days per year on which Fourier improves do not outweigh the
+\(\sim 365\) days on which it loses the seasonal-by-hour
+resolution.\footnote{Fourier artifact body sha256
+\texttt{9b569ae8\(\ldots\)}; frozen spec hash
+\texttt{b6a39463\(\ldots\)}. The two specs and the two CLAIM
+artifacts sit side-by-side in the repository (the active
+production spec is \(\mu_{m,h}\)). A Fourier basis \emph{with}
+cross-interaction terms (\(\sim 289\) parameters, matching the
+lookup's cell count) is the natural next experiment but is out
+of scope here.}
 
 \subsection{Registered forward prediction experiment}
 \label{sec:registered}
