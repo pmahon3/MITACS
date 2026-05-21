@@ -7,6 +7,8 @@
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage[colorinlistoftodos]{todonotes}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
 
 \newcommand{\kQ}{\kappa_{Q}}
 \newcommand{\Pij}{\Pi_{ij}}
@@ -43,35 +45,36 @@ estimator produces.}}
 
 \begin{abstract}
 The investigation in \S4.2 of the application paper closed three
-climatology-axis experiments (seasonal-vs-raw; scale-only @ elbow;
-scale-only @ forced seasonal dims) on the same parametric object
+climatology-axis experiments on the parametric object
 \((\mu_{m,h}, \sigma_{m,h})\) and reached a HOLD verdict on
 de-seasonalisation removal with branch (iii) confirmed (the additive
 sub-step is doing real work independent of dimension). Two engineering
-candidates remain inside that family --- additive seasonal with
-exogenous scale (\(B\)); Fourier-decomposition scale layer (\(C\)) ---
-but both feed transformed series into the same Gaussian local kernel,
-so neither in principle reaches the heavy-tail cost; they can only
-redistribute it. The question this memo answers is whether the
+candidates remain inside that family but both feed transformed series
+into the same Gaussian local kernel, so neither in principle reaches
+the heavy-tail cost. The question this memo answers is whether the
 \(\kQ\) framework permits any method that accommodates the coupling,
 and if not, why.
 
 The exhaustion is \emph{staged}. At each stage we attempt to settle
 every one of the three qualifiers --- \textbf{Register},
 \textbf{Imposed Gaussianity}, \textbf{Single step} --- as
-\textsc{open} (the relaxation lives inside the stage's licensing),
-\textsc{foreclosed-at-stage} (the relaxation is incoherent at this
-stage but may live at the next), or \textsc{requires-experiment}
-(open in principle; needs a designed gate). We escalate only when all
-three reach a definite verdict at the current stage. The three stages
-are: (1) strict \(\kQ\)-only (no redefinition); (2) \(\kQ\) +
-extensions the framework's own language admits (e.g.\ law-agnostic
-local kernels); (3) any Markov-semigroup-coherent estimator class
-(may leave the \(\kQ\) register).
+\textsc{open}, \textsc{foreclosed-at-stage}, or
+\textsc{requires-experiment}. We escalate only when all three reach
+a definite verdict. The three stages are: (1) strict \(\kQ\)-only;
+(2) \(\kQ\) plus extensions the framework's own language admits
+(e.g.\ law-agnostic local kernels); (3) any Markov-semigroup-coherent
+estimator class.
 
-The memo is paper-only --- experiments fall out of its gaps as
-separate work. Integration into the application paper (sibling tex
-vs.\ inline \S4.3) is deferred until the verdict shape is visible.
+The verdict shape: the framework \emph{permits} accommodation via
+four design options (\textsf{S}~state, \textsf{H}~horizon,
+\textsf{K}~kernel, \textsf{S+K}~combined); empirical comparison on
+Ontario at \(n = 132\) days finds them all marginal-to-null under
+clean preprocessing; and a Patra--Sen contamination quantification
+shows \(\geq 49\%\)--\(74\%\) of per-anchor library mass is
+non-Gaussian mixture mass --- large but structurally orthogonal to
+the lagged-\(z\) state our levers operated on. Exogenous information,
+not state-augmentation or kernel-form changes within \(z\)'s lag
+span, is the empirically licensed direction.
 \end{abstract}
 
 \section{Setup and inheritance}
@@ -95,9 +98,8 @@ that \S2.2 documents as the ways \(\Pij\) departs from \(\kQ\) are:
   \item[Imposed Gaussianity.] The conditional \emph{law} is fit as
   Gaussian by estimator design (WLS gives \(\Cj\), residual
   covariance gives \(\Sj\), and these together specify a Gaussian
-  predictive law). \(\kQ\) itself is law-agnostic --- whatever the
-  conditional distribution of \(Q\) is, that is what \(\kQ\)
-  discloses. Gaussianity is not a \(\kQ\)-side commitment.
+  predictive law). \(\kQ\) itself is law-agnostic; Gaussianity is
+  not a \(\kQ\)-side commitment.
   \item[Single step.] \(\Pij\) targets \(\Pi_1\) only; multi-step
   predictions are obtained by composition (\(\Pi_1^k\)), which carries
   a propagation gate (Task~\#11/12) but does not refit per horizon.
@@ -122,7 +124,7 @@ that \S2.2 documents as the ways \(\Pij\) departs from \(\kQ\) are:
   The additive \(\mu_{m,h}\) step alone carries
   \(\approx 9.3\) pp of the \(\approx 9.7\) pp total cost; the
   scale step \(\approx 0.4\) pp; the dimension shift
-  \(\approx 1.1\) pp. Branch (iii) confirmed.
+  \(\approx 1.1\) pp.
   \item \#41 (\textsc{resolved}): no prediction-error
   cross-validation localises a bandwidth on this estimator on any
   tested system; the operator-as-run is a global linear drift. Any
@@ -130,20 +132,17 @@ that \S2.2 documents as the ways \(\Pij\) departs from \(\kQ\) are:
   failure mode if naively selected by CV.
 \end{itemize}
 
-\paragraph{The coupling the memo must accommodate.} The three
-empirical facts taken together --- strongly non-Gaussian one-step
-innovation; both drift and diffusion deficiencies materialise; the
-additive level step is irreducibly entangled with forecast accuracy
-in the parametric \((\mu, \sigma)\) family --- describe a regime in
-which a Gaussian local kernel fed a level-and-scale-stripped
-embedding is fundamentally a proxy. The question is whether the
-framework permits any escape from the proxy regime.
+\paragraph{The coupling the memo must accommodate.} Strongly
+non-Gaussian one-step innovation; both drift and diffusion
+deficiencies materialise; the additive level step is irreducibly
+entangled with forecast accuracy in the parametric \((\mu, \sigma)\)
+family. A Gaussian local kernel fed a level-and-scale-stripped
+embedding is fundamentally a proxy.
 
 \paragraph{Exit condition (locked).} Each stage produces a
 three-row table: \{Register, Imposed Gaussianity, Single step\}
-\(\times\) \{verdict, mechanism, evidence in hand, what would close
-it\}. We escalate to the next stage only when all three rows hold a
-definite verdict at the current stage.
+\(\times\) \{verdict, mechanism, evidence, closing condition\}. We
+escalate only when all three rows hold a definite verdict.
 
 \section{Stage 1 --- Strict \(\kQ\)-only (no redefinition)}
 \label{sec:stage1}
@@ -151,59 +150,49 @@ definite verdict at the current stage.
 \paragraph{Licensing (partition declaration).} The \(\kQ\)
 disclosure is law-agnostic and supports the full semigroup
 \(\{\Pi_t\}\); it does not by itself commit to any specific
-estimator class. To make the staging informative rather than
-tautological we declare a \emph{partition} at Stage 1: the local
-estimator class stays \emph{local-linear-Gaussian} and the disclosure
-register stays unchanged; what varies is (i) the \emph{state} the
-realisation is built on (the embedding that defines the conditioning
-\(\sigma\)-algebra) and (ii) the \emph{horizon} \(\Pi_t\) being
-targeted. Stage 2 relaxes the estimator class explicitly; Stage 3
-relaxes the framework. Stage 1's foreclosures of Imposed Gaussianity
-that follow are foreclosures \emph{at this partition}, not
-\(\kQ\)-side commitments.
+estimator class. To make the staging informative we declare a
+\emph{partition} at Stage 1: the local estimator class stays
+\emph{local-linear-Gaussian} and the disclosure register stays
+unchanged; what varies is (i) the \emph{state} the realisation is
+built on and (ii) the \emph{horizon} \(\Pi_t\) being targeted.
+Stage 2 relaxes the estimator class explicitly. Stage 1's
+foreclosures of Imposed Gaussianity are foreclosures \emph{at this
+partition}, not \(\kQ\)-side commitments.
 
 \paragraph{Register at Stage 1.} \(\kQ\) is defined via the Rokhlin
 disintegration of \(Q\) over the \(\sigma\)-algebra induced by the
-observation pair \((Q, F)\). The embedding is what \emph{defines}
-that \(\sigma\)-algebra: changing the embedding gives a different
-\((Q, F)\) and therefore a different disclosure object
-\(\kappa_{Q', F'} \neq \kappa_{Q, F}\). The framework permits this --- the
-Rokhlin theorem applies to any well-defined observation pair --- but
-the resulting estimand is a different conditional law, not a
+observation pair \((Q, F)\). The embedding \emph{defines} that
+\(\sigma\)-algebra: changing it gives a different \((Q, F)\) and
+therefore a different disclosure object
+\(\kappa_{Q', F'} \neq \kappa_{Q, F}\). The framework permits this ---
+the Rokhlin theorem applies to any well-defined observation pair ---
+but the resulting estimand is a different conditional law, not a
 re-reading of the same one. Adding a derivative coordinate, an
 explicit phase coordinate, or an exogenous covariate is therefore a
 substantive Stage-1 move: it stays inside the local-linear-Gaussian
 class and inside the disclosure register but it targets
-\(\kappa_{Q,\mathrm{new}}\). The §6 conclusion already names this as the
-higher-leverage path. \textbf{Verdict: OPEN, responsive, with
-estimand-change caveat.}
+\(\kappa_{Q,\mathrm{new}}\). The \S6 conclusion of the application
+paper already names this as the higher-leverage path.
+\textbf{Verdict: OPEN, responsive, with estimand-change caveat.}
 
 \paragraph{Imposed Gaussianity at Stage 1.} Under the partition, the
 estimator class is held fixed at local-linear-Gaussian. Relaxing the
-local kernel (heavier-tailed parametric form; non-parametric local
-distribution) is by stipulation a Stage-2 move. Within Stage 1, the
+local kernel is by stipulation a Stage-2 move. Within Stage 1, the
 only route to make a Gaussian local kernel \emph{adequate} is to
 change the state so that the conditional law under the new
 \((Q, F)\) coarsening is approximately Gaussian --- i.e.\ this
-qualifier reduces to Register at Stage 1. As a standalone Stage-1
-lever (vary the estimator while keeping state and horizon fixed),
-the qualifier is foreclosed by the partition's class restriction.
-\textbf{Verdict: FORECLOSED-AT-STAGE (partition-induced); see Stage 2
-for the substantive verdict on relaxing the kernel form.}
+qualifier reduces to Register at Stage 1. \textbf{Verdict:
+FORECLOSED-AT-STAGE (partition-induced); see Stage 2 for the
+substantive verdict.}
 
 \paragraph{Single step at Stage 1.} \(\Pi_h\) for \(h > 1\) is in
 the disclosure register; fitting a separate local-linear-Gaussian
-realisation per horizon \(h\) is permitted without redefinition.
-The empirical question is whether direct multi-step fitting
-\emph{addresses} the heavy-tail concern --- the per-horizon residual
-must actually be close to Gaussian for a Gaussian local kernel at
-that horizon to be adequate. This is verifiable from the
-rebaselined augmented-scope cache (132-day population, propagated
-\(s_k^2\)) without any new estimator work: compute the excess
-kurtosis of the standardised \(h\)-step residual and of the raw
-\(h\)-step residual (the latter discriminates the charitable
-``composition genuinely launders the tail'' reading from the
-skeptical ``\(s_k^2\) grows and over-scales'' reading).
+realisation per horizon \(h\) is permitted. The empirical question
+is whether direct multi-step fitting \emph{addresses} the heavy-tail
+concern --- the per-horizon residual must actually be close to
+Gaussian for a Gaussian local kernel at that horizon to be adequate.
+This is verifiable from the rebaselined augmented-scope cache (132-day
+population, propagated \(s_k^2\)) without any new estimator work.
 
 The check, run on the augmented-scope cache
 (\texttt{scratch/hstep\_kurtosis.py}; CIs added by
@@ -224,549 +213,350 @@ The check, run on the augmented-scope cache
 \bottomrule
 \end{tabular}
 \end{center}
-Three observations bound what the check supports.
 
-\emph{(a) Trend versus magnitude.} The point estimates trend
-downward with \(h\): \(8.60 \to 2.60 \to 1.13\) over \(h = 1{,}2{,}3\)
-and then fluctuate near zero. Standardised and raw kurt agree
-line-for-line, so the propagation \(s_k^2\) is not over-scaling. The
-\emph{trend} is real. But the bootstrap CIs at \(h = 2,3,4,6\) all
-straddle \(1.0\); the magnitude reading ``kurt drops to
-\(\approx 0\) at \(h = 3\)'' is a point-estimate claim the CI does
-not support. Only at \(h \geq 8\) do the CIs cleanly exclude
-moderate heavy-tailedness.
-
-\emph{(b) Pooling vs.\ composition.} The rebaseline established
-\(\mathrm{kurt} \approx 24\)--\(33\) per day-type slab on the
-intra-day-conditioned one-step residual; the \(h{=}1\) cache reading
-here is \(8.6\) (pooled) and \(10.2\) (weekday slab; \(n = 94\)).
-The gap is the difference between the per-day-type intra-day-slab
-diagnostic (heavily heavy-tailed) and the dev-set forecast cache
-(which the augmented propagation conditions and scales differently).
-The pooling decomposition shows the kurt-decay pattern is
-weekday-driven --- weekday \(h{=}1 \to h{=}3\): \(10.20 \to 1.14\),
-monotone --- while saturday (\(n = 19\); qualitative only) is
-non-monotone (peaks at \(h{=}6\)) and sunday is noisy. The
-composition-launders-the-tail reading holds within the weekday slab;
-on the smaller-\(n\) day-types it is unmeasured.
-
-\emph{(c) Negative kurt at \(h \geq 8\).} Three readings:
-genuinely-platykurtic recursion behaviour (residuals saturate as
-\(s_k^2\) grows); finite-sample artefact at \(n = 132\); or
-over-scaling already ruled out by the raw\(\,=\,\)std agreement. The
-bootstrap CI excludes the kurt being \(\geq 1\) at \(h \geq 8\) but
-does not pin down which of the first two readings holds. For Stage-1
-purposes, the load-bearing claim is only that the kernel form is
-\emph{approximately} adequate at long horizons; whether it is exactly
-Gaussian or slightly thin-tailed does not change that.
-
-\textbf{Verdict: OPEN, responsive (with hedged magnitude).} Direct
-fitting of \(\Pi_h\) with a Gaussian local kernel is
-framework-consistent and the cached evidence supports approximate
-adequacy at long horizons (\(h \geq 8\), CI-clean) and is consistent
-with adequacy at medium horizons (\(h = 3\)--\(6\), trend present but
-CI uncertain). Two important closing conditions: \emph{(i)}~the
-\(h\)-step residual property here is a property of \(\Pi_1^h\) under
-the current one-step estimator, not of a directly-fit
+The point estimates trend downward with \(h\):
+\(8.60 \to 2.60 \to 1.13\) over \(h = 1{,}2{,}3\) and then fluctuate
+near zero. Standardised and raw kurt agree line-for-line, so the
+propagation \(s_k^2\) is not over-scaling --- the trend is real.
+But the bootstrap CIs at \(h = 2,3,4,6\) all straddle \(1.0\); only
+at \(h \geq 8\) do the CIs cleanly exclude moderate heavy-tailedness.
+The kurt-decay pattern is weekday-driven (weekday \(h{=}1\to h{=}3\):
+\(10.20\to 1.14\), monotone); on the smaller-\(n\) day-types it is
+unmeasured. The \(h\)-step property here is a property of \(\Pi_1^h\)
+under the current one-step estimator, not of a directly-fit
 \((C_j^{(h)}, \Sigma_j^{(h)})\) --- whether direct h-step fitting
-preserves the property is \emph{plausible by the same compositional
-reasoning} but unmeasured; \emph{(ii)}~a designed multi-horizon
-estimator with a per-horizon non-Gaussianity gate is needed to
-confirm the pattern survives a full re-estimation.
+preserves the property is plausible by the same compositional
+reasoning but unmeasured.
+
+\textbf{Verdict: OPEN, responsive (with hedged magnitude).} Closing
+condition: a multi-horizon estimator with per-horizon
+\((C_j^{(h)}, \Sigma_j^{(h)})\) and a per-horizon non-Gaussianity
+gate; verify direct-h fitting preserves the compositional property.
 
 \paragraph{Stage-1 table.}
 \begin{center}\small
-\begin{tabular}{p{0.20\linewidth} p{0.34\linewidth} p{0.36\linewidth}}
+\begin{tabular}{P{0.20\linewidth} P{0.34\linewidth} P{0.36\linewidth}}
 \toprule
 Qualifier & Stage-1 verdict & Closing condition \\
 \midrule
 Register
 & OPEN, responsive (estimand changes: \(\kappa_{Q,\mathrm{new}} \neq \kappa_{Q,\mathrm{old}}\))
-& Designed state-augmentation experiment (derivative / phase /
-exogenous), reporting kurt + \(M_1/M_2\) + \S4.2-ranking under
-\(\kappa_{Q,\mathrm{new}}\) \\
+& Designed state-augmentation experiment, reporting kurt + \(M_1/M_2\)
++ \S4.2-ranking under \(\kappa_{Q,\mathrm{new}}\) \\
 \midrule
 Imposed Gaussianity
-& FORECLOSED-AT-STAGE (by partition: kernel-form change is
-deferred to Stage~2; within Stage 1 the only route is via Register)
-& Stage 2 (substantive verdict on relaxing the local kernel) \\
+& FORECLOSED-AT-STAGE (kernel-form change deferred to Stage~2)
+& Stage 2 substantive verdict \\
 \midrule
 Single step
 & OPEN, responsive with hedged magnitude (trend
 \(\mathrm{kurt}(h){\downarrow}\) is real and weekday-driven; CIs
-clean at \(h{\geq}8\), uncertain at \(h = 3\)--\(6\); the property
-is measured under composition of the current one-step estimator,
-not under direct h-step fitting)
-& Multi-horizon estimator with separate
-\((C_j^{(h)}, \Sigma_j^{(h)})\) per \(h\), with a per-horizon
-non-Gaussianity gate; verify direct-h fitting preserves the
-compositional property \\
+clean at \(h{\geq}8\), uncertain at \(h = 3\)--\(6\))
+& Multi-horizon estimator with per-horizon non-Gaussianity gate;
+verify direct-h fitting preserves the compositional property \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\paragraph{Stage-1 conclusion.} All three qualifiers hold definite
-verdicts; the exit condition is met. Two qualifiers opened with
-responsive levers --- Register cleanly (state augmentation is
-framework-permitted; the §6 lever) and Single step with hedged
-magnitude (the kurt-decay trend is real and CI-clean at long
-horizons; medium-horizon magnitude is uncertain and direct-h fitting
-remains unmeasured). Imposed Gaussianity is foreclosed at this stage
-by the partition's class restriction; Stage 2 is designed to give it
-the substantive verdict on relaxing the kernel form. The locked exit
-rule requires Stage 2 to run regardless of how many levers Stage 1
-already identified.
+All three qualifiers hold definite verdicts; exit condition met.
+Register opens cleanly (state augmentation), Single step opens with
+hedged magnitude; Imposed Gaussianity is foreclosed-at-stage by the
+partition. Stage 2 must run regardless.
 
 \section{Stage 2 --- \(\kQ\) plus named extensions}
 \label{sec:stage2}
 
 \paragraph{Licensing.} Stage 2 relaxes the partition: the estimator
 class may now change. A relaxation is open if it lives inside the
-\emph{law-agnostic content of \(\kQ\)} --- the Rokhlin conditional
+law-agnostic content of \(\kQ\) --- the Rokhlin conditional
 distribution is whatever \(Q\) discloses; Gaussianity was an
 estimator-side imposition. Replacing the Gaussian local kernel with
-a parametric heavy-tailed local kernel (e.g.\ local Student-\(t\) with
-estimated \(\nu\)) or a local non-parametric kernel (KDE / empirical
-CDF of local residuals) is an extension of the estimator, not of
-\(\kQ\). The framework permits this directly. \(\{\Pi_t\}\), the
-disclosure register, and the state-side conditioning are unchanged
-from Stage 1; what varies is the parametric form of the local
-predictive law.
+a parametric heavy-tailed form (e.g.\ local Student-\(t\) with
+estimated \(\nu\)) or a local non-parametric kernel is an extension
+of the estimator, not of \(\kQ\). The framework permits this
+directly.
 
-\paragraph{Imposed Gaussianity at Stage 2 --- the qualifier the
-stage is designed for.} Three concrete relaxations sit inside the
+\paragraph{Imposed Gaussianity at Stage 2 --- the stage's
+load-bearing qualifier.} Three concrete relaxations sit inside the
 stage's licensing:
 \begin{enumerate}[leftmargin=2em]
   \item \emph{Local Student-\(t\)} with anchor-level \(\nuhat_j\).
   Fit \((\Cj, \Sj)\) as now; replace the Gaussian predictive
-  likelihood with Student-\(t(\nuhat_j,\; x\Cj,\; \Sj)\). The shape
-  of the data already supports the right parametric choice ---
+  likelihood with Student-\(t(\nuhat_j,\; x\Cj,\; \Sj)\). The
   rebaseline kurt \(\approx 24\)--\(33\) is exactly the regime where
-  a Student-\(t\) tail with low \(\nu\) (around \(4\)--\(5\)) is the
+  a Student-\(t\) with low \(\nu\) (around \(4\)--\(5\)) is the
   canonical fit. The existing error-decomposition memo
-  (\texttt{run\_error\_decomposition.py} line 353) already uses the
+  (\texttt{run\_error\_decomposition.py}) already uses the
   method-of-moments \(\nuhat = 6/\kappa + 4\) construction; \(M_2\)
-  reports the relative-loss reduction \(dB \approx 2.3\%\), CI
-  overlaps the drift counterfactual but is non-zero. The framework
-  evidence is in hand; the gating evidence is partial.
+  reports relative-loss reduction \(dB \approx 2.3\%\) (CI overlaps
+  the drift counterfactual but is non-zero).
   \item \emph{Local non-parametric kernel.} Use the empirical
-  distribution of the local residuals (KDE for densities; empirical
-  CDF for intervals) as the predictive law directly. Maximal
-  flexibility, no parametric assumption on the conditional law. Cost:
-  a residual-KDE bandwidth that \emph{cannot} be selected by
-  prediction-error CV (\#41 RESOLVED bars this), so a plug-in
-  selector (Silverman, scaled-MAD) is mandatory; and predictive
-  moments do not compose cleanly through the rank-1 \(J\) for
-  multi-step propagation, so multi-step would require either
-  bootstrap-resample propagation or a parametric proxy for the
-  recursion.
+  distribution of local residuals as the predictive law. Maximal
+  flexibility; cost: a KDE bandwidth that cannot be CV-selected
+  (\#41 bars it), and predictive moments do not compose cleanly
+  through the rank-1 \(J\) for multi-step propagation.
   \item \emph{Mixture locals} --- per-anchor finite Gaussian
-  mixture. Captures bi-modal local conditional laws if the dynamics
-  flips between regimes (the \(j\)-th anchor's neighbourhood contains
-  examples from two distinct local linearisations). Framework-
-  consistent. Cost: per-anchor mixture-component count and weight
+  mixture. Framework-consistent; cost: component-count and weight
   selection, same \#41 caveat.
 \end{enumerate}
-All three are framework-permitted; relaxation~1 has the most
-existing evidence (the rebaseline kurt directly supports a low-\(\nu\)
-Student-\(t\); the \(\nuhat\) machinery is already implemented; the
-\(M_2\) sub-result is non-zero), is the cheapest to implement (drop-in
-likelihood swap), and propagates through the multi-step recursion
-without leaving closed-form analytics. \textbf{Verdict: OPEN,
-responsive.} Closing condition: a designed local-\(t\) estimator
-with a non-CV \(\nu\)-selection rule (per-anchor method-of-moments
-\(\nuhat_j\), or a global \(\hat\nu\) from the pooled standardised
-residual), a \#41-safe gate (no prediction-error CV in the selection
-loop), and a re-measurement of \(M_1/M_2\) with the new likelihood to
-see whether the diffusion-deficiency contribution \(dB\) clears
-\(\tau_{\min}\).
+Relaxation~1 has the most existing evidence, is the cheapest to
+implement (drop-in likelihood swap), and propagates cleanly.
+\textbf{Verdict: OPEN, responsive.} Closing condition: a local-\(t\)
+estimator with non-CV \(\nu\)-selection (per-anchor
+method-of-moments \(\nuhat_j\), or a global pooled \(\hat\nu\)) and
+re-measurement of \(M_1/M_2\).
 
-\paragraph{Register at Stage 2.} The estimator-class relaxation is
-orthogonal to the state choice. Stage 2 leaves Register's Stage-1
-verdict intact (OPEN, responsive, estimand changes). But the
-estimator-class licensing opens a \emph{combined} lever: state
-augmentation + non-Gaussian local kernel. State augmentation
-(richer embedding) reduces the conditional-law non-Gaussianity by
-exposing the latent variable that was driving it; the non-Gaussian
-local kernel handles whatever residual heavy-tailedness state
-augmentation does not kill. Framework-consistency: both moves are
-independent dimensions of the Stage-2 licensing (one varies the
-\((Q, F)\) coarsening, the other varies the parametric form of the
-local law); their composition is permitted. \textbf{Verdict: OPEN,
-responsive (unchanged from Stage 1); combined lever now also open
-as the richest Stage-2 design.}
+\paragraph{Register at Stage 2.} Estimator-class relaxation is
+orthogonal to state choice; Stage 1's Register verdict is intact.
+The new licensing additionally opens a \emph{combined} lever: state
+augmentation + non-Gaussian local kernel. \textbf{Verdict: OPEN,
+responsive (combined lever now also open).}
 
-\paragraph{Single step at Stage 2.} Stage 1 found OPEN, responsive
-with hedged magnitude. Stage 2's relaxation could in principle
-refine this in two ways: (i)~direct-h fitting with a non-Gaussian
-local kernel at each horizon; (ii)~hybrid --- direct-h fitting at
-short horizons where the per-step kurt is high (\(h = 1, 2\)) with
-local-\(t\), then composition with Gaussian local kernels at long
+\paragraph{Single step at Stage 2.} Two refinements over Stage 1:
+(i)~direct-h fitting with a non-Gaussian local kernel at each
+horizon; (ii)~hybrid --- direct-h with local-\(t\) at short horizons
+where per-step kurt is high, composition with Gaussian at long
 horizons where the cached kurt-decay says Gaussian is approximately
-adequate. The cached kurt evidence is sufficient \emph{shape}-wise
-to motivate the hybrid design but not magnitude-wise to declare it
-adequate at \(h = 3\)--\(6\) (the CIs straddle 1.0). A theoretical
-caveat: composition of Student-\(t\) local kernels does not in
-general yield a Student-\(t\) marginal; the moment behaviour of the
-composed law is qualitatively different from the per-step law and
-must be measured rather than assumed. \textbf{Verdict: OPEN,
-responsive (unchanged from Stage 1; the hybrid design is now also
-open).} Closing condition adds: per-horizon residual non-Gaussianity
-measurement \emph{under} the relaxed kernel (not just the current
-Gaussian's composed residuals).
+adequate. Theoretical caveat: composition of Student-\(t\) local
+kernels does not in general yield Student-\(t\) marginals; the
+composed law's moment behaviour must be measured, not assumed.
+\textbf{Verdict: OPEN, responsive (hybrid design now also open).}
 
 \paragraph{Stage-2 table.}
 \begin{center}\small
-\begin{tabular}{p{0.20\linewidth} p{0.34\linewidth} p{0.36\linewidth}}
+\begin{tabular}{P{0.20\linewidth} P{0.34\linewidth} P{0.36\linewidth}}
 \toprule
 Qualifier & Stage-2 verdict & Closing condition \\
 \midrule
 Register
-& OPEN, responsive (unchanged from Stage 1); combined lever
-\emph{state augmentation + non-Gaussian kernel} additionally open
-& Designed state-augmentation experiment; optionally combined with
-a local-\(t\) likelihood under the augmented state \\
+& OPEN, responsive; combined lever \emph{state augmentation +
+non-Gaussian kernel} additionally open
+& Designed state-augmentation experiment, optionally combined with
+a local-\(t\) likelihood \\
 \midrule
 Imposed Gaussianity
-& OPEN, responsive (the stage's load-bearing finding): local
-Student-\(t\), local non-parametric, and mixture locals are all
-framework-permitted; rebaseline kurt directly supports the
-Student-\(t\) shape with \(\nu \approx 4\)--\(5\); the
-\texttt{run\_error\_decomposition.py} \(M_2\) machinery already
-implements \(\nuhat\) and gives a partial gating signal
-(\(dB \approx 2.3\%\), CI overlaps the drift counterfactual but
-non-zero)
-& Local-\(t\) estimator with non-CV \(\nuhat\) selection
-(method-of-moments per-anchor or pooled-residual global) and a
-\#41-safe gate; re-measure \(M_1/M_2\) under the new likelihood \\
+& OPEN, responsive (stage's load-bearing finding): local
+Student-\(t\), local non-parametric, mixture locals all
+framework-permitted; \(\nuhat\) machinery already implemented;
+\(dB \approx 2.3\%\) partial gating signal in hand
+& Local-\(t\) estimator with non-CV \(\nuhat\) selection,
+\#41-safe; re-measure \(M_1/M_2\) under the new likelihood \\
 \midrule
 Single step
-& OPEN, responsive (unchanged from Stage 1); hybrid design
-(direct-h with local-\(t\) at \(h = 1, 2\); composition with
-Gaussian at \(h \geq 8\); medium-horizon strategy TBD by
-measurement) additionally open
-& As Stage 1, plus per-horizon residual non-Gaussianity
-measurement \emph{under} the relaxed kernel \\
+& OPEN, responsive; hybrid design additionally open
+& As Stage 1, plus per-horizon non-Gaussianity measurement
+\emph{under} the relaxed kernel \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\paragraph{Stage-2 conclusion.} All three qualifiers hold definite
-verdicts; the exit condition is met. The substantive (non-partition-
-induced) verdict on Imposed Gaussianity is OPEN, responsive --- the
-framework's law-agnostic content directly permits the kernel-form
-relaxations the paper's heavy-tail finding calls for, and the most
-practical of them (local Student-\(t\)) already has partial
-implementation and a non-zero gating signal. With Stage 2 settled,
-the memo's primary question is answered: \emph{the \(\kQ\) framework
-permits at least three substantively-distinct levers}
-(state augmentation; direct-h fitting with appropriate per-horizon
-kernel choice; local kernel-form relaxation), and a combined design
-across two or more axes. Stage 3 would be needed only if Stage 2
-had foreclosed everything; it has not.
+The substantive (non-partition-induced) verdict on Imposed
+Gaussianity is OPEN, responsive: the framework's law-agnostic
+content directly permits the kernel-form relaxations the heavy-tail
+finding calls for, and the most practical of them (local
+Student-\(t\)) already has partial implementation and a non-zero
+gating signal. The memo's primary question is answered: the \(\kQ\)
+framework permits at least three substantively-distinct levers
+(state augmentation; per-horizon direct fitting; local kernel-form
+relaxation) and their combinations.
 
-\section{Stage 3 --- Any Markov-semigroup-coherent estimator
-(not load-bearing)}
+\section{Stage 3 --- Markov-semigroup generalisations (not load-bearing)}
 \label{sec:stage3}
 
-\paragraph{Status.} Stages 1 and 2 each identified responsive levers
-open within their licensing. The locked exit rule requires every
-stage to deliver three definite verdicts before the next stage can
-run, and Stage 2 has done so. \emph{Stage 3 is not load-bearing for
-the memo's primary question}: ``Can the \(\kQ\) framework
-accommodate the coupling?'' is settled in the affirmative at Stage 2.
-The remainder of this section is included only to make the
-exhaustion structurally complete; it is short by design.
+Stage 2 settled the primary question affirmatively, so Stage 3 is
+included only for structural completeness. Dropping the \(\kQ\)
+register opens additional classes (generator-based parametrisations;
+latent-variable augmentations outside the original \((Q, F)\) pair;
+operator-learning approaches that parametrise \(\{\Pi_t\}\)
+jointly). All three qualifiers remain OPEN by inheritance from
+Stages 1--2; the additional Stage-3 levers depart from the disclosure
+register and incur framework cost for benefits the Stage-1/Stage-2
+levers already deliver. \textbf{Not preferred over Stages 1--2.}
 
-\paragraph{Licensing.} The \(\kQ\) register is dropped. A relaxation
-is open at this stage if it sits inside any class of estimators
-coherent with general Markov-semigroup theory, including ones that
-change the operator class (e.g.\ generator-based parametrisations;
-non-Markovian state-space with auxiliary latent variables; deep
-operator-learning).
+\section{Framework synthesis: design options}
+\label{sec:framework-synthesis}
 
-\paragraph{Stage-3 verdicts (summary).} All three qualifiers remain
-OPEN at this stage by inheritance --- anything permitted at Stages 1
-or 2 is permitted here. Additional levers Stage 3 \emph{adds}:
-operator-learning approaches that parametrise \(\{\Pi_t\}\) jointly
-rather than per-horizon (these change the modelling target away from
-the Rokhlin disclosure register, so they sit outside the paper's
-register; they are framework-coherent in the general
-Markov-semigroup sense but not \(\kQ\)-faithful); latent-variable
-augmentations that the original \((Q, F)\) pair does not contain.
-These are not preferred over the Stage-1/Stage-2 levers because they
-incur framework cost (departing from the disclosure register) for
-benefits that the Stage-1/Stage-2 levers already deliver.
-
-\paragraph{Stage-3 table (brief).}
-\begin{center}\small
-\begin{tabular}{p{0.20\linewidth} p{0.34\linewidth} p{0.36\linewidth}}
-\toprule
-Qualifier & Stage-3 verdict & Note \\
-\midrule
-Register & OPEN (inherits Stage 1/2; Stage 3 adds latent-variable
-augmentations outside \((Q, F)\))
-& Not preferred over Stage 1; same lever at higher framework cost \\
-\midrule
-Imposed Gaussianity & OPEN (inherits Stage 2; Stage 3 adds
-operator-learning likelihoods)
-& Not preferred over Stage 2; same lever at higher framework cost \\
-\midrule
-Single step & OPEN (inherits Stage 1/2; Stage 3 adds joint
-parametrisation of \(\{\Pi_t\}\))
-& Outside the disclosure register \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\section{Synthesis and outcome}
-\label{sec:synthesis}
-
-\paragraph{Outcome shape.} Both Stage 1 and Stage 2 identified
-responsive levers; Stage 3 inherits all of them at higher framework
-cost. The memo's primary question is answered: \textbf{the \(\kQ\)
-framework permits accommodation of the heavy-tail / forecast-accuracy
-coupling}, via at least three substantively-distinct levers and
-their combinations. The natural generality of the framework holds:
-no foreclosure is required, the answer is constructive rather than
-``no method can exist.''
-
-\paragraph{Options inventory.} Four design options sit inside the
-union of Stages 1 and 2; each is framework-consistent. The table
-records framework cost (which qualifier(s) the option relaxes;
-whether the estimand changes; whether the disclosure register is
-preserved), implementation cost, evidence in hand, and the
-\#41-bite risk (whether the option introduces a hyperparameter that
-prediction-error CV cannot select).
+The exhaustion identifies four framework-consistent design options
+sitting inside the union of Stages 1 and 2. Each is recorded with
+framework cost (which qualifier(s) it relaxes; whether the estimand
+changes), implementation cost, evidence in hand, and the \#41-bite
+risk (whether a hyperparameter must be selected without
+prediction-error CV).
 
 \begin{center}\small
-\begin{tabular}{p{0.18\linewidth} p{0.22\linewidth} p{0.18\linewidth} p{0.17\linewidth} p{0.13\linewidth}}
+\begin{tabular}{P{0.10\linewidth} P{0.22\linewidth} P{0.20\linewidth} P{0.20\linewidth} P{0.11\linewidth}}
 \toprule
 Option & Mechanism & Framework cost & Evidence in hand & \#41 risk \\
 \midrule
 \textbf{S} (state)
 & Augment embedding with derivative, phase, or exogenous covariate;
 keep local-linear-Gaussian estimator
-& Stage 1; estimand changes (new \(\kappa_{Q,\mathrm{new}}\));
-disclosure register preserved
-& \S6 of the paper names it; no direct experiment yet
-& Low (state choice is structural, not CV-selected) \\
+& Stage 1; estimand changes; register preserved
+& \S6 of paper names it; no direct experiment yet
+& Low \\
 \midrule
 \textbf{H} (horizon)
 & Fit \((C_j^{(h)}, \Sigma_j^{(h)})\) per horizon; keep Gaussian
 local kernel
-& Stage 1; estimand unchanged; disclosure register preserved
+& Stage 1; estimand unchanged; register preserved
 & kurt\((h)\) cache: trend present, CIs clean at \(h{\geq}8\),
-uncertain at \(h{=}3\)--\(6\); under composition of current
-estimator only
-& Low (no new hyperparameter) \\
+uncertain at \(h{=}3\)--\(6\)
+& Low \\
 \midrule
 \textbf{K} (kernel)
 & Replace Gaussian local likelihood with Student-\(t(\nuhat_j)\);
 keep state and \(\Pi_1\)
-& Stage 2; estimand unchanged; disclosure register preserved
+& Stage 2; estimand unchanged; register preserved
 & Rebaseline kurt directly supports the shape; \(\nuhat\) machinery
-already implemented; \(M_2\)'s \(dB \approx 2.3\%\) (CI overlaps,
-non-zero)
-& Medium (\(\nu\) selection must be non-CV: per-anchor
-method-of-moments or pooled-residual global) \\
+implemented; \(M_2\)'s \(dB \approx 2.3\%\) (CI overlaps, non-zero)
+& Medium (\(\nu\) selection must be non-CV) \\
 \midrule
 \textbf{S+K} (combined)
 & State augmentation + non-Gaussian local kernel
-& Stages 1 and 2; estimand changes; disclosure register preserved
+& Stages 1 and 2; estimand changes; register preserved
 & Inherits S and K
-& Medium (inherits K's selection rule) \\
+& Medium (inherits K) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-\paragraph{Recommendation block.} The performance-comparison plan
-the user has asked for naturally falls out of this inventory. A
-sensible ordering:
+\paragraph{Comparison ordering.} Option K was implemented first as
+the cheapest move (drop-in likelihood swap; no new pipeline, state,
+or propagation), with the strongest existing evidence
+(rebaseline kurt + \(\nuhat\) + non-zero \(dB\)), isolating the
+kernel-form lever. S followed as the structural-lever comparator
+(adding a derivative coordinate is the simplest state-augmentation).
+H is informative but lower-priority once K is in hand. S+K is the
+upper-bound design; running it before S and K individual signals
+were available would have repeated the \S4.2 disambiguation trap.
+Each option introduces at most one hyperparameter and lives inside
+the existing pipeline; selection rules must be plug-in
+(method-of-moments, Silverman, scaled-MAD) or structural, never
+prediction-error CV. \S\S\,\ref{sec:option-k-result}--\ref{sec:option-s-result}
+report the empirical landings.
 
-\begin{enumerate}[leftmargin=2em]
-  \item \textbf{Implement Option K first} as a head-to-head against
-  the current Gaussian estimator on the same dev set. It is the
-  cheapest move (drop-in likelihood swap; no new pipeline, no new
-  state, no new propagation), has the strongest existing evidence
-  (rebaseline kurt + \(\nuhat\) + non-zero \(dB\)), and isolates the
-  kernel-form lever. The discriminating measurement is \(M_1/M_2\)
-  under the new likelihood plus log-score and interval coverage on
-  the dev set. \#41-safe \(\nu\) selection: per-anchor
-  method-of-moments \(\nuhat_j = 6/\hat{\kappa}_j + 4\) (already
-  implemented; constant per anchor; not CV-selected) or pooled-
-  residual global \(\hat\nu\).
-  \item \textbf{Implement Option S as the structural-lever
-  comparator.} The \S6 lever is named but unmeasured. Adding a
-  derivative coordinate to the embedding (the simplest of the three
-  state-augmentations) gives the strongest discriminating signal
-  against K --- if S alone reduces the kurt to \(K\)-level adequacy,
-  the kernel-form lever may be unnecessary; if S only reduces it
-  partially, S+K is the natural design.
-  \item \textbf{Option H is informative but lower-priority.}
-  Per-horizon refitting is most useful if the K head-to-head is
-  inconclusive and the cached kurt-decay is the load-bearing
-  signal. Defer pending the K result.
-  \item \textbf{Option S+K is the upper-bound design.} Not run until
-  S and K individual signals are in hand --- combined experiments
-  with two confounded mechanisms repeat the \S4.2 disambiguation
-  trap.
-\end{enumerate}
-
-\paragraph{Common requirements for any of the above.} Each option
-above introduces (at most) one hyperparameter and lives inside the
-existing pipeline; none requires a new validation-gate architecture.
-\#41-class CV-selection is foreclosed for all of them and the
-selection rule must be plug-in (method-of-moments, Silverman, scaled-
-MAD) or structural (state choice). Frozen-spec implications: any
-option that changes the estimator class is a new frozen spec; the
-existing spec is the Gaussian-\(\Pi_1\) baseline. The empirical fork --- S
-vs.\ K vs.\ S+K --- is precisely the kind of comparison the user has
-asked for, run head-to-head against the existing frozen spec.
-
-\section{Empirical landing: Option K result}
+\section{Empirical landing: Option K (Student-\(t\) local kernel)}
 \label{sec:option-k-result}
 
-\paragraph{Protocol as run.} Per the \S5 recommendation, Option K
-was implemented first. The design choices fixed before the run:
-per-day-type \(\nuhat\) via method-of-moments
-(\(\nuhat = \max(4.5, 6/\kappa + 4)\); \#41-safe; no
-prediction-error CV); leave-one-day-out gate (fit \(\nuhat\) on
-\(131\) days, score on the held-out day, rotate); all horizons via
-Monte-Carlo composition (\(N_{\mathrm{MC}} = 500\)) through the
-augmented \((J, \Sigma)\) propagation. Pre-flight: an MC-vs-analytic
-variance sanity check confirmed the propagation convention matches
-the gate-validated \texttt{propagate\_predictive\_cov} at
-\(h \in \{1, 6, 12, 24\}\) within Monte-Carlo noise. The load-bearing
-horizon \(h = 1\) used closed-form Gaussian and Student-\(t\)
-densities (closed-form being more accurate than KDE at the tails,
-which is where the kernel-form difference lives).
+\paragraph{Protocol as run.} Per-day-type \(\nuhat\) via
+method-of-moments (\(\nuhat = \max(4.5, 6/\kappa + 4)\); \#41-safe);
+leave-one-day-out gate (fit \(\nuhat\) on \(131\) days, score on the
+held-out day, rotate); all horizons via Monte-Carlo composition
+(\(N_{\mathrm{MC}} = 500\)) through the augmented
+\((J, \Sigma)\) propagation. Pre-flight: an MC-vs-analytic variance
+sanity check confirmed the propagation convention matches the
+gate-validated \texttt{propagate\_predictive\_cov} at
+\(h \in \{1, 6, 12, 24\}\) within Monte-Carlo noise. The
+load-bearing horizon \(h = 1\) used closed-form Gaussian and
+Student-\(t\) densities.
 
-\paragraph{Pooled headline (single-number verdict).}
+\paragraph{Pre-registered reading conventions.} The relative-loss
+bar \(\tau_{\min} = 0.01\) is read two ways: \emph{lenient} (point
+estimate \(> \tau_{\min}\) and CI excludes zero --- the original
+\texttt{run\_error\_decomposition.py} pre-registration);
+\emph{strict} (CI lower bound \(> \tau_{\min}\)). Both readings
+appear below; the lenient bar is the operative pre-reg.
+
+\paragraph{Pooled headline.}
 \begin{center}\small
-\begin{tabular}{l r r r}
+\begin{tabular}{P{0.35\linewidth} r r P{0.20\linewidth}}
 \toprule
-Quantity & Point & 95\% CI (day-bootstrap) & vs.\ \(\tau_{\min} = 0.01\) \\
+Quantity & Point & 95\% CI & vs.\ \(\tau_{\min}\) \\
 \midrule
-Pooled \(dB\) (full data)   & \(0.0238\) & \([0.0071,\ 0.0414]\) & lenient PASS / strict fail \\
-Pooled \(dB\) (\(\setminus\) \(2021\text{-}12\text{-}01\))
-                            & \(0.0177\) & \([0.0043,\ 0.0306]\) & lenient PASS / strict fail \\
+Pooled \(dB\) (full data)
+  & \(0.0238\) & \([0.0071,\ 0.0414]\) & lenient PASS / strict fail \\
+Pooled \(dB\) (excl.\ \(2021\text{-}12\text{-}01\))
+  & \(0.0177\) & \([0.0043,\ 0.0306]\) & lenient PASS / strict fail \\
 Original \texttt{M2} \(dB\) (in-sample, pooled-global \(\nu\))
-                            & \(\approx 0.023\) & non-zero (overlaps \(M_1\)) & lenient PASS \\
+  & \(\approx 0.023\) & non-zero (overlaps \(M_1\)) & lenient PASS \\
 \bottomrule
 \end{tabular}
 \end{center}
-The LOO + per-day-type + closed-form-at-\(h{=}1\) tightening did not
-materially change the magnitude from the original error-decomposition
-\(M_2\): \(dB \approx 2.4\%\) versus \(\approx 2.3\%\). Two
-interpretations of the pre-registered bar:
-\emph{lenient} (point estimate \(>\tau_{\min}\) AND CI excludes zero) ---
-\textbf{PASS}; \emph{strict} (CI lower bound \(>\tau_{\min}\)) ---
-\textbf{fail} (CI lower bound \(0.71\%\) is below the \(1\%\) bar).
+The LOO + per-day-type + closed-form-at-\(h{=}1\) tightening did
+not materially change the magnitude from the original \(M_2\):
+\(\approx 2.4\%\) vs.\ \(\approx 2.3\%\).
 
 \paragraph{Per-horizon detail.} Under the strict per-horizon
 interpretation, only \(h = 3\) and \(h = 4\) cleanly clear
-\(\tau_{\min}\); under the lenient bar, \(h \in \{3, 4, 8, 9\}\) add
-that their CIs exclude zero with point estimate above \(\tau_{\min}\).
-Routine-day performance (per-day win-rate) is \(56.7\%\) on
-average across horizons --- at the \(132\)-day sample size that is
-\(\approx 1.5\) standard errors above the \(50\%\) null and does not
-on its own constitute a statistical signal.
+\(\tau_{\min}\); under the lenient bar, \(h \in \{3, 4, 8, 9\}\)
+add that their CIs exclude zero with point estimate above
+\(\tau_{\min}\). Routine-day per-day win-rate is \(56.7\%\) on
+average across horizons --- at \(n = 132\) that is \(\approx 1.5\)
+standard errors above the \(50\%\) null and does not on its own
+constitute a statistical signal.
 
-\paragraph{The apparent catastrophic-event channel was a pipeline
-artefact (retraction).} This section initially claimed a prominent
-\(h = 1\) catastrophic-event channel: one day
-(\(2021\text{-}12\text{-}01\)) was a \(\approx 7\sigma\) event under
-the Gaussian one-step law (\(\mathrm{LL}_{\mathrm{Gauss}} = 26.3\)
-nats, \(\mathrm{LL}_{t} = 10.2\); single-day advantage \(16.2\)
-nats), carrying the pooled \(h = 1\) mean \(\Delta\mathrm{LL}\) of
-\(+0.12\) under the Gaussian \(\to\) Student-\(t\) swap. That
-claim is wrong. The mechanism, documented in
-Section~\ref{sec:option-k-seam-audit}, is a separable pipeline
-issue --- a month-boundary climatology lookup discontinuity ---
-not an intrinsic heavy-tail property of the conditional law. Two
-further facts establish the retraction. \emph{(a)}~The \(h = 1\)
-signal does not survive seam exclusion: pooled \(h = 1\)
-\(\Delta\mathrm{LL}\) drops from \(+0.12\) (all days) to \(-0.02\)
-(excl-first-of-month), and \emph{both} day-bootstrap CIs straddle
-zero (all-days CI \([-0.034, +0.388]\); excl-first CI
-\([-0.056, +0.019]\)) --- so the catastrophe-channel claim was not
-statistically supported \emph{even on the contaminated data}.
-\emph{(b)}~The pooled K verdict (over all horizons) is robust:
-\(dB\) drops from \(0.024\) to \(0.018\) under seam exclusion, with
-day-bootstrap CIs excluding zero in both cases (all-days CI
-\([0.007, 0.041]\); excl-first CI \([0.005, 0.031]\)). What Student-\(t\) actually
-provides is a modest mid-horizon improvement
-(Section~\ref{sec:option-k-seam-audit}), not h=1 catastrophe
-insurance.
-
-\paragraph{The mid-horizon signal is what's real.} Per-horizon
-day-bootstrap excluding first-of-month delivery days: \(h = 3\)
-PASS strict (CI \([+0.16, +25.65]\); the dB ratio is degenerate at
-\(h = 3\) because the baseline LL is near zero, but the raw
-\(\Delta\mathrm{LL}\) of \(+0.03\) nats is real), \(h = 4\) PASS
-strict (\(dB = 0.15\); CI \([+0.05, +0.32]\)); \(h = 8, 9\) PASS
-lenient (\(dB \approx 0.02\); CI cleanly above zero); all other
-horizons tied. Pooled excl-first-of-month \(dB = 0.018\) (CI
-\([0.005, 0.031]\)); pooled excl-first-of-month AND excl-\(h = 1\)
-\(dB = 0.018\) (CI \([0.004, 0.031]\)) --- the pooled signal does
-not depend on the \(h = 1\) contribution at all. The improvement is
-concentrated where the kurt-decay analysis (Section~\ref{sec:stage1})
+\paragraph{Mid-horizon signal.} Per-horizon day-bootstrap excluding
+first-of-month delivery days (see \S\ref{sec:option-k-seam-audit}
+for why exclusion is the operative reading): \(h = 3\) PASS strict
+(CI \([+0.16,\ +25.65]\); raw \(\Delta\mathrm{LL} = +0.03\) nats);
+\(h = 4\) PASS strict (\(dB = 0.15\); CI \([+0.05,\ +0.32]\));
+\(h = 8, 9\) PASS lenient (\(dB \approx 0.02\); CI cleanly above
+zero). Pooled excl-first-of-month \(dB = 0.018\) (CI
+\([0.005,\ 0.031]\)); excluding \(h = 1\) additionally leaves the
+pooled signal at \(dB = 0.018\) (CI \([0.004,\ 0.031]\)) --- the
+pooled signal does not depend on the \(h = 1\) contribution. The
+improvement is concentrated where the Stage-1 kurt-decay analysis
 predicted the kernel-form gap to live: mid-horizons (\(h = 3\)--\(9\))
-where the compositional kurt is dropping but not yet near zero.
+where compositional kurt is dropping but not yet near zero.
 
-\paragraph{Reading of Option K's Stage-2 closing condition.} The
-condition was ``re-measure \(M_1/M_2\) under the new likelihood;
-clear \(\tau_{\min}\)''. With seam exclusion as the operative
-measurement (the catastrophe-channel narrative being retracted),
-the answer depends on strictness reading:
-\begin{itemize}[leftmargin=2em]
-  \item Under the lenient reading (\(M_2\)'s original protocol ---
-  ``non-zero, point above \(\tau_{\min}\)''): pooled excl-first-of-month
-  \(dB = 1.8\%\) clears, condition \textbf{met}.
-  \item Under the strict reading (``CI lower bound above
-  \(\tau_{\min}\)''): pooled excl-first-of-month CI lower bound is
-  \(0.5\%\), below the \(1\%\) bar; condition \textbf{not met}.
-\end{itemize}
-The original \texttt{run\_error\_decomposition.py} pre-registered
-rule used the lenient reading. Consistency with that prior reading is
-the load-bearing call. \textbf{Verdict on Option K under the lenient
-pre-reg: PASS}, with the effect size small (\(\approx 1.8\%\)
-relative log-loss reduction) and localised at mid-horizons.
+\paragraph{Retraction --- the apparent \(h = 1\) catastrophe channel
+was a pipeline artefact.} This section originally claimed a prominent
+\(h = 1\) catastrophic-event channel, attributing the pooled signal
+to one day (\(2021\text{-}12\text{-}01\); a \(\approx 7\sigma\) event
+under the Gaussian one-step law; single-day Student-\(t\) advantage
+\(16.2\) nats). The mechanism is in fact a separable pipeline issue
+(a month-boundary climatology lookup discontinuity, documented in
+\S\ref{sec:option-k-seam-audit}), not an intrinsic heavy-tail
+property of the conditional law. Two further facts settle the
+retraction: (a)~the \(h = 1\) signal does not survive seam
+exclusion (pooled \(h = 1\) \(\Delta\mathrm{LL}\) drops from
+\(+0.12\) to \(-0.02\); both CIs straddle zero --- the catastrophe-
+channel claim was not statistically supported \emph{even on the
+contaminated data}); (b)~the pooled K verdict is robust (\(dB\) drops
+from \(0.024\) to \(0.018\) under seam exclusion, CI excludes zero
+in both cases). What Student-\(t\) actually provides is a modest
+mid-horizon improvement, not h=1 catastrophe insurance.
 
-\section{Empirical landing: Option K seam audit}
+\paragraph{Closing-condition reading.} The Stage-2 closing condition
+asked for re-measured \(M_1/M_2\) under the new likelihood, clearing
+\(\tau_{\min}\). With seam exclusion as the operative measurement:
+under the lenient bar, pooled excl-first-of-month \(dB = 1.8\%\)
+clears --- condition \textbf{met}; under the strict bar, CI lower
+bound is \(0.5\%\), below the \(1\%\) bar --- not met. The original
+pre-registration used the lenient reading. \textbf{Verdict on
+Option K: PASS (lenient pre-reg)}, with modest effect size
+(\(\approx 1.8\%\) relative log-loss reduction) localised at
+mid-horizons.
+
+\section{Pipeline finding: the month-boundary climatology seam}
 \label{sec:option-k-seam-audit}
 
-\paragraph{The discovery.} An attempt to extend the dev window from
-\(n = 132\) to \(n = 365\) days (motivated by the wide
-day-bootstrap CIs at \(n = 132\)) surfaced a structural issue in
-the deseasonalisation pipeline. At \(n = 365\) the pooled \(h = 1\)
-standardised-residual kurt rises to \(19.1\); excluding the \(12\)
-first-of-month delivery days (\(3.3\%\) of the sample) drops it to
-\(0.46\). The mechanism, verified by direct inspection of the raw
-demand and \(z\)-series on \(2022\text{-}04\text{-}01\): raw demand
+\paragraph{Discovery.} Extending the dev window from \(n = 132\) to
+\(n = 365\) days surfaced a structural issue in the deseasonalisation
+pipeline. At \(n = 365\) the pooled \(h = 1\) standardised-residual
+kurt rises to \(19.1\); excluding the \(12\) first-of-month
+delivery days (\(3.3\%\) of the sample) drops it to \(0.46\).
+Mechanism, verified on \(2022\text{-}04\text{-}01\): raw demand
 fell normally from \(13\,808\) MW at \(23\):\(00\) on
 \(2022\text{-}03\text{-}31\) to \(13\,534\) MW at \(00\):\(00\) on
 \(2022\text{-}04\text{-}01\) (an unremarkable early-morning trough),
 but the \(z\)-score jumped from \(-0.87\) to \(+0.48\) because
-\(z\) at \(23\):\(00\) uses \((\mu_{\mathrm{Mar},23}, \sigma_{\mathrm{Mar},23})\)
-and \(z\) at \(00\):\(00\) uses
-\((\mu_{\mathrm{Apr},0}, \sigma_{\mathrm{Apr},0})\). The local-linear
-model treats \(z\) as a continuous series and has no machinery for
-this discontinuity; the production estimator handles an analogous
-day-anchor seam at hour \(7\) (\texttt{day\_anchor\_hour} masks
-transitions whose target lands on that hour) but has no analogous
-month-boundary mask.
+\(z\) at \(23\):\(00\) uses
+\((\mu_{\mathrm{Mar},23}, \sigma_{\mathrm{Mar},23})\) and \(z\)
+at \(00\):\(00\) uses \((\mu_{\mathrm{Apr},0}, \sigma_{\mathrm{Apr},0})\).
+The local-linear model treats \(z\) as continuous and has no
+machinery for this discontinuity; the production estimator handles
+an analogous day-anchor seam at hour \(7\)
+(\texttt{day\_anchor\_hour} masks transitions whose target lands on
+that hour) but has no analogous month-boundary mask.
 
-\paragraph{The programme premise is unaffected.} The premise the
-qualifier-exhaustion programme rests on --- the local conditional
-law of the one-step innovation is strongly heavy-tailed (rebaseline
-kurt \(24\)--\(33\)) --- is rebaseline-grade and was the production-path
-diagnostic on which the entire framework analysis was motivated.
-Direct check (\texttt{scratch/check\_rebaseline\_seam.py}, mirroring
-\texttt{processing/innovations/validation/rebaseline.py}'s exact
-machinery, additionally masking transitions whose target falls on
-first-of-month at \(00\):\(00\)):
+\paragraph{The programme premise is unaffected.} The rebaseline
+finding (heavy-tailed one-step conditional, kurt \(24\)--\(33\)) was
+the production-path diagnostic on which the framework analysis is
+built. A direct check
+mirrors\texttt{processing/innovations/}\penalty0\texttt{validation/}\penalty0\texttt{rebaseline.py}
+exactly and additionally masks seam transitions
+(\texttt{scratch/check\_rebaseline\_seam.py}):
 \begin{center}\small
 \begin{tabular}{l r r r r}
 \toprule
@@ -780,9 +570,9 @@ sunday   & \(27.21\) & \(27.72\) & \(-0.51\) & \(0.16\%\) \\
 \end{center}
 Seam-excluded medians are \emph{slightly higher} than the full
 medians; the seam contributes \(\sim 0.15\%\) of each anchor's
-kernel-weighted library and is statistically inconsequential at the
-per-anchor kurt level. The rebaseline finding is robust; the heavy
-tail is a genuine property of \(\kappa_Q\), not a seam artefact.
+library and is statistically inconsequential at the per-anchor kurt
+level. The heavy tail is a genuine property of \(\kappa_Q\), not a
+seam artefact.
 
 \paragraph{The forecast-cache evidence is partially contaminated.}
 The Option K forward iteration cache covers \(n = 132\) days with
@@ -800,54 +590,44 @@ Pooled \(dB\) CI                           & \([0.007, 0.041]\) & \([0.005, 0.03
 \bottomrule
 \end{tabular}
 \end{center}
-The pooled K verdict is robust: under either reading of the
-operative bar (lenient or strict), the conclusion is unchanged at
-the pooled level (lenient PASS under both; strict fail under both).
-The catastrophe-channel narrative at \(h = 1\), which was prominent
-in the initial reading, is the part that does not survive
-exclusion --- and bootstrap CIs straddle zero \emph{with or without}
-the seam day, so the narrative was not statistically supported in
-either case. The pooled \(1.8\%\) lenient-PASS signal localises at
-\(h = 3, 4, 8, 9\) (mid-horizons; per-horizon table above), which
-matches the kurt-decay analysis that motivated Stage-1's
-``approximate Gaussianity at long horizons'' reading.
+The pooled K verdict is robust to seam exclusion (lenient PASS
+either way). The catastrophe-channel narrative at \(h = 1\) is the
+part that does not survive --- and bootstrap CIs straddle zero
+\emph{with or without} the seam day, so the narrative was not
+statistically supported in either case.
 
 \paragraph{Pipeline-level disposition.} The month-boundary seam is
-a known, fixable issue in the deseasonalisation/forecast interface
-(the production pipeline would mask first-of-month \(00\):\(00\)
-targets, analogous to the existing \texttt{day\_anchor\_hour}
-mask). It is documented as a separable concern for the application
-paper's limitations section; it does not change the framework
-verdict and the K result is reported with seam exclusion as the
-operative primary.
+a known, fixable issue (production fix: a target-side mask analogous
+to \texttt{day\_anchor\_hour}). Out of scope for this memo;
+documented as a separable concern for the application paper's
+limitations section. The K result is reported with seam exclusion
+as the operative primary.
 
 \section{Empirical landing: Option S (state augmentation)}
 \label{sec:option-s-result}
 
 \paragraph{Protocol as run.} A first-pass design used a derivative
-coordinate \(\dot z_t = z_t - z_{t-1}\) added to the lag state;
-the advisor flagged --- correctly --- that under a linear WLS fit,
-the derivative lives in the linear span of \((z_t, z_{t-1})\) and
-augmenting with it is mathematically equivalent to enriching the
-lag depth (no discriminating power for the Register lever). The
-revised design uses
+coordinate \(\dot z_t = z_t - z_{t-1}\) added to the lag state, but
+under a linear WLS fit, the derivative lives in the linear span of
+\((z_t, z_{t-1})\) and augmenting with it is mathematically
+equivalent to enriching the lag depth (no discriminating power for
+Register). The revised design uses
 \(\phi_t = \tanh\!\bigl((z_t - z_{t-1}) / s_{\mathrm{dt}}\bigr)\)
 where \(s_{\mathrm{dt}}\) is the dev-set median \(|\dot z|\) per
-day-type --- a nonlinear function of past \(z\) that the linear
-WLS fit cannot recover from raw lags. A confound-control side arm
-(``\textsf{lag}'') uses pure delay coordinates at the same
-augmented dimension \(d + 1\), to check whether any kurt change is
-specifically attributable to the nonlinear coordinate or merely
-to a larger state. Scope is \(h = 1\) (the load-bearing horizon
-for the kernel-form question); multi-step propagation under a
-nonlinear \(\phi_{t+1}\) would require EKF-style linearisation,
-which is deferred.
+day-type --- a nonlinear function of past \(z\) that the linear WLS
+fit cannot recover from raw lags. A confound-control side arm
+(\textsf{lag}) uses pure delay coordinates at the same augmented
+dimension \(d + 1\) to check whether any kurt change is specifically
+attributable to the nonlinear coordinate or merely to a larger state.
+Scope: \(h = 1\) (the load-bearing horizon for the kernel-form
+question); multi-step propagation under nonlinear \(\phi_{t+1}\)
+would require EKF-style linearisation and is deferred.
 
-\paragraph{Pooled and per-day-type residual kurt.}
+\paragraph{Residual kurt by arm.}
 \begin{center}\small
 \begin{tabular}{l r r r}
 \toprule
-arm & pooled kurt & weekday kurt (\(n \approx 95\)) & saturday/sunday (\(n = 19\) each, qualitative) \\
+arm & pooled & weekday (\(n{\approx}95\)) & sat/sun (\(n{=}19\), qual.) \\
 \midrule
 baseline (cache, \(d\) per elbow) & \(8.60\) & \(10.24\) & \(1.50\) / \(2.72\) \\
 \textsf{phi} (lag + \(\phi_t\), \(d+1\)) & \(9.77\) & \(8.55\) & \(3.29\) / \(8.59\) \\
@@ -857,31 +637,31 @@ baseline (cache, \(d\) per elbow) & \(8.60\) & \(10.24\) & \(1.50\) / \(2.72\) \
 \end{center}
 Pooled-kurt CIs are wide (\(\approx [1, 15]\)) and overlap across
 arms. Weekday point estimates suggest a small (\(\approx 1.5\)-unit)
-reduction under both \textsf{phi} and \textsf{lag}, but the
-bootstrap noise is large relative to the difference. \textsf{phi}
-and \textsf{lag} agree to within \(0.5\) units everywhere --- the
+reduction under both \textsf{phi} and \textsf{lag}, but bootstrap
+noise is large relative to the difference. \textsf{phi} and
+\textsf{lag} agree to within \(0.5\) units everywhere --- the
 nonlinear \(\phi\) coordinate is not contributing distinguishable
 work beyond what bigger state alone delivers.
 
 \textbf{Verdict on the kurt gate: S-iii.} The residual kurt is
 statistically unchanged by either augmentation. The heavy-tail
-property of the per-step conditional law is not removable by
-state augmentation within this family at this measurement resolution.
+property of the per-step conditional law is not removable by state
+augmentation within this family at this measurement resolution.
 
-\paragraph{The apparent \(dB(K | S)\) drop was seam-driven
-(retraction).} A first reading of the S experiment observed that
-pooled \(dB(K)\) under the \textsf{phi}-augmented state dropped
-\(16\times\) (\(4.56\%\) baseline \(\to 0.28\%\) phi), and proposed
-a mechanism (the augmented WLS produces \(\sigma_{00} \approx 2\times\)
-baseline, which deflates the catastrophe day's \(z_{\mathrm{std}}\)
-from \(-7.4\) to \(-5.3\)). Both observations were factually
-correct, but the seam audit changes their interpretation:
+\paragraph{Retraction --- the \(dB(K | S)\) drop was seam-driven.}
+A first reading observed that pooled \(dB(K)\) under the
+\textsf{phi}-augmented state dropped \(16\times\) (\(4.56\%\)
+baseline \(\to 0.28\%\) phi), and proposed a mechanism: the augmented
+WLS produces \(\sigma_{00} \approx 2\times\) baseline, which deflates
+the catastrophe day's \(z_{\mathrm{std}}\) from \(-7.4\) to
+\(-5.3\). Both observations were factually correct; the seam audit
+changes their interpretation:
 \begin{center}\small
 \begin{tabular}{l r r r}
 \toprule
 arm & all-days \(dB\) & excl-first-of-month \(dB\) & excl-first \(dB\) CI \\
 \midrule
-baseline & \(+4.56\)  & \(-0.008\) & \([-0.066, +0.045]\) \\
+baseline    & \(+4.56\)  & \(-0.008\) & \([-0.066, +0.045]\) \\
 \textsf{phi} & \(+0.28\) & \(+0.028\) & \([-0.003, +0.052]\) \\
 \textsf{lag} & \(+0.31\) & \(+0.026\) & \([-0.009, +0.051]\) \\
 \bottomrule
@@ -889,152 +669,49 @@ baseline & \(+4.56\)  & \(-0.008\) & \([-0.066, +0.045]\) \\
 \end{center}
 The \(16\times\) drop \emph{dissolves} under seam exclusion. On
 routine days, all three arms have \(dB \in [-0.008, +0.028]\) with
-CIs straddling zero. \(\sigma_{00}\) median is \(0.0154\) for
+CIs straddling zero. The \(\sigma_{00}\) median is \(0.0154\) for
 baseline and \(\approx 0.0287\) for both augmented arms ---
 \emph{uniform} across all anchors, not concentrated at seam-near
-ones. The original mechanistic story (``\(\sigma\)-inflation tames
-catastrophe events'') is therefore \textbf{retracted}: the
-\(\sigma\)-doubling is a global property of the higher-dim WLS fit,
-not a seam-responsive property, and its observable consequence on
-\(dB\) was specifically the deflation of seam-event extremes.
+ones. The original mechanistic story
+(``\(\sigma\)-inflation tames catastrophe events'') is therefore
+\textbf{retracted}: the \(\sigma\)-doubling is a global property of
+the higher-dim WLS fit, not a seam-responsive property, and its
+observable consequence on \(dB\) was specifically the deflation of
+seam-event extremes.
 
 \paragraph{Open mechanism question.} The \(\sigma_{00}\) doubling
-under state augmentation is itself unexplained at this scope. Three
-candidate mechanisms are plausible: (i) curse-of-dimensionality on
-the local-residual variance estimate (a sparser local neighbourhood
-gives a higher variance estimate of the residuals); (ii) a genuinely
-worse-on-average WLS fit under augmented state, producing
-genuinely larger residuals; (iii) the LOO-CV bandwidth selection
-responding differently to richer state. Distinguishing them
-requires a designed experiment outside this memo's scope; the open
-question is flagged for follow-up.
-
-\section{Cross-option synthesis}
-\label{sec:synthesis}
-
-\paragraph{Three layers, kept distinct.} The empirical work in
-\S\S\,\ref{sec:option-k-result}--\ref{sec:option-s-result} produces
-findings at three different levels of the question
-``does the \(\kappa_Q\) framework permit a method that accommodates
-the heavy-tail / forecast-accuracy coupling?''. Conflating them
-would misread either the framework verdict or the empirical
-landing.
-
-\paragraph{Layer 1 --- programme: the framework verdict is
-unchanged.} The qualifier-exhaustion analysis in \S\S\,2--5
-identified four framework-consistent design options
-(\textsf{S, H, K, S+K}) under Stages 1 and 2; all are licensed by
-\(\kappa_Q\)'s law-agnostic content. The premise that motivated
-the exhaustion --- a strongly heavy-tailed conditional law
-(rebaseline kurt \(24\)--\(33\)) --- is production-path-validated
-and now additionally verified seam-independent
-(\S\,\ref{sec:option-k-seam-audit}). The framework permits
-accommodation; that conclusion is robust.
-
-\paragraph{Layer 2 --- empirical: per-arm landings on the
-\(n = 132\) dev set, with seam exclusion as primary.}
-\begin{center}\small
-\begin{tabular}{l p{0.45\linewidth} l}
-\toprule
-Option & Empirical landing (excl-first-of-month primary) & Verdict \\
-\midrule
-\textsf{K} (Student-\(t\) local kernel)
-& Pooled \(dB = 1.8\%\), CI \([0.5\%, 3.1\%]\); signal localised
-at \(h = 3, 4, 8, 9\) (mid-horizons); the \(h = 1\)
-catastrophe-channel reading was the seam.
-& Lenient PASS, modest effect. \\
-\midrule
-\textsf{S} (state augmentation, \(\phi_t\) coord or enrich-\(d\))
-& Pooled residual kurt unchanged within bootstrap noise
-(\(\sim 9\)--\(10\) for all arms); \(dB(K | S)\) collapses to
-\([-0.01, +0.03]\) under seam exclusion; \(\phi\) and lag-enriched
-give identical kurt and \(dB\) (the \(\phi\) coord is not
-contributing distinguishable work).
-& S-iii at kurt gate; routine-day advantage seam-driven. \\
-\midrule
-\textsf{S+K} (combined)
-& \(\phi\)\textsf{-t} variant has the best point estimate of
-absolute log-loss (\(-0.31\) nats vs.\ baseline-Gaussian's
-\(-0.05\)), but all five non-baseline variants overlap each other
-to within \(\sim 0.08\) nats with CIs straddling zero against
-baseline. No statistical separation.
-& Not distinguishable from \textsf{K} alone or \textsf{S} alone
-on routine days. \\
-\midrule
-\textsf{H} (direct \(\Pi_h\) per horizon)
-& Per-horizon residual kurt under direct fitting mirrors composed
-kurt at \(h \in \{1, 3, 8\}\) within bootstrap noise (direct
-\(8.70 / 1.80 / -0.46\); composed \(8.60 / 1.13 / -0.34\)).
-& Framework-permitted; not differentially valuable vs.\
-composition. \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\paragraph{Layer 3 --- pipeline: a new finding, documented as
-limitation.} The month-boundary climatology lookup discontinuity
-(\S\,\ref{sec:option-k-seam-audit}) is a structural issue in the
-deseasonalisation pipeline that is separable from the framework
-verdict but observably contaminates forecast-cache evidence at
-\(\sim 12\) events per year. The production fix is a target-side
-mask analogous to \texttt{day\_anchor\_hour}; out of scope for this
-memo but documented as a known limitation entering the application
-paper's limitations section.
-
-\paragraph{Overall reading.} The framework permits accommodation;
-the empirical magnitude on this dataset is modest. At \(n = 132\)
-days with the seam-exclusion-as-primary reading, Student-\(t\) local
-kernel (\textsf{K}) delivers a small but bootstrap-robust mid-horizon
-log-loss improvement (\(\sim 1.8\%\) pooled; CI clean above zero
-under the lenient interpretation of \(\tau_{\min}\)). State
-augmentation (\textsf{S}) does not change the residual kurt
-meaningfully on routine days. \textsf{S+K} does not improve over
-\textsf{K} alone. The pattern matches the kurt-decay finding from
-Stage~1: the kernel-form gap is concentrated at mid-horizons
-(\(h = 3\)--\(9\)), where the composed innovation is still
-heavy-tailed but the per-step innovation distribution dominates;
-at long horizons the central-limit-style averaging brings the
-composed law toward Gaussian and the kernel-form lever has little
-to do.
-
-\paragraph{What this leaves unresolved.} Two questions remain
-flagged for future work: \emph{(a)} the \(\sigma_{00}\) doubling
-under state augmentation
-(\S\,\ref{sec:option-s-result}, three candidate mechanisms); and
-\emph{(b)} whether at \(n \gg 132\) (with the seam fixed in the
-pipeline) the cross-arm differences become statistically
-resolvable --- the CIs at \(n = 132\) span zero on cross-arm
-comparisons by a meaningful margin, and the per-day-type drift SEs
-estimated earlier in this analysis suggest that even \(n = 365\) is
-unlikely to cleanly resolve them without pipeline-level changes.
+under state augmentation is itself unexplained. Three candidate
+mechanisms are plausible: (i)~curse-of-dimensionality on the
+local-residual variance estimate (sparser local neighbourhood gives
+higher residual variance); (ii)~a genuinely worse-on-average WLS fit
+under augmented state; (iii)~LOO-CV bandwidth selection responding
+differently to richer state. Distinguishing them requires a designed
+experiment outside this memo's scope; flagged for follow-up.
 
 \section{Contamination quantification (Patra--Sen)}
 \label{sec:patra-sen}
 
 \paragraph{Question.} The qualifier-exhaustion programme established
 that the framework \emph{permits} levers against the heavy-tailed
-conditional law and that the empirical Ontario landings on those
-levers were marginal or null. A natural follow-up question: how much
-of the per-anchor library-residual mass is genuinely non-Gaussian
-mixture mass, distinct from the predictive-Gaussian null
-\(\mathcal{N}(0,1)\)? Patra \& Sen
-(2016)~\cite{patra_sen_2016}\footnote{Patra, R.\ K., and B.\ Sen,
-``Estimation of a two-component mixture model with applications to
-multiple testing,'' \emph{Journal of the Royal Statistical Society
-Series B} 78(4):869--893 (2016); arXiv:1204.5488.} give a published
-consistent estimator
-\(\hat\alpha_0\) of the mixing proportion in
-\(F = \alpha F_s + (1-\alpha) F_b\) with \(F_b\) fully specified, and
-a distribution-free finite-sample lower confidence bound
-\(\hat\alpha_L^{95\%}\) (their Theorem~5) satisfying
+conditional law and that the Ontario empirical landings on those
+levers were marginal or null. How much of the per-anchor
+library-residual mass is genuinely non-Gaussian mixture mass,
+distinct from the predictive-Gaussian null \(\mathcal{N}(0,1)\)?
+Patra \& Sen (2016)\footnote{Patra, R.\ K.,
+and B.\ Sen, ``Estimation of a two-component mixture model with
+applications to multiple testing,'' \emph{Journal of the Royal
+Statistical Society Series B} 78(4):869--893 (2016); arXiv:1204.5488.}
+give a published consistent estimator \(\hat\alpha_0\) of the mixing
+proportion in \(F = \alpha F_s + (1-\alpha) F_b\) with \(F_b\) fully
+specified, and a distribution-free finite-sample lower confidence
+bound \(\hat\alpha_L^{95\%}\) (their Theorem~5) satisfying
 \(\mathbb{P}(\alpha_0 \geq \hat\alpha_L^{95\%}) \geq 0.95\) and
 \(\mathbb{P}(\hat\alpha_L^{95\%} = 0 \mid \alpha_0 = 0) \geq 0.95\)
 (an exact homogeneity test at the null). The Patra--Sen
 identifiability result (their Lemma~4) implies that for
 contamination sharing support with \(F_b\) (which heavy-tailed
 contamination does), \(\hat\alpha_0\) is a \emph{lower bound} on
-the true mixing fraction: the headline numbers therefore
-understate the true contamination fraction.
+the true mixing fraction.
 
 \paragraph{Protocol.} For each (day-type \(\times\) preprocessing),
 draw 30 random anchors from the pre-cutoff intra-day library; at
@@ -1042,19 +719,17 @@ each anchor, take the scalar library residual
 \(r_0 = z_{t+1} - x_t \cdot C_j[:,0]\) returned by the production-path
 \texttt{local\_drift\_and\_diffusion}, standardise by
 \(\sqrt{\Sigma_j[0,0]}\); subsample to a cap of \(2{,}000\) per
-anchor; pool across anchors to give \(n_{\mathrm{pooled}} = 60{,}000\)
-standardised residuals per cell. Apply Patra--Sen with
-\(F_b = \Phi\) (standard normal CDF) at the published tuning
+anchor; pool to \(n_{\mathrm{pooled}} = 60{,}000\) per cell. Apply
+Patra--Sen with \(F_b = \Phi\) at the published tuning
 (\(c_n = 0.1 \log\log n\) for the point estimate; \(c_n = 0.6792\)
-for the \(95\%\) lower CI, Anderson--Darling
-quantile).
+for the \(95\%\) lower CI, Anderson--Darling quantile).
 
-\paragraph{Implementation provenance.} A Python implementation of
-the PAVA-based estimator (\texttt{scratch/patra\_sen.py}) was
-verified against the paper's Figure~1 synthetic settings
+\paragraph{Implementation provenance.} The Python PAVA-based
+estimator (\texttt{scratch/patra\_sen.py}) was verified
+against the paper's Figure~1 synthetic settings
 (\(\hat\alpha\) within \(\sim 0.02\) of truth at \(\alpha = 0.10\),
 \(n = 5000\)); the null setting \(\alpha = 0\) gave
-\(\hat\alpha_L^{95\%} = 0.002\) (exact lower bound property of
+\(\hat\alpha_L^{95\%} = 0.002\) (exact lower-bound property of
 Theorem~5 confirmed).
 
 \paragraph{Result.}
@@ -1074,121 +749,184 @@ sunday   & 3 & \(23.17\) & \(0.810\) & \(0.735\) & \([0.717, 0.738]\) \\
 \bottomrule
 \end{tabular}
 \end{center}
-The lower 95\% confidence bounds span \(0.49\) (Mon-hour weekday) to
-\(0.74\) (Mon-hour and Fourier sunday) across the six conditions.
 Every cell rejects the homogeneity null
 (\(\hat\alpha_L^{95\%} > 0\)) decisively; the rebaseline-grade
 heavy-tail finding is now quantified as a \emph{lower bound} on the
-mixing fraction \(\alpha_0\).
+mixing fraction \(\alpha_0\), spanning \(0.49\) to \(0.74\) across
+the six conditions.
 
-\paragraph{Pipeline-aware null.} The same protocol on synthetic VAR(1)
-with Gaussian innovations through the identical production estimator
-(\texttt{processing/innovations/validation/synthetic}) gives
-\(\hat\alpha_L^{95\%} = 0.002\): the local-WLS-fit-and-pool protocol
-does not produce false positives.
-
-\paragraph{No single heavy-tailed law explains the result.} Two
-discriminating checks rule out single-law explanations:
-\begin{itemize}[leftmargin=2em]
-  \item AR(1) with Student-\(t(\nu)\) innovations at population-kurt-
-  matched \(\nu \in \{4.27, 4.10, 4.05, 4.02, 4.01\}\) gives
-  \(\hat\alpha_L^{95\%} \in [0.20, 0.24]\) (single seed); at
-  sample-kurt-matched \(\nu = 4.01\) across five RNG seeds,
+\paragraph{Nested stability checks the result survives.} The
+\(0.49\)--\(0.74\) lower-bound range is robust under each of the
+following independent checks:
+\begin{enumerate}[leftmargin=2em]
+  \item \emph{Synthetic null}: VAR(1) with Gaussian innovations
+  through the identical production estimator
+  (\texttt{processing/innovations/validation/synthetic}) gives
+  \(\hat\alpha_L^{95\%} = 0.002\). The local-WLS-fit-and-pool
+  protocol does not produce false positives.
+  \item \emph{Single heavy-tailed AR(1) rule-out}: AR(1) with
+  Student-\(t(\nu)\) innovations at population-kurt-matched
+  \(\nu \in \{4.27, 4.10, 4.05, 4.02, 4.01\}\) gives
+  \(\hat\alpha_L^{95\%} \in [0.20, 0.24]\). Ontario
+  \(\hat\alpha_L^{95\%}\) is \(2.0\)--\(3.5\times\) the maximum any
+  single AR(1)+\(t\) configuration produces --- Ontario residuals
+  are not a single heavy-tailed AR(1).
+  \item \emph{Moment-vs-CDF robustness}: at sample-kurt-matched
+  \(\nu = 4.01\) across five RNG seeds,
   \(\hat\alpha_L^{95\%} \in [0.218, 0.262]\). Sample kurts fluctuate
   \(6\) to \(22\) across seeds at this \(\nu\) (the fourth moment
   doesn't exist for \(\nu \le 4\)), but \(\hat\alpha_L^{95\%}\) is
   rock-stable across the same seeds --- Patra--Sen's CDF-based
   functional is robust where moment statistics are not.
-  \item Ontario \(\hat\alpha_L^{95\%}\) (\(0.49\)--\(0.74\)) is
-  \(2.0\)--\(3.5\times\) the maximum any single AR(1)+\(t\) configuration
-  produces. The Ontario residuals are not a single heavy-tailed
-  AR(1); they have mixture structure beyond what any pure
-  heavy-tailed law generates.
-\end{itemize}
-
-\paragraph{Anchor-seed stability across all six cells.} Five anchor
-RNG seeds per cell: all six \(\hat\alpha_L^{95\%}\) ranges have
-spread \(< 0.04\) (table above, last column). The headline
-\(0.49\)--\(0.74\) range is defensible across the full result
-table, not just a representative cell.
+  \item \emph{Anchor-seed stability across all six cells}: spread
+  \(< 0.04\) on every cell (table above, last column).
+  \item \emph{Homogeneity rejection across cells}: every cell
+  passes \(\hat\alpha_L^{95\%} > 0\) decisively.
+  \item \emph{Preprocessing-independence}: Fourier preprocessing
+  drops pooled kurt substantially (40\(\to\)22 weekday;
+  28\(\to\)20 saturday) but \(\hat\alpha_L^{95\%}\) shifts much less
+  (weekday 0.49\(\to\)0.51; saturday 0.64\(\to\)0.52; sunday
+  unchanged at 0.74). The seam affected tail shape (kurt); the
+  underlying mixture structure is preprocessing-independent.
+  \item \emph{Identifiability direction (Lemma~4)}: for contamination
+  sharing support with \(F_b\), \(\hat\alpha_0\) estimates
+  \(\alpha_0 = \alpha \cdot \{1 - \operatorname{ess\,inf}(f_s/f_b)\}
+  \leq \alpha\). The headline \(0.49\)--\(0.74\) therefore
+  \emph{underestimates} the true mixing fraction. Honest framing:
+  ``Patra--Sen's \(\alpha_0\) (a lower bound on the true mixing
+  fraction) is \(0.49\)--\(0.74\) in Ontario.''
+\end{enumerate}
 
 \paragraph{Reading.} The non-Gaussian library-residual mass is
 genuinely substantial: \(\hat\alpha_L^{95\%} \geq 0.49\) under every
 condition, with the bound conservatively underestimating the true
 \(\alpha\). Combined with the qualifier-exhaustion programme's
-negative empirical lever-comparison findings
-(\textsf{K}, \textsf{S}, \textsf{S+K}, \textsf{H} all marginal or
-null under clean preprocessing), this reframes the practical
-conclusion: \emph{the contamination is large in mass but
-structurally orthogonal to the lagged-\(z\) state} our levers
+negative empirical lever-comparison findings, this reframes the
+practical conclusion: the contamination is large in mass but
+\emph{structurally orthogonal} to the lagged-\(z\) state our levers
 operated on. Exogenous information (temperature, calendar event
 flags, weather regime indicators), not state-augmentation or
 kernel-form changes within \(z\)'s lag span, is the empirically
-licensed direction for accommodating the heavy-tailed conditional
-law.
+licensed direction.
 
-\paragraph{Identifiability caveat (the right direction).} Patra--Sen
-Lemma~4: for contamination sharing support with \(F_b\),
-\(\hat\alpha_0\) estimates \(\alpha_0 = \alpha \cdot
-\{1 - \operatorname{ess inf}(f_s/f_b)\} \leq \alpha\). The headline
-\(0.49\)--\(0.74\) therefore \emph{underestimates} the true mixing
-fraction. The honest framing: ``Patra--Sen's \(\alpha_0\)
-(a lower bound on the true mixing fraction) is \(0.49\)--\(0.74\)
-in Ontario.''
-
-\paragraph{Preprocessing comparison.} Fourier preprocessing reduces
-pooled kurt substantially (40\(\to\)22 weekday, 28\(\to\)20 saturday)
-but \(\hat\alpha_L^{95\%}\) moves much less (Mon-hour weekday 0.49
-\(\to\) Fourier weekday 0.51; Mon-hour saturday 0.64 \(\to\) Fourier
-saturday 0.52; sunday unchanged at 0.74). This is consistent with
-the seam-audit finding: the seam affected the \emph{tail shape}
-(kurt) but the underlying mixture \emph{structure} is
-preprocessing-independent. The contamination is intrinsic to
-\(\kappa_Q\), not introduced by preprocessing.
-
-\section{Integration decision}
+\section{Cross-layer synthesis and integration decision}
 \label{sec:integration}
 
-With all four design options' empirical landings and the
-Patra--Sen contamination quantification in hand, the verdict shape
-is clear at three levels:
+\paragraph{Three layers, kept distinct.} The work in this memo
+produces findings at three different levels of the question
+``does the \(\kQ\) framework permit a method that accommodates the
+heavy-tail / forecast-accuracy coupling?''. Conflating them would
+misread either the framework verdict or the empirical landing.
 
-\emph{Framework}: the \(\kappa_Q\) programme \emph{permits}
-kernel-form, state-augmentation, and per-horizon relaxations;
-\(\kappa_Q\)'s law-agnostic content supports all four design
-options (\textsf{K}, \textsf{S}, \textsf{H}, \textsf{S+K}).
-Rebaseline-grade evidence (per-anchor library kurt \(24\)--\(33\))
-of heavy-tailedness motivates the search.
+\paragraph{Layer 1 --- programme: the framework verdict is
+constructive.} The qualifier-exhaustion analysis
+(\S\S\,\ref{sec:setup}--\ref{sec:framework-synthesis}) identifies
+four framework-consistent design options
+(\textsf{S, H, K, S+K}) under Stages 1 and 2; all are licensed by
+\(\kQ\)'s law-agnostic content. The premise that motivated the
+exhaustion --- a strongly heavy-tailed conditional law (rebaseline
+kurt \(24\)--\(33\)) --- is production-path-validated and seam-
+independent (\S\,\ref{sec:option-k-seam-audit}). \emph{The framework
+permits accommodation; no foreclosure is required.}
 
-\emph{Empirical magnitude on the contamination}: at least
-\(49\)--\(74\%\) of per-anchor library mass is non-Gaussian
-mixture mass (Patra--Sen \(\hat\alpha_L^{95\%}\), conservative
-lower bound by Lemma~4). This is large and unambiguous; the
+\paragraph{Layer 2 --- empirical: per-arm landings on the
+\(n = 132\) dev set, seam exclusion as primary.}
+\begin{center}\small
+\begin{tabular}{l P{0.45\linewidth} P{0.28\linewidth}}
+\toprule
+Option & Empirical landing (excl-first-of-month primary) & Verdict \\
+\midrule
+\textsf{K}
+& Pooled \(dB = 1.8\%\), CI \([0.5\%, 3.1\%]\); signal localised at
+\(h = 3, 4, 8, 9\) (mid-horizons); the \(h = 1\) catastrophe-
+channel reading was the seam.
+& Lenient PASS, modest effect. \\
+\midrule
+\textsf{S}
+& Pooled residual kurt unchanged within bootstrap noise
+(\(\sim 9\)--\(10\) all arms); \(dB(K | S)\) collapses to
+\([-0.01, +0.03]\) under seam exclusion; \(\phi\) and lag-enriched
+give identical kurt and \(dB\).
+& S-iii at kurt gate; routine-day advantage seam-driven. \\
+\midrule
+\textsf{S+K}
+& Best-point variant (\(\phi\)-t) has absolute log-loss \(-0.31\)
+nats vs.\ baseline-Gaussian's \(-0.05\), but all five non-baseline
+variants overlap within \(\sim 0.08\) nats with CIs straddling
+zero against baseline.
+& Not distinguishable from \textsf{K} alone or \textsf{S} alone. \\
+\midrule
+\textsf{H}
+& Per-horizon residual kurt under direct fitting mirrors composed
+kurt at \(h \in \{1, 3, 8\}\) within bootstrap noise (direct
+\(8.70 / 1.80 / -0.46\); composed \(8.60 / 1.13 / -0.34\)).
+& Framework-permitted; not differentially valuable vs.\
+composition. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Layer 3 --- contamination: large mass, orthogonal to
+\(z\)-state.} The Patra--Sen quantification
+(\S\,\ref{sec:patra-sen}) places at least \(49\%\)--\(74\%\) of
+per-anchor library mass in the non-Gaussian mixture component, with
+that bound conservatively underestimating the true fraction
+(Lemma~4). The contamination is intrinsic to \(\kappa_Q\) (not
+preprocessing-induced; seven nested stability checks survive). The
+only consistent reading of large contamination mass alongside
+null empirical levers is that the contamination is structurally
+orthogonal to the lagged-\(z\) state on which \textsf{S}, \textsf{K},
+\textsf{S+K}, and \textsf{H} all operate.
+
+\paragraph{Pipeline finding documented as limitation.} The
+month-boundary climatology lookup discontinuity
+(\S\,\ref{sec:option-k-seam-audit}) is a structural issue in the
+deseasonalisation pipeline, separable from the framework verdict
+but observably contaminating forecast-cache evidence at
+\(\sim 12\) events per year. Production fix: a target-side mask
+analogous to \texttt{day\_anchor\_hour}. Out of scope here;
+documented as a known limitation for the application paper.
+
+\paragraph{What this leaves unresolved.} Two questions remain
+flagged for future work: (a)~the \(\sigma_{00}\) doubling under
+state augmentation
+(\S\,\ref{sec:option-s-result}, three candidate mechanisms); and
+(b)~whether at \(n \gg 132\), with the seam fixed, the cross-arm
+differences become statistically resolvable --- the per-day-type
+drift SEs suggest even \(n = 365\) is unlikely to resolve them
+cleanly without pipeline-level changes.
+
+\paragraph{Integration into the application paper.} A short paragraph
+in \S4.3 carries the verdict at all three layers:
+
+\emph{Framework.} The \(\kappa_Q\) programme permits kernel-form,
+state-augmentation, and per-horizon relaxations; its law-agnostic
+content supports four design options
+(\textsf{K}, \textsf{S}, \textsf{H}, \textsf{S+K}). Rebaseline-grade
+evidence (per-anchor library kurt \(24\)--\(33\)) of heavy-tailedness
+motivates the search.
+
+\emph{Empirical contamination magnitude.} At least \(49\%\)--\(74\%\)
+of per-anchor library mass is non-Gaussian mixture mass (Patra--Sen
+\(\hat\alpha_L^{95\%}\), conservative lower bound by Lemma~4). The
 contamination is \emph{not} a small heavy-tail perturbation of a
 near-Gaussian conditional law.
 
-\emph{Empirical activation of the framework levers}: under clean
-(Fourier) preprocessing, none of \textsf{K}, \textsf{S}, \textsf{S+K},
-\textsf{H} delivers a statistically clean forecast-accuracy
-improvement on routine-day data. Combined with the contamination
-quantification, the only consistent reading is that \emph{the
-contamination is structurally orthogonal to the lagged-\(z\) state}
-on which all four levers operate. Exogenous information
+\emph{Empirical activation of the framework levers.} Under clean
+(Fourier) preprocessing, none of \textsf{K}, \textsf{S},
+\textsf{S+K}, \textsf{H} delivers a statistically clean
+forecast-accuracy improvement on routine-day data. Combined with the
+contamination quantification, the only consistent reading is that
+the contamination is structurally orthogonal to the lagged-\(z\)
+state on which all four levers operate. \emph{Exogenous information}
 (temperature, weather regime, calendar event flags), not
 state-augmentation or kernel-form changes within the past-\(z\)
 information set, is the empirically licensed direction.
 
-The application paper's integration is a short paragraph: the
-qualifier-exhaustion analysis identifies the framework as
-permitting the three classes of lever; the empirical comparison on
-the \(n = 132\) dev set finds them all marginal-to-null under clean
-preprocessing; the Patra--Sen contamination quantification reframes
-the negative empirical findings as evidence that the licensed
-direction is exogenous information rather than \(z\)-state
-augmentation; the month-boundary seam is documented as a separable
-preprocessing limitation and Fourier preprocessing as the cleaner
-choice. The sibling-memo arrangement (this document) is the right
-place for the detailed exhaustion analysis; the application
-paper's \S4.3 inherits the verdict statement above.
+The month-boundary seam is documented as a separable preprocessing
+limitation and Fourier preprocessing is adopted as the cleaner
+default. The sibling-memo arrangement (this document) is the right
+place for the detailed exhaustion analysis; the application paper's
+\S4.3 inherits the verdict statement above.
 
 \end{document}
