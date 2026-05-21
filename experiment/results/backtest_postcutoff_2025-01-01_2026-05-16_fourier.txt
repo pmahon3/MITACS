@@ -1,0 +1,69 @@
+<<<PROVENANCE
+{
+  "body_sha256": "9b569ae80de1aa31af6f618066942945271e12998264fddc3c78522e2b201069",
+  "extra": {
+    "climatology_method": "fourier",
+    "note": "Backtest under climatology_method=fourier. Parallel artifacts under alternative climatologies (if present) carry the climatology suffix in the filename (e.g. backtest_postcutoff_<span>_fourier.txt)."
+  },
+  "generated_utc": "2026-05-21T18:43:42+00:00",
+  "git_clean": true,
+  "git_sha": "e950060934a66e1bbb325ff6c52ab5231e917e29",
+  "grade": "CLAIM-GRADE",
+  "inputs_fingerprint": "64fd13abdf1c8cf04cfcbf8c4a57854dde2ef14809aeee995738294db5065679",
+  "reproducibility": {
+    "frozen_spec_hash": "b6a39463e657ff177aac407fdd619ae3c447e672888669b3e7a9d902996a05d4",
+    "git_sha": "e950060934a66e1bbb325ff6c52ab5231e917e29",
+    "inputs": {
+      "backtest_span": [
+        "2025-01-01",
+        "2026-05-16"
+      ],
+      "data_cutoff": "2024-12-31T23:00:00",
+      "delivery_days": 500,
+      "pre_cutoff_actuals_sha256": "a110d8eec48463bf5634e0f7248fdd321c39f2440f7d3c0bb153c1468f2bfe1a"
+    },
+    "lib_versions": {
+      "edynamics": "0.3.14",
+      "numpy": "2.2.4",
+      "pandas": "2.2.3",
+      "scipy": "1.15.2"
+    },
+    "seeds": {}
+  },
+  "schema": "mitacs.experiment.result_provenance/1",
+  "title": "Post-cutoff multi-step day-ahead backtest vs Ontario actuals (no IESO; climatology=fourier)"
+}
+PROVENANCE>>>
+
+backtest: 500 days, 12000 hourly forecasts, span ('2025-01-01', '2026-05-16')
+  overall ours MAE  = 904 MW  MAPE = 5.42%
+  overall p168 MAE  = 1138 MW
+  t-24h daytype mismatch = 42.7%
+  interval coverage = 21.8% (per-step Gaussian proxy, heavy-tailed innovation, no cross-step accumulation -> expected far from nominal; reported, not hidden)
+  diurnal error structure (h == hour-of-day; MAPE controls for demand level):
+    hod ours_MAE ours_MAPE p168_MAE  demand    n
+      0      143     0.97%      972   14942  500
+      1      240     1.67%      945   14606  500
+      2      321     2.24%      914   14435  500
+      3      400     2.80%      905   14425  500
+      4      498     3.44%      922   14665  500
+      5      770     5.07%      960   15315  500
+      6     1042     6.56%     1013   16232  500
+      7      954     5.88%     1057   16911  500
+      8      938     5.74%     1103   17137  500
+      9     1082     6.61%     1196   17217  500
+     10     1245     7.54%     1288   17275  500
+     11     1343     8.09%     1351   17297  500
+     12     1424     8.52%     1405   17317  500
+     13     1439     8.60%     1418   17316  500
+     14     1398     8.26%     1407   17415  500
+     15     1309     7.52%     1347   17765  500
+     16     1192     6.62%     1252   18274  500
+     17     1067     5.87%     1200   18577  500
+     18      952     5.21%     1169   18590  500
+     19      870     4.76%     1144   18418  500
+     20      850     4.76%     1150   18002  500
+     21      771     4.51%     1120   17209  500
+     22      699     4.19%     1059   16299  500
+     23      748     4.63%     1007   15503  500
+  Backtest validates the multi-step predictor on real Ontario ground truth. NOT the IESO head-to-head (no IESO here); that is Step 5, horizon-matched. NOTE: horizon h is collinear with hour-of-day -- the error structure is DIURNAL (night easiest, dawn/dusk demand ramps hardest), NOT pure horizon compounding.
