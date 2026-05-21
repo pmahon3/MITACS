@@ -310,28 +310,32 @@ Single-dim
 \end{tabular}
 \end{table}
 
-\paragraph{Propagation reconciliation.}
+\paragraph{Propagation softens the apparent heavy tail at multi-step.}
 \label{sec:caveat-propagation}
-The simpler reading is that the heavy-tail strength measured one
-step at a time is a direct property of the innovation law. If so,
-the propagation-aware measurement (which feeds correctly-propagated
-predictive variance through each multi-step iteration before
-computing standardised residuals) should give the same answer to
-within sampling noise. On the same data,
+The decomposition above operates on standardised residuals of the
+multi-step forecast, with predictive variance correctly propagated
+through each iteration. On the same data this gives
 \begin{equation}
 \label{eq:kurt-attenuation}
 \nuhat \;:\; 5.0 \to 6.5,
 \qquad
 \mathrm{kurt}_{\mathrm{exc}} \;:\; 6.1 \to 2.4 \,,
 \end{equation}
-a roughly four-fold attenuation. The simpler reading fails: much
-of the apparent heavy-tail strength is a propagation artefact,
-and the earlier one-step measurements
-(re-baseline \(\mathrm{kurt}_{\mathrm{exc}} \approx 24\)--\(33\),
-without multi-step variance propagation) were partly a propagation
-artefact, not solely a property of the innovation law. As a
-robustness check, restricting to the single-dimension subpopulation
-(\(\approx 58\%\) of days) yields the same qualitative verdict.
+a roughly four-fold attenuation of the multi-step kurtosis under
+propagation-aware standardisation. As a robustness check, restricting
+to the single-dimension subpopulation (\(\approx 58\%\) of days)
+yields the same qualitative verdict.
+
+\paragraph{The one-step conditional law remains heavy-tailed.} The
+propagation softening is a property of the multi-step forecast
+object, not of the underlying conditional law. The rebaseline
+\(\mathrm{kurt}_{\mathrm{exc}} \approx 24\)--\(33\) is measured at
+the per-anchor library-residual level (one-step, locally, no
+propagation involved), and is preprocessing-independent at that
+level. The qualifier-exhaustion analysis
+(Section~\ref{sec:qualifier-verdict}) quantifies the mass of this
+one-step departure directly via a Patra--Sen consistent contamination
+estimator and links the empirical lever-comparison findings to it.
 
 \section{Application and results}
 \label{sec:application}
@@ -718,14 +722,71 @@ additive-level-removal contribution to forecast performance
 ride on the same parametric object \((\mu_{m,h}, \sigma_{m,h})\). At
 the four-channel diagnostic's resolution within this family, the
 cost and the two benefit channels are intertwined: removing either
-sub-step degrades Ch1 substantially. The engineering question
-therefore moves out of the additive-vs-multiplicative decomposition
-and into the next tier: candidates B (additive seasonal model with
-the scale handed exogenously to the diffusion fit) or C
-(Fourier-decomposition scale layer), or accepting the coupling and
-documenting it. The phase-asymmetry finding that motivated this
-section's investigation remains independent of the coupling and does
-not depend on the de-seasonalisation step.
+sub-step degrades Ch1 substantially. The engineering question moves
+out of the additive-vs-multiplicative decomposition; the next-tier
+analysis (a separate continuous-climatology preprocessing, and the
+framework-level enumeration of the available levers against the
+heavy-tail cost) is the subject of
+Section~\ref{sec:qualifier-verdict}. The phase-asymmetry finding
+that motivated this section's investigation remains independent of
+the coupling and does not depend on the de-seasonalisation step.
+
+\subsection{Qualifier-exhaustion verdict}
+\label{sec:qualifier-verdict}
+
+The Section~\ref{sec:caveat} caveat documents two ways \(\Pij\)
+departs from \(\kQ\) (phase-mis-centred mean; Gaussian-proxy
+diffusion). The Section~\ref{sec:zscore} investigation establishes
+the \(z\)-score as a framework coupling rather than benign
+preprocessing, and ends at the question of how to engineer around
+the heavy-tail cost. This subsection enumerates the available
+levers at the framework level, reports the empirical landing of
+each, and quantifies the underlying contamination. The analysis
+has three layers, and conflating them misreads either the framework
+or the empirical landing.
+
+\emph{Framework.} The \(\kQ\) programme permits kernel-form,
+state-augmentation, and per-horizon relaxations; its law-agnostic
+content supports four design options --- \textsf{K} (Student-\(t\)
+local kernel), \textsf{S} (state augmentation within lagged \(z\)),
+\textsf{H} (per-horizon direct fit), and the combined
+\textsf{S+K} --- under the qualifier exhaustion. Rebaseline-grade
+evidence (per-anchor library kurt \(24\)--\(33\)) of heavy-tailedness
+motivates the search; the framework verdict is
+\emph{permits-accommodation}.
+
+\emph{Empirical contamination magnitude.} A Patra--Sen
+consistent two-component-mixture estimator~\cite{PatraSen2016},
+with the predicted-Gaussian as the known component, applied to
+pooled standardised per-anchor library residuals from the
+production estimation path, places at least \(49\)--\(74\%\) of
+the per-anchor library mass in the non-Gaussian mixture component
+across day-types and preprocessings (\(\hat\alpha_L^{95\%}\), a
+conservative lower bound by their Lemma~4). A pipeline-aware
+Gaussian-innovation null through the identical protocol gives
+\(\hat\alpha_L^{95\%} = 0.002\); the maximum value any single
+heavy-tailed AR(1) reproduces, across both population-kurt-matched
+and sample-kurt-matched checks, is \(0.26\). The contamination is
+mixture-structured, not a small heavy-tail perturbation, and is
+preprocessing-independent.
+
+\emph{Empirical activation of the framework levers.} Under a
+continuous Fourier-of-(day-of-year, hour-of-day) climatology
+adopted as the cleaner preprocessing default (which by construction
+eliminates the month-boundary lookup discontinuity the
+\((\mu_{m,h}, \sigma_{m,h})\) lookup introduces at twelve
+delivery days per year), none of \textsf{K}, \textsf{S},
+\textsf{S+K}, \textsf{H} delivers a statistically clean
+forecast-accuracy improvement on routine-day data at \(n = 132\).
+\textsf{K} alone gives a modest mid-horizon log-loss gain
+(\(\approx 1.8\%\), CI excludes zero); the others are null. The
+only consistent reading of large contamination mass alongside null
+empirical levers is that the contamination is structurally
+orthogonal to the lagged-\(z\) state on which all four levers
+operate. The licensed direction is exogenous information ---
+temperature, weather regime, calendar event flags --- not
+state-augmentation or kernel-form changes within the past-\(z\)
+information set.
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
@@ -851,19 +912,31 @@ the verified run.}
   heavy-tailed innovation). The pre-registered decomposition bounds
   recoverable loss at \(\approx 4.8\%\) and \(\approx 2.3\%\) of dev
   log-loss; \textbf{neither clears the pre-registered 1\% materiality
-  bar} (heavy-tail interval includes zero). The heavy-tail effect
-  attenuated \(\approx 4\times\) under propagated variance, indicating
-  it was partly a propagation artefact. Open: phase-aware conditional
-  mean and/or non-Gaussian local model; neither licensed as the
-  higher-leverage lever by current evidence.
+  bar} (heavy-tail interval includes zero). Multi-step propagation
+  softens the apparent kurtosis \(\approx 4\times\); the one-step
+  conditional law remains heavy-tailed at the library-residual level.
+
+  \item \textbf{Available within-\(z\) levers tested
+  (Section~\ref{sec:qualifier-verdict}).} The kernel-form
+  (Student-\(t\)), state-augmentation (within lagged \(z\)),
+  per-horizon direct fit, and combined relaxations of the
+  Section~\ref{sec:caveat} qualifiers are all framework-permitted
+  and were tested empirically. Only the kernel-form lever delivers
+  a statistically clean forecast-accuracy improvement, and the
+  effect is modest (\(\approx 1.8\%\) log-loss reduction at mid
+  horizons). State augmentation and combined variants are null.
 
   \item \textbf{Single-step only.} The semigroup \(\{\Pi_t\}\) is not
   constructed; multi-step is iteration of \(\Pidelta\), validated for
   error growth. A semigroup treatment is open.
 
   \item \textbf{Exogenous information.} No weather/exogenous
-  covariates; the backtest error structure suggests this is a
-  model-scope ceiling, not a hyperparameter issue.
+  covariates. The Patra--Sen quantification places at least
+  \(49\)--\(74\%\) of per-anchor library mass in a non-Gaussian
+  mixture component, and the within-\(z\) levers above do not access
+  it; the licensed direction for accommodating the heavy-tailed
+  conditional law is exogenous information rather than further
+  variation within the \(z\) information set.
 \end{itemize}
 
 \paragraph{Reproducibility.} Recorded results carry two content
@@ -879,11 +952,22 @@ cited as a result elsewhere in the paper.
 The two ways \(\Pij\) departs from \(\kQ\) --- phase-mis-centred mean
 and Gaussian-proxy diffusion --- were pre-registered for elimination
 and both fall below the materiality bar on the validated full
-population. The standing
-shortcomings are structural (univariate state, phase-blind embedding,
-no exogenous covariates), not tuning issues, and the higher-leverage
-next step is a state representation change rather than an estimator
-change.
+population. The framework-level enumeration in
+Section~\ref{sec:qualifier-verdict} confirms that the
+\(\kQ\) programme \emph{permits} kernel-form, state-augmentation, and
+per-horizon relaxations of these qualifiers; the empirical
+comparison on the \(n = 132\) development set finds only the
+kernel-form lever statistically clean (\(\approx 1.8\%\) mid-horizon
+log-loss reduction), with state augmentation and combined variants
+null. A Patra--Sen contamination quantification places at least
+\(49\)--\(74\%\) of per-anchor library mass in a non-Gaussian
+mixture component --- substantial mass that the within-\(z\) levers
+do not access. The combined reading is that the contamination is
+structurally orthogonal to the lagged-\(z\) state on which the
+levers operate. The licensed direction for accommodating the
+heavy-tailed conditional law is therefore \emph{exogenous
+information} (temperature, weather regime, calendar event flags),
+not further variation within the \(z\) information set.
 
 \appendix
 
