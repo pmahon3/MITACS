@@ -674,22 +674,30 @@ average across horizons --- at the \(132\)-day sample size that is
 on its own constitute a statistical signal.
 
 \paragraph{The apparent catastrophic-event channel was a pipeline
-artefact (retraction).} A first reading of this experiment
-identified a prominent \(h = 1\) channel: one day
+artefact (retraction).} An earlier version of this section claimed a
+prominent \(h = 1\) catastrophic-event channel: one day
 (\(2021\text{-}12\text{-}01\)) was a \(\approx 7\sigma\) event under
 the Gaussian one-step law (\(\mathrm{LL}_{\mathrm{Gauss}} = 26.3\)
 nats, \(\mathrm{LL}_{t} = 10.2\); single-day advantage \(16.2\)
-nats), and that one day carried the pooled \(h = 1\) mean
-\(\Delta\mathrm{LL}\) of \(+0.12\) under the Gaussian \(\to\) Student-\(t\)
-swap. Section~\ref{sec:option-k-seam-audit} below documents that
-this was driven by a separable pipeline issue (month-boundary
-climatology lookup discontinuity), not by an intrinsic heavy-tail
-property of the conditional law. The \(h = 1\) signal does not
-survive seam exclusion: pooled \(h = 1\) \(\Delta\mathrm{LL}\) drops
-from \(+0.12\) to \(-0.02\) with CI straddling zero. The narrative
-``Student-\(t\) provides insurance against rare \(7\sigma\) events
-at \(h = 1\)'' is therefore \emph{retracted}; what Student-\(t\)
-provides is a modest mid-horizon improvement (Section~\ref{sec:option-k-seam-audit}).
+nats), carrying the pooled \(h = 1\) mean \(\Delta\mathrm{LL}\) of
+\(+0.12\) under the Gaussian \(\to\) Student-\(t\) swap. That
+claim is wrong. The mechanism, documented in
+Section~\ref{sec:option-k-seam-audit}, is a separable pipeline
+issue --- a month-boundary climatology lookup discontinuity ---
+not an intrinsic heavy-tail property of the conditional law. Two
+further facts establish the retraction. \emph{(a)}~The \(h = 1\)
+signal does not survive seam exclusion: pooled \(h = 1\)
+\(\Delta\mathrm{LL}\) drops from \(+0.12\) (all days) to \(-0.02\)
+(excl-first-of-month), and \emph{both} day-bootstrap CIs straddle
+zero (all-days CI \([-0.034, +0.388]\); excl-first CI
+\([-0.056, +0.019]\)) --- so the catastrophe-channel claim was not
+statistically supported \emph{even on the contaminated data}.
+\emph{(b)}~The pooled K verdict (over all horizons) is robust:
+\(dB\) drops from \(0.024\) to \(0.018\) under seam exclusion with
+CIs cleanly above zero in both cases. What Student-\(t\) actually
+provides is a modest mid-horizon improvement
+(Section~\ref{sec:option-k-seam-audit}), not h=1 catastrophe
+insurance.
 
 \paragraph{The mid-horizon signal is what's real.} Per-horizon
 day-bootstrap excluding first-of-month delivery days: \(h = 3\)
