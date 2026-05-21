@@ -4,7 +4,6 @@
     "pre_cutoff_actuals_sha256": "a110d8eec48463bf5634e0f7248fdd321c39f2440f7d3c0bb153c1468f2bfe1a"
   },
   "predictor": {
-    "climatology_method": "fourier",
     "day_anchor_hour": 7,
     "diffusion": "plain_mu_centred_residual_covariance_no_kernel",
     "dim_selection": "elbow",
@@ -17,8 +16,6 @@
     },
     "estimand": "intra_day",
     "estimator": "build_local_gaussian_semigroup",
-    "fourier_k_day": 8,
-    "fourier_k_year": 8,
     "grid_spacing": "geometric",
     "horizon": "one_step",
     "variable_name": "zscore"
@@ -26,8 +23,8 @@
   "provenance": {
     "edynamics_version": "0.3.14",
     "git_clean": true,
-    "git_sha": "9cf6d6716669f04034afdda12aa43c2b3df43ff2"
+    "git_sha": "8b89e4c833445aa16906a776914f673d386a5723"
   },
   "schema": "mitacs.experiment.frozen_spec/1",
-  "spec_hash": "b6a39463e657ff177aac407fdd619ae3c447e672888669b3e7a9d902996a05d4"
+  "spec_hash": "f0dd9c8795fda781fa8cab80ddd9ec9fb844af284cdb3077c0d1116b13e0536d"
 }
