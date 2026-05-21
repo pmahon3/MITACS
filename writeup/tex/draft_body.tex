@@ -112,12 +112,12 @@ collapse.
 
 \paragraph{Bandwidth: locality of \(\Cj\).}
 Can the bandwidth \(\theta\) be chosen by data so that \(\Cj\) is
-genuinely local? Two candidate rules were investigated. The
+local? Two candidate rules were investigated. The
 Goldenshluger--Lepski
 criterion in the supporting library predicts an interior optimum that
 balances bias against variance; for the normalised Gaussian
 kernel of Eq.~\ref{eq:weights} the GL score is monotone in \(\theta\)
-with no interior optimum, so any grid simply returns its own
+with no interior optimum, so any grid returns its own
 ceiling --- the GL prediction fails. True leave-one-out
 cross-validation on one-step squared error,
 \begin{equation}
@@ -217,9 +217,9 @@ Gaussian-proxy diffusion}
 
 The two estimator factors \(\Cj\) and \(\Sj\) each carry a quantified
 limitation. A pre-registered decomposition on the 2021--22
-development-set benchmark (below), with predictive variance correctly
-propagated over the full delivery-day population, finds
-\textbf{neither effect clears the materiality bar}.
+development-set benchmark, with predictive variance propagated over
+the full delivery-day population, finds \textbf{neither effect
+clears the materiality bar}.
 
 \paragraph{\(\Sj\) is rank-1 by construction.} For a single-variable
 delay embedding, coordinates \(2, \ldots, d\) of the one-step image
@@ -233,14 +233,12 @@ variance embedded in \(\Rb^{d \times d}\).
 \paragraph{That scalar innovation is non-Gaussian.} The
 non-Gaussianity question is therefore \emph{univariate}. The
 estimator, validated against synthetic ground truth
-(Section~\ref{sec:synth}), gives a heavy-tailed one-step innovation;
-the propagation-aware strength of that departure
-(Section~\ref{sec:caveat-propagation}) is what the diagnostic of
-Section~\ref{sec:caveat-decomposition} acts on.
+(Section~\ref{sec:synth}), gives a heavy-tailed one-step innovation.
 
 \paragraph{The conditional mean is phase-mis-centred.}
-Is the conditional-mean factor faithful, leaving only the shape
-deficit above? The embedding gives the local linear map no phase
+Is the conditional-mean factor faithful, leaving only the
+non-Gaussianity deficit? The embedding gives the local linear map no
+phase
 information --- it cannot tell a state rising through a demand level
 from one falling through it. The simpler reading is that this
 matters little (real load dynamics are nearly time-reversible at
@@ -258,11 +256,10 @@ not only its shape, departs from \(\kQ\).
 \paragraph{Decomposition.}
 \label{sec:caveat-decomposition}
 A pre-registered diagnostic on the 2021--22 development-set
-benchmark (exploratory; results not carried as headline claims)
-bounds the recoverable loss of each factor by oracle counterfactuals
-on the multi-step forecast
+benchmark (exploratory) bounds the recoverable loss of each factor
+by oracle counterfactuals on the multi-step forecast
 log-loss \(\Lbar\), over all delivery days, with predictive variance
-correctly propagated across the embedding-dimension change.
+propagated across the embedding-dimension change.
 The recoverable-loss factors are
 \begin{equation}
 \label{eq:DA-DB}
@@ -283,8 +280,8 @@ interval includes zero}; on the single-dimension subpopulation
 (used here as a robustness comparison) both cleared \(\taumin\) but
 the CIs overlapped. The full-population verdict is therefore the
 catch-all ``neither dominates'' --- not because the effects are real
-and tied, but because on the complete, correctly-propagated data
-neither is established at all.
+and tied, but because on the complete propagated data neither is
+established at all.
 
 \begin{table}[h]
 \centering
@@ -312,19 +309,18 @@ Single-dim
 
 \paragraph{Propagation softens the apparent heavy tail at multi-step.}
 \label{sec:caveat-propagation}
-The decomposition above operates on standardised residuals of the
-multi-step forecast, with predictive variance correctly propagated
-through each iteration. On the same data this gives
+The decomposition operates on standardised residuals of the
+multi-step forecast under propagation-aware variance. On the same
+data this gives
 \begin{equation}
 \label{eq:kurt-attenuation}
 \nuhat \;:\; 5.0 \to 6.5,
 \qquad
 \mathrm{kurt}_{\mathrm{exc}} \;:\; 6.1 \to 2.4 \,,
 \end{equation}
-a roughly four-fold attenuation of the multi-step kurtosis under
-propagation-aware standardisation. As a robustness check, restricting
-to the single-dimension subpopulation (\(\approx 58\%\) of days)
-yields the same qualitative verdict.
+a roughly four-fold attenuation. Restricting to the single-dimension
+subpopulation (\(\approx 58\%\) of days) yields the same qualitative
+verdict.
 
 \paragraph{The one-step conditional law remains heavy-tailed.} The
 propagation softening is a property of the multi-step forecast
@@ -385,11 +381,10 @@ re-run under climatology specs of varying resolution
 the no-transform extreme), and the per-axis error structure measured
 in demand space.
 
-The result has two parts. On the location axis (phase/asymmetry
-structure), the error was \textbf{invariant} across all specs ---
-the benign prediction is met exactly, and the conditional-mean
-structure is genuine demand dynamics rather than a transform
-artefact. On the heavy-tail axis, however, the error structure
+On the location axis (phase/asymmetry structure), the error was
+\textbf{invariant} across all specs --- the benign prediction is met
+exactly, and the conditional-mean structure is demand dynamics
+rather than a transform artefact. On the heavy-tail axis, however, the error structure
 \emph{did} move with seasonal resolution --- the benign prediction
 fails, and the coupling acts there as a partially leaky seasonal
 model. This is Section~\ref{sec:caveat}'s heavy-tail caveat showing
@@ -398,21 +393,13 @@ up at the coordinate layer, not a separate defect.
 methodological --- establishing the coordinate is sound before any
 subsequent re-specification.}
 
-The benign/leaky test established that de-seasonalisation
-\emph{delivers} the location benefit (the conditional mean is
-recovered as genuine demand dynamics) and \emph{drives} the tail
-leak (heavy-tail strength moves with seasonal resolution). The
-sharper question this opens, and the one whose answer determines
-whether the leak can be engineered around, is whether the
-\emph{element of the de-seasonalisation that delivers the location
-benefit is the element driving the tail leak}. Three sub-questions
-arise, in increasing concreteness: under what assumptions does
-intrinsic coupling follow from the joint observation of location
-invariance and tail movement; which sub-step of de-seasonalisation
-delivers the location benefit; and whether a different family of
-preprocessing could separate the cost from the benefit. They resolve
-in reverse, each later question only earning its place if the prior
-one does not settle the issue.
+The follow-up question --- whether the element delivering the
+location benefit is the element driving the tail leak --- spawns
+three sub-questions: under what assumptions does intrinsic coupling
+follow from the joint observation of location invariance and tail
+movement; which sub-step of de-seasonalisation delivers the location
+benefit; and whether a different family of preprocessing could
+separate the cost from the benefit.
 
 \paragraph{The assumptions question resolves in an unexpected
 direction: there is no location benefit on the phase channel.}
@@ -427,22 +414,20 @@ for the global, month\,\(\times\)\,hour, and identity (no-transform)
 specs respectively --- a range of \(0.033\) on a baseline of
 \(-0.25\), including the no-transform extreme. The location-axis
 signal is therefore not \emph{delivered} by de-seasonalisation; it
-is already present in the raw demand at essentially the same
-magnitude. What de-seasonalisation does on the phase channel is
-leave the signal undisturbed; what it does on the tail channel is
-introduce a resolution-dependent leak. The two later sub-questions
-(which sub-step delivers the location benefit; whether a different
-family separates the cost from the benefit) collapse on this channel:
-there is no benefit on the phase channel to separate from the cost.
+is already present in the raw demand at near-identical magnitude.
+The two later sub-questions (which sub-step delivers the location
+benefit; whether a different family separates the cost from the
+benefit) collapse on this channel: there is no benefit on the phase
+channel to separate from the cost.
 
-\paragraph{The genuine remaining question.} The phase-correlation
+\paragraph{The remaining question.} The phase-correlation
 result does not settle whether de-seasonalisation contributes to
 forecast performance through some other channel. The discriminating
 test held the embedding dimension fixed at \(d = 3\) across all four
 specs --- by design, to isolate the climatology effect --- and the
 no-transform pipeline was not run end-to-end through the production
 backtest (per-day-type elbow-selected dimensions, the registered
-evaluation, leakage guards). The honest next experiment is end-to-end:
+evaluation, leakage guards). The next experiment is end-to-end:
 re-fit the per-day-type embedding dimension to raw demand by the same
 elbow rule used for the seasonal pipeline, run the full backtest from
 this configuration, and compare against the seasonal pipeline on a
@@ -452,11 +437,10 @@ layers simultaneously, and the channels through which it could
 plausibly contribute to forecast value are not all summarised by
 average error.
 
-\paragraph{Pre-registered comparison criterion.} The four channels
-and their tolerances are fixed here, before the experiment runs;
-removal of de-seasonalisation is licensed only if \emph{all four}
-channels match within their tolerances. Tolerances are derived from
-the materiality framework of Section~\ref{sec:caveat} where possible
+\paragraph{Pre-registered comparison criterion.} Removal of
+de-seasonalisation is licensed only if \emph{all four} channels
+match within their tolerances. Tolerances derive from the
+materiality framework of Section~\ref{sec:caveat} where possible
 (channel~1) and from the structural conditioning facts established
 in the rebaseline (channel~2).
 \begin{enumerate}
@@ -471,8 +455,8 @@ in the rebaseline (channel~2).
   \(\kappa(\Sj) \in [6,\, 1072]\) vs.\ full-process up to
   \(\sim 10^{20}\)) \emph{within} the seasonal pipeline in z-units;
   ratio-based comparisons of \(\kappa(\Sj)\) \emph{across} pipelines
-  are not unit-invariant (z-space and demand-space variances live on
-  different absolute scales). The honest channel-2 question is binary
+  are not unit-invariant (z-space and demand-space variances have
+  different absolute scales). The channel-2 question is binary
   and per-pipeline: does \(\Sj\) support the downstream predictive
   law? Operationally, for each pipeline, fit the production
   \(\Sj\) at \(N = 60\) sampled anchors per day-type and check that
@@ -512,8 +496,8 @@ in the rebaseline (channel~2).
 \paragraph{Result of the four-channel comparison.} End-to-end
 within-harness comparison was run as
 \texttt{scratch/diagnose\_deseasonalisation\_removal.py} on the
-2021--22 development-set window (exploratory; not carried as a
-headline claim). Per-day-type elbow-rule dimensions:
+2021--22 development-set window (exploratory). Per-day-type
+elbow-rule dimensions:
 seasonal \(\{d_{\mathrm{wkdy}}, d_{\mathrm{sat}}, d_{\mathrm{sun}}\}
 = \{2, 4, 3\}\) on \(z\); no-transform \(\{3, 2, 4\}\) on raw \(D\).
 \(n = 3168\) hours per pipeline on the same dev window.
@@ -569,24 +553,21 @@ intervals are not wide enough at the demand peaks the seasonal
 pipeline implicitly normalises against) --- is the mechanistic
 fingerprint of the missing scale step.
 
-The follow-up question therefore narrows. The forecast-performance
+The follow-up question narrows. The forecast-performance
 contribution is not on the location axis (the phase-asymmetry signal
-was independent of de-seasonalisation, established earlier in this
-subsection) but on the scale axis. The concrete next question is
-whether the scale-calibration benefit can be delivered without the
-heavy-tail cost --- candidates: scale-only normalisation (divide by
-\(\sigma_{m,h}\) without level removal), an additive seasonal model
-that hands a separate scale-conditioning input to the diffusion fit,
-or a Fourier-decomposition scale layer. This is the
-different-family question from earlier in this section, redirected
-at the now-identified channel.
+is independent of de-seasonalisation) but on the scale axis. The
+next question is whether the scale-calibration benefit can be
+delivered without the heavy-tail cost --- candidates: scale-only
+normalisation (divide by \(\sigma_{m,h}\) without level removal), an
+additive seasonal model that hands a separate scale-conditioning
+input to the diffusion fit, or a Fourier-decomposition scale layer.
 
 \paragraph{Pre-registered candidate A: scale-only normalisation.}
 The minimal perturbation is to keep the scale step that the
 preceding experiment located as load-bearing and drop the level step
 that is the candidate carrier of the heavy-tail cost:
-\(z_{\mathrm{A}} = D / \sigma_{m,h}\), no mean subtraction. The fair
-comparison applies the same diagnostic harness used for the
+\(z_{\mathrm{A}} = D / \sigma_{m,h}\), no mean subtraction. The
+comparison applies the same diagnostic harness as the
 seasonal-vs-raw test: elbow-selected dimension per day-type on
 \(z_{\mathrm{A}}\), the same four-channel measurement at the same
 pre-registered tolerances.
@@ -615,7 +596,7 @@ the additive sub-step is the removable lever; the scale-only
 pipeline delivers the scale-calibration benefit at reduced tail
 cost; the §3 caveat becomes specific to the additive step. The
 \emph{coverage-passes-but-tail-fails outcome}: the heavy-tail cost
-lives with the multiplicative \(\sigma_{m,h}\) step, not the
+attaches to the multiplicative \(\sigma_{m,h}\) step, not the
 additive one; scale-only is not the lever; the engineering question
 moves to alternative scale-conditioning candidates. The
 \emph{accuracy-fails outcome} (forecast accuracy noticeably worse
@@ -668,13 +649,12 @@ the same. To isolate the additive sub-step's contribution the
 scale-only pipeline is re-run with the embedding dimension forced to
 the seasonal assignment \(\{2, 4, 3\}\), making the additive step
 the only remaining difference between the two pipelines. Three
-outcomes are pre-stated for this disambiguation, with thresholds
-\(\MAPE\)-based and fixed before the experiment runs:
+\(\MAPE\)-based outcomes are pre-stated for this disambiguation:
 \begin{itemize}[leftmargin=2em]
   \item \textbf{Dimension-driven outcome.}
   \(\MAPE_{\{2,4,3\}} < 5\%\): scale-only at the seasonal
-  dimensions essentially recovers the forecast performance the
-  elbow-selected dimensions did not, and the attribution to the
+  dimensions recovers the forecast performance the elbow-selected
+  dimensions did not, and the attribution to the
   additive sub-step is overclaimed. The additive step's marginal
   contribution to forecast accuracy is smaller than the
   candidate-A result suggested.
@@ -694,10 +674,10 @@ Scale-only at the seasonal dimensions \(\{2,4,3\}\) gives
 the same dev set --- \emph{worse} than scale-only at the
 elbow-selected \(\{4,4,4\}\) (\(\MAPE = 11.98\%\)), and only
 \(0.4\) pp better than the no-transform pipeline
-(\(\MAPE = 13.57\%\)). The pre-registered outcome is the
-additive-step-driven one: the additive sub-step does real work
-independent of dimension. The four-point ranking at matched
-dimensions is \(3.86\% \to 13.13\% \to 13.57\%\) as one drops first
+(\(\MAPE = 13.57\%\)) --- the additive-step-driven outcome fires:
+the additive sub-step does real work independent of dimension. The
+four-point ranking at matched dimensions is \(3.86\% \to 13.13\%
+\to 13.57\%\) as one drops first
 the additive \(\mu_{m,h}\) step and then the multiplicative
 \(\sigma_{m,h}\) step --- the additive step alone accounts for
 \(\approx 9.3\) pp of the \(\approx 9.7\) pp total cost. Forcing the
@@ -725,7 +705,7 @@ additive step \emph{carries} the heavy-tail cost; if anything,
 removing the additive step makes the tail slightly worse rather
 than better. This weakens (but does not by itself rule out) the
 original coverage-passes-but-tail-fails hypothesis that the cost
-lives entirely in the multiplicative step.
+attaches entirely to the multiplicative step.
 
 \paragraph{Resolved standing position.} The \(z\)-score coupling
 carries a documented heavy-tail cost (Section~\ref{sec:caveat}); a
@@ -744,8 +724,7 @@ continuous-climatology preprocessing, and the framework-level
 enumeration of the available levers against the heavy-tail cost) is
 the subject of Section~\ref{sec:qualifier-verdict}. The
 phase-asymmetry finding that motivated this section's investigation
-remains independent of the coupling and does not depend on the
-de-seasonalisation step.
+is independent of the de-seasonalisation step.
 
 \subsection{Available levers against the heavy-tail cost: framework
 enumeration and empirical landing}
@@ -756,11 +735,8 @@ departs from \(\kQ\) (phase-mis-centred mean; Gaussian-proxy
 diffusion). The Section~\ref{sec:zscore} investigation establishes
 the \(z\)-score as a framework coupling rather than benign
 preprocessing, and ends at the question of how to engineer around
-the heavy-tail cost. This subsection enumerates the available levers
-at the framework level, reports the empirical landing of each, and
-quantifies the underlying contamination. The analysis has three
-layers, and conflating them misreads either the framework or the
-empirical landing.
+the heavy-tail cost. The analysis has three layers, and conflating
+them misreads either the framework or the empirical landing.
 
 \emph{Framework.} The \(\kQ\) programme permits kernel-form,
 state-augmentation, and per-horizon relaxations; its law-agnostic
@@ -768,8 +744,7 @@ content supports four design options --- a Student-\(t\) local
 kernel; state augmentation within the lagged-\(z\) embedding;
 per-horizon direct fitting; and the combined state-augmentation +
 kernel-form variant. Rebaseline-grade evidence (per-anchor library
-kurt \(24\)--\(33\)) of heavy-tailedness motivates the search; the
-framework permits each of these relaxations.
+kurt \(24\)--\(33\)) motivates the search.
 
 \emph{Empirical contamination magnitude.} A Patra--Sen
 consistent two-component-mixture estimator~\cite{PatraSen2016},
@@ -791,19 +766,19 @@ continuous Fourier-of-(day-of-year, hour-of-day) climatology
 adopted as the cleaner preprocessing default (which by construction
 eliminates the month-boundary lookup discontinuity the
 \((\mu_{m,h}, \sigma_{m,h})\) lookup introduces at twelve
-delivery days per year), none of the four relaxations --- the
-Student-\(t\) kernel-form lever, the state-augmentation lever, their
-combination, or per-horizon direct fitting --- delivers a
-statistically clean forecast-accuracy improvement on routine-day
-data at \(n = 132\). The Student-\(t\) kernel-form lever alone gives
-a modest mid-horizon log-loss gain (\(\approx 1.8\%\), CI excludes
-zero); the others are null. The only consistent reading of large
-contamination mass alongside null empirical levers is that the
-contamination is structurally orthogonal to the lagged-\(z\) state
-on which all four levers operate. The licensed direction is
-exogenous information --- temperature, weather regime, calendar
-event flags --- not state-augmentation or kernel-form changes within
-the past-\(z\) information set.
+delivery days per year), only the Student-\(t\) kernel-form lever
+delivers a statistically clean log-loss improvement on routine-day
+data at \(n = 132\) (\(\approx 1.8\%\) mid-horizon, CI excludes
+zero); state augmentation, per-horizon direct fitting, and the
+combined variant are null. The improvement is modest --- well
+below the contamination magnitude the previous paragraph reports.
+The only consistent reading of large contamination mass alongside
+modest-to-null empirical levers is that the contamination is
+structurally orthogonal to the lagged-\(z\) state on which all four
+levers operate. The licensed direction is exogenous information ---
+temperature, weather regime, calendar event flags --- not
+state-augmentation or kernel-form changes within the past-\(z\)
+information set.
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
@@ -939,9 +914,9 @@ the verified run.}
   per-horizon direct fit, and combined relaxations of the
   Section~\ref{sec:caveat} qualifiers are all framework-permitted
   and were tested empirically. Only the kernel-form lever delivers
-  a statistically clean forecast-accuracy improvement, and the
-  effect is modest (\(\approx 1.8\%\) log-loss reduction at mid
-  horizons). State augmentation and combined variants are null.
+  a statistically clean log-loss improvement, and the effect is
+  modest (\(\approx 1.8\%\) reduction at mid horizons). State
+  augmentation and combined variants are null.
 
   \item \textbf{Single-step only.} The semigroup \(\{\Pi_t\}\) is not
   constructed; multi-step is iteration of \(\Pidelta\), validated for
