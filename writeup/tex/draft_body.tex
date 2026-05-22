@@ -281,20 +281,17 @@ done about it.
 \subsection{Ontario pipeline}
 \label{sec:pipeline}
 
-The instantiation is a configuration-driven pipeline; all paths and
-parameters resolve from a single \texttt{config/pipeline.yaml}
-relative to the project root (no working-directory dependence).
-Stages: \textbf{acquire} IESO public \texttt{PUB\_Demand};
-\textbf{de-seasonalise} (Section~\ref{sec:zscore}) hourly demand to a
-stationary \(z\)-score; \textbf{day-type tag}
-\(\{\mathrm{weekday}, \mathrm{saturday}, \mathrm{sunday}\}\) using a
-configurable 07:00 day-anchor offset (transitions across the day-type
-seam are excluded as in Section~\ref{sec:construction} --- without
-this \(\Sj\) is catastrophically ill-conditioned, so the estimand is
-effectively forced to be \emph{intra-day}); \textbf{embedding
-dimension} selected per day-type by an elbow rule on the
-prediction-skill-vs-dimension curve; \textbf{per-anchor fit} of the
-Section~\ref{sec:method} estimator.
+The instantiation is a four-stage pipeline on IESO public
+\texttt{PUB\_Demand}: hourly demand is de-seasonalised to a stationary
+\(z\)-score (Section~\ref{sec:zscore}); each hour is tagged
+\(\{\mathrm{weekday}, \mathrm{saturday}, \mathrm{sunday}\}\) on a
+07:00 day-anchor offset; an embedding dimension is selected per
+day-type by an elbow rule on the prediction-skill-vs-dimension curve;
+and the Section~\ref{sec:method} estimator is fit per anchor.
+Transitions across the day-type seam are excluded
+(Section~\ref{sec:construction}) --- without this \(\Sj\) is
+catastrophically ill-conditioned, so the estimand is forced to be
+intra-day.
 
 \subsection{The \(z\)-score transform is a modelling choice, not a
 preprocessing detail}
@@ -305,125 +302,107 @@ De-seasonalisation is
 \label{eq:zscore}
 z \;=\; \frac{D - \mu_{m,h}}{\sigma_{m,h}},
 \end{equation}
-with \(\mu, \sigma\) a month \(\times\) hour-of-day climatology
-estimated strictly from pre-cutoff data. This single climatology
-object enters \emph{all four} estimator layers: the embedded state,
-the drift fit, the diffusion (\(\Sj\) is the covariance of
-\(z\)-residuals), and the demand-space round-trip. It is therefore an
+with \((\mu_{m,h}, \sigma_{m,h})\) a month \(\times\) hour-of-day
+climatology estimated strictly from pre-cutoff data. This one
+climatology object enters all four estimator layers --- the embedded
+state, the drift fit, the diffusion (\(\Sj\) is the covariance of
+\(z\)-residuals), and the demand-space round-trip --- so it is an
 implicit seasonal model coupled into \(\kQ\), not a benign
-preprocessing step, and its specification is a modelling choice worth
-examining directly.
+preprocessing step, and two questions about its specification were
+investigated on the development-set window.
 
-Two questions were investigated on the development-set window. The
-first: is the phase-asymmetry structure of Section~\ref{sec:caveat}
-an artefact of de-seasonalisation? Measured in raw-demand units so it
-is comparable across specifications, the phase-asymmetry correlation
-is \(\mathrm{corr}(\dd D/\dd t,\, e) = -0.247,\, -0.250,\, -0.217\)
-under the global, month\,\(\times\)\,hour, and no-transform
-specifications respectively --- near-identical, and present already
-in raw demand. The phase-mis-centring is a property of the demand
-dynamics, not a transform artefact.
-
-The second: does de-seasonalisation earn its place on forecast
-accuracy? Re-fitting the pipeline end-to-end on raw demand and on a
-scale-only variant (\(z = D/\sigma_{m,h}\), no level removal), the
-full month\,\(\times\)\,hour transform is decisively better ---
-\(\MAPE\) on the development window degrades from \(3.86\%\) (full
-transform) to \(11.98\%\) (scale-only) to \(13.57\%\) (raw demand).
+The phase-asymmetry structure of Section~\ref{sec:caveat} is not a
+de-seasonalisation artefact: in raw-demand units, the phase
+correlation \(\mathrm{corr}(\dd D/\dd t,\, e)\) is \(-0.247\),
+\(-0.250\), \(-0.217\) under the global, month\,\(\times\)\,hour, and
+no-transform specifications --- near-identical, and already present in
+raw demand. The transform does, however, earn its place on accuracy:
+re-fitting the pipeline end-to-end gives
+\begin{equation}
+\label{eq:zscore-mape}
+\MAPE \;=\; 3.86\%\ \text{(full)}
+\;\to\; 11.98\%\ \text{(scale-only, }z = D/\sigma_{m,h})
+\;\to\; 13.57\%\ \text{(raw demand)}.
+\end{equation}
 The interval-coverage breakdown locates the mechanism: the raw-demand
 pipeline delivers uniform-width intervals that over-cover overnight
-(demand small and stable) and under-cover at the midday peak ---
-the signature of a missing demand-space scale step that the
-\(\sigma_{m,h}\) factor supplies. The de-seasonalisation transform
-is load-bearing for forecast accuracy; both its level and scale
-sub-steps contribute, and neither is removable without a substantial
-accuracy cost. The month\,\(\times\)\,hour climatology is therefore
-retained as the production choice; Section~\ref{sec:backtest}
-compares it at production scale against a continuous-basis
-alternative.
+and under-cover at the midday peak --- the signature of the missing
+\(\sigma_{m,h}\) scale step. Both sub-steps are load-bearing; the
+month\,\(\times\)\,hour climatology is retained, and
+Section~\ref{sec:backtest} compares it at production scale against a
+continuous-basis alternative.
 
 \subsection{Levers against the heavy-tailed conditional law}
 \label{sec:qualifier-verdict}
 
 Given the heavy-tailed one-step innovation of
-Section~\ref{sec:caveat}, what can be done within the past-demand
-information set? The \(\kQ\) construction admits four candidate
-design changes that stay within the lagged-\(z\) embedding: a
-Student-\(t\) local kernel in place of the Gaussian; state
-augmentation within the embedding; per-horizon direct fitting; and
-the combined state-augmentation-plus-kernel variant. Each was tested
-on the development set, and the result is read against an independent
-measurement of how much non-Gaussian mass is actually present.
+Section~\ref{sec:caveat}, the \(\kQ\) construction admits four design
+changes within the lagged-\(z\) embedding: a Student-\(t\) local
+kernel; state augmentation; per-horizon direct fitting; and the
+combined state-augmentation-plus-kernel variant. Each was tested on
+the development set against an independent measurement of how much
+non-Gaussian mass is present.
 
-\emph{Contamination magnitude.} A Patra--Sen
-consistent two-component-mixture estimator~\cite{PatraSen2016},
-with the predicted-Gaussian as the known component, applied to
-pooled standardised per-anchor library residuals from the
-production estimation path, places at least \(49\)--\(74\%\) of
-the per-anchor library mass in the non-Gaussian mixture component
-across day-types and preprocessings (\(\hat\alpha_L^{95\%}\), a
-conservative lower bound by their Lemma~4). A pipeline-aware
-Gaussian-innovation null through the identical protocol gives
-\(\hat\alpha_L^{95\%} = 0.002\); the maximum value any single
-heavy-tailed AR(1) reproduces, across both population-kurt-matched
-and sample-kurt-matched checks, is \(0.26\). The contamination is
-mixture-structured, not a small heavy-tail perturbation, and is
+A Patra--Sen consistent two-component-mixture
+estimator~\cite{PatraSen2016}, with the predicted-Gaussian as the
+known component, applied to pooled standardised per-anchor library
+residuals from the production estimation path, places
+\(\hat\alpha_L^{95\%} \in [0.49,\, 0.74]\) of the per-anchor library
+mass in the non-Gaussian component across day-types and
+preprocessings --- a conservative lower bound by their Lemma~4.
+Against \(\hat\alpha_L^{95\%} = 0.002\) for a pipeline-aware
+Gaussian-innovation null, and \(0.26\) the maximum any single
+heavy-tailed AR(1) reproduces, the contamination is
+mixture-structured, not a small heavy-tail perturbation, and
 preprocessing-independent.
 
-\emph{Empirical result.} On the development set (\(n = 132\) days),
-only the Student-\(t\) kernel delivers a clean log-loss improvement
-on routine-day data (\(\approx 1.8\%\) at mid horizons, CI excludes
-zero); state augmentation, per-horizon direct fitting, and the
-combined variant are null. The improvement is modest --- far below
-the contamination mass just measured. The consistent reading of
-large contamination alongside modest-to-null levers is that the
-contamination is structurally orthogonal to the lagged-\(z\) state on
-which all four levers operate. Reducing it requires exogenous
-information --- temperature, weather regime, calendar event flags ---
-not further variation within the past-demand information set.
+Yet on the development set (\(n = 132\) days) only the Student-\(t\)
+kernel delivers a clean log-loss gain on routine-day data
+(\(\approx 1.8\%\) at mid horizons, CI excludes zero); state
+augmentation, per-horizon fitting, and the combined variant are null.
+The gain is far below the contamination mass just measured. The
+consistent reading is that the contamination is structurally
+orthogonal to the lagged-\(z\) state on which all four levers
+operate: reducing it requires exogenous information --- temperature,
+weather regime, calendar event flags --- not further variation within
+the past-demand information set.
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
 
 The iterated one-step predictor is backtested on Ontario ground truth
 for complete delivery days strictly after the model-specification
-cutoff. Leakage guard: fits and \(z\)-score climatology use only
-\(\le\)-cutoff data; post-cutoff actuals enter only as query history
-and scoring truth. With forecast \(\hat{y}_{d,h}\) and actual
-\(y_{d,h}\) over delivery days \(d \in \mathcal{D}\) and horizons
+cutoff; fits and \(z\)-score climatology use only \(\le\)-cutoff
+data, and post-cutoff actuals enter only as query history and scoring
+truth. With forecast \(\hat{y}_{d,h}\) and actual \(y_{d,h}\) over
+delivery days \(d \in \mathcal{D}\) and horizons
 \(h \in \{1, \ldots, 24\}\),
 \begin{equation}
 \label{eq:mae-mape}
-\MAE \;=\; \frac{1}{|\mathcal{D}|\cdot 24}
+\MAE \;=\; \frac{1}{24|\mathcal{D}|}
 \sum_{d \in \mathcal{D}} \sum_{h=1}^{24}
 \bigl| \hat{y}_{d,h} - y_{d,h} \bigr|,
 \qquad
-\MAPE \;=\; \frac{1}{|\mathcal{D}|\cdot 24}
+\MAPE \;=\; \frac{1}{24|\mathcal{D}|}
 \sum_{d \in \mathcal{D}} \sum_{h=1}^{24}
 \frac{\bigl| \hat{y}_{d,h} - y_{d,h} \bigr|}{y_{d,h}} \,.
 \end{equation}
-In a day-ahead forecast, horizon \(h\) is collinear with hour-of-day,
-so the error structure is \emph{diurnal} (deep night easiest;
-dawn/dusk ramps hardest), not pure horizon compounding. The recorded
-backtest gives \(\MAE = 786~\mathrm{MW}\),
-\(\MAPE = 4.78\%\) over \(|\mathcal{D}| = 500\) out-of-sample
-days, \(\approx 1.5\times\) better than seasonal persistence at
-every hour. The number is bound to the recorded artifact by its
-content hash;\footnote{Body sha256 \texttt{e405a121\(\ldots\)};
-recorded under frozen-spec hash \texttt{f0dd9c87\(\ldots\)}
-(\(\mu_{m,h}\) climatology). The per-horizon table appears in
-Appendix~\ref{app:backtest}.}
-interval coverage carries the Section~\ref{sec:caveat}
-Gaussian-proxy caveat: a Gaussian interval around a heavy-tailed
-innovation under-covers.
+Over \(|\mathcal{D}| = 500\) out-of-sample days the backtest gives
+\(\MAE = 786~\mathrm{MW}\) and \(\MAPE = 4.78\%\),
+\(\approx 1.5\times\) better than seasonal persistence at every
+hour.\footnote{Body sha256 \texttt{e405a121\(\ldots\)}, recorded
+under frozen-spec hash \texttt{f0dd9c87\(\ldots\)}; per-horizon table
+in Appendix~\ref{app:backtest}.} Since horizon \(h\) is collinear
+with hour-of-day in a day-ahead forecast, the error is diurnal ---
+lowest at deep night, highest on the dawn/dusk ramps --- not
+horizon-compounding. Interval coverage carries the
+Section~\ref{sec:caveat} caveat: a Gaussian interval around a
+heavy-tailed innovation under-covers.
 
-\paragraph{Climatology comparison.} The \((\mu_{m,h}, \sigma_{m,h})\)
-lookup is piecewise-constant and jumps discretely at month boundaries
-(twelve delivery days per year). A continuous Fourier climatology ---
-a basis in (day-of-year, hour-of-day) with
-\(K_{\mathrm{year}} = K_{\mathrm{day}} = 8\), no interaction terms ---
-was re-fit and run on the same \(500\)-day post-cutoff span as an
-alternative. The two backtests compare as follows:
+The \((\mu_{m,h}, \sigma_{m,h})\) lookup jumps discretely at month
+boundaries. A continuous Fourier climatology --- a basis in
+(day-of-year, hour-of-day), \(K_{\mathrm{year}} = K_{\mathrm{day}} =
+8\), no cross-terms --- was re-fit on the same \(500\)-day span:
 \begin{center}\small
 \begin{tabular}{l r r r}
 \toprule
@@ -436,39 +415,34 @@ interval coverage           & \(20.8\%\)   & \(21.8\%\)   & \(+1.0\)~pp \\
 \bottomrule
 \end{tabular}
 \end{center}
-The \(\mu_{m,h}\) lookup wins overall by \(\sim 15\%\) in \(\MAE\).
-A diurnal breakdown locates the difference: Fourier improves slightly
-on the dawn ramp (\(h = 7\)--\(9\)) but loses substantially across
-the daytime peak (\(h = 11\)--\(16\), \(+161\) to \(+361\) MW), where
-demand --- and thus absolute error --- is highest. The mechanism is
-that the lookup's \(288\) independent cells carry the day-of-year
-\(\times\) hour-of-day interaction explicitly (the seasonal peak-load
-shape varies by month), which a Fourier basis without cross-terms
-cannot represent. The month-boundary jumps are real but of small
-operational consequence: the \(\sim 12\) days per year on which
+The lookup wins by \(\sim 15\%\) in \(\MAE\): Fourier improves
+slightly on the dawn ramp (\(h = 7\)--\(9\)) but loses \(+161\) to
+\(+361\) MW across the daytime peak (\(h = 11\)--\(16\)), where demand
+and absolute error are highest. The lookup's \(288\) cells carry the
+day-of-year \(\times\) hour-of-day interaction --- the seasonal
+peak-load shape varies by month --- which a cross-term-free Fourier
+basis cannot represent; the \(\sim 12\) month-boundary days on which
 Fourier improves do not outweigh the \(\sim 365\) on which it loses
-seasonal-by-hour resolution.\footnote{A Fourier basis \emph{with}
-cross-interaction terms (\(\sim 289\) parameters, matching the
-lookup's cell count) is a natural variant, out of scope here.}
+seasonal-by-hour resolution.\footnote{A Fourier basis with
+cross-interaction terms (\(\sim 289\) parameters, matching the cell
+count) is a natural variant, out of scope here.}
 
 \subsection{Registered forward prediction experiment}
 \label{sec:registered}
 
 A fair retrospective IESO comparison is not recoverable
-(Section~\ref{sec:ieso}), so the comparison is run forward. The model
-specification (estimator identity, resolved hyperparameters, data
-cutoff \(t_{\mathrm{cut}}\), code commit, and a content hash of the
-\(\le t_{\mathrm{cut}}\) actuals) is committed before any forecast
-is issued, and the same content hash is re-checked at every
-prediction-time load so the recorded specification cannot be silently
-edited. The predictor is local/lazy (per-anchor fit at prediction
-time from \(\le t_{\mathrm{cut}}\) library data), so the committed
-specification pins the function and its inputs; a cutoff guard blocks
-any post-\(t_{\mathrm{cut}}\) data from entering a fit.
-Forecasts issue forward; scraped actuals settle into an append-only
-ledger (IESO restates recent demand --- revisions appended, never
-overwritten); scoring runs against persistence baselines with IESO
-published values recorded as differently-horizoned context.
+(Section~\ref{sec:ieso}), so the comparison is run forward as a
+pre-registered experiment. The full model specification --- estimator
+identity, resolved hyperparameters, data cutoff \(t_{\mathrm{cut}}\),
+code commit, and a content hash of the \(\le t_{\mathrm{cut}}\)
+actuals --- is committed before any forecast is issued; because the
+predictor is lazy (per-anchor fit at prediction time), that
+specification pins both the function and its inputs. Forecasts then
+issue forward against settled actuals, scored on persistence
+baselines with IESO published values recorded as differently-horizoned
+context. The enforcement detail --- content-hash recheck at load, the
+post-\(t_{\mathrm{cut}}\) cutoff guard, the append-only revision
+ledger --- is given in Appendix~\ref{app:estimator}.
 
 \todo[inline]{Forward-experiment results accrue with calendar time;
 report once a sufficient settled window exists.}
@@ -534,12 +508,10 @@ Multi-step
 \end{table}
 
 \noindent
-The recovery gate confirms \(\Cj\) and \(\Sj\) are estimated within
-tolerance on a system whose \((A, Q)\) are known; the
-non-Gaussianity gate confirms the diagnostic reads a Gaussian
-innovation as \(\approx\)Gaussian and a \(t_5\) innovation as
-heavy-tailed; the multi-step gate shows the iterated map's drift
-error growing with horizon but staying within the
+The three gates confirm, on systems with known ground truth, that
+\((\Cj, \Sj)\) are recovered within tolerance, that the
+non-Gaussianity diagnostic discriminates a Gaussian from a \(t_5\)
+innovation, and that the iterated map stays within its
 horizon-dependent tolerance band through \(h = 24\). All three are
 recorded as a single CLAIM-grade artifact (body sha256
 \texttt{d8435415\(\ldots\)}).
@@ -611,8 +583,110 @@ IESO head-to-head being infeasible from public archives.
 \section{Estimator detail}
 \label{app:estimator}
 
-\todo[inline]{WLS weighting, the LOO-CV \(\theta\) rule, the
-GL-degeneracy note in full.}
+The drift \(\Cj\) (Eq.~\ref{eq:wls}) is computed as the least-squares
+solution of the row-scaled system
+\begin{equation}
+\label{eq:rowscale}
+\sqrt{W}\,X\,C \;=\; \sqrt{W}\,Y,
+\qquad W = \operatorname{diag}(w_i),\ w_i \ge 0,
+\end{equation}
+not by forming the normal equations \((X^{\top}WX)^{-1}X^{\top}WY\):
+the two coincide, and the row-scaled solve via a pseudoinverse
+degrades gracefully when the scaled design is rank-deficient (a query
+state with few non-negligible weights) rather than failing. The
+diffusion \(\Sj\) (Eq.~\ref{eq:diff}) is the plain, unweighted
+covariance of the residuals \(r_i = y_i - x_i\Cj\); \(W\) localises
+which pairs enter the fit, but the second moment is taken without
+further reweighting, for the collapse reason of
+Section~\ref{sec:construction}. The anchor's own pair is removed from
+\(\mathcal{L}\) before the fit, so \(\Cj\) and \(\Sj\) are
+leave-one-out at the anchor.
+
+The bandwidth \(\theta^{*}\) minimises the leave-one-out objective
+\(\mathcal{R}_{\mathrm{LOO}}\) (Eq.~\ref{eq:loocv}) over a per-anchor
+geometric grid
+\begin{equation}
+\label{eq:thetagrid}
+\{\theta_k\}_{k=1}^{18}
+\;=\; \operatorname{geomspace}
+\bigl(\max(d_{\min}, 10^{-3}),\ d_{\max};\ 18\bigr),
+\qquad
+d_{\min/\max} = \min/\max_{i}\lVert x_i - x\rVert,
+\end{equation}
+so the candidates span the inter-point scales present at that anchor.
+True leave-one-out refits \(\Cj^{(-i)}\) for every held-out row, at
+cost \(O(m^{2})\) per grid point; it is evaluated exactly on a fixed
+random subsample of \(150\) library pairs (the full library when
+\(|\mathcal{L}| \le 150\)), drawn from a seeded generator for
+reproducibility.\footnote{The naive refit-per-row form is used in
+place of a hat-matrix shortcut, which was found to be both buggy and
+sensitive to the weighting convention; the subsample evaluation is
+exact and costs \(\approx 0.1\,\)s per call.} The fitting stage
+consumes the grid argmin directly --- no rail-pin guard, edge
+fallback, or clipping --- which the non-discrimination result of
+Section~\ref{sec:construction} licenses: with no grid point
+statistically separated from the argmin, the precise selected value
+carries little weight, and \(\Cj\) is in effect a single global
+linear operator.
+
+The library \(\mathcal{L}\) (Eq.~\ref{eq:library}) drops one-step
+pairs \((x_t, x_{t+1})\) whose \emph{target} time \(t+1\) falls on the
+07:00 anchor hour; source-side filtering would not remove the same
+pairs. These are \(\approx 4\%\) of the pairs but are the artificial
+overnight-to-morning discontinuities that otherwise dominate \(\Sj\):
+weekday per-component residual excess kurtosis falls from
+\(\approx 133\) to \(\approx 5\) once they are removed. The mask is
+parameterised by the anchor hour and disabled for inputs with no
+day-type structure, such as the synthetic VAR(1) of
+Section~\ref{sec:synth}.
+
+Estimation at an anchor and the multi-step forecast generator of
+Section~\ref{sec:caveat} call one local-fit routine, which maps a
+library \((X, Y)\) and an explicit query state to
+\((\Cj, \Sj, \bar r, \theta^{*}, r)\); estimation derives the query
+from an embedding and an anchor, the forecast generator supplies a
+post-cutoff query against a pre-cutoff library. The forecast path is
+therefore the estimation path --- the backtest numbers of
+Section~\ref{sec:backtest} come from the code the synthetic recovery
+gate of Section~\ref{sec:synth} validates, not a re-implementation.
+
+Finally, the Goldenshluger--Lepski criterion of the supporting
+library is degenerate on the normalised kernel of
+Eq.~\ref{eq:weights}. The criterion balances a data-fit term against a
+complexity penalty and is well posed only when the fit term's bias
+proxy grows with bandwidth. Here the weights carry the normalising
+factor \((2\pi)^{-d/2}\theta^{-d}\), so as \(\theta \to \infty\),
+\begin{equation}
+\label{eq:gl-degeneracy}
+w_i \;\sim\; \theta^{-d} \to 0,
+\qquad
+\underbrace{E(\theta) = w^{\top}g}_{\text{data fit}} \to 0,
+\qquad
+\underbrace{\Pi(\theta) \sim
+\tfrac{\theta^{-d} + \sigma^{-d}}{n_{\mathrm{eff}}}}_{\text{penalty}}
+\to 0,
+\end{equation}
+with the fit term driven to zero by the normalisation faster than the
+penalty vanishes. The total score decreases monotonically to
+\(0^{+}\) with no interior turning point: the normalisation cancels
+exactly the bandwidth-growing opposition the criterion requires.
+Co-optimising drift and residual bandwidth on a real anchor with the
+grid ceiling raised through \(50, 200, 10^{3}, 5\times10^{3}\) pins
+the residual bandwidth at the ceiling every time and recovers no
+interior optimum. The leave-one-out rule is used in its place: an
+applied-statistics choice on a kernel family the criterion was not
+designed for, not a departure from a prescribed convention.
+
+The forward experiment of Section~\ref{sec:registered} enforces its
+committed specification mechanically. The content hash of the
+\(\le t_{\mathrm{cut}}\) actuals recorded at registration is
+recomputed at every prediction-time load and compared, so a silently
+edited specification fails rather than scores; a cutoff guard rejects
+any row dated after \(t_{\mathrm{cut}}\) from entering a fit. IESO
+restates recently published demand, so settled actuals accumulate in
+an append-only ledger --- a revision is a new appended record, never
+an overwrite --- and the ledger state is itself hashed into each
+score.
 
 \section{Per-horizon backtest table}
 \label{app:backtest}
