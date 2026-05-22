@@ -15,6 +15,9 @@ processing/innovations/outputs/
 # the parsed data product data/ontario/forecast/ieso_forecast.csv IS tracked,
 # matching the repo convention of tracking processed demand CSVs)
 data/ontario/forecast/xml/
+# Raw IESO day-ahead totals XML cache (regenerable by data.da_forecast_scraping;
+# same convention as the xml/ cache above)
+data/ontario/forecast/da_xml/
 
 # Legacy climate data (paths no longer in this layout)
 src/main/resources/data/climate/ontario/*
@@ -22,6 +25,16 @@ src/main/resources/data/ontario/climate/ontario/csv_files/54239.csv
 
 # Local convenience archives (originals recoverable from git history)
 archive/
+
+# IDE / editor and Claude Code local state (machine-specific, not project)
+.idea/
+.claude/
+
+# Third-party competition data: IEEE DataPort Post-COVID load-forecasting
+# dataset (re-hosting governed by IEEE DataPort terms). The probe scripts
+# scratch/postcovid_*.py ARE tracked; the CSVs are reproducible from the
+# primary source per scratch/data/postcovid/README.md.
+scratch/data/postcovid/*.csv
 
 # Experiment ledger: gitignored UNTIL a live collect run produces genuine
 # accrued forecasts/actuals. Current/offline-test contents are regenerable
