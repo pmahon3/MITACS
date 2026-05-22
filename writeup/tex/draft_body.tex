@@ -915,31 +915,44 @@ the recorded access date.)
 \subsection{Validation against synthetic ground truth}
 \label{sec:synth}
 
-Three gates, summarised in Table~\ref{tab:gates}, all pass.
+Three gates, summarised in Table~\ref{tab:gates}, all pass on
+known-ground-truth synthetic systems.
 
 \begin{table}[h]
 \centering
 \small
-\caption{Synthetic-ground-truth validation gates.}
+\caption{Synthetic-ground-truth validation gates. Recorded result
+artifact body \(\text{sha256} = \text{d843}{\ldots}\).}
 \label{tab:gates}
-\begin{tabular}{l l l}
+\begin{tabular}{l l p{0.42\linewidth}}
 \toprule
-Gate & System & Check \\
+Gate & System & Result \\
 \midrule
 Recovery
   & Known-\((A,Q)\) VAR(1)
-  & drift, diffusion within tolerance \\
+  & drift rel.\ err.\ \(0.048\) (tol.\ \(0.10\)), diffusion
+    \(0.026\) (tol.\ \(0.25\)) \\
 Non-Gaussianity
-  & Gaussian / \(t\)-innov.\ VAR(1)
-  & \(\approx\)Gaussian / heavy-tail flag \\
+  & Gaussian / \(t_5\) VAR(1)
+  & excess kurt.\ \(-0.05\) / \(+4.72\); heavy tail flagged \\
 Multi-step
-  & \(\Pidelta^{k}\) vs.\ VAR(1) closed form
-  & error growth within tolerance \\
+  & \(\Pidelta^{k}\) vs.\ closed form
+  & drift rel.\ err.\ \(0.05 \to 0.44\) over \(h = 1 \to 24\),
+    within tolerance \\
 \bottomrule
 \end{tabular}
 \end{table}
-\todo[inline]{Cite the recorded gate result with its numbers from
-the verified run.}
+
+\noindent
+The recovery gate confirms \(\Cj\) and \(\Sj\) are estimated within
+tolerance on a system whose \((A, Q)\) are known; the
+non-Gaussianity gate confirms the diagnostic reads a Gaussian
+innovation as \(\approx\)Gaussian and a \(t_5\) innovation as
+heavy-tailed; the multi-step gate shows the iterated map's drift
+error growing with horizon but staying within the
+horizon-dependent tolerance band through \(h = 24\). All three are
+recorded as a single CLAIM-grade artifact (body sha256
+\texttt{d8435415\(\ldots\)}).
 
 \section{Limitations and reproducibility}
 \label{sec:limits}
@@ -1035,18 +1048,43 @@ seasonal-persistence baseline.}
 \toprule
 Horizon \(h\) & \(\MAE_h\) (MW) & \(\MAPE_h\) (\%) & \(\MAE_h /\MAE_h^{\mathrm{persist}}\) \\
 \midrule
-\(1\)   & --- & --- & --- \\
-\(2\)   & --- & --- & --- \\
-\(\vdots\) & \(\vdots\) & \(\vdots\) & \(\vdots\) \\
-\(23\)  & --- & --- & --- \\
-\(24\)  & --- & --- & --- \\
+\(1\)   & \(161\)  & \(1.08\) & \(0.17\) \\
+\(2\)   & \(215\)  & \(1.48\) & \(0.23\) \\
+\(3\)   & \(241\)  & \(1.67\) & \(0.26\) \\
+\(4\)   & \(288\)  & \(2.00\) & \(0.32\) \\
+\(5\)   & \(370\)  & \(2.54\) & \(0.40\) \\
+\(6\)   & \(563\)  & \(3.80\) & \(0.59\) \\
+\(7\)   & \(839\)  & \(5.43\) & \(0.83\) \\
+\(8\)   & \(1011\) & \(6.25\) & \(0.96\) \\
+\(9\)   & \(1056\) & \(6.43\) & \(0.96\) \\
+\(10\)  & \(1130\) & \(6.92\) & \(0.94\) \\
+\(11\)  & \(1190\) & \(7.27\) & \(0.92\) \\
+\(12\)  & \(1182\) & \(7.23\) & \(0.87\) \\
+\(13\)  & \(1154\) & \(7.10\) & \(0.82\) \\
+\(14\)  & \(1105\) & \(6.82\) & \(0.78\) \\
+\(15\)  & \(1037\) & \(6.36\) & \(0.74\) \\
+\(16\)  & \(959\)  & \(5.72\) & \(0.71\) \\
+\(17\)  & \(891\)  & \(5.08\) & \(0.71\) \\
+\(18\)  & \(886\)  & \(4.89\) & \(0.74\) \\
+\(19\)  & \(908\)  & \(4.95\) & \(0.78\) \\
+\(20\)  & \(893\)  & \(4.93\) & \(0.78\) \\
+\(21\)  & \(857\)  & \(4.86\) & \(0.75\) \\
+\(22\)  & \(745\)  & \(4.40\) & \(0.67\) \\
+\(23\)  & \(612\)  & \(3.75\) & \(0.58\) \\
+\(24\)  & \(579\)  & \(3.67\) & \(0.57\) \\
 \midrule
-overall & \(\approx 786\) & \(\approx 4.78\) & \(\approx 1/1.5\) \\
+overall & \(786\) & \(4.78\) & \(0.69\) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\todo[inline]{Fill horizon rows from the recorded backtest result.}
+The error is diurnal, not horizon-compounding: \(\MAE_h\) is lowest
+overnight (\(h \le 5\)) and peaks across the midday demand plateau
+(\(h = 11\)--\(13\)). The ratio to seasonal persistence is best
+overnight (\(0.17\) at \(h = 1\)) and weakest across the dawn ramp
+(\(h = 8\)--\(9\), ratio \(0.96\)) --- the dawn ramp is the hardest
+part of the day for both the predictor and the persistence
+baseline.
 
 % ---------- References ----------
 \ifstandalone
