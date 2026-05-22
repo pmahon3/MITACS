@@ -136,7 +136,7 @@ gold-standard template the rest was raised to. Inspection-only scratch carries a
 greppable `PROVENANCE-GRADE: INSPECTION-ONLY` docstring banner — never cite it as a
 result.
 
-## Status (as of 2026-05-17)
+## Status (as of 2026-05-21)
 
 - ✅ Config-driven pipeline (`config/`, `run_pipeline.py` with stage registry,
   skip-if-exists, `--from/--to/--only/--daytype/--profile/--dry-run/--force`; `fast`/
@@ -152,12 +152,23 @@ result.
     excess kurtosis ≈24–33, tail ratio ≈2.4–3.8; clean VAR(1) reference reads ≈0/≈1).
     `Σ_j` is a Gaussian second-moment *proxy* of a heavy-tailed law — a mandatory
     writeup caveat.
+- ✅ **Goal-4 writeup drafted** (`writeup/tex/draft.tex` → `draft_body.tex`; ~10-page
+  PDF, builds clean). Self-contained application paper. As of 2026-05-21 cut ~38%
+  for professional polish (lab-notebook narration removed); pre-registration language
+  scoped to the §4.5 forward experiment only — the backtest, the error decomposition,
+  and the z-score comparisons are retrospective/exploratory analysis, not registered.
+  See `mitacs-writeup-state` (trust its top block).
+- ✅ **IESO retrospective head-to-head shown infeasible** from public archives
+  (Adequacy3 wrong horizon, DATotals wrong basis); the registered *forward* prediction
+  experiment (`experiment/freeze.py` frozen spec) is the design built in response.
 - 🗄️ `processing/locality/` (old θ-sweep, broken on the WLS API) removed; archived at
   `archive/legacy_locality_sweep.zip` (gitignored; recoverable from git history).
-- ⏳ Not yet started: IESO published-forecast comparison + web dashboard; the
-  publication writeup. A future production-scale (`full` profile) run is a separate
-  question — the re-baseline is the current trustworthy factual record.
+- ⏳ Open: the web dashboard; forward-experiment results accrue with calendar time;
+  the abstract (written last). A production-scale (`full` profile) run is a separate
+  question — the re-baseline remains the trustworthy factual record.
 - `scratch/` and `processing/innovations/scratch.py` are exploratory; not pipeline.
+  `scratch/postcovid_*.py` are inspection-only probes on the IEEE DataPort Post-COVID
+  competition dataset (its CSVs are gitignored — see `scratch/data/postcovid/README.md`).
 - `processing/innovations/validation/bandwidth_comparison.py` is a superseded
   investigation record (its conclusion is implemented); kept runnable for trace.
 
