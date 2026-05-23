@@ -171,7 +171,12 @@ def main():
         print(f"    MAE(X) - MAE(Y) = {dmae:>+7.2f} MW  "
               f"95% CI [{lo:>+7.2f}, {hi:>+7.2f}]{sep}")
 
-    # P3: theta-sensitivity differential
+    # P3: theta-sensitivity differential.
+    # The pre-registered claim is |MAE(D)-MAE(F)| < |MAE(C)-MAE(E)|
+    # -- a difference of absolute differences. Reported here as the
+    # qualitative side-by-side without a formal CI on the |.|-of-|.|
+    # statistic; treat the two θ-sensitivity numbers as point
+    # estimates only, NOT as a tested claim.
     needed = ("C_smc_global_gauss", "E_smc_prod_gauss",
               "D_smc_global_emp",   "F_smc_prod_emp")
     if all(k in cells for k in needed):
@@ -181,12 +186,12 @@ def main():
         df, _, _ = _bootstrap_dmae(cells["D_smc_global_emp"],
                                     cells["F_smc_prod_emp"],
                                     args.B, args.seed + 2)
-        # the |.| version not strictly comparable as differences-of-
-        # differences; report the two θ-sensitivities side by side.
-        print(f"\n  P3 θ-sensitivity (point ests, no CI):")
+        print(f"\n  P3 θ-sensitivity (qualitative comparison, no formal "
+              f"test):")
         print(f"    Gaussian-SMC  MAE(C) - MAE(E) = {ce:>+6.2f} MW")
         print(f"    empirical-SMC MAE(D) - MAE(F) = {df:>+6.2f} MW")
-        print(f"    (prediction: |empirical-SMC| < |Gaussian-SMC|)")
+        print(f"    Prediction is |empirical-SMC| < |Gaussian-SMC|;")
+        print(f"    no CI on |.|-of-|.|. Read as point estimates only.")
 
     if args.per_horizon:
         print("\n" + "=" * 74)
