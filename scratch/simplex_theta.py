@@ -20,7 +20,7 @@ Method discipline. The frozen theta-field IS the production theta*: each
 field point's theta* is read straight out of `local_drift_and_diffusion`
 (the production estimator), so it carries the production anchor-exclusion
 AND the day-anchor seam mask -- no parallel reimplementation, no drift.
-Step 3 then calls the production `_gauss_w` and replays `_local_fit_at`'s
+Step 3 then calls the production `_smap_w` and replays `_local_fit_at`'s
 drift/diffusion lines verbatim; the ONLY change from production is that
 theta comes from the simplex field instead of a per-query `_theta_loo_cv`.
 At a library point the simplex collapses onto it (zero distance) and
@@ -44,7 +44,7 @@ from scipy.spatial import cKDTree
 from edynamics.modelling_tools import Embedding
 
 from processing.innovations.estimator import (
-    _gauss_w,
+    _smap_w,
     _theta_loo_cv,
     local_drift_and_diffusion,
 )
@@ -177,8 +177,9 @@ def _fit_given_theta(
     lines verbatim from estimator._local_fit_at, with theta supplied
     instead of `_theta_loo_cv`-selected. The shared fit core for both the
     simplex-interpolated and the fixed-theta predictors."""
+    del d  # S-map kernel is dimension-independent; argument retained
     dists = np.linalg.norm(X - x_query, axis=1)
-    w = _gauss_w(dists, theta, d)
+    w = _smap_w(dists, theta)
     C = np.linalg.lstsq(w[:, None] * X, w[:, None] * Y, rcond=None)[0]
     resid = Y - X @ C
     mu = resid.mean(axis=0)

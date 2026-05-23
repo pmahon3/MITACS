@@ -185,7 +185,9 @@ def _build_fields(dims):
     spec = freeze.load_verified()
     cutoff = pd.Timestamp(spec["data_cutoff"])
     clim_method = spec["predictor"].get("climatology_method", "month_hour")
-    cache_key = (clim_method, cutoff.isoformat(),
+    # Cache key includes the kernel tag so a Gaussian-era cached field
+    # does not silently satisfy an S-map request (and vice versa).
+    cache_key = ("smap", clim_method, cutoff.isoformat(),
                  tuple(sorted({int(v) for v in dims.values()})))
     if FIELD_CACHE.exists():
         cached = pickle.loads(FIELD_CACHE.read_bytes())
@@ -409,14 +411,22 @@ def _per_horizon_table(prod, other, other_label):
 
 
 def fixed_theta_test(max_days=None,
-                     thetas=(1.7, 3.0, 4.2, 6.0)):
+                     thetas=(0.0, 0.5, 1.0, 2.0, 4.0, 8.0)):
     """FALSIFICATION CONTROL for the simplex-theta multi-step gain.
 
-    The per-horizon backtest showed the simplex predictor beats production
-    by up to ~29 MW at mid horizons -- while running at a uniformly higher
-    theta (median ~4.2 vs ~1.7). Hypothesis: the gain is a bandwidth-LEVEL
-    effect (a wider, more global theta is more robust once the iterated
-    trajectory has accumulated error), NOT a localisation or field effect.
+    The per-horizon backtest under the prior Gaussian kernel showed the
+    simplex predictor beats production by up to ~29 MW at mid horizons
+    while running at a uniformly higher Gaussian theta. The hypothesis
+    was that the gain is a bandwidth-LEVEL effect (a wider, more global
+    theta is more robust once the iterated trajectory has accumulated
+    error), NOT a localisation or field effect.
+
+    Under the S-map kernel (theta in the numerator, dimensionless,
+    theta=0 == global OLS) the same hypothesis is tested at a different
+    grid -- 0 is the global limit, 8 is the Sugihara-typical tight
+    locality endpoint. If a fixed theta near 0 recovers the simplex
+    predictor's gain, the simplex/field machinery is unnecessary route
+    to "use a more global theta multi-step".
 
     Test: run the iterated day-ahead backtest with theta pinned to a single
     constant -- no field, no per-query selection. If a fixed theta ~4
@@ -551,7 +561,8 @@ if __name__ == "__main__":
                          "(None = use cfg.data.day_anchor_hours)")
     ap.add_argument("--thetas", type=str, default=None,
                     help="comma-separated fixed-theta grid for the "
-                         "fixed-theta test (default 1.7,3.0,4.2,6.0)")
+                         "fixed-theta test (default 0,0.5,1,2,4,8 -- "
+                         "S-map dimensionless theta)")
     args = ap.parse_args()
     if args.window_shift_test:
         window_shift_test(max_days=args.max_days, anchor_h=args.anchor_h)

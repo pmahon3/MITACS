@@ -1,32 +1,39 @@
-"""Local Gaussian predictive-semigroup estimator.
+"""Local Gaussian predictive-semigroup estimator (S-map kernel).
 
 For each anchor time the estimator fits a local linear drift ``C_j`` by
-weighted least squares whose Gaussian drift bandwidth ``theta_j`` is chosen
-per anchor by **true leave-one-out cross-validation** on one-step forecast
-error, and a local diffusion ``Sigma_j`` = the mu-centred *plain* covariance
-of the locally-fitted residuals ``Y - X @ C_j`` (NO residual kernel).
+weighted least squares whose S-map (Sugihara 1994) bandwidth
+``theta_j`` is chosen per anchor by **true leave-one-out
+cross-validation** on one-step forecast error, and a local diffusion
+``Sigma_j`` = the mu-centred *plain* covariance of the locally-fitted
+residuals ``Y - X @ C_j`` (NO residual kernel).
 
-Why this design (see memory ``mitacs-theta-rail-pinning`` for the full
-evidence trail):
+S-map weights are ``w_i = exp(-theta * dist_i / d_bar)`` with
+``d_bar = mean(dist_i)``: dimensionless ``theta >= 0``, ``theta = 0``
+the global linear fit (a finite achievable left endpoint), ``theta``
+increasing localising. See :func:`_smap_w` for the definition and the
+draft (eq:weights) for the model framing.
 
-  - The edynamics ``LocalGLSelector`` is degenerate for the normalized
-    Gaussian kernel: its GL score has no interior optimum (sigma* pins at
-    any grid ceiling; score monotone-decreasing as bandwidth -> inf).
-    Verified empirically. The Resolvent_Framework programme prescribes no
-    bandwidth-selection convention to defer to (verified). So the rule is
-    a settled applied-statistics choice, not a theory question.
-  - true-LOO-CV is the only candidate that is well-posed (genuinely
-    U-shaped objective), non-degenerate, per-anchor adaptive, and free of
-    extra hyperparameters.
+Why this design (see memory ``mitacs-theta-rail-pinning`` for the
+evidence trail under the prior Gaussian-kernel parameterisation, and
+the 2026-05-23 S-map switch in commit history):
+
+  - The edynamics ``LocalGLSelector``'s GL criterion is degenerate for
+    the normalised Gaussian kernel (its ``theta^{-d}`` normaliser
+    cancels the penalty-growth opposition the criterion requires).
+    The S-map kernel carries no such normaliser; the bandwidth-search
+    pathology that motivated true-LOO-CV under the Gaussian kernel
+    does not exist here, but true-LOO-CV is kept as the selection rule
+    so the empirical re-test is a clean parameterisation comparison.
+  - true-LOO-CV is well-posed (genuinely U-shaped objective when the
+    underlying optimum is interior; monotone in the global direction
+    when the optimum is at the boundary), non-degenerate, per-anchor
+    adaptive, and free of extra hyperparameters.
   - Dropping the residual kernel: diffusion is still residual-based and
     still spatially local (theta localizes which points enter the fit);
     only the residual-magnitude reweighting is removed. The kernel
-    systematically shrank Sigma toward the small-residual core (the
-    collapse pathology in mild form); the plain covariance is the
-    unbiased local second moment -- the honest ``kappa_Q`` 2nd moment,
-    not a robustified proxy. Empirically, CV-likelihood when free to pick
-    sigma reproduces the plain covariance within ~10%, and the headline
-    spectral structure (r_hat) is invariant across all bandwidth rules.
+    systematically shrank Sigma toward the small-residual core; the
+    plain covariance is the unbiased local second moment -- the honest
+    ``kappa_Q`` 2nd moment, not a robustified proxy.
 
 Together ``(C_j, Sigma_j)`` parameterise the per-anchor Gaussian Markov
 kernel ``x' | x ~ N(x @ C_j, Sigma_j)`` on the delay-embedding state space.
@@ -89,10 +96,25 @@ class SemigroupEstimate:
     anchor_times: np.ndarray
 
 
-def _gauss_w(dist: np.ndarray, theta: float, dim: int) -> np.ndarray:
-    """Normalized Gaussian kernel weights (matches edynamics ``Gaussian``)."""
-    norm = (2.0 * np.pi) ** (-dim / 2) * (1.0 / theta**dim)
-    return norm * np.exp(-0.5 * (dist / theta) ** 2)
+def _smap_w(dist: np.ndarray, theta: float) -> np.ndarray:
+    """S-map (Sugihara 1994) kernel weights:
+    ``w_i = exp(-theta * dist_i / d_bar)`` with ``d_bar = mean(dist)``.
+
+    Dimensionless ``theta >= 0``: ``theta = 0`` is uniform weights (the
+    global linear fit, finite achievable point); ``theta`` increasing
+    localises. Distance to the first power, not squared. No normaliser
+    -- WLS uses relative weights, so the absent ``theta^{-d}`` factor
+    that the Gaussian kernel previously carried makes no difference to
+    the resulting ``C, Sigma``, but removes the GL-degeneracy pathology
+    that factor induced.
+    """
+    dbar = dist.mean()
+    if dbar <= 0:
+        # all distances zero -> uniform weights (query coincides with
+        # every library point; degenerate, but well-defined as the
+        # global limit).
+        return np.ones_like(dist)
+    return np.exp(-theta * dist / dbar)
 
 
 def _theta_loo_cv(
@@ -100,27 +122,35 @@ def _theta_loo_cv(
     X: np.ndarray,
     Y: np.ndarray,
     d: int,
-    n_grid: int = 18,
+    n_grid: int = 17,
     sub: int = 150,
     seed: int = 0,
 ) -> float:
-    """Per-anchor drift bandwidth by TRUE leave-one-out one-step CV.
+    """Per-anchor S-map bandwidth by TRUE leave-one-out one-step CV.
 
     True LOO (refit C excluding the held-out row) is genuinely U-shaped in
     theta; an *in-sample* weighted residual is monotone and rail-pins. LOO
     is O(m^2) per theta, so it is evaluated exactly on a bounded random
     subsample of ``sub`` library points (no convention-sensitive
     hat-matrix shortcut -- a buggy shortcut was the reason this is naive).
+
+    Grid: ``linspace(0, 8, n_grid)`` -- the Sugihara-typical S-map range.
+    ``theta = 0`` is the global linear fit (a finite, achievable left
+    endpoint); ``theta = 8`` weights the nearest neighbour ~3000x more
+    than the mean-distance one. ``d`` is unused by the S-map kernel but
+    kept in the signature for backwards compatibility with callers
+    threaded under the older Gaussian-kernel API.
     """
+    del d  # S-map kernel is dimension-independent; argument retained
     n = len(dists)
     rng = np.random.default_rng(seed)
     idx = rng.choice(n, sub, replace=False) if n > sub else np.arange(n)
     Xs, Ys, ds = X[idx], Y[idx], dists[idx]
     m = len(idx)
-    grid = np.geomspace(max(ds.min(), 1e-3), ds.max(), n_grid)
-    best = (np.inf, grid[len(grid) // 2])
+    grid = np.linspace(0.0, 8.0, n_grid)
+    best = (np.inf, grid[0])
     for th in grid:
-        w = _gauss_w(ds, th, d)
+        w = _smap_w(ds, th)
         if w.sum() <= 0:
             continue
         tot = 0.0
@@ -193,7 +223,7 @@ def _local_fit_at(
     """
     dists = np.linalg.norm(X - x_query, axis=1)
     theta = _theta_loo_cv(dists, X, Y, d)
-    w = _gauss_w(dists, theta, d)
+    w = _smap_w(dists, theta)
     C = np.linalg.lstsq(w[:, None] * X, w[:, None] * Y, rcond=None)[0]
 
     resid = Y - X @ C
