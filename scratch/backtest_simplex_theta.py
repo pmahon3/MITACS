@@ -177,7 +177,7 @@ def _pre_cutoff_embedding(z_pre, d):
     return emb
 
 
-def _build_fields(dims, anchor_h):
+def _build_fields(dims):
     """One frozen theta-field per embedding dimension. Each field's theta*
     is the PRODUCTION theta* (read from local_drift_and_diffusion) at every
     pre-cutoff library point -- disk-cached, since that is one LOO-CV per
@@ -214,8 +214,7 @@ def _build_fields(dims, anchor_h):
         print(f"  building theta-field d={d}: {len(anchors)} library "
               f"points (production LOO-CV each, parallel) ...", flush=True)
         fields[d] = build_theta_field(
-            embedding=emb, anchors=anchors, day_anchor_hour=anchor_h,
-            pool=pool)
+            embedding=emb, anchors=anchors, pool=pool)
     FIELD_CACHE.write_bytes(
         pickle.dumps({"key": cache_key, "fields": fields}))
     print(f"  cached theta-field(s) -> {FIELD_CACHE}")
@@ -486,10 +485,9 @@ def main(max_days=None):
 
     spec = freeze.load_verified()
     dims = spec["predictor"]["embedding_dims"]
-    anchor_h = spec["predictor"]["day_anchor_hour"]
 
     print("\nfreezing theta-field(s):")
-    fields = _build_fields(dims, anchor_h)
+    fields = _build_fields(dims)
 
     print("\nrunning backtests:")
     fc_prod = _run(days, mode="production")

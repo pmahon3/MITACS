@@ -49,17 +49,11 @@ Per day-type \(\mathrm{dt} \in \{\mathrm{weekday},
 \mathrm{saturday}, \mathrm{sunday}\}\) the embedding dimension
 \(d = d(\mathrm{dt})\) is selected on pre-cutoff library data by the
 elbow rule on the one-step in-sample prediction-skill curve
-\(\rho \mapsto d\), with the \emph{day-type seam} excluded --- here
-defined as the 07:00 hour at which the active day-type changes; a
-one-step pair \((x_t, x_{t+1})\) whose target time \(t+1\) falls on
-that hour crosses to a different day-type's library and is dropped
-from the fit (see Section~\ref{sec:pipeline}). The pre-cutoff library
-is
+\(\rho \mapsto d\). The pre-cutoff library is
 \begin{equation}
 \label{eq:library}
 \mathcal{L} \;=\; \{\,(x_t, x_{t+1}) : t \le t_{\mathrm{cut}},\;
-t \text{ on the day-type } \mathrm{dt},\;
-t+1 \notin \text{day-type seam}\,\} \,,
+t \text{ on the day-type } \mathrm{dt}\,\} \,,
 \end{equation}
 with \(t_{\mathrm{cut}}\) the model-specification cutoff.
 
@@ -285,13 +279,15 @@ The instantiation is a four-stage pipeline on IESO public
 \texttt{PUB\_Demand}: hourly demand is de-seasonalised to a stationary
 \(z\)-score (Section~\ref{sec:zscore}); each hour is tagged
 \(\{\mathrm{weekday}, \mathrm{saturday}, \mathrm{sunday}\}\) on a
-07:00 day-anchor offset; an embedding dimension is selected per
-day-type by an elbow rule on the prediction-skill-vs-dimension curve;
-and the Section~\ref{sec:method} estimator is fit per anchor.
-Transitions across the day-type seam are excluded
-(Section~\ref{sec:construction}) --- without this \(\Sj\) is
-catastrophically ill-conditioned, so the estimand is forced to be
-intra-day.
+single configured day-anchor (matching IESO's HE1--HE24 delivery-day
+convention); an embedding dimension is selected per day-type by an
+elbow rule on the prediction-skill-vs-dimension curve; and the
+Section~\ref{sec:method} estimator is fit per anchor. The delivery-day
+window and the day-type clock share a single source of truth, so
+multi-step trajectories do not cross an un-modelled day-type
+seam.\footnote{Three calendar days are excluded at load time as
+non-representative of normal demand dynamics: 14--16 August 2003, the
+Northeast blackout and its grid-restoration window.}
 
 \subsection{The \(z\)-score transform is a modelling choice, not a
 preprocessing detail}
@@ -328,9 +324,7 @@ The interval-coverage breakdown locates the mechanism: the raw-demand
 pipeline delivers uniform-width intervals that over-cover overnight
 and under-cover at the midday peak --- the signature of the missing
 \(\sigma_{m,h}\) scale step. Both sub-steps are load-bearing; the
-month\,\(\times\)\,hour climatology is retained, and
-Section~\ref{sec:backtest} compares it at production scale against a
-continuous-basis alternative.
+month\,\(\times\)\,hour climatology is retained.
 
 \subsection{Levers against the heavy-tailed conditional law}
 \label{sec:qualifier-verdict}
@@ -387,45 +381,15 @@ delivery days \(d \in \mathcal{D}\) and horizons
 \sum_{d \in \mathcal{D}} \sum_{h=1}^{24}
 \frac{\bigl| \hat{y}_{d,h} - y_{d,h} \bigr|}{y_{d,h}} \,.
 \end{equation}
-Over \(|\mathcal{D}| = 500\) out-of-sample days the backtest gives
-\(\MAE = 786~\mathrm{MW}\) and \(\MAPE = 4.78\%\),
-\(\approx 1.5\times\) better than seasonal persistence at every
-hour.\footnote{Body sha256 \texttt{e405a121\(\ldots\)}, recorded
-under frozen-spec hash \texttt{f0dd9c87\(\ldots\)}; per-horizon table
-in Appendix~\ref{app:backtest}.} Since horizon \(h\) is collinear
-with hour-of-day in a day-ahead forecast, the error is diurnal ---
-lowest at deep night, highest on the dawn/dusk ramps --- not
-horizon-compounding. Interval coverage carries the
-Section~\ref{sec:caveat} caveat: a Gaussian interval around a
-heavy-tailed innovation under-covers.
-
-The \((\mu_{m,h}, \sigma_{m,h})\) lookup jumps discretely at month
-boundaries. A continuous Fourier climatology --- a basis in
-(day-of-year, hour-of-day), \(K_{\mathrm{year}} = K_{\mathrm{day}} =
-8\), no cross-terms --- was re-fit on the same \(500\)-day span:
-\begin{center}\small
-\begin{tabular}{l r r r}
-\toprule
-metric & \(\mu_{m,h}\) lookup & Fourier (\(K_y=K_d=8\)) & \(\Delta\) \\
-\midrule
-overall \(\MAE\)            & \(786\)~MW   & \(904\)~MW   & \(+118\)~MW \\
-overall \(\MAPE\)           & \(4.78\%\)   & \(5.42\%\)   & \(+0.64\)~pp \\
-persistence-168h \(\MAE\)   & \(1138\)~MW  & \(1138\)~MW  & --- \\
-interval coverage           & \(20.8\%\)   & \(21.8\%\)   & \(+1.0\)~pp \\
-\bottomrule
-\end{tabular}
-\end{center}
-The lookup wins by \(\sim 15\%\) in \(\MAE\): Fourier improves
-slightly on the dawn ramp (\(h = 7\)--\(9\)) but loses \(+161\) to
-\(+361\) MW across the daytime peak (\(h = 11\)--\(16\)), where demand
-and absolute error are highest. The lookup's \(288\) cells carry the
-day-of-year \(\times\) hour-of-day interaction --- the seasonal
-peak-load shape varies by month --- which a cross-term-free Fourier
-basis cannot represent; the \(\sim 12\) month-boundary days on which
-Fourier improves do not outweigh the \(\sim 365\) on which it loses
-seasonal-by-hour resolution.\footnote{A Fourier basis with
-cross-interaction terms (\(\sim 289\) parameters, matching the cell
-count) is a natural variant, out of scope here.}
+Since horizon \(h\) is collinear with hour-of-day in a day-ahead
+forecast, the error structure is diurnal --- lowest at deep night,
+highest on the dawn/dusk ramps --- not horizon-compounding. Interval
+coverage carries the Section~\ref{sec:caveat} caveat: a Gaussian
+interval around a heavy-tailed innovation under-covers.\todo[inline]{
+Backtest numerics pending: the predictor has been realigned to a
+single delivery-day anchor (cf.\ Section~\ref{sec:pipeline}); the
+re-emitted CLAIM-grade artifact and per-horizon table are pending a
+v2 frozen specification of the realigned predictor.}
 
 \subsection{Registered forward prediction experiment}
 \label{sec:registered}
@@ -629,17 +593,6 @@ statistically separated from the argmin, the precise selected value
 carries little weight, and \(\Cj\) is in effect a single global
 linear operator.
 
-The library \(\mathcal{L}\) (Eq.~\ref{eq:library}) drops one-step
-pairs \((x_t, x_{t+1})\) whose \emph{target} time \(t+1\) falls on the
-07:00 anchor hour; source-side filtering would not remove the same
-pairs. These are \(\approx 4\%\) of the pairs but are the artificial
-overnight-to-morning discontinuities that otherwise dominate \(\Sj\):
-weekday per-component residual excess kurtosis falls from
-\(\approx 133\) to \(\approx 5\) once they are removed. The mask is
-parameterised by the anchor hour and disabled for inputs with no
-day-type structure, such as the synthetic VAR(1) of
-Section~\ref{sec:synth}.
-
 Estimation at an anchor and the multi-step forecast generator of
 Section~\ref{sec:caveat} call one local-fit routine, which maps a
 library \((X, Y)\) and an explicit query state to
@@ -691,59 +644,8 @@ score.
 \section{Per-horizon backtest table}
 \label{app:backtest}
 
-Table~\ref{tab:backtest-horizons} reports per-horizon backtest error
-on the out-of-sample delivery days
-(\(|\mathcal{D}| = 500\) days, horizons \(h = 1, \ldots, 24\)).
-\(\MAE\) and \(\MAPE\) are defined in Eq.~\ref{eq:mae-mape}; the
-persistence baseline is the seasonal-persistence value at the same
-hour-of-day from one week prior.
-
-\begin{table}[h]
-\centering
-\caption{Per-horizon backtest error and ratio to the
-seasonal-persistence baseline.}
-\label{tab:backtest-horizons}
-\begin{tabular}{c c c c}
-\toprule
-Horizon \(h\) & \(\MAE_h\) (MW) & \(\MAPE_h\) (\%) & \(\MAE_h /\MAE_h^{\mathrm{persist}}\) \\
-\midrule
-\(1\)   & \(161\)  & \(1.08\) & \(0.17\) \\
-\(2\)   & \(215\)  & \(1.48\) & \(0.23\) \\
-\(3\)   & \(241\)  & \(1.67\) & \(0.26\) \\
-\(4\)   & \(288\)  & \(2.00\) & \(0.32\) \\
-\(5\)   & \(370\)  & \(2.54\) & \(0.40\) \\
-\(6\)   & \(563\)  & \(3.80\) & \(0.59\) \\
-\(7\)   & \(839\)  & \(5.43\) & \(0.83\) \\
-\(8\)   & \(1011\) & \(6.25\) & \(0.96\) \\
-\(9\)   & \(1056\) & \(6.43\) & \(0.96\) \\
-\(10\)  & \(1130\) & \(6.92\) & \(0.94\) \\
-\(11\)  & \(1190\) & \(7.27\) & \(0.92\) \\
-\(12\)  & \(1182\) & \(7.23\) & \(0.87\) \\
-\(13\)  & \(1154\) & \(7.10\) & \(0.82\) \\
-\(14\)  & \(1105\) & \(6.82\) & \(0.78\) \\
-\(15\)  & \(1037\) & \(6.36\) & \(0.74\) \\
-\(16\)  & \(959\)  & \(5.72\) & \(0.71\) \\
-\(17\)  & \(891\)  & \(5.08\) & \(0.71\) \\
-\(18\)  & \(886\)  & \(4.89\) & \(0.74\) \\
-\(19\)  & \(908\)  & \(4.95\) & \(0.78\) \\
-\(20\)  & \(893\)  & \(4.93\) & \(0.78\) \\
-\(21\)  & \(857\)  & \(4.86\) & \(0.75\) \\
-\(22\)  & \(745\)  & \(4.40\) & \(0.67\) \\
-\(23\)  & \(612\)  & \(3.75\) & \(0.58\) \\
-\(24\)  & \(579\)  & \(3.67\) & \(0.57\) \\
-\midrule
-overall & \(786\) & \(4.78\) & \(0.69\) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The error is diurnal, not horizon-compounding: \(\MAE_h\) is lowest
-overnight (\(h \le 5\)) and peaks across the midday demand plateau
-(\(h = 11\)--\(13\)). The ratio to seasonal persistence is best
-overnight (\(0.17\) at \(h = 1\)) and weakest across the dawn ramp
-(\(h = 8\)--\(9\), ratio \(0.96\)) --- the dawn ramp is the hardest
-part of the day for both the predictor and the persistence
-baseline.
+\todo[inline]{Per-horizon backtest pending the v2 frozen-spec
+emission of the realigned predictor (see Section~\ref{sec:backtest}).}
 
 % ---------- References ----------
 \ifstandalone

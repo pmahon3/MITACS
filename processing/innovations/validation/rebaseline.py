@@ -81,19 +81,15 @@ def _intraday_mask(fl, dayid, d):
     return np.array(keep)
 
 
-def _row(label, estimand, emb, anchors, d, day_anchor_hour, library):
+def _row(label, estimand, emb, anchors, d, library):
     """All numbers here come from production functions only."""
     anchors = pd.DatetimeIndex([a for a in anchors if a in emb.block.index])
-    est = build_local_gaussian_semigroup(
-        embedding=emb, anchors=anchors, day_anchor_hour=day_anchor_hour
-    )
+    est = build_local_gaussian_semigroup(embedding=emb, anchors=anchors)
     innov_var = est.covariances[:, 0, 0]                       # production
     conds = np.array([np.linalg.cond(S) for S in est.covariances])  # standard
     eks, trs = [], []
     for a in anchors:
-        di = innovation_diagnostics(
-            embedding=emb, anchor=a, day_anchor_hour=day_anchor_hour
-        )
+        di = innovation_diagnostics(embedding=emb, anchor=a)
         if np.isfinite(di["excess_kurt"]):
             eks.append(di["excess_kurt"])
             trs.append(di["tail_ratio"])
@@ -130,7 +126,7 @@ def rebaseline(n_anchors: int = 60, seed: int = 7) -> list[BaselineRow]:
         an = interior[
             np.sort(rng.choice(len(interior), min(n_anchors, len(interior)), replace=False))
         ]
-        rows.append(_row(f"VAR1_clean_d{d}", "n/a", emb, an, d, None, len(idx)))
+        rows.append(_row(f"VAR1_clean_d{d}", "n/a", emb, an, d, len(idx)))
 
     # --- Ontario: full_process vs intra_day, fixed shared anchors --------
     df = pd.read_csv(
@@ -157,10 +153,10 @@ def rebaseline(n_anchors: int = 60, seed: int = 7) -> list[BaselineRow]:
         ]
 
         rows.append(
-            _row(dt, "full_process", emb_full, anchors, d, ah, len(fl_full))
+            _row(dt, "full_process", emb_full, anchors, d, len(fl_full))
         )
         rows.append(
-            _row(dt, "intra_day", emb_intra, anchors, d, ah, len(fl_intra))
+            _row(dt, "intra_day", emb_intra, anchors, d, len(fl_intra))
         )
     return rows
 
@@ -198,9 +194,7 @@ if __name__ == "__main__":
     emb.compile()
     rng = np.random.default_rng(0)
     an = pd.DatetimeIndex(np.sort(rng.choice(fl, 30, replace=False)))
-    est = build_local_gaussian_semigroup(
-        embedding=emb, anchors=an, day_anchor_hour=cfg.data.day_anchor_hours
-    )
+    est = build_local_gaussian_semigroup(embedding=emb, anchors=an)
     with tempfile.TemporaryDirectory() as tmp:
         ok = _roundtrip_ok(est, Path(tmp))
     print()

@@ -51,7 +51,7 @@ def _pool(emb, libt, rng):
     for a in anchors:
         try:
             _C, S, _mu, _theta, resid = local_drift_and_diffusion(
-                embedding=emb, anchor=a, day_anchor_hour=None,
+                embedding=emb, anchor=a,
             )
         except Exception:
             continue

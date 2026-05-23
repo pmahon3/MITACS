@@ -68,7 +68,6 @@ def main(cfg: PipelineConfig, daytype: str | None = None) -> None:
         estimate = build_local_gaussian_semigroup(
             embedding=embedding,
             anchors=anchors,
-            day_anchor_hour=cfg.data.day_anchor_hours,
         )
         spectrum = diffusion_spectrum(estimate.eigvals)
 

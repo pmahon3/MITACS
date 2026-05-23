@@ -69,27 +69,21 @@ class ThetaField:
 
 
 def _theta_at_anchor_pos(
-    block: np.ndarray, hours: np.ndarray, anchor_pos: int,
-    day_anchor_hour: int | None, d: int,
+    block: np.ndarray, anchor_pos: int, d: int,
 ) -> float:
     """Production theta* at one anchor, from arrays only.
 
-    Replays `local_drift_and_diffusion` EXACTLY: drop the anchor row from
-    the block, form one-step (X, Y) pairs, apply the day-anchor seam mask
-    on the TARGET hour, then `_theta_loo_cv`. Array-only so it can run in
-    a worker without shipping the heavy `Embedding`. `block`/`hours` are
-    the embedding block values and its index hours; `anchor_pos` is the
-    anchor's row position in `block`.
+    Replays `local_drift_and_diffusion`: drop the anchor row from the
+    block, form one-step (X, Y) pairs, `_theta_loo_cv`. Array-only so
+    it can run in a worker without shipping the heavy `Embedding`. The
+    target-hour seam mask was dropped 2026-05-22 (see estimator.py and
+    memory mitacs-realignment); only the anchor-row exclusion remains.
     """
     keep_row = np.ones(len(block), dtype=bool)
     keep_row[anchor_pos] = False              # drop the anchor row
     blk = block[keep_row]
-    blk_hours = hours[keep_row]
     X = blk[:-1]
     Y = blk[1:]
-    if day_anchor_hour is not None:
-        keep = blk_hours[1:] != day_anchor_hour   # mask on TARGET hour
-        X, Y = X[keep], Y[keep]
     x0 = block[anchor_pos]
     dists = np.linalg.norm(X - x0, axis=1)
     return float(_theta_loo_cv(dists, X, Y, d))
@@ -98,17 +92,16 @@ def _theta_at_anchor_pos(
 def _theta_chunk(args):
     """Worker: production theta* for a contiguous chunk of anchor
     positions. Returns (positions, theta* values)."""
-    block, hours, positions, day_anchor_hour, d = args
+    block, positions, d = args
     out = np.empty(len(positions))
     for k, pos in enumerate(positions):
-        out[k] = _theta_at_anchor_pos(block, hours, pos, day_anchor_hour, d)
+        out[k] = _theta_at_anchor_pos(block, pos, d)
     return positions, out
 
 
 def build_theta_field(
     embedding: Embedding,
     anchors: pd.DatetimeIndex,
-    day_anchor_hour: int | None,
     pool=None,
     chunk_size: int = 256,
 ) -> ThetaField:
@@ -116,8 +109,8 @@ def build_theta_field(
 
     theta* at each anchor is the production selection rule -- the
     array-only `_theta_at_anchor_pos` replays `local_drift_and_diffusion`
-    line-for-line (anchor-row drop, target-hour seam mask, `_theta_loo_cv`),
-    so the field is the production theta* by construction.
+    (anchor-row drop + `_theta_loo_cv`), so the field is the production
+    theta* by construction.
 
     `pool` (a `ray.util.multiprocessing.Pool` or any `.map`-capable pool)
     parallelises the per-anchor LOO-CV -- embarrassingly parallel, ~10x on
@@ -130,7 +123,6 @@ def build_theta_field(
     block_df = embedding.block
     d = block_df.shape[1]
     block = block_df.values
-    hours = block_df.index.hour.to_numpy()
     X = block[:-1]
     Y = block[1:]
 
@@ -141,13 +133,12 @@ def build_theta_field(
 
     if pool is None:
         theta_star = np.array([
-            _theta_at_anchor_pos(block, hours, p, day_anchor_hour, d)
-            for p in anchor_pos
+            _theta_at_anchor_pos(block, p, d) for p in anchor_pos
         ])
     else:
         chunks = [anchor_pos[i:i + chunk_size]
                   for i in range(0, len(anchor_pos), chunk_size)]
-        tasks = [(block, hours, ch, day_anchor_hour, d) for ch in chunks]
+        tasks = [(block, ch, d) for ch in chunks]
         theta_star = np.empty(len(anchor_pos))
         # map preserves order; positions returned for an explicit scatter
         base = 0

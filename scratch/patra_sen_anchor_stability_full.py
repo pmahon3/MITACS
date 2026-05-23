@@ -70,7 +70,7 @@ def _run_cell(df, daytype, d, ah, rng_seed):
     for a in anchors:
         try:
             _C, S, _mu, _theta, resid = local_drift_and_diffusion(
-                embedding=emb, anchor=a, day_anchor_hour=ah,
+                embedding=emb, anchor=a,
             )
         except Exception:
             continue

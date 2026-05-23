@@ -247,7 +247,7 @@ def collect_fibres(embedding, anchors, dah):
         coords.append(x0)
         # production fit must lie on the swept fibre at theta*
         C_prod, S_prod, _mu, th_star, _r = local_drift_and_diffusion(
-            embedding=embedding, anchor=anchor, day_anchor_hour=dah)
+            embedding=embedding, anchor=anchor)
         C_at, S_at = _fit_at_theta(X, Y, x0, d, th_star)
         sanity_max = max(sanity_max,
                          np.abs(C_at - C_prod).max(),

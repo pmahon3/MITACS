@@ -339,7 +339,7 @@ def channel_2(act: pd.Series, dims: dict, kind: str,
         for a in anchors:
             try:
                 C, Sigma, _mu, _theta, _resid = local_drift_and_diffusion(
-                    embedding=emb, anchor=a, day_anchor_hour=ANCHOR_H,
+                    embedding=emb, anchor=a,
                 )
             except Exception:
                 continue

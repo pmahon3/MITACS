@@ -127,7 +127,7 @@ def main(n_anchors: int = 60, seed: int = 7) -> None:
             Y_kept = Y_df[keep]
             target_times = Y_kept.index
             _C, _S, _mu, _theta, resid = local_drift_and_diffusion(
-                embedding=emb_intra, anchor=a, day_anchor_hour=ah,
+                embedding=emb_intra, anchor=a,
             )
             r0 = resid[:, 0]
             if len(r0) != len(target_times):

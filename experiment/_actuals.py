@@ -40,10 +40,29 @@ from config import load_config
 from .fourier_climatology import FourierParams, fit_fourier_params
 
 
+# Documented exclusions: full calendar dates whose hourly values are
+# dropped from the actuals series at load time. Every downstream caller
+# (fit library, climatology, scoring, backtest) sees the same coherent
+# absence. Each entry should name a reason; add inline footnotes in §A.
+#
+#   2003-08-14..16  Northeast blackout. Demand collapsed from ~24 GW at
+#                   14:00 EDT on Aug 14 to ~2.3 GW within two hours and
+#                   was rationed through grid restoration. The three
+#                   consecutive calendar days (Aug 14, 15, 16) are all
+#                   non-representative of normal demand dynamics; Aug 17
+#                   returns to a normal Sunday level and is kept.
+EXCLUDED_DATES = pd.DatetimeIndex([
+    "2003-08-14", "2003-08-15", "2003-08-16",
+])
+
+
 def _load_raw_actuals() -> pd.Series:
     """All hourly "Ontario Demand" from the git-tracked per-year
     ``PUB_Demand_<yr>.csv`` files (no cutoff). Single parser; mirrors
-    ``pre_processing.year_wise_standardization``."""
+    ``pre_processing.year_wise_standardization``.
+
+    ``EXCLUDED_DATES`` (see module-level constant) are dropped at load
+    time so every downstream consumer sees the same coherent absence."""
     cfg = load_config()
     frames = []
     for f in sorted(Path(cfg.paths.historical_csvs).glob("PUB_Demand_*.csv")):
@@ -57,7 +76,10 @@ def _load_raw_actuals() -> pd.Series:
             + ":00:00"
         )
         frames.append(df.set_index("Time")[["Ontario Demand"]])
-    return pd.concat(frames).sort_index()["Ontario Demand"]
+    s = pd.concat(frames).sort_index()["Ontario Demand"]
+    # drop excluded calendar dates (entire 24h of each)
+    excluded_mask = s.index.normalize().isin(EXCLUDED_DATES)
+    return s[~excluded_mask]
 
 
 def load_actuals(cutoff: pd.Timestamp | None = None) -> pd.Series:

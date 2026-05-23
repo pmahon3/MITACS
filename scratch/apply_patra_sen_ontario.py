@@ -115,7 +115,7 @@ def _pool_standardised_residuals(z: pd.Series, df: pd.DataFrame,
     for a in anchors:
         try:
             _C, S, _mu, _theta, resid = local_drift_and_diffusion(
-                embedding=emb_intra, anchor=a, day_anchor_hour=ah,
+                embedding=emb_intra, anchor=a,
             )
         except Exception:
             continue
