@@ -58,82 +58,111 @@ t \text{ on the day-type } \mathrm{dt}\,\} \,,
 with \(t_{\mathrm{cut}}\) the model-specification cutoff.
 
 \paragraph{Local linear fit.}
-For a query state \(x \in \Rb^{d}\), form the kernel weights
+For a query state \(x \in \Rb^{d}\), form the S-map kernel
+weights~\cite{Sugihara1994}
 \begin{equation}
 \label{eq:weights}
-w_i(x;\theta) \;=\; (2\pi)^{-d/2}\,\theta^{-d}\,
-\exp\!\left(-\frac{\lVert x_i - x \rVert^{2}}{2\theta^{2}}\right),
-\qquad (x_i, y_i) \in \mathcal{L} \,,
+w_i(x;\theta) \;=\;
+\exp\!\left(-\theta\,\frac{\lVert x_i - x \rVert}{\bar d(x)}\right),
+\qquad
+\bar d(x) \;=\; \frac{1}{|\mathcal{L}|}\sum_{i \in \mathcal{L}}
+\lVert x_i - x \rVert,
+\qquad (x_i, y_i) \in \mathcal{L},
 \end{equation}
-with bandwidth \(\theta > 0\) and \(y_i \equiv x_{t_i + 1}\). The
-weighted least-squares local linear one-step map
-\begin{equation}
-\label{eq:drift}
-x_{\text{next}} \;\approx\; x \cdot \Cj \qquad
-\text{(row convention; \(j\) indexes the query state)}
-\end{equation}
-solves
+with \(\theta \ge 0\) dimensionless: \(\theta = 0\) gives
+\(w_i \equiv 1\) (uniform weights, the global linear fit) and
+\(\theta\) increasing localises the weights toward the nearest
+neighbours. \(y_i \equiv x_{t_i + 1}\). The
+For each query state \(x\) and bandwidth \(\theta \ge 0\), the
+weighted least-squares local linear one-step operator is
 \begin{equation}
 \label{eq:wls}
-\Cj \;=\; \arg\min_{C \in \Rb^{d \times d}}
+C(x;\theta) \;=\;
+\arg\min_{C \in \Rb^{d \times d}}
 \sum_{i \in \mathcal{L}} w_i(x;\theta) \, \lVert y_i - x_i C \rVert^{2}
-\;=\; \bigl(X^{\top} W X\bigr)^{-1} X^{\top} W Y \,,
+\;=\; \bigl(X^{\top} W(\theta) X\bigr)^{-1} X^{\top} W(\theta) Y,
 \end{equation}
-where \(X, Y\) stack the library pairs and
-\(W = \operatorname{diag}(w_i)\). The plain (unweighted)
-residual covariance defines the diffusion,
+with \(W(\theta) = \operatorname{diag}(w_i(x;\theta))\), \(X, Y\) the
+stacked library pairs, and \(y_i \equiv x_{t_i + 1}\). Note that
+\(C(x;\theta)\) is a \emph{family} of operators indexed by \(\theta\):
+\(\theta = 0\) gives the global linear fit (uniform weights), and
+\(\theta\) increasing localises the operator at \(x\). The one-step
+map is then
+\begin{equation}
+\label{eq:drift}
+x_{\text{next}} \;\approx\; x \cdot C(x;\theta) \qquad
+\text{(row convention).}
+\end{equation}
+
+\paragraph{Bandwidth: a simplex-interpolated \(\theta\)-field.}
+The bandwidth is not a free hyperparameter to be selected at the
+query; it is itself a \emph{state-dependent quantity},
+\(\theta = \theta(x)\), produced by a two-stage scheme.
+
+\emph{Stage 1 (fit-time, one per library anchor).}
+At each library point \(x_j \in \mathcal{L}\), select \(\theta^{*}_j\)
+by true leave-one-out cross-validation on one-step squared error,
+\begin{equation}
+\label{eq:loocv}
+\theta^{*}_j \;=\;
+\arg\min_{\theta \ge 0}\;
+\mathcal{R}_{\mathrm{LOO}}(x_j;\theta), \qquad
+\mathcal{R}_{\mathrm{LOO}}(x_j;\theta)
+\;=\; \frac{1}{|\mathcal{L}|}
+\sum_{i \in \mathcal{L}}
+\bigl\lVert y_i - x_i C^{(-i)}(x_j;\theta) \bigr\rVert^{2},
+\end{equation}
+with \(C^{(-i)}(x_j;\theta)\) the WLS fit at query \(x_j\) excluding
+\((x_i, y_i)\). The collection
+\(\{(x_j, \theta^{*}_j) : x_j \in \mathcal{L}\}\) is a discrete
+\(\theta\)-field over the pre-cutoff embedding, frozen at fit time.
+
+\emph{Stage 2 (query-time, per prediction).}
+At a query state \(x\), interpolate the field via the
+\((d+1)\)-simplex of nearest library neighbours,
+\begin{equation}
+\label{eq:simplextheta}
+\theta(x) \;=\; \sum_{k=1}^{d+1} \pi_k(x)\, \theta^{*}_{j_k(x)},
+\end{equation}
+where \(\{j_k(x)\}_{k=1}^{d+1}\) are the indices of the \(d+1\) nearest
+library points to \(x\), and \(\pi_k(x)\) are normalised Sugihara
+simplex weights
+\(\pi_k(x) \propto \exp(-\lVert x_{j_k(x)} - x\rVert / d_{\min}(x))\)
+with \(d_{\min}(x) = \min_k \lVert x_{j_k(x)} - x\rVert\). The
+field thus transports a state-dependent bandwidth from the library to
+any query.
+
+\emph{The operator at \(x\) is then a single evaluation of the
+family,}
+\begin{equation}
+\label{eq:Cofx}
+C(x) \;:=\; C\bigl(x;\,\theta(x)\bigr),
+\end{equation}
+which inherits the \(\theta\)-field's smoothness on the embedding.
+The plain residual covariance at this fit,
 \begin{equation}
 \label{eq:diff}
-\Sj \;=\; \frac{1}{|\mathcal{L}|}
+\Sigma(x) \;=\; \frac{1}{|\mathcal{L}|}
 \sum_{i \in \mathcal{L}} \bigl(r_i - \bar r\bigr)
 \bigl(r_i - \bar r\bigr)^{\!\top},
-\qquad r_i := y_i - x_i \Cj,
-\quad \bar r := \tfrac{1}{|\mathcal{L}|}\sum_i r_i \,.
+\qquad r_i := y_i - x_i C(x),
+\quad \bar r := \tfrac{1}{|\mathcal{L}|}\sum_i r_i,
 \end{equation}
-The pair defines the state-dependent Gaussian Markov kernel
+defines the diffusion. Together they specify the state-dependent
+Gaussian Markov kernel
 \begin{equation}
 \label{eq:kernel}
-\Pij(x, \cdot) \;=\; \Nrm\!\bigl(x \Cj,\; \Sj\bigr) \,.
+\Pi(x, \cdot) \;=\; \Nrm\!\bigl(x \, C(x),\; \Sigma(x)\bigr).
 \end{equation}
 
 \paragraph{Why the plain (unweighted) covariance.}
-The kernel-weighted residual covariance
-\(\Sj^{w} = \sum_i w_i\,(r_i - \bar r)(r_i - \bar r)^{\!\top}
-/ \sum_i w_i\) collapses toward \(\approx w^{2}\!\cdot Q\) for the
-normalised Gaussian kernel of Eq.~\ref{eq:weights}; the plain
-covariance is the unbiased local second moment, free of that
-collapse.
-
-\paragraph{Bandwidth: locality of \(\Cj\).}
-Can the bandwidth \(\theta\) be chosen by data so that \(\Cj\) is
-genuinely local? Two rules were examined. The Goldenshluger--Lepski
-criterion in the supporting library predicts a bias--variance
-interior optimum; for the normalised Gaussian kernel of
-Eq.~\ref{eq:weights} its score is monotone in \(\theta\) with no
-interior optimum, so it returns only the grid ceiling. True
-leave-one-out cross-validation on one-step squared error,
-\begin{equation}
-\label{eq:loocv}
-\mathcal{R}_{\mathrm{LOO}}(\theta)
-\;=\; \frac{1}{|\mathcal{L}|}
-\sum_{i \in \mathcal{L}}
-\bigl\lVert y_i - x_i \Cj^{(-i)}(\theta) \bigr\rVert^{2},
-\end{equation}
-with \(\Cj^{(-i)}(\theta)\) the local fit at \(x_i\) excluding
-\((x_i, y_i)\), does have an interior argmin, but under a
-bootstrap-SE procedure (\(B = 10^{3}\) library resamples) it is not
-statistically separated from any other grid point. The same
-non-discrimination reproduces on three controlled systems (a linear
-VAR(1), the logistic map, a regime-switching AR) across horizons
-\(h \in \{1, 2, 4, 8, 16, 24\}\): it is a property of the criterion,
-not of Ontario data. At the \(d = 2\) z-score-lag embedding, \(\Cj\)
-is therefore effectively a single global linear operator.
-
-With \(\Cj\) effectively global and linear, the non-Dirac content of
-the predictive law is carried by \(\Sj\) and its departure from
-Gaussianity (Section~\ref{sec:caveat}). The available lever is the
-\emph{state representation} (richer embedding, explicit
-phase/derivative coordinate), not the bandwidth rule.
+A weighted residual covariance \(\Sigma^{w}(x) = \sum_i w_i\,
+(r_i - \bar r)(r_i - \bar r)^{\!\top} / \sum_i w_i\) shrinks toward
+the small-residual core as \(\theta(x)\) grows --- a collapse
+pathology the kernel-weighting machinery induces but does not
+represent in the estimand. The plain covariance is the unbiased local
+second moment of the residuals selected into the fit by \(w\), free
+of that shrinkage.
 
 \paragraph{The conditional law \(\kQ\) the estimator targets.}
 On a probability space \((\Omega, \mathcal{F}, P)\) with two
@@ -227,7 +256,11 @@ signed \(z\)-space error and the demand derivative \(\dd z/\dd t\):
 measured, it is \(\mathrm{corr} = -0.246\) (bootstrap 95\% CI
 \([-0.283,\, -0.207]\), \(n = 3167\)), monotone across
 rising/falling phase. \(\Pij\)'s location, not only its shape,
-departs from \(\kQ\).
+departs from \(\kQ\).\todo[inline]{Number measured under the
+Gaussian-kernel predictor; pending re-measurement under the S-map
+estimator (Eq.~\ref{eq:weights}). The structural claim (phase
+mis-centring is a property of the embedding, not of the kernel
+choice) is expected to survive.}
 
 \paragraph{Decomposition.}
 \label{sec:caveat-decomposition}
@@ -258,7 +291,11 @@ qualitative reading. The diffusion-shape diagnostic is run on
 standardised residuals of the multi-step forecast under
 propagation-aware variance; on the same data the propagation softens
 the apparent kurtosis roughly four-fold
-(\(\mathrm{kurt}_{\mathrm{exc}}: 6.1 \to 2.4\)).
+(\(\mathrm{kurt}_{\mathrm{exc}}: 6.1 \to 2.4\)).\todo[inline]{\(\DA\),
+\(\DB\), \(\nuhat\), and the kurtosis values are pending
+re-measurement under the S-map estimator (Eq.~\ref{eq:weights}). The
+structural decomposition into mean-bias and diffusion-shape oracles
+is parameterisation-independent.}
 
 \paragraph{The one-step conditional law remains heavy-tailed.} The
 propagation softening is a property of the multi-step forecast
@@ -267,7 +304,10 @@ library residual has \(\mathrm{kurt}_{\mathrm{exc}} \approx
 24\)--\(33\) (one-step, local, no propagation), and that figure is
 preprocessing-independent. Section~\ref{sec:qualifier-verdict}
 quantifies this one-step departure directly and examines what can be
-done about it.
+done about it.\todo[inline]{Kurtosis range measured under the
+Gaussian-kernel predictor; pending re-measurement under the S-map
+estimator. The structural claim (the scalar coord-0 innovation is
+heavy-tailed) is expected to survive.}
 
 \section{Application and results}
 \label{sec:application}
@@ -359,7 +399,12 @@ consistent reading is that the contamination is structurally
 orthogonal to the lagged-\(z\) state on which all four levers
 operate: reducing it requires exogenous information --- temperature,
 weather regime, calendar event flags --- not further variation within
-the past-demand information set.
+the past-demand information set.\todo[inline]{Patra--Sen
+\(\hat\alpha_L^{95\%}\) range and the Student-\(t\)-kernel
+\(\approx 1.8\%\) gain were measured under the Gaussian-kernel
+predictor; pending re-measurement under S-map. The qualitative
+reading --- mixture-structured contamination, lever orthogonal to
+the lagged-\(z\) state --- is parameterisation-independent.}
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
@@ -567,31 +612,29 @@ Section~\ref{sec:construction}. The anchor's own pair is removed from
 leave-one-out at the anchor.
 
 The bandwidth \(\theta^{*}\) minimises the leave-one-out objective
-\(\mathcal{R}_{\mathrm{LOO}}\) (Eq.~\ref{eq:loocv}) over a per-anchor
-geometric grid
+\(\mathcal{R}_{\mathrm{LOO}}\) (Eq.~\ref{eq:loocv}) over a fixed
+dimensionless grid
 \begin{equation}
 \label{eq:thetagrid}
-\{\theta_k\}_{k=1}^{18}
-\;=\; \operatorname{geomspace}
-\bigl(\max(d_{\min}, 10^{-3}),\ d_{\max};\ 18\bigr),
-\qquad
-d_{\min/\max} = \min/\max_{i}\lVert x_i - x\rVert,
+\{\theta_k\}_{k=1}^{K}
+\;=\; \operatorname{linspace}(0, \theta_{\max}; K),
 \end{equation}
-so the candidates span the inter-point scales present at that anchor.
-True leave-one-out refits \(\Cj^{(-i)}\) for every held-out row, at
-cost \(O(m^{2})\) per grid point; it is evaluated exactly on a fixed
-random subsample of \(150\) library pairs (the full library when
-\(|\mathcal{L}| \le 150\)), drawn from a seeded generator for
-reproducibility.\footnote{The naive refit-per-row form is used in
-place of a hat-matrix shortcut, which was found to be both buggy and
-sensitive to the weighting convention; the subsample evaluation is
-exact and costs \(\approx 0.1\,\)s per call.} The fitting stage
-consumes the grid argmin directly --- no rail-pin guard, edge
-fallback, or clipping --- which the non-discrimination result of
-Section~\ref{sec:construction} licenses: with no grid point
-statistically separated from the argmin, the precise selected value
-carries little weight, and \(\Cj\) is in effect a single global
-linear operator.
+spanning the full local--global range: \(\theta = 0\) is the global
+linear fit (uniform weights), and \(\theta_{\max}\) is the tightest
+locality the grid resolves. True leave-one-out refits \(\Cj^{(-i)}\)
+for every held-out row, at cost \(O(m^{2})\) per grid point; it is
+evaluated exactly on a fixed random subsample of \(150\) library
+pairs (the full library when \(|\mathcal{L}| \le 150\)), drawn from a
+seeded generator for reproducibility.\footnote{The naive
+refit-per-row form is used in place of a hat-matrix shortcut, which
+was found to be both buggy and sensitive to the weighting convention;
+the subsample evaluation is exact and costs \(\approx 0.1\,\)s per
+call.} The fitting stage consumes the grid argmin directly --- no
+rail-pin guard, edge fallback, or clipping. Because the S-map kernel
+(Eq.~\ref{eq:weights}) carries no \(\theta\)-dependent normaliser,
+the LOO objective has a well-posed left endpoint at \(\theta = 0\)
+and admits the global linear operator as a finite, achievable
+selection rather than an unattained limit.
 
 Estimation at an anchor and the multi-step forecast generator of
 Section~\ref{sec:caveat} call one local-fit routine, which maps a
@@ -602,33 +645,6 @@ post-cutoff query against a pre-cutoff library. The forecast path is
 therefore the estimation path --- the backtest numbers of
 Section~\ref{sec:backtest} come from the code the synthetic recovery
 gate of Section~\ref{sec:synth} validates, not a re-implementation.
-
-Finally, the Goldenshluger--Lepski criterion of the supporting
-library is degenerate on the normalised kernel of
-Eq.~\ref{eq:weights}. The criterion balances a data-fit term against a
-complexity penalty and is well posed only when the fit term's bias
-proxy grows with bandwidth. Here the weights carry the normalising
-factor \((2\pi)^{-d/2}\theta^{-d}\), so as \(\theta \to \infty\),
-\begin{equation}
-\label{eq:gl-degeneracy}
-w_i \;\sim\; \theta^{-d} \to 0,
-\qquad
-\underbrace{E(\theta) = w^{\top}g}_{\text{data fit}} \to 0,
-\qquad
-\underbrace{\Pi(\theta) \sim
-\tfrac{\theta^{-d} + \sigma^{-d}}{n_{\mathrm{eff}}}}_{\text{penalty}}
-\to 0,
-\end{equation}
-with the fit term driven to zero by the normalisation faster than the
-penalty vanishes. The total score decreases monotonically to
-\(0^{+}\) with no interior turning point: the normalisation cancels
-exactly the bandwidth-growing opposition the criterion requires.
-Co-optimising drift and residual bandwidth on a real anchor with the
-grid ceiling raised through \(50, 200, 10^{3}, 5\times10^{3}\) pins
-the residual bandwidth at the ceiling every time and recovers no
-interior optimum. The leave-one-out rule is used in its place: an
-applied-statistics choice on a kernel family the criterion was not
-designed for, not a departure from a prescribed convention.
 
 The forward experiment of Section~\ref{sec:registered} enforces its
 committed specification mechanically. The content hash of the

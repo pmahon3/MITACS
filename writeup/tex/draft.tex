@@ -60,9 +60,15 @@
 
 % ---------- Commands (paper-specific notation) ----------
 \newcommand{\kQ}{\kappa_{Q}}
-\newcommand{\Sj}{\Sigma_{j}}
-\newcommand{\Cj}{C_{j}}
-\newcommand{\Pij}{\Pi^{(j)}}
+% C, Sigma, Pi are functions of the query state x under the
+% simplex-interpolated theta-field scheme (see eq:Cofx, eq:diff,
+% eq:kernel in draft_body.tex). The legacy \Cj, \Sj, \Pij macros
+% are now shorthand for C(x), Sigma(x), Pi(x, .) at the query state
+% (the "j" index is suppressed; one operator per query, evaluated
+% at the simplex-interpolated theta(x)).
+\newcommand{\Sj}{\Sigma(x)}
+\newcommand{\Cj}{C(x)}
+\newcommand{\Pij}{\Pi}
 \newcommand{\Pidelta}{\Pi_{\Delta}}
 \newcommand{\Rb}{\mathbb{R}}
 \newcommand{\Nrm}{\mathcal{N}}
