@@ -27,6 +27,8 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 
+from config import load_config
+
 from .ledger import read_ledger
 
 
@@ -81,7 +83,9 @@ def _daytype(ts: pd.Timestamp, anchor_h: int) -> str:
     )
 
 
-def score(anchor_hours: int = 7) -> ScoreReport:
+def score() -> ScoreReport:
+    cfg = load_config()
+    anchor_hours = cfg.data.day_anchor_hours
     led = read_ledger()
     graded = led[led["actual_mw"].notna()].copy()
     n_settled = len(graded)

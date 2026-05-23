@@ -53,6 +53,7 @@ from scratch.simplex_theta import (
     build_theta_field,
     fit_at_fixed_theta,
     fit_at_simplex_theta,
+    fit_global_ols,
 )
 
 ISSUE_HOUR_OFFSET = pd.Timedelta(hours=1)
@@ -61,16 +62,30 @@ ISSUE_HOUR_OFFSET = pd.Timedelta(hours=1)
 FIELD_CACHE = Path("/tmp/simplex_theta_fields.pkl")
 
 
-def _run(delivery_dates, mode, theta_fields=None, fixed_theta=None):
+def _run(delivery_dates, mode, theta_fields=None, fixed_theta=None,
+         anchor_h=None):
     """Iterated 24h day-ahead forecast for each date.
 
     mode='production' : _local_fit_at (theta via _theta_loo_cv per query)
     mode='simplex'    : fit_at_simplex_theta (theta from the frozen field)
     mode='fixed'      : fit_at_fixed_theta (a single constant `fixed_theta`)
+    mode='global'     : fit_global_ols (w_i=1 -- literal global OLS, the
+                        asymptote-of-wide-theta directly; no localisation)
+
+    `anchor_h`: the delivery-day anchor (target h=1 = D+anchor_h:00).
+    None (default) reads from cfg.data.day_anchor_hours so the
+    delivery-day clock matches the day-type clock (memory
+    mitacs-realignment). Override for diagnostic probes only.
     """
+    if anchor_h is None:
+        anchor_h = load_config().data.day_anchor_hours
     spec = freeze.load_verified()
     cutoff = pd.Timestamp(spec["data_cutoff"])
-    anchor_h = spec["predictor"]["day_anchor_hour"]
+    # NOTE: `experiment.predict_multistep.day_ahead` reads anchor_h from
+    # the spec (registered predictor binds its anchor); the probe reads
+    # from config/kwarg so realignment experiments can run without a v2
+    # spec. The spec's anchor is still on file (and may differ); a
+    # mismatch is a probe-result reading concern, not a code bug.
     dims = spec["predictor"]["embedding_dims"]
     clim_method = spec["predictor"].get("climatology_method", "month_hour")
     zp = zscore_params(cutoff, method=clim_method)
@@ -83,7 +98,8 @@ def _run(delivery_dates, mode, theta_fields=None, fixed_theta=None):
 
     for D in pd.DatetimeIndex(delivery_dates):
         D = pd.Timestamp(D.date())
-        targets = [D + pd.Timedelta(hours=h) for h in range(24)]
+        targets = [D + pd.Timedelta(hours=anchor_h + h)
+                   for h in range(24)]
         issue_anchor = targets[0] - ISSUE_HOUR_OFFSET
         dmax = max(int(v) for v in dims.values())
         hist_need = [issue_anchor - pd.Timedelta(hours=i) for i in range(dmax)]
@@ -124,6 +140,8 @@ def _run(delivery_dates, mode, theta_fields=None, fixed_theta=None):
             elif mode == "fixed":
                 C, Sigma, theta = fit_at_fixed_theta(
                     X, Y, x_query, d, fixed_theta)
+            elif mode == "global":
+                C, Sigma, theta = fit_global_ols(X, Y, x_query, d)
             else:
                 raise ValueError(f"unknown mode {mode!r}")
 
@@ -245,6 +263,136 @@ def _metrics(fc, actual, label):
     return {"mae": mae, "mape": mape, "per_h": per_h, "fc": fc}
 
 
+def window_shift_test(max_days=None, anchor_h=None):
+    """ANCHOR PROBE: run the multi-step backtest at an arbitrary
+    delivery-day anchor (overriding cfg.data.day_anchor_hours).
+
+    Built originally to test the "9-to-9 IESO alignment" hypothesis;
+    that hypothesis turned out wrong (IESO's HE1..HE24 IS 00:00->23:00,
+    so the correct IESO-aligned anchor is 0). Retained as a general
+    diagnostic for ad-hoc anchor comparisons without editing the YAML.
+
+    With `anchor_h=None` (default) this just runs the configured pipeline.
+
+    PROVENANCE-GRADE: INSPECTION-ONLY.
+    """
+    if anchor_h is None:
+        anchor_h = load_config().data.day_anchor_hours
+    actual = load_actuals(cutoff=None)
+    cutoff = pd.Timestamp("2024-12-31T23:00:00")
+    days = _complete_delivery_days(actual, anchor_h)
+    days = days[days > cutoff]
+    # for an anchor>0 window, the LAST delivery day's last targets spill
+    # into the next calendar day; drop it from the population so every
+    # day has 24 in-range actuals.
+    if anchor_h > 0:
+        days = days[:-1]
+    if max_days:
+        days = days[:max_days]
+
+    print("=" * 70)
+    print(f"ANCHOR probe: anchor_h={anchor_h} "
+          f"(targets {anchor_h:02d}:00 -> {(anchor_h + 23) % 24:02d}:00"
+          f"{' next day' if anchor_h > 0 else ''})  (INSPECTION-ONLY)")
+    print(f"post-cutoff delivery days: {len(days)}  "
+          f"({days.min().date()}..{days.max().date()})")
+    print("=" * 70)
+
+    print("\nrunning production + global-OLS backtests ...", flush=True)
+    fc_prod = _run(days, mode="production", anchor_h=anchor_h)
+    fc_glob = _run(days, mode="global", anchor_h=anchor_h)
+    for fc in (fc_prod, fc_glob):
+        fc["actual_mw"] = fc["target_dt"].map(actual)
+        fc["err"] = fc["our_forecast_mw"] - fc["actual_mw"]
+
+    prod = _metrics(fc_prod, actual, "production")
+    glob = _metrics(fc_glob, actual, "global-OLS")
+    print(f"\n  overall dMAE (global-OLS - production): "
+          f"{glob['mae'] - prod['mae']:+.1f} MW")
+    print(f"  reference (00-23 window): production 786.3, "
+          f"global-OLS 763.1, dMAE -23.2")
+
+    # per-horizon table WITH clock-hour annotation so the flip's
+    # position can be read either way
+    print(f"\n  PER-HORIZON delta (global-OLS - production), "
+          f"shifted window:")
+    print(f"    {'h':>3} {'clk':>3} {'prod_MAE':>9} {'glob_MAE':>9} "
+          f"{'dMAE':>8}  {'prod_sgnERR':>11}")
+    for h in range(1, 25):
+        clk = (anchor_h + h - 1) % 24
+        p = prod["per_h"].get(h)
+        s = glob["per_h"].get(h)
+        if p is None or s is None:
+            continue
+        gp = fc_prod[fc_prod["horizon_h"] == h].dropna(subset=["actual_mw"])
+        sgn = gp["err"].mean() if len(gp) else float("nan")
+        print(f"    {h:>3} {clk:>02d}: {p['mae']:>9.1f} {s['mae']:>9.1f} "
+              f"{s['mae'] - p['mae']:>+8.1f}  {sgn:>+11.1f}")
+
+    print("\n  READING (no verdict baked in):")
+    print("    flip persists at clock 23 (h=15 of a 9-to-9 day)")
+    print("       -> clock-hour-specific. 23:00 demand has something")
+    print("          specific (it is the daily minimum); window choice")
+    print("          doesn't fix it.")
+    print("    flip moves to clock 08 (h=24 of a 9-to-9 day)")
+    print("       -> trajectory-position-specific. The iterated bias")
+    print("          crosses zero at whichever diurnal trough the")
+    print("          trajectory ends in. 9-to-9 is operationally right")
+    print("          for IESO alignment but doesn't fix the flip.")
+    print("=" * 70)
+
+
+def global_ols_test(max_days=None):
+    """ASYMPTOTE SANITY CHECK: run the iterated multi-step backtest with
+    w_i = 1 (literal global unweighted OLS) -- the theta -> infinity
+    asymptote the wide-theta bracketing was approaching.
+
+    The wide-theta sweep reported dMAE -22.8 MW at theta=25 with the
+    marginal gain asymptoting (theta=15 -> 25 only bought -0.8 MW). The
+    monotone descent suggests the multi-step optimum IS the global
+    operator; this run reads the asymptote directly. If global-OLS dMAE
+    matches theta=25 within a few MW, the asymptote IS the optimum and
+    the S-map (theta-in-numerator) parameterisation is the natural
+    cleanup -- theta=0 there is global-OLS at a finite, achievable point.
+    If global-OLS dMAE descends further beyond theta=25's reading, the
+    picture is different and we re-think.
+
+    PROVENANCE-GRADE: INSPECTION-ONLY.
+    """
+    anchor_h = load_config().data.day_anchor_hours
+    actual = load_actuals(cutoff=None)
+    cutoff = pd.Timestamp("2024-12-31T23:00:00")
+    days = _complete_delivery_days(actual, anchor_h)
+    days = days[days > cutoff]
+    if max_days:
+        days = days[:max_days]
+
+    print("=" * 70)
+    print("GLOBAL-OLS asymptote sanity check  (INSPECTION-ONLY)")
+    print(f"post-cutoff delivery days: {len(days)}  "
+          f"({days.min().date()}..{days.max().date()})")
+    print("=" * 70)
+
+    print("\nrunning backtests:")
+    prod = _metrics(_run(days, mode="production"), actual, "production")
+    glob = _metrics(_run(days, mode="global"), actual, "global-OLS")
+    print(f"  -> overall dMAE vs production: "
+          f"{glob['mae'] - prod['mae']:+.1f} MW")
+    print(f"  -> reference: fixed theta=25 was -22.8 MW; "
+          f"fixed theta=15 was -22.0 MW")
+
+    _per_horizon_table(prod, glob, "global-OLS")
+
+    print("\n  READING (no verdict baked in):")
+    print("    global-OLS dMAE matches the wide-theta asymptote")
+    print("       -> the asymptote IS the optimum. S-map (theta in the")
+    print("          numerator, theta=0 == global) is the right cleanup;")
+    print("          the production estimator should refactor to it.")
+    print("    global-OLS dMAE descends further past the asymptote")
+    print("       -> the wide-theta sweep was still climbing; revisit.")
+    print("=" * 70)
+
+
 def _per_horizon_table(prod, other, other_label):
     """Print the per-horizon dMAE/dMAPE/theta table for `other` vs prod."""
     print(f"\n  PER-HORIZON delta ({other_label} - production):")
@@ -278,9 +426,10 @@ def fixed_theta_test(max_days=None,
 
     PROVENANCE-GRADE: INSPECTION-ONLY.
     """
+    anchor_h = load_config().data.day_anchor_hours
     actual = load_actuals(cutoff=None)
     cutoff = pd.Timestamp("2024-12-31T23:00:00")
-    days = _complete_delivery_days(actual)
+    days = _complete_delivery_days(actual, anchor_h)
     days = days[days > cutoff]
     if max_days:
         days = days[:max_days]
@@ -300,11 +449,13 @@ def fixed_theta_test(max_days=None,
         print(f"  -> overall dMAE vs production: "
               f"{m['mae'] - prod['mae']:+.1f} MW")
 
-    # full per-horizon table for the theta closest to the simplex median
-    th_match = min(thetas, key=lambda t: abs(t - 4.2))
-    fc_match = _run(days, mode="fixed", fixed_theta=th_match)
-    m_match = _metrics(fc_match, actual, f"fixed={th_match}")
-    _per_horizon_table(prod, m_match, f"fixed theta={th_match}")
+    # full per-horizon table for the widest theta tested -- shows whether
+    # the per-horizon gain shape holds (and where it saturates) as theta
+    # is pushed out toward the global limit.
+    th_show = max(thetas)
+    fc_show = _run(days, mode="fixed", fixed_theta=th_show)
+    m_show = _metrics(fc_show, actual, f"fixed={th_show}")
+    _per_horizon_table(prod, m_show, f"fixed theta={th_show}")
 
     print("\n  READING (no verdict baked in):")
     print("    fixed theta~4 RECOVERS the simplex per-horizon gain")
@@ -319,9 +470,10 @@ def fixed_theta_test(max_days=None,
 
 def main(max_days=None):
     cfg = load_config()
+    anchor_h = cfg.data.day_anchor_hours
     actual = load_actuals(cutoff=None)
     cutoff = pd.Timestamp("2024-12-31T23:00:00")
-    days = _complete_delivery_days(actual)
+    days = _complete_delivery_days(actual, anchor_h)
     days = days[days > cutoff]
     if max_days:
         days = days[:max_days]
@@ -387,8 +539,30 @@ if __name__ == "__main__":
     ap.add_argument("--fixed-theta-test", action="store_true",
                     help="run the fixed-theta falsification control "
                          "(no field build) instead of the simplex backtest")
+    ap.add_argument("--global-ols-test", action="store_true",
+                    help="run the global-OLS (w=1) asymptote sanity "
+                         "check -- decides whether the asymptote IS the "
+                         "multi-step optimum before any refactor")
+    ap.add_argument("--window-shift-test", action="store_true",
+                    help="anchor probe: production + global-OLS at an "
+                         "arbitrary anchor_h (use --anchor-h, or omit to "
+                         "use cfg). Diagnostic for ad-hoc anchor "
+                         "comparisons without editing the YAML.")
+    ap.add_argument("--anchor-h", type=int, default=None,
+                    help="override anchor_h for --window-shift-test "
+                         "(None = use cfg.data.day_anchor_hours)")
+    ap.add_argument("--thetas", type=str, default=None,
+                    help="comma-separated fixed-theta grid for the "
+                         "fixed-theta test (default 1.7,3.0,4.2,6.0)")
     args = ap.parse_args()
-    if args.fixed_theta_test:
-        fixed_theta_test(max_days=args.max_days)
+    if args.window_shift_test:
+        window_shift_test(max_days=args.max_days, anchor_h=args.anchor_h)
+    elif args.global_ols_test:
+        global_ols_test(max_days=args.max_days)
+    elif args.fixed_theta_test:
+        kw = {"max_days": args.max_days}
+        if args.thetas:
+            kw["thetas"] = tuple(float(t) for t in args.thetas.split(","))
+        fixed_theta_test(**kw)
     else:
         main(max_days=args.max_days)

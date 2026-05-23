@@ -75,7 +75,7 @@ def test_ledger_and_scoring() -> None:
             "graded forecast was overwritten -- immutability violated"
 
     with mock.patch.object(S, "read_ledger", return_value=l3):
-        r = S.score(anchor_hours=7)
+        r = S.score()
 
     assert r.sufficient and r.n_settled == 240, r
     assert r.ours["mae"] < r.ieso_DIFFERENT_HORIZON_reference["mae"], \

@@ -214,3 +214,24 @@ def fit_at_fixed_theta(
     bandwidth-LEVEL effect, not a localisation or field effect."""
     C, Sigma = _fit_given_theta(X, Y, x_query, d, theta)
     return C, Sigma, theta
+
+
+def fit_global_ols(
+    X: np.ndarray, Y: np.ndarray, x_query: np.ndarray, d: int,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """(C, Sigma, theta) at x_query with w_i = 1 for all i -- the literal
+    global unweighted OLS fit. This is the limit the wide-theta backtests
+    were asymptoting toward; running it directly gives the asymptote's
+    value at a single, achievable point (no theta sweep needed). Returns
+    theta=0.0 as a sentinel meaning 'uniform weights'.
+
+    No state-dependence at all: the same (C, Sigma) is produced at every
+    query state. So `x_query` is unused except as a signature match.
+    """
+    del x_query  # global OLS: query state irrelevant to the fit
+    C = np.linalg.lstsq(X, Y, rcond=None)[0]
+    resid = Y - X @ C
+    mu = resid.mean(axis=0)
+    rc = resid - mu[None, :]
+    Sigma = rc.T @ rc / len(rc)
+    return C, Sigma, 0.0

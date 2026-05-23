@@ -164,9 +164,13 @@ if __name__ == "__main__":
         fc = pd.read_csv(cfg.paths.forecast_csv, parse_dates=["datetime"])
         tgt = pd.DatetimeIndex(fc["datetime"])
     elif args.targets:
+        # Delivery-day window anchored at cfg.data.day_anchor_hours so
+        # the target list matches the day-type clock (memory
+        # mitacs-realignment): D + anchor_h .. D + anchor_h + 23h.
+        anchor_h = cfg.data.day_anchor_hours
         tgt = pd.DatetimeIndex(
             [
-                d + pd.Timedelta(hours=h)
+                d + pd.Timedelta(hours=anchor_h + h)
                 for d in pd.to_datetime(args.targets.split(","))
                 for h in range(24)
             ]

@@ -33,7 +33,13 @@ data:
   year_range: [2018, 2025]   # inclusive start, exclusive end (range semantics)
   variable_name: zscore
   daytypes: [weekday, saturday, sunday]
-  day_anchor_hours: 7        # the "day" starts at 07:00, not midnight
+  day_anchor_hours: 0        # the "day" starts at 00:00, matching IESO's
+                             # HE1..HE24 delivery-day convention (HE1 is
+                             # the hour ending 01:00, so the operating day
+                             # runs 00:00->23:00). The delivery-day window
+                             # AND the day-type clock share this single
+                             # source of truth -- see memory
+                             # mitacs-realignment.
 
 embedding:
   max_dimensions: 10

@@ -60,10 +60,17 @@ def _both_available_days() -> tuple[pd.DatetimeIndex, pd.Series, pd.Series]:
     act = load_actuals(cutoff=None)
     fc_hours = set(ieso.index)
     days = sorted({d.normalize() for d in ieso.index})
+    # Delivery-day window anchored at cfg.data.day_anchor_hours (memory
+    # mitacs-realignment). Under anchor_h>0 our day-D window spans two
+    # IESO calendar days, but the per-hour head-to-head is still
+    # well-defined (IESO publishes per-hour forecasts).
+    anchor_h = cfg.data.day_anchor_hours
     keep = [
         D for D in days
-        if all((D + pd.Timedelta(hours=h)) in act.index for h in range(24))
-        and all((D + pd.Timedelta(hours=h)) in fc_hours for h in range(24))
+        if all((D + pd.Timedelta(hours=anchor_h + h)) in act.index
+               for h in range(24))
+        and all((D + pd.Timedelta(hours=anchor_h + h)) in fc_hours
+                for h in range(24))
     ]
     return pd.DatetimeIndex(keep), act, ieso
 
@@ -79,7 +86,7 @@ def _mape(p, a):
     return float(e.mean() * 100) if len(e) else np.nan
 
 
-def run_headtohead(anchor_h: int = 7) -> dict:
+def run_headtohead() -> dict:
     spec = freeze.load_verified()
     cutoff = pd.Timestamp(spec["data_cutoff"])
     days, act, ieso = _both_available_days()

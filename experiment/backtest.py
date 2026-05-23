@@ -35,29 +35,42 @@ from .predict_multistep import day_ahead
 from .score import _daytype
 
 
-def _complete_delivery_days(actual: pd.Series, dmax: int = 4) -> pd.DatetimeIndex:
-    """Dates D with all 24 actual hours AND >= dmax actual hours of
-    pre-issue history immediately before D 00:00."""
+def _complete_delivery_days(
+    actual: pd.Series, anchor_h: int, dmax: int = 4
+) -> pd.DatetimeIndex:
+    """Dates D with all 24 actual hours of the *delivery-day window*
+    (``D + anchor_h .. D + anchor_h + 23h``) AND >= ``dmax`` actual
+    hours of pre-issue history immediately before ``D + anchor_h``.
+
+    The window is anchored at ``cfg.data.day_anchor_hours`` so that the
+    delivery-day clock and the day-type clock share one anchor (see
+    memory ``mitacs-realignment``). ``anchor_h`` is mandatory -- the
+    earlier ``anchor_h=7`` default coexisted silently with a 00:00
+    delivery window and created the seam misalignment that produced the
+    h=24 flip artefact.
+    """
     days = pd.DatetimeIndex(sorted({ts.normalize() for ts in actual.index}))
     out = []
     idx = actual.index
     for D in days:
-        day_hours = pd.date_range(D, periods=24, freq="h")
+        win_start = D + pd.Timedelta(hours=anchor_h)
+        day_hours = pd.date_range(win_start, periods=24, freq="h")
         if not all(h in idx for h in day_hours):
             continue
-        hist = [D - pd.Timedelta(hours=i + 1) for i in range(dmax)]
+        hist = [win_start - pd.Timedelta(hours=i + 1) for i in range(dmax)]
         if all(h in idx for h in hist):
             out.append(D)
     return pd.DatetimeIndex(out)
 
 
-def run_backtest(max_days: int | None = None, anchor_h: int = 7) -> dict:
+def run_backtest(max_days: int | None = None) -> dict:
     cfg = load_config()
+    anchor_h = cfg.data.day_anchor_hours
     actual = load_actuals(cutoff=None)
     cutoff = pd.Timestamp("2024-12-31T23:00:00")
     # backtest only on POST-cutoff days (true out-of-sample for the frozen
     # model; pre-cutoff days are training territory).
-    days = _complete_delivery_days(actual)
+    days = _complete_delivery_days(actual, anchor_h)
     days = days[days > cutoff]
     if max_days:
         days = days[:max_days]
@@ -110,7 +123,8 @@ def run_backtest(max_days: int | None = None, anchor_h: int = 7) -> dict:
             "mean_demand_mw": float(g["actual_mw"].mean()),
         })
 
-    # t-24h day-type mismatch rate (07:00 anchor crosses regime at weekends)
+    # t-24h day-type mismatch rate (the day-anchor crosses regime at
+    # weekends -- the anchor is configured via cfg.data.day_anchor_hours).
     tt = fc["target_dt"]
     mism = np.mean([
         _daytype(t, anchor_h) != _daytype(t - pd.Timedelta(hours=24), anchor_h)

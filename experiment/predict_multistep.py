@@ -14,9 +14,12 @@ Integrity (same discipline as the one-step predictor):
     legitimate: you know the past when forecasting tomorrow;
   * within day D the lag vector is filled with PREDICTIONS, never peeked
     actuals (that is what makes it a real forecast, and why error grows);
-  * day-type / embedding dim re-resolved PER TARGET HOUR (the 07:00
-    anchor can switch regime mid-horizon -- faithful to clustering and
-    the one-step predictor).
+  * day-type / embedding dim re-resolved PER TARGET HOUR (with the
+    delivery-day window anchored at cfg.data.day_anchor_hours, a
+    24-hour trajectory STARTS at the day-anchor and ends just before
+    the next one, so day-type does not change mid-horizon -- the
+    realignment that closed the h=24 flip artefact, see memory
+    mitacs-realignment).
 
 Interval note: the per-step Gaussian Sigma band is a proxy of a verified
 heavy-tailed innovation AND ignores cross-step error accumulation, so
@@ -77,8 +80,12 @@ def day_ahead(delivery_dates: pd.DatetimeIndex) -> pd.DataFrame:
 
     for D in pd.DatetimeIndex(delivery_dates):
         D = pd.Timestamp(D.date())
-        targets = [D + pd.Timedelta(hours=h) for h in range(24)]
-        issue_anchor = targets[0] - ISSUE_HOUR_OFFSET  # D-1 23:00
+        # Delivery-day window is anchored at the day-anchor: targets run
+        # from D+anchor_h to D+anchor_h+23h, matching the day-type clock
+        # so iterated trajectories don't cross an un-modelled seam
+        # mid-flight (see memory mitacs-realignment).
+        targets = [D + pd.Timedelta(hours=anchor_h + h) for h in range(24)]
+        issue_anchor = targets[0] - ISSUE_HOUR_OFFSET
 
         # need d real actuals immediately before issue (max d across daytypes)
         dmax = max(int(v) for v in dims.values())
