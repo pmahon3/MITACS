@@ -223,6 +223,79 @@ this correspondence:
   the semigroup.)
 \end{enumerate}
 
+\subsection{Multi-step propagation: mean iteration and SMC}
+\label{sec:multistep}
+
+The one-step kernel \(\Pij\) admits two distinct \(h\)-step
+propagation modes. Both \emph{iterate} the single-step
+\(\Pidelta\); neither constructs the semigroup
+\(\{\Pi_t\}\) of qualifier~3 above.
+
+\emph{Mean iteration} (point trajectory). Starting from
+\(x_0\), produce a deterministic length-\(h\) trajectory by iterating
+the conditional mean,
+\begin{equation}
+\label{eq:meaniter}
+x_h^{\mathrm{mean}} \;=\;
+x_{h-1}^{\mathrm{mean}} \cdot C\!\bigl(x_{h-1}^{\mathrm{mean}}\bigr),
+\qquad h = 1, 2, \ldots
+\end{equation}
+The diffusion \(\Sj\) sizes a per-step interval but never feeds
+forward; the point forecast at horizon \(h\) is
+\(\hat{x}_h = x_h^{\mathrm{mean}}\).
+
+\emph{Sequential Monte Carlo}~\cite{DoucetJohansen2009}
+(ensemble of trajectories). Maintain \(M\) particles
+\(\{x_h^{(m)}\}_{m=1}^{M}\); at each step, draw each particle's next
+state from the local kernel at its current position,
+\begin{equation}
+\label{eq:smc-step}
+x_h^{(m)} \;\sim\; \Pi\!\bigl(x_{h-1}^{(m)}, \cdot\bigr)
+\;=\; \Nrm\!\bigl(x_{h-1}^{(m)} \cdot C\!\bigl(x_{h-1}^{(m)}\bigr),\;
+\Sigma\!\bigl(x_{h-1}^{(m)}\bigr)\bigr).
+\end{equation}
+The Gaussian form of Eq.~\ref{eq:smc-step} samples from the
+estimator's Gaussian projection of \(\kQ\); an alternative
+\emph{empirical-residual} variant resamples a coordinate-0 residual
+\(r^{(m)}\) directly from the local fit's residual array and sets
+\(x_h^{(m)} = x_{h-1}^{(m)} \cdot C(x_{h-1}^{(m)}) + r^{(m)}\)
+(rank-1: only coord 0 is stochastic; coords 1..d-1 are deterministic
+lag shifts). Both variants iterate \(\Pidelta\); they differ only in
+which sampling law the per-step innovation is drawn from.
+Point forecast at horizon \(h\) is the ensemble mean
+\(\hat{x}_h = M^{-1}\sum_m x_h^{(m)}\); predictive intervals are
+ensemble quantiles.
+
+The two modes consume the same one-step kernel differently: mean
+iteration discards \(\Sj\) at every step, while SMC propagates it
+(or, in the empirical variant, the residuals it summarises). The
+Section~\ref{sec:caveat} qualifier~2 (imposed Gaussianity) bites
+asymmetrically across these modes --- a structurally heavy-tailed
+innovation under-couples to mean iteration's point forecast but
+enters SMC's ensemble shape directly.
+
+\section{Illustrative simulations}
+\label{sec:illustrations}
+
+\todo[inline]{Demonstration of the model and its multi-step
+propagation modes on closed-form ground-truth systems, prior to any
+Ontario number. Section to be filled in as a \(2\times 2\) grid of
+canonical cases: innovation law \(\{\text{Gaussian},
+\text{heavy-tailed}\}\) \(\times\) prediction scheme
+\(\{\text{mean iteration}, \text{SMC}\}\)
+(Section~\ref{sec:multistep}). The two rows use VAR(1) ground-truth
+with Gaussian and Student-\(t_5\) innovations respectively
+(closed-form \(h\)-step predictive distributions are known in both);
+the two columns instantiate Eq.~\ref{eq:meaniter} and
+Eq.~\ref{eq:smc-step}. Expected behaviour: mean iteration tracks the
+closed-form mean in both rows; SMC (empirical-residual variant)
+recovers the closed-form mean \emph{and} the predictive distribution
+in both rows; SMC with the Gaussian sampling variant of
+Eq.~\ref{eq:smc-step} matches the closed form on the Gaussian row
+but under-covers on the heavy-tailed row --- demonstrating, on
+known ground truth, the Section~\ref{sec:caveat} structural
+qualifier 2 (imposed Gaussianity) under each prediction scheme.}
+
 \section{Structural caveat: a mis-centred conditional mean and a
 Gaussian-proxy diffusion}
 \label{sec:caveat}
@@ -230,7 +303,10 @@ Gaussian-proxy diffusion}
 The two estimator factors \(\Cj\) and \(\Sj\) each carry a quantified
 limitation. A decomposition on the 2021--22 development-set window,
 with predictive variance propagated over the full delivery-day
-population, finds \textbf{neither effect large enough to act on}.
+population, finds the recoverable-loss factors small in both
+directions; the specific values are deferred to the
+Section~\ref{sec:caveat-decomposition} reporting and inherit the
+pending-re-measurement caveat noted there.
 
 \paragraph{\(\Sj\) is rank-1 by construction.} For a single-variable
 delay embedding, coordinates \(2, \ldots, d\) of the one-step image
@@ -528,6 +604,14 @@ recorded as a single CLAIM-grade artifact (body sha256
 \section{Limitations and reproducibility}
 \label{sec:limits}
 
+\todo[inline]{The specific empirical values cited below
+(\(\approx 4.8\%\), \(\approx 2.3\%\), the \(4\times\) kurtosis
+softening, the \(1.8\%\) Student-\(t\)-kernel gain, the \(49\)--\(74\%\)
+Patra--Sen range) inherit the Section~\ref{sec:caveat-decomposition}
+and Section~\ref{sec:qualifier-verdict} pending-re-measurement
+caveats. The qualitative structure of each limitation is
+parameterisation-independent.}
+
 \begin{itemize}
   \item \textbf{Estimator limitations (Section~\ref{sec:caveat}).}
   \(\Pij\) departs from \(\kQ\) in location (\(\Cj\)
@@ -585,7 +669,12 @@ conditional law requires \emph{exogenous information} (temperature,
 weather regime, calendar event flags), not further variation within
 the past-demand information set. The estimator's evaluation is run
 forward as a registered prediction experiment, the retrospective
-IESO head-to-head being infeasible from public archives.
+IESO head-to-head being infeasible from public archives.\todo[inline]{
+The cited \(1.8\%\) and \(49\)--\(74\%\) values are the
+Section~\ref{sec:qualifier-verdict} measurements pending
+re-measurement; the qualitative conclusion (contamination
+orthogonal to the lagged-\(z\) state; the lever is exogenous
+information) is parameterisation-independent.}
 
 \appendix
 
