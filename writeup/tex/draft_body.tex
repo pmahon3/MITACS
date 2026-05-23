@@ -266,35 +266,32 @@ Point forecast at horizon \(h\) is the ensemble mean
 \(\hat{x}_h = M^{-1}\sum_m x_h^{(m)}\); predictive intervals are
 ensemble quantiles.
 
-The two modes consume the same one-step kernel differently: mean
-iteration discards \(\Sj\) at every step, while SMC propagates it
-(or, in the empirical variant, the residuals it summarises). The
-Section~\ref{sec:caveat} qualifier~2 (imposed Gaussianity) bites
-asymmetrically across these modes --- a structurally heavy-tailed
-innovation under-couples to mean iteration's point forecast but
-enters SMC's ensemble shape directly.
+The two modes differ in their use of the diffusion factor \(\Sj\).
+Mean iteration discards \(\Sj\) at each step; SMC propagates it
+(or, in the empirical variant, the residuals it summarises).
+Qualifier 2 (imposed Gaussianity; see Section~\ref{sec:caveat})
+therefore has asymmetric consequences across the two modes: a
+structurally heavy-tailed innovation enters the mean-iteration point
+forecast only through its effect on \(C\), but enters the SMC
+predictive distribution directly at every step.
 
 \section{Illustrative simulations}
 \label{sec:illustrations}
 
-\todo[inline]{Demonstration of the model and its multi-step
-propagation modes on closed-form ground-truth systems, prior to any
-Ontario number. Section to be filled in as a \(2\times 2\) grid of
-canonical cases: innovation law \(\{\text{Gaussian},
-\text{heavy-tailed}\}\) \(\times\) prediction scheme
-\(\{\text{mean iteration}, \text{SMC}\}\)
-(Section~\ref{sec:multistep}). The two rows use VAR(1) ground-truth
-with Gaussian and Student-\(t_5\) innovations respectively
-(closed-form \(h\)-step predictive distributions are known in both);
-the two columns instantiate Eq.~\ref{eq:meaniter} and
-Eq.~\ref{eq:smc-step}. Expected behaviour: mean iteration tracks the
-closed-form mean in both rows; SMC (empirical-residual variant)
-recovers the closed-form mean \emph{and} the predictive distribution
-in both rows; SMC with the Gaussian sampling variant of
-Eq.~\ref{eq:smc-step} matches the closed form on the Gaussian row
-but under-covers on the heavy-tailed row --- demonstrating, on
-known ground truth, the Section~\ref{sec:caveat} structural
-qualifier 2 (imposed Gaussianity) under each prediction scheme.}
+\todo[inline]{To be filled in as a \(2\times 2\) grid of canonical
+ground-truth systems exhibiting the predicted behaviour of the model
+and its multi-step propagation modes (Section~\ref{sec:multistep}),
+prior to the Section~\ref{sec:application} Ontario application. The
+two axes are the innovation law (Gaussian; Student-\(t_5\)) and the
+prediction scheme (mean iteration, Eq.~\ref{eq:meaniter}; SMC,
+Eq.~\ref{eq:smc-step}). Both rows admit closed-form \(h\)-step
+predictive distributions, against which mean iteration is expected
+to recover the closed-form mean and SMC with empirical-residual
+sampling is expected to recover the closed-form distribution. SMC
+with Gaussian sampling is expected to recover the closed form on the
+Gaussian row and to undercover predictive intervals on the
+heavy-tailed row, exhibiting the Section~\ref{sec:caveat}
+qualifier~2 (imposed Gaussianity) under each prediction scheme.}
 
 \section{Structural caveat: a mis-centred conditional mean and a
 Gaussian-proxy diffusion}
@@ -738,13 +735,13 @@ gate of Section~\ref{sec:synth} validates, not a re-implementation.
 The forward experiment of Section~\ref{sec:registered} enforces its
 committed specification mechanically. The content hash of the
 \(\le t_{\mathrm{cut}}\) actuals recorded at registration is
-recomputed at every prediction-time load and compared, so a silently
-edited specification fails rather than scores; a cutoff guard rejects
-any row dated after \(t_{\mathrm{cut}}\) from entering a fit. IESO
-restates recently published demand, so settled actuals accumulate in
-an append-only ledger --- a revision is a new appended record, never
-an overwrite --- and the ledger state is itself hashed into each
-score.
+recomputed at every prediction-time load and compared against the
+stored value; any divergence raises rather than scores. A cutoff
+guard rejects any row dated after \(t_{\mathrm{cut}}\) from entering
+a fit. Settled actuals accumulate in an append-only ledger,
+accommodating IESO's published-demand revisions as new appended
+records rather than overwrites, and the ledger state is itself
+hashed into each score.
 
 \section{Per-horizon backtest table}
 \label{app:backtest}
