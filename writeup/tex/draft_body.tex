@@ -191,19 +191,23 @@ kernel; a conditional law), \(\{\Pi_t\}\) (the time-indexed Markov
 semigroup), and \(K_t\) (the operator-layer object).
 
 \paragraph{The estimator's relationship to \(\kQ\).}
+The \(\{\Pi_t\}\) semigroup and the operator family
+\(\{K_t\} / \{P_t^*\}\) exist in the data measure by the construction
+of Section~\ref{sec:multistep}'s framework reference: stationarity of
+the de-seasonalised series and the delay-embedding observation
+structure together satisfy the temporal coherence that forces the
+Chapman--Kolmogorov property; the disintegration kernel \(\kQ\)
+admits the family, derived from the measure rather than posited.
 The object Section~\ref{sec:construction} constructs is a
-finite-sample, parametric, single-step, Gaussian-form estimator of
-\(\kQ\) at the delay-embedding layer, from which the operator-layer
-objects \(K_{\Delta} / P_{\Delta}^{*}\) are recoverable in the
-non-Dirac regime (\(\Sj \neq 0\)).
-The \(\kQ\) correspondence holds at the embedding layer; \emph{locality}
-of that estimator is not empirically operative on Ontario
-(Section~\ref{sec:construction}).
-\(\Cj\) is a linearisation of the conditional-mean factor (intended
-local, effectively global here); \(\Sj\) is the second moment of
-\(\kQ\)'s Gaussian projection; \(\Sj \to 0\) reproduces the
-classical-Koopman (deterministic) collapse. Three qualifiers bound
-this correspondence:
+finite-sample, parametric, Gaussian-form estimator of the
+\emph{single-step slice} \(\Pidelta\) of that family at the
+delay-embedding layer. From the estimated \((C(x), \Sigma(x))\) the
+operator-layer slice \(K_{\Delta} / P_{\Delta}^{*}\) is recoverable
+in the non-Dirac regime (\(\Sj \neq 0\)).
+\(\Cj\) is a linearisation of the conditional-mean factor; \(\Sj\) is
+the second moment of \(\kQ\)'s Gaussian projection; \(\Sj \to 0\)
+reproduces the classical-Koopman (deterministic) collapse. Three
+qualifiers bound this correspondence:
 
 \begin{enumerate}
   \item \textbf{Register.} \(\kQ\) is determined by the measure; this
@@ -215,21 +219,34 @@ this correspondence:
   itself Gaussian. Section~\ref{sec:caveat} quantifies the gap as
   real but small in recoverable forecast loss.
 
-  \item \textbf{Single step.} \(\Pij\) is the single-step slice
-  \(\Pidelta\); the semigroup \(\{\Pi_t\}\) is neither composed nor
-  verified here. (A multi-step predictive-variance propagation via a
-  shift-aware state Jacobian is built and gate-validated as the
-  instrument for Section~\ref{sec:caveat}'s decomposition; it is not
-  the semigroup.)
+  \item \textbf{Scope of extraction.} What is extracted is the
+  single-step slice \(\Pidelta\); other slices
+  \(\Pi_{h\Delta}\) of the same data-measure semigroup
+  \(\{\Pi_t\}\) are not estimated directly. The multi-step
+  propagation modes of Section~\ref{sec:multistep} extend
+  \(\widehat{\Pidelta}\) to \(h\) steps by iteration; whether the
+  iterate \((\widehat{\Pidelta})^{h}\) tracks the directly-extractable
+  \(\widehat{\Pi}_{h\Delta}\) is a separable empirical question
+  testable by a Chapman--Kolmogorov consistency check at one or more
+  discrete horizons (out of scope here; flagged as the natural
+  follow-up). Existence of \(\{\Pi_t\}\) is a property of the
+  measure; access to it beyond \(\Pidelta\) is a property of the
+  extraction scheme.
 \end{enumerate}
 
 \subsection{Multi-step propagation: mean iteration and SMC}
 \label{sec:multistep}
 
 The one-step kernel \(\Pij\) admits two distinct \(h\)-step
-propagation modes. Both \emph{iterate} the single-step
-\(\Pidelta\); neither constructs the semigroup
-\(\{\Pi_t\}\) of qualifier~3 above.
+propagation modes. Both \emph{iterate} the estimated single-step
+\(\widehat{\Pidelta}\) to extend it to \(h\) steps. The data-measure
+semigroup \(\{\Pi_t\}\) and its slices \(\Pi_{h\Delta}\) at horizons
+\(h > 1\) exist in the measure (see qualifier~3 above and
+Section~\ref{sec:construction}); whether the iterate
+\((\widehat{\Pidelta})^{h}\) agrees with the directly-extractable
+slice \(\widehat{\Pi}_{h\Delta}\) is an empirical
+Chapman--Kolmogorov-consistency question, separable from the
+iteration scheme itself.
 
 \emph{Mean iteration} (point trajectory). Starting from
 \(x_0\), produce a deterministic length-\(h\) trajectory by iterating
@@ -628,9 +645,15 @@ parameterisation-independent.}
   the effect is modest (\(\approx 1.8\%\) at mid horizons). State
   augmentation and the combined variant are null.
 
-  \item \textbf{Single-step only.} The semigroup \(\{\Pi_t\}\) is not
-  constructed; multi-step is iteration of \(\Pidelta\), validated for
-  error growth. A semigroup treatment is open.
+  \item \textbf{Scope of extraction.} The data-measure semigroup
+  \(\{\Pi_t\}\) exists by Chapman--Kolmogorov on the temporally-
+  coherent measure (see Section~\ref{sec:construction} qualifier 3);
+  what is extracted is the single-step slice \(\widehat{\Pidelta}\).
+  Multi-step (Section~\ref{sec:multistep}) iterates this slice;
+  whether the iterate \((\widehat{\Pidelta})^{h}\) tracks the
+  directly-extractable \(\widehat{\Pi}_{h\Delta}\) is a separable
+  empirical question (a Chapman--Kolmogorov consistency check at
+  one or more discrete horizons) flagged as the natural follow-up.
 
   \item \textbf{Exogenous information.} No weather/exogenous
   covariates. The Patra--Sen quantification places at least
