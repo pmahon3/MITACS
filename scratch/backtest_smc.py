@@ -77,11 +77,20 @@ def _smc_day_worker(args):
     no shared caches. Per-worker reproducibility: each day's RNG is
     seeded by base_seed + day_index, so days are independent and
     deterministic regardless of execution order.
+
+    Return: ``(rows, samples)``. ``samples`` is either None (when
+    ``save_samples`` is False, or when the day bails early on missing
+    history) or a float32 ``(M, H)`` array of per-particle MW
+    forecasts at coord 0 (rank-1: coords 1..d-1 are deterministic
+    lag shifts and carry no extra stochastic content). Samples are
+    de-z-scored to MW so downstream distributional diagnostics
+    (multi-σ coverage, PIT, ensemble-shape) operate in the same
+    units as the actuals.
     """
     (D, day_idx, base_seed, anchor_h, dims_by_d,
      z_full_index_i8, z_full_values, libs,
      mu_mh, sigma_mh, clim_method, fourier_params,
-     cell, variant, M, fixed_theta) = args
+     cell, variant, M, fixed_theta, save_samples) = args
 
     D = pd.Timestamp(pd.Timestamp(D).date())
     targets = [D + pd.Timedelta(hours=anchor_h + h) for h in range(24)]
@@ -91,9 +100,9 @@ def _smc_day_worker(args):
     z_full = pd.Series(z_full_values, index=z_full_idx)
     hist_need = [issue_anchor - pd.Timedelta(hours=i) for i in range(dmax)]
     if not all(h in z_full.index for h in hist_need):
-        return []
+        return [], None
     if not np.all(np.isfinite(z_full.reindex(hist_need).to_numpy())):
-        return []
+        return [], None
 
     dt0 = _daytype(targets[0], anchor_h)
     d = int(dims_by_d[dt0])
@@ -103,7 +112,7 @@ def _smc_day_worker(args):
     try:
         x_0 = np.array([float(z_full.loc[lt]) for lt in lag_times])
     except KeyError:
-        return []
+        return [], None
 
     if cell == "global":
         C_g, S_g, r_g = _global_fit(X, Y)
@@ -133,11 +142,13 @@ def _smc_day_worker(args):
     else:
         zp = {"method": "fourier", "fourier": fourier_params}
 
+    # Per-horizon de-z-scoring factors (one mu_t, sd_t per target hour)
+    t_idx_all = pd.DatetimeIndex(targets)
+    mu_arr = np.asarray(mu_at(zp, t_idx_all))     # (H,)
+    sd_arr = np.asarray(sigma_at(zp, t_idx_all))  # (H,)
+
     rows = []
     for h, t in enumerate(targets):
-        t_idx = pd.DatetimeIndex([t])
-        mu_t = float(mu_at(zp, t_idx)[0])
-        sd_t = float(sigma_at(zp, t_idx)[0])
         z_mean = float(summ["mean"][h, 0])
         z_lo = float(summ["q_lo"][h])
         z_hi = float(summ["q_hi"][h])
@@ -145,19 +156,27 @@ def _smc_day_worker(args):
             "delivery_date": D,
             "target_dt": t,
             "horizon_h": h + 1,
-            "our_forecast_mw": z_mean * sd_t + mu_t,
-            "our_pi_lo_mw": z_lo * sd_t + mu_t,
-            "our_pi_hi_mw": z_hi * sd_t + mu_t,
+            "our_forecast_mw": z_mean * sd_arr[h] + mu_arr[h],
+            "our_pi_lo_mw": z_lo * sd_arr[h] + mu_arr[h],
+            "our_pi_hi_mw": z_hi * sd_arr[h] + mu_arr[h],
             "daytype": dt0,
             "embedding_dim": d,
             "cell": cell,
             "variant": variant,
         })
-    return rows
+
+    samples = None
+    if save_samples:
+        # traj is (M, H, d); coord 0 is the predicted variable.
+        # De-z-score in place: MW_{m,h} = z_{m,h,0} * sd_arr[h] + mu_arr[h]
+        samples = (traj[:, :, 0].astype(np.float32) * sd_arr[None, :]
+                   + mu_arr[None, :]).astype(np.float32)
+
+    return rows, samples
 
 
 def _run_smc(delivery_dates, cell, variant, M, fixed_theta=None,
-             seed=20260522, pool=None):
+             seed=20260522, pool=None, save_samples=False):
     """Run the SMC backtest across all delivery dates.
 
     `pool`: a ray.util.multiprocessing.Pool (or any .map-capable pool).
@@ -165,6 +184,13 @@ def _run_smc(delivery_dates, cell, variant, M, fixed_theta=None,
     particle per horizon) is the main reason to parallelise -- per-day
     parallelism is the established pattern (cf. simplex_theta field
     build, commit 4f4c877).
+
+    `save_samples`: if True, also return a dict of per-day sample
+    arrays so the caller can persist the M-particle trajectories
+    alongside the summary rows. Returns ``(df, samples_by_date)``
+    where samples_by_date maps pd.Timestamp(D.date()) -> float32 array
+    of shape ``(M, H)`` (de-z-scored to MW). If False, returns
+    just ``df``.
     """
     spec = freeze.load_verified()
     spec_cutoff = pd.Timestamp(spec["data_cutoff"])
@@ -197,24 +223,43 @@ def _run_smc(delivery_dates, cell, variant, M, fixed_theta=None,
     tasks = [
         (D, i, seed, anchor_h, dims_by_d,
          z_idx_i8, z_vals, libs, mu_mh, sigma_mh, clim_method,
-         fourier_params, cell, variant, M, fixed_theta)
+         fourier_params, cell, variant, M, fixed_theta, save_samples)
         for i, D in enumerate(days)
     ]
+    # day-index -> delivery_date Timestamp (D.date()), so workers can
+    # report their day back via the first row's delivery_date and the
+    # caller can map it to a date key in samples_by_date.
+    date_by_idx = {
+        i: pd.Timestamp(pd.Timestamp(D).date()) for i, D in enumerate(days)
+    }
 
     all_rows = []
+    samples_by_date: dict[pd.Timestamp, np.ndarray] = {}
+
+    def _absorb(result, idx_hint=None):
+        rows, samp = result
+        all_rows.extend(rows)
+        if samp is not None and rows:
+            # use the rows' delivery_date (Timestamp) as the key
+            samples_by_date[pd.Timestamp(rows[0]["delivery_date"])] = samp
+
     if pool is None:
         for i, t in enumerate(tasks):
-            all_rows.extend(_smc_day_worker(t))
+            _absorb(_smc_day_worker(t))
             if (i + 1) % 50 == 0:
                 print(f"  ... {i+1}/{len(days)} days", flush=True)
     else:
         done = 0
-        for rows in pool.imap_unordered(_smc_day_worker, tasks):
-            all_rows.extend(rows)
+        for result in pool.imap_unordered(_smc_day_worker, tasks):
+            _absorb(result)
             done += 1
             if done % 50 == 0:
                 print(f"  ... {done}/{len(days)} days", flush=True)
-    return pd.DataFrame(all_rows)
+
+    df = pd.DataFrame(all_rows)
+    if save_samples:
+        return df, samples_by_date
+    return df
 
 
 def _mae(pred, act):
@@ -226,6 +271,29 @@ def _mape(pred, act):
     m = act != 0
     e = ((pred[m] - act[m]).abs() / act[m]).dropna()
     return float(e.mean() * 100) if len(e) else np.nan
+
+
+def _save_samples_npz(save_dir, cell_tag, samples_by_date):
+    """Persist the per-day M-particle sample arrays for one cell as a
+    compressed npz file. Schema:
+      delivery_dates : (N,) int64 ns timestamps (sorted)
+      samples        : (N, M, H) float32 MW per (day, particle, horizon)
+    where N is the count of days that produced valid samples (days
+    that bailed on missing history are omitted; the sorted
+    delivery_dates array makes the day -> sample mapping explicit).
+    """
+    if not samples_by_date:
+        return
+    dates_sorted = sorted(samples_by_date.keys())
+    arr = np.stack([samples_by_date[d] for d in dates_sorted], axis=0)
+    path = Path(save_dir) / f"samples_{cell_tag}.npz"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        path,
+        delivery_dates=np.array([d.value for d in dates_sorted],
+                                dtype=np.int64),
+        samples=arr.astype(np.float32),
+    )
 
 
 def _metrics(fc, actual, label, save_dir=None, cell_tag=None):
@@ -297,7 +365,8 @@ def _per_horizon_delta(prod, other, label):
 
 
 def main_grid(M: int = 200, max_days: int | None = None, cheap_only=False,
-              parallel: bool = True, save_dir: str | None = None):
+              parallel: bool = True, save_dir: str | None = None,
+              save_samples: bool = False):
     """Run the SMC backtest grid.
 
     cheap_only=True runs only the global cells (state-independent fits,
@@ -306,6 +375,12 @@ def main_grid(M: int = 200, max_days: int | None = None, cheap_only=False,
     parallel=True wraps the per-day SMC in a ray Pool -- the established
     pattern (cf. simplex_theta field build, commit 4f4c877). Required to
     make the prod cells (M*24 LOO-CV/day) tractable.
+
+    save_samples=True (requires save_dir): for each SMC cell, also
+    persist the per-day M-particle sample arrays as
+    ``samples_{cell_tag}.npz`` (compressed). Schema in
+    :func:`_save_samples_npz`. The mean-iter cells (A, B) have no
+    ensemble and are unaffected.
     """
     from scratch.backtest_simplex_theta import _run as _mean_run
 
@@ -321,10 +396,14 @@ def main_grid(M: int = 200, max_days: int | None = None, cheap_only=False,
 
     print("=" * 70)
     print(f"SMC backtest grid  (INSPECTION-ONLY)  M={M}  "
-          f"anchor_h={anchor_h}  parallel={parallel}")
+          f"anchor_h={anchor_h}  parallel={parallel}  "
+          f"save_samples={save_samples}")
     print(f"post-cutoff delivery days: {len(days)}  "
           f"({days.min().date()}..{days.max().date()})")
     print("=" * 70)
+
+    if save_samples and save_dir is None:
+        raise ValueError("save_samples=True requires save_dir to be set")
 
     pool = None
     if parallel:
@@ -338,7 +417,23 @@ def main_grid(M: int = 200, max_days: int | None = None, cheap_only=False,
 
     if save_dir is not None:
         Path(save_dir).mkdir(parents=True, exist_ok=True)
-        print(f"per-row arrays will be saved to {save_dir}/cell_*.parquet")
+        print(f"per-row pickles -> {save_dir}/cell_*.pkl")
+        if save_samples:
+            print(f"per-particle samples -> {save_dir}/samples_*.npz "
+                  f"(SMC cells only)")
+
+    def _smc_call(cell_kind, var_kind, tag, label):
+        """One SMC cell: run, save samples if requested, score."""
+        result = _run_smc(
+            days, cell=cell_kind, variant=var_kind, M=M, pool=pool,
+            save_samples=save_samples,
+        )
+        if save_samples:
+            fc, samples_by_date = result
+            _save_samples_npz(save_dir, tag, samples_by_date)
+        else:
+            fc = result
+        return _metrics(fc, actual, label, save_dir, tag)
 
     print("\nA. mean-iteration baselines:")
     prod = _metrics(_mean_run(days, mode="production"), actual,
@@ -348,25 +443,21 @@ def main_grid(M: int = 200, max_days: int | None = None, cheap_only=False,
                        "B_meaniter_global")
 
     print("\nC. SMC-global-Gaussian:", flush=True)
-    smc_gG = _metrics(
-        _run_smc(days, cell="global", variant="gaussian", M=M, pool=pool),
-        actual, "C. SMC-global Gaussian", save_dir, "C_smc_global_gauss")
+    smc_gG = _smc_call("global", "gaussian", "C_smc_global_gauss",
+                       "C. SMC-global Gaussian")
 
     print("\nD. SMC-global-empirical:", flush=True)
-    smc_gE = _metrics(
-        _run_smc(days, cell="global", variant="empirical", M=M, pool=pool),
-        actual, "D. SMC-global empirical", save_dir, "D_smc_global_emp")
+    smc_gE = _smc_call("global", "empirical", "D_smc_global_emp",
+                       "D. SMC-global empirical")
 
     if not cheap_only:
         print("\nE. SMC-prod-Gaussian (expensive: M*24 LOO-CV/day) ...",
               flush=True)
-        smc_pG = _metrics(
-            _run_smc(days, cell="prod", variant="gaussian", M=M, pool=pool),
-            actual, "E. SMC-prod Gaussian", save_dir, "E_smc_prod_gauss")
+        smc_pG = _smc_call("prod", "gaussian", "E_smc_prod_gauss",
+                           "E. SMC-prod Gaussian")
         print("\nF. SMC-prod-empirical:", flush=True)
-        smc_pE = _metrics(
-            _run_smc(days, cell="prod", variant="empirical", M=M, pool=pool),
-            actual, "F. SMC-prod empirical", save_dir, "F_smc_prod_emp")
+        smc_pE = _smc_call("prod", "empirical", "F_smc_prod_emp",
+                           "F. SMC-prod empirical")
 
     # per-horizon deltas vs production baseline (A)
     print("\n" + "-" * 70)
@@ -399,9 +490,16 @@ if __name__ == "__main__":
                          "cells; skip the expensive prod cells")
     ap.add_argument("--save-dir", type=str, default=None,
                     help="if set, save each cell's per-row joined "
-                         "frame to {save_dir}/cell_*.parquet for "
+                         "frame to {save_dir}/cell_*.pkl for "
                          "paired-day-bootstrap analysis")
+    ap.add_argument("--save-samples", action="store_true",
+                    help="additionally save per-day M-particle sample "
+                         "arrays as {save_dir}/samples_*.npz for SMC "
+                         "cells (requires --save-dir). Enables multi-σ "
+                         "coverage / PIT / ensemble-shape diagnostics "
+                         "via a downstream analysis script.")
     args = ap.parse_args()
     main_grid(M=args.M, max_days=args.max_days,
               cheap_only=args.cheap_only,
-              save_dir=args.save_dir)
+              save_dir=args.save_dir,
+              save_samples=args.save_samples)
