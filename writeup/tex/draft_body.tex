@@ -652,8 +652,18 @@ parameterisation-independent.}
   Multi-step (Section~\ref{sec:multistep}) iterates this slice;
   whether the iterate \((\widehat{\Pidelta})^{h}\) tracks the
   directly-extractable \(\widehat{\Pi}_{h\Delta}\) is a separable
-  empirical question (a Chapman--Kolmogorov consistency check at
-  one or more discrete horizons) flagged as the natural follow-up.
+  empirical question (a Chapman--Kolmogorov consistency check at one
+  or more discrete horizons) flagged as the natural follow-up.
+  Should that check find a non-trivial inconsistency, the obvious
+  escalation is a direct estimation of the multi-horizon family
+  \(\{\widehat{\Pi}_{h\Delta}\}_{h \in H}\) for a chosen horizon
+  set \(H\) --- fit by the same WLS construction on the
+  \((x_t, x_{t+h})\) library at each \(h\), in place of iterating
+  \(\widehat{\Pidelta}\). At long horizons, the headroom such an
+  estimator can recover is bounded by the Chapman--Kolmogorov
+  inconsistency the iterate exhibits at those horizons. A jointly
+  CK-constrained estimator is a further escalation, distinct from
+  this paper.
 
   \item \textbf{Exogenous information.} No weather/exogenous
   covariates. The Patra--Sen quantification places at least
