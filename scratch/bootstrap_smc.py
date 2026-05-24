@@ -125,6 +125,20 @@ def _coverage_binomial(fc: pd.DataFrame) -> tuple[float, float]:
     return 100 * p, 100 * se
 
 
+def _ensure_daytype(df: pd.DataFrame) -> pd.DataFrame:
+    """Derive a `daytype` column from target_dt if missing.
+    The mean-iter cells (A, B) did not save daytype; the SMC cells did.
+    Stratification needs it on every cell, derived consistently."""
+    if "daytype" in df.columns:
+        return df
+    from config import load_config
+    from experiment.predict import _daytype
+    anchor_h = load_config().data.day_anchor_hours
+    df = df.copy()
+    df["daytype"] = df["target_dt"].apply(lambda t: _daytype(t, anchor_h))
+    return df
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--save-dir", required=True,
@@ -136,6 +150,11 @@ def main():
     ap.add_argument("--per-horizon", action="store_true",
                     help="also produce per-horizon dMAE CIs (24 rows "
                          "per comparison)")
+    ap.add_argument("--by-daytype", action="store_true",
+                    help="repeat coverage + bootstrap dMAE stratified "
+                         "by day-type (weekday, saturday, sunday); "
+                         "mean-iter cells get their daytype derived from "
+                         "target_dt + cfg.data.day_anchor_hours")
     args = ap.parse_args()
 
     cells = {}
@@ -144,7 +163,7 @@ def main():
         if not path.exists():
             print(f"  missing: {path}")
             continue
-        cells[tag] = pd.read_pickle(path)
+        cells[tag] = _ensure_daytype(pd.read_pickle(path))
         print(f"  loaded {tag}: {len(cells[tag])} rows")
 
     print("\n" + "=" * 74)
@@ -209,6 +228,40 @@ def main():
                 sep = "  *" if (lo > 0 or hi < 0) else ""
                 print(f"    {h:>3} {d:>+9.1f}  "
                       f"[{lo:>+8.1f},{hi:>+8.1f}]{sep}")
+
+    if args.by_daytype:
+        print("\n" + "=" * 74)
+        print("STRATIFIED BY DAY-TYPE")
+        print("=" * 74)
+        print("Note: weekday d=2, saturday d=2, sunday d=4. CIs widen on "
+              "the smaller populations\n(weekday ~71% of days, sat/sun "
+              "~14% each); read sat/sun signs as ~2x noisier than weekday.")
+        for dt in ("weekday", "saturday", "sunday"):
+            cells_dt = {tag: df[df["daytype"] == dt]
+                        for tag, df in cells.items()}
+            sample = next(iter(cells_dt.values()))
+            n_typical = sample.shape[0]
+            n_days = int(sample["delivery_date"].nunique())
+            print(f"\n  --- {dt} (n_days={n_days}, n_rows={n_typical} "
+                  f"per cell) ---")
+            print(f"  {'cell':<28} {'coverage':>10} {'SE':>8}")
+            for tag, df in cells_dt.items():
+                if len(df) == 0:
+                    continue
+                cov, se = _coverage_binomial(df)
+                print(f"  {CELL_LABELS[tag]:<28} {cov:>9.2f}%  "
+                      f"±{se:>5.2f}")
+            print()
+            for label, x_tag, y_tag, _hyp in LIU_GAO_PAIRS:
+                if x_tag not in cells_dt or y_tag not in cells_dt:
+                    continue
+                if len(cells_dt[x_tag]) == 0 or len(cells_dt[y_tag]) == 0:
+                    continue
+                d, lo, hi = _bootstrap_dmae(
+                    cells_dt[x_tag], cells_dt[y_tag], args.B, args.seed)
+                sep = "  excludes 0" if (lo > 0 or hi < 0) else "  includes 0"
+                print(f"    {label:<24} dMAE = {d:>+7.2f}  "
+                      f"95% CI [{lo:>+7.2f}, {hi:>+7.2f}]{sep}")
 
     print("=" * 74)
 
