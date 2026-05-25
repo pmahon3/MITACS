@@ -137,12 +137,14 @@ def run_backtest(zp: dict,
         if not np.all(np.isfinite(z_full.reindex(hist_need).to_numpy())):
             continue
 
-        # Recent z-history (lag window) for mean-iteration
-        zhist = {
-            ts: float(z_full.loc[ts])
-            for ts in z_full.index
-            if (issue_anchor - pd.Timedelta(hours=dmax)) <= ts <= issue_anchor
-        }
+        # Recent z-history (lag window) for mean-iteration.  Slice the
+        # already-sorted z_full series once rather than iterate every
+        # timestamp; the per-day cost goes from O(|z_full|) to O(dmax).
+        # In-loop predictions get inserted into zhist as they're made.
+        hist_window = z_full.loc[
+            issue_anchor - pd.Timedelta(hours=dmax) : issue_anchor
+        ]
+        zhist = dict(zip(hist_window.index, hist_window.values.astype(float)))
 
         for t in targets:
             dt = _daytype(t, anchor_h)
