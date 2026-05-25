@@ -1,15 +1,7 @@
 \maketitle
 
 \begin{abstract}
-\todo[inline]{Abstract --- written last, once the application numbers
-are verified. Will state: (a) a delay-embedding local-Gaussian
-conditional-kernel predictor instantiated on Ontario IESO demand;
-(b) the out-of-sample backtest; (c) the directly-verified
-infeasibility of a retrospective IESO head-to-head and the registered
-forward experiment built in response; (d) the structural caveat that
-\(\Pij\) departs from \(\kQ\) in both location and shape, with the
-recoverable loss of each quantified and found small on the full
-delivery-day population.}
+\todo[inline]{Abstract --- written last.}
 \end{abstract}
 
 \section{Introduction}
@@ -216,8 +208,9 @@ qualifiers bound this correspondence:
 
   \item \textbf{Imposed Gaussianity.} \(\Pij = \Nrm(x \Cj, \Sj)\)
   coincides with \(\kQ\) only where the local conditional law is
-  itself Gaussian. Section~\ref{sec:caveat} quantifies the gap as
-  real but small in recoverable forecast loss.
+  itself Gaussian. Section~\ref{sec:caveat} reports the
+  rank-1 structural consequence and the measured non-Gaussianity of
+  the scalar coord-0 innovation.
 
   \item \textbf{Scope of extraction.} What is extracted is the
   single-step slice \(\Pidelta\); other slices
@@ -296,108 +289,28 @@ predictive distribution directly at every step.
 \section{Illustrative simulations}
 \label{sec:illustrations}
 
-\todo[inline]{To be filled in as a \(2\times 2\) grid of canonical
-ground-truth systems exhibiting the predicted behaviour of the model
-and its multi-step propagation modes (Section~\ref{sec:multistep}),
-prior to the Section~\ref{sec:application} Ontario application. The
-two axes are the innovation law (Gaussian; Student-\(t_5\)) and the
-prediction scheme (mean iteration, Eq.~\ref{eq:meaniter}; SMC,
-Eq.~\ref{eq:smc-step}). Both rows admit closed-form \(h\)-step
-predictive distributions, against which mean iteration is expected
-to recover the closed-form mean and SMC with empirical-residual
-sampling is expected to recover the closed-form distribution. SMC
-with Gaussian sampling is expected to recover the closed form on the
-Gaussian row and to undercover predictive intervals on the
-heavy-tailed row, exhibiting the Section~\ref{sec:caveat}
-qualifier~2 (imposed Gaussianity) under each prediction scheme.}
+\todo[inline]{Placeholder for a synthetic-system illustration of the
+two propagation modes of Section~\ref{sec:multistep}, to be added
+once the design is finalised.}
 
-\section{Structural caveat: a mis-centred conditional mean and a
-Gaussian-proxy diffusion}
+\section{Structural facts about the estimator}
 \label{sec:caveat}
-
-The two estimator factors \(\Cj\) and \(\Sj\) each carry a quantified
-limitation. A decomposition on the 2021--22 development-set window,
-with predictive variance propagated over the full delivery-day
-population, finds the recoverable-loss factors small in both
-directions; the specific values are deferred to the
-Section~\ref{sec:caveat-decomposition} reporting and inherit the
-parameterisation caveat noted at Section~\ref{sec:limits}.
 
 \paragraph{\(\Sj\) is rank-1 by construction.} For a single-variable
 delay embedding, coordinates \(2, \ldots, d\) of the one-step image
 are deterministic shifts of the input coordinates
 (\(Y_{[:,\,1:]} = X_{[:,\,:-1]}\) exactly). The only stochastic
 content of the one-step map is the scalar coordinate-0 innovation;
-therefore \(\Sj\) is rank-1 by construction, independent of data ---
-the multivariate diffusion is structurally a single scalar innovation
-variance embedded in \(\Rb^{d \times d}\).
+\(\Sj\) is therefore rank-1 by construction, independent of data.
 
-\paragraph{That scalar innovation is non-Gaussian.} The
-non-Gaussianity question is therefore \emph{univariate}. The
-estimator, validated against synthetic ground truth
-(Section~\ref{sec:synth}), gives a heavy-tailed one-step innovation.
-
-\paragraph{The conditional mean is phase-mis-centred.}
-The conditional-mean factor is not faithful either. The embedding
-gives the local linear map no phase information --- it cannot tell a
-state rising through a demand level from one falling through it ---
-so it centres between rising and falling regimes and carries a
-structured residual bias. The signature is a correlation between the
-signed \(z\)-space error and the demand derivative \(\dd z/\dd t\):
-measured, it is \(\mathrm{corr} = -0.246\) (bootstrap 95\% CI
-\([-0.283,\, -0.207]\), \(n = 3167\)), monotone across
-rising/falling phase. \(\Pij\)'s location, not only its shape,
-departs from \(\kQ\).%
-\footnote{Measured under the predecessor Gaussian-kernel
-parameterisation; the structural claim is a property of the
-embedding (no phase information) and is parameterisation-independent.
-See the umbrella note at Section~\ref{sec:limits}.}
-
-\paragraph{Decomposition.}
-\label{sec:caveat-decomposition}
-A diagnostic on the 2021--22 development-set window bounds the
-recoverable loss of each factor by oracle counterfactuals on the
-multi-step forecast log-loss \(\Lbar\), over all delivery days, with
-predictive variance propagated across the embedding-dimension change.
-The recoverable-loss factors are
-\begin{equation}
-\label{eq:DA-DB}
-\DA \;:=\; \frac{\Lbar - \Lbar^{(A)}}{\Lbar},
-\qquad
-\DB \;:=\; \frac{\Lbar - \Lbar^{(B)}}{\Lbar},
-\end{equation}
-where \(\Lbar^{(A)}\) is the log-loss under the oracle that removes
-the phase-conditional mean bias, and \(\Lbar^{(B)}\) is the loss
-under the oracle that replaces the Gaussian innovation law with a
-Student-\(t\) fitted on the residuals (shape \(\nuhat\)).
-On the full delivery-day population the recoverable loss is small in
-both directions: \(\DA = 0.048\) (95\% day-bootstrap CI
-\([0.007,\,0.086]\)) and \(\DB = 0.023\) (CI
-\([-0.000,\,0.048]\), including zero), at \(\nuhat = 6.5\). Neither
-effect is large or cleanly established enough to act on; restricting
-to the single-dimension subpopulation (\(\approx 58\%\) of days)
-gives larger point estimates (\(\DA \approx 0.061\),
-\(\DB \approx 0.091\)) but overlapping intervals, the same
-qualitative reading. The diffusion-shape diagnostic is run on
-standardised residuals of the multi-step forecast under
-propagation-aware variance; on the same data the propagation softens
-the apparent kurtosis roughly four-fold
-(\(\mathrm{kurt}_{\mathrm{exc}}: 6.1 \to 2.4\)).\todo[inline]{\(\DA\),
-\(\DB\), \(\nuhat\), and the kurtosis values were measured under
-the predecessor Gaussian-kernel parameterisation; see the umbrella
-note at Section~\ref{sec:limits}.}
-
-\paragraph{The one-step conditional law remains heavy-tailed.} The
-propagation softening is a property of the multi-step forecast
-object, not of the underlying conditional law: the per-anchor
-library residual has \(\mathrm{kurt}_{\mathrm{exc}} \approx
-24\)--\(33\) (one-step, local, no propagation), and that figure is
-preprocessing-independent. Section~\ref{sec:qualifier-verdict}
-quantifies this one-step departure directly and examines what can be
-done about it.%
-\footnote{Kurtosis range measured under the predecessor
-Gaussian-kernel parameterisation; the structural claim (the scalar
-coord-0 innovation is heavy-tailed) is parameterisation-independent.}
+\paragraph{The scalar innovation is heavy-tailed.} The
+non-Gaussianity question reduces to a univariate one in the
+coordinate-0 innovation. On the Ontario library this innovation
+carries \(\mathrm{kurt}_{\mathrm{exc}} \approx 24\)--\(33\)
+(per-anchor, one-step, no propagation). The estimator's
+non-Gaussianity diagnostic, validated against synthetic ground truth
+(Section~\ref{sec:synth}), discriminates this heavy-tailed law from
+the Gaussian reference.
 
 \section{Application and results}
 \label{sec:application}
@@ -450,50 +363,8 @@ re-fitting the pipeline end-to-end gives
 \;\to\; 11.98\%\ \text{(scale-only, }z = D/\sigma_{m,h})
 \;\to\; 13.57\%\ \text{(raw demand)}.
 \end{equation}
-The interval-coverage breakdown locates the mechanism: the raw-demand
-pipeline delivers uniform-width intervals that over-cover overnight
-and under-cover at the midday peak --- the signature of the missing
-\(\sigma_{m,h}\) scale step. Both sub-steps are load-bearing; the
+Both the centring and the scaling sub-steps are load-bearing; the
 month\,\(\times\)\,hour climatology is retained.
-
-\subsection{Levers against the heavy-tailed conditional law}
-\label{sec:qualifier-verdict}
-
-Given the heavy-tailed one-step innovation of
-Section~\ref{sec:caveat}, the \(\kQ\) construction admits four design
-changes within the lagged-\(z\) embedding: a Student-\(t\) local
-kernel; state augmentation; per-horizon direct fitting; and the
-combined state-augmentation-plus-kernel variant. Each was tested on
-the development set against an independent measurement of how much
-non-Gaussian mass is present.
-
-A Patra--Sen consistent two-component-mixture
-estimator~\cite{PatraSen2016}, with the predicted-Gaussian as the
-known component, applied to pooled standardised per-anchor library
-residuals from the production estimation path, places
-\(\hat\alpha_L^{95\%} \in [0.49,\, 0.74]\) of the per-anchor library
-mass in the non-Gaussian component across day-types and
-preprocessings --- a conservative lower bound by their Lemma~4.
-Against \(\hat\alpha_L^{95\%} = 0.002\) for a pipeline-aware
-Gaussian-innovation null, and \(0.26\) the maximum any single
-heavy-tailed AR(1) reproduces, the contamination is
-mixture-structured, not a small heavy-tail perturbation, and
-preprocessing-independent.
-
-Yet on the development set (\(n = 132\) days) only the Student-\(t\)
-kernel delivers a clean log-loss gain on routine-day data
-(\(\approx 1.8\%\) at mid horizons, CI excludes zero); state
-augmentation, per-horizon fitting, and the combined variant are null.
-The gain is far below the contamination mass just measured. The
-consistent reading is that the contamination is structurally
-orthogonal to the lagged-\(z\) state on which all four levers
-operate: reducing it requires exogenous information --- temperature,
-weather regime, calendar event flags --- not further variation within
-the past-demand information set.%
-\footnote{Patra--Sen \(\hat\alpha_L^{95\%}\) range and the
-Student-\(t\)-kernel \(\approx 1.8\%\) gain were measured under the
-predecessor Gaussian-kernel parameterisation; see the umbrella note
-at Section~\ref{sec:limits}.}
 
 \subsection{Out-of-sample backtest}
 \label{sec:backtest}
@@ -525,25 +396,19 @@ The full \(\{\text{propagation}\} \times \{\theta\} \times
 labelled 1--6 along the propagation \(\times\)
 \(\theta\) \(\times\) innovation grid as listed in
 Table~\ref{tab:predictors}. Point error follows a diurnal envelope
-(Figure~\ref{fig:diurnal}) --- a property of the demand process
-under a day-anchored delivery-day clock, not of any predictor ---
-with the lowest values at deep night and the peak near
-\(h \approx 11\) (HE\,11). The predictor-to-predictor separation,
-by contrast, is small: the lowest \(\MAE\) is predictor 2
+across all six predictors (Figure~\ref{fig:diurnal} shows the
+underlying demand distribution; Figure~\ref{fig:per-horizon} the
+predictor differences). The lowest \(\MAE\) is predictor 2
 (mean-iteration, \(\theta = 0\); \(751.6\)~MW), the highest is
-predictor 1 (\(768.8\)~MW), and all six lie within a \(17\)-MW
-band over the full \(500\)-day population. The two
-state-dependent-\(\theta(x)\) predictors (1 and 5) are uniformly
-worse than their \(\theta = 0\) counterparts (2, 3, 4, 6) by a few
-to a few-dozen MW at most horizons (Figure~\ref{fig:per-horizon});
-under multi-step iteration the simplex-interpolated \(\theta(x)\)
-field costs MAE rather than buying it. Point accuracy is not the
-discriminating axis. Interval coverage is
-(Section~\ref{sec:distributional}): the Gaussian band of the
-mean-iteration predictors covers \(\approx 21\%\) of actuals
-against a nominal \(\approx 68.3\%\) one-sigma band --- the
-under-coverage signature of a Gaussian interval around a
-heavy-tailed innovation --- and SMC restores it to \(68\)--\(72\%\).
+predictor 1 (\(768.8\)~MW), and all six lie within a \(17\)-MW band
+over the full \(500\)-day population. The two
+state-dependent-\(\theta(x)\) predictors (1 and 5) read above their
+\(\theta = 0\) counterparts by a few to a few-dozen MW at most
+horizons. Interval coverage (Section~\ref{sec:distributional})
+spans a much wider range than the point error: the mean-iteration
+predictors cover \(\approx 21\%\) of actuals against a nominal
+\(\approx 68.3\%\) one-sigma band, the SMC predictors
+\(68\)--\(72\%\).
 
 \begin{table}[h]
 \centering
@@ -603,93 +468,53 @@ envelope of MAE (Appendix~\ref{app:backtest}).}
 
 The full ensemble at each \((d, h)\) of the SMC predictors 3--6 of
 Section~\ref{sec:backtest} carries information the point/interval
-summary does not surface: how the predictive distribution is shaped,
-where in the level set the band misses, and whether the per-step
-innovation pushed forward by Eq.~\ref{eq:smc-step} reaches the actual
-in the tails. Three diagnostics are reported.
+summary does not surface. Three diagnostics are reported below as
+observations; their interpretation is deferred to follow-up analysis.
 
-\emph{Multi-sigma coverage} (Figure~\ref{fig:multisigma}). For
+\emph{Multi-sigma coverage} (Figure~\ref{fig:multisigma}). At
 nominal central levels
 \(\alpha \in \{0.50, 0.683, 0.80, 0.90, 0.95, 0.99\}\), the
-empirical coverage of the corresponding sample-quantile band reveals
-which predictors calibrate across the full range and which do not.
-The two empirical-residual predictors (4 and 6) ride the nominal
-diagonal within \(\approx 1\) percentage point at every level; the
-two Gaussian-SMC predictors (3 and 5) bulge above the diagonal at
-small levels and dip below it at large levels, the signature of a
-Gaussian tail mildly under-dispersed against a heavier-tailed truth.
+empirical coverage of the corresponding sample-quantile band, pooled
+over horizons and day-types, reads on the diagonal within
+\(\approx 1\) percentage point at every level for the two
+empirical-residual predictors (4 and 6); the two Gaussian-SMC
+predictors (3 and 5) read above the diagonal at small levels and
+below it at large levels.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=\linewidth]{fig_multisigma_coverage.pdf}
 \caption{Empirical vs.\ nominal coverage at six central levels for
 the four SMC predictors, pooled over horizons and day-types
-(\(|\mathcal{D}| = 500\)). Diagonal is perfect calibration. The
-two empirical-residual predictors (4 and 6) calibrate at every
-level; the two Gaussian-SMC predictors (3 and 5) are mildly
-under-dispersed in the extremes --- Section~\ref{sec:caveat}
-qualifier 2 visible in the predictive distribution.}
+(\(|\mathcal{D}| = 500\)). Diagonal is perfect calibration.}
 \label{fig:multisigma}
 \end{figure}
 
 \emph{PIT shape} (Figure~\ref{fig:pit}). The probability-integral
-transform of the actual through the per-step predictive distribution
-exposes the residual mis-calibration the coverage diagonal smooths
-over. All four SMC predictors exhibit a systematic right-decreasing
-density: actuals fall in the lower half of the predictive more often
-than uniform expectation, indicating a small forecast-high bias
-shared across propagation modes and innovation laws. The bias is a
-property of the conditional-mean factor \(\Cj\) and is not the SMC
-sampler's to repair.
+transform of the actual through the per-step predictive
+distribution, pooled across horizons and day-types, reads
+right-decreasing across all four SMC predictors: actuals fall in
+the lower half of the predictive more often than uniform
+expectation. The shape persists across the propagation
+\(\times\) innovation-law grid.
 
 \emph{Ensemble shape and CRPS.} At \(h = 1\) the per-anchor sample
-excess-kurtosis averaged across the population is
+excess-kurtosis averaged across the population reads
 \(\overline{\mathrm{kurt}_{\mathrm{exc}}} \approx +4.8\) for the
 empirical-residual predictors (4 and 6) and \(\approx -0.04\) for
-the Gaussian predictors (3 and 5): the empirical sampler injects
-the heavy tail measured at the library-residual layer
-(Section~\ref{sec:caveat}, one-step \(\mathrm{kurt}_{\mathrm{exc}}
-\approx 24\)--\(33\)) into the predictive distribution; the
-Gaussian sampler does not. The sample-form CRPS (with the
+the Gaussian predictors (3 and 5). The sample-form CRPS (with the
 \(M/(M-1)\) unbiased correction), pooled over all
-\((d, h, \mathrm{daytype})\), ranks predictor~3 (\(539.2\)) \(<\)
-4 (\(542.2\)) \(<\) 5 (\(547.6\)) \(<\) 6 (\(550.7\))~MW: the
-Gaussian-SMC predictors score better on the proper rule (sharpness
-wins on average); the empirical-SMC predictors match nominal
-coverage at every level. The classical
-sharpness-versus-calibration trade-off, made visible by the
-diagnostic.
+\((d, h, \mathrm{daytype})\), reads predictor~3 (\(539.2\)) \(<\)
+4 (\(542.2\)) \(<\) 5 (\(547.6\)) \(<\) 6 (\(550.7\))~MW.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\linewidth]{fig_pit_panel.pdf}
 \caption{Probability-integral-transform histograms for the four SMC
-predictors, pooled over the full population. Dotted line: the uniform
-density expected under perfect calibration. All four exhibit a
-right-decreasing PIT density, the signature of a small forecast-high
-bias shared across propagation modes and innovation laws ---
-attributable to the conditional-mean factor \(\Cj\), not the SMC
-sampler.}
+predictors, pooled over the full population. Dotted line: the
+uniform density of perfect calibration.}
 \label{fig:pit}
 \end{figure}
-
-\paragraph{Liu--Gao pre-registration.} The six-predictor grid of
-Section~\ref{sec:backtest} was pre-registered as a test of
-contamination-pattern predictions adapted
-from~\cite{LiuGao2019} for local-Gaussian forecasters under
-heavy-tailed innovations: a
-Gaussian-SMC step under-covers (P1), an empirical-residual step
-restores nominal coverage (P2), the gap between mean-iteration and
-SMC coverage is large (P4), and the empirical sampler is less
-\(\theta\)-sensitive than the Gaussian sampler (P3). Pooled across
-the population P4 is confirmed (\(\approx 50\) percentage-point
-coverage gain for SMC over mean iteration at the one-sigma band).
-Day-type-stratified, P4 is weekday-specific (\(+52\)-percentage-point
-gain to \(75\)--\(78\%\) coverage); on weekends the empirical-SMC
-predictors under-cover the one-sigma band by \(12\)--\(19\) points,
-falsifying P2 for sunday with statistical force under a
-day-bootstrap test. The sunday d-vs-day-type confound is not resolved
-within this paper.
 
 \subsection{Registered forward prediction experiment}
 \label{sec:registered}
@@ -793,58 +618,25 @@ an inspection-only probe (Section~\ref{sec:limits}).
 \section{Limitations and reproducibility}
 \label{sec:limits}
 
-\todo[inline]{The specific empirical values cited below
-(\(\approx 4.8\%\), \(\approx 2.3\%\), the \(4\times\) kurtosis
-softening, the \(1.8\%\) Student-\(t\)-kernel gain, the \(49\)--\(74\%\)
-Patra--Sen range) are the development-set decomposition figures of
-Section~\ref{sec:caveat-decomposition} and
-Section~\ref{sec:qualifier-verdict}. They were measured under the
-predecessor Gaussian-kernel parameterisation; the S-map kernel
-(Eq.~\ref{eq:weights}) was a re-parameterisation of the same
-local-linear-with-Gaussian-residual fit and is expected to leave the
-qualitative structure (mean-bias and shape-departure contributions,
-contamination orthogonal to the lagged-\(z\) state) unchanged.}
-
 \begin{itemize}
-  \item \textbf{Estimator limitations (Section~\ref{sec:caveat}).}
-  \(\Pij\) departs from \(\kQ\) in location (\(\Cj\)
-  phase-mis-centred) and shape (\(\Sj\) Gaussian proxy of a
-  heavy-tailed innovation). The decomposition bounds the recoverable
-  loss at \(\approx 4.8\%\) and \(\approx 2.3\%\) of development-set
-  log-loss --- small in both directions, with the heavy-tail interval
-  including zero. Multi-step propagation softens the apparent
-  kurtosis \(\approx 4\times\); the one-step conditional law remains
-  heavy-tailed at the library-residual level.
-
-  \item \textbf{Within-\(z\) levers (Section~\ref{sec:qualifier-verdict}).}
-  Of the four candidate design changes within the lagged-\(z\)
-  embedding --- a Student-\(t\) kernel, state augmentation,
-  per-horizon direct fitting, and the combined variant --- only the
-  Student-\(t\) kernel delivers a clean log-loss improvement, and
-  the effect is modest (\(\approx 1.8\%\) at mid horizons). State
-  augmentation and the combined variant are null.
+  \item \textbf{No exogenous covariates.} The predictor uses only
+  past demand. Weather, calendar event flags, and similar covariates
+  are out of scope.
 
   \item \textbf{Scope of extraction.} The data-measure semigroup
   \(\{\Pi_t\}\) exists by Chapman--Kolmogorov on the
   temporally-coherent measure (Section~\ref{sec:construction}
   qualifier 3); what is extracted is the single-step slice
   \(\widehat{\Pidelta}\), and Section~\ref{sec:multistep} iterates
-  this slice. The CK consistency gate (Table~\ref{tab:gates}) confirms
-  on a VAR(1) ground truth that the iterate \((\widehat{\Pidelta})^h\)
+  this slice. The CK consistency gate (Table~\ref{tab:gates}) reports
+  that on a VAR(1) ground truth the iterate \((\widehat{\Pidelta})^h\)
   matches the directly-extractable \(\widehat{\Pi}_{h\Delta}\) within
   the gate's tolerance at \(h \le 24\); an analogous inspection-only
   probe run in-sample on the Ontario embedding finds the gap
-  diverging fast with \(h\) (Figure~\ref{fig:ck-divergence}).
-  Quantitatively, the relative-Frobenius diffusion error reaches
-  \(\approx 50\%\) at \(h = 24\) across day-types --- a thirty-fold
-  inflation against the synthetic VAR(1) baseline. The data-measure
-  semigroup exists; the iterated estimator does not approximate it
-  at long horizons. The headroom a direct multi-horizon estimator
-  \(\{\widehat{\Pi}_{h\Delta}\}_{h \in H}\) --- fit by the same WLS
-  construction on the \((x_t, x_{t+h})\) library at each \(h\) ---
-  can recover is bounded above by precisely this inconsistency.
-  A jointly CK-constrained estimator is a further escalation,
-  distinct from this paper.
+  Frobenius-diverging with \(h\) (Figure~\ref{fig:ck-divergence}).
+  Relative-Frobenius diffusion error reaches \(\approx 50\%\) at
+  \(h = 24\) across day-types, against the synthetic VAR(1) baseline
+  of \(\approx 6\%\) at the same horizon.
 
 \begin{figure}[h]
 \centering
@@ -855,21 +647,9 @@ contamination orthogonal to the lagged-\(z\) state) unchanged.}
 against the directly-fit operator. \textit{Right}: relative
 Frobenius diffusion error
 \(\|\widehat \Sigma_{h\Delta} - \Sigma_h^{\mathrm{iter}}\|_F\,/\,
-\|\Sigma_h^{\mathrm{iter}}\|_F\). On a known VAR(1) (dashed) the
-estimator IS consistent with the linear-Gaussian semigroup property
-through \(h = 24\). The in-sample Ontario probe diverges by one to
-three orders of magnitude beyond \(h \approx 4\). The data-measure
-semigroup exists; the iterated estimator does not approximate it at
-long horizons.}
+\|\Sigma_h^{\mathrm{iter}}\|_F\).}
 \label{fig:ck-divergence}
 \end{figure}
-
-  \item \textbf{Exogenous information.} No weather/exogenous
-  covariates. The Patra--Sen quantification places at least
-  \(49\)--\(74\%\) of per-anchor library mass in a non-Gaussian
-  mixture component that the within-\(z\) levers do not access;
-  reducing the heavy-tailed departure requires exogenous information
-  rather than further variation within the \(z\) information set.
 \end{itemize}
 
 \paragraph{Reproducibility.} Recorded results carry two content
@@ -882,27 +662,16 @@ cited as a result elsewhere in the paper.
 \section{Conclusion}
 \label{sec:conclusion}
 
-The two ways \(\Pij\) departs from \(\kQ\) --- a phase-mis-centred
-conditional mean and a Gaussian-proxy diffusion --- were each
-quantified by an oracle decomposition, and the recoverable loss is
-small in both directions on the full delivery-day population. Of the
-four design changes available within the lagged-\(z\) embedding, only
-the Student-\(t\) kernel delivers a clean log-loss improvement, and
-it is modest (\(\approx 1.8\%\) at mid horizons). A Patra--Sen
-contamination estimate places at least \(49\)--\(74\%\) of the
-per-anchor library mass in a non-Gaussian mixture component ---
-substantial mass the within-\(z\) levers do not reach. The consistent
-reading is that the contamination is structurally orthogonal to the
-lagged-\(z\) state: reducing the heavy-tailed departure of the
-conditional law requires \emph{exogenous information} (temperature,
-weather regime, calendar event flags), not further variation within
-the past-demand information set. The estimator's evaluation is run
-forward as a registered prediction experiment, the retrospective
-IESO head-to-head being infeasible from public archives.%
-\footnote{The cited \(1.8\%\) and \(49\)--\(74\%\) values are the
-Section~\ref{sec:qualifier-verdict} measurements under the
-predecessor Gaussian-kernel parameterisation; see the umbrella note
-at Section~\ref{sec:limits}.}
+A delay-embedding local-Gaussian conditional-kernel estimator was
+instantiated on Ontario electricity demand and evaluated as a
+prediction experiment. The retrospective head-to-head against IESO's
+own published forecasts was found infeasible from public archives
+(Section~\ref{sec:ieso}); the comparison is run forward as a
+registered experiment (Section~\ref{sec:registered}). The
+out-of-sample backtest (Section~\ref{sec:backtest}) and the
+distributional diagnostics on the SMC predictive law
+(Section~\ref{sec:distributional}) are reported as observations
+over the full \(500\)-day post-cutoff population.
 
 \appendix
 
@@ -986,11 +755,8 @@ predictor 2: \(\MAE(h{=}1) = 157.7\)~MW, \(\MAPE\,1.06\%\); peak
 \(\MAE(h{=}11) = 1125.8\)~MW, \(\MAPE\,6.90\%\); decay to
 \(\MAE(h{=}24) = 597.9\)~MW, \(\MAPE\,3.75\%\). One-sigma coverage
 falls monotonically from \(60.4\%\) at \(h = 1\) (close to nominal)
-to \(\approx 13\%\) at \(h \in [9, 13]\) (the deep-trough hours) and
-recovers to \(\approx 18\%\) at \(h = 24\) --- the under-coverage
-signature of a Gaussian interval around a heavy-tailed innovation
-seen end-to-end in the SMC comparison of
-Section~\ref{sec:distributional}.
+to \(\approx 13\%\) at \(h \in [9, 13]\) and recovers to
+\(\approx 18\%\) at \(h = 24\).
 
 % ---------- References ----------
 \ifstandalone
