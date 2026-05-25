@@ -522,30 +522,51 @@ and global-OLS \(\theta = 0\) --- and SMC under both Gaussian
 (Eq.~\ref{eq:smc-step}) and empirical-residual innovation sampling.
 The full \(\{\text{propagation}\} \times \{\theta\} \times
 \{\text{innovation law}\}\) grid is six cells, labelled
-\(\mathrm{A}\)--\(\mathrm{F}\); the per-horizon error structure is
-in Figure~\ref{fig:per-horizon}. Point error is similar across
-cells and follows a diurnal envelope --- lowest at deep night,
-highest on the dawn/dusk ramps --- not a horizon-compounding ramp.
-The grid's lowest \(\MAE\) is cell B (mean-iteration with
-\(\theta = 0\), \(751.6\)~MW), the highest is cell A
-(\(768.8\)~MW); all six lie within a \(17\)-MW band over the full
-\(500\)-day population. Point accuracy is not the discriminating
-axis. Interval coverage is (Section~\ref{sec:distributional}): the
-Gaussian band of the mean-iteration cells covers \(\approx 21\%\)
-of actuals against a nominal \(\approx 68.3\%\) one-sigma band ---
-the under-coverage signature of a Gaussian interval around a
-heavy-tailed innovation --- and SMC restores it to \(68\)--\(72\%\).
+\(\mathrm{A}\)--\(\mathrm{F}\). Point error follows a diurnal
+envelope (Figure~\ref{fig:diurnal}) --- a property of the demand
+process under a day-anchored delivery-day clock, not of any
+predictor --- with the lowest values at deep night and the peak
+near \(h \approx 11\) (HE\,11). The cell-to-cell separation, by
+contrast, is small: the grid's lowest \(\MAE\) is cell B
+(mean-iteration, \(\theta = 0\), \(751.6\)~MW), the highest is
+cell A (\(768.8\)~MW), and all six lie within a \(17\)-MW band
+over the full \(500\)-day population. The
+production-\(\theta\) cells (A, E) are uniformly worse than the
+\(\theta = 0\) counterparts (B, C, D, F) by a few to a few-dozen
+MW at most horizons (Figure~\ref{fig:per-horizon}); under
+multi-step iteration the simplex-interpolated \(\theta(x)\) field
+costs MAE rather than buying it. Point accuracy is not the
+discriminating axis. Interval coverage is
+(Section~\ref{sec:distributional}): the Gaussian band of the
+mean-iteration cells covers \(\approx 21\%\) of actuals against a
+nominal \(\approx 68.3\%\) one-sigma band --- the under-coverage
+signature of a Gaussian interval around a heavy-tailed innovation
+--- and SMC restores it to \(68\)--\(72\%\).
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{fig_diurnal_envelope.pdf}
+\caption{Hourly Ontario demand distribution by day-type over the
+\(|\mathcal{D}| = 500\)-day population, on the HE1--HE24 delivery
+clock (HE\,\(k\) is the hour ending at \(k{:}00\)). The diurnal
+envelope is a property of the demand process: weekday carries the
+sharpest morning ramp and the tallest evening peak, saturday a
+gentler ramp, sunday the smallest amplitude and latest peak.}
+\label{fig:diurnal}
+\end{figure}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=\linewidth]{fig_per_horizon_mae.pdf}
-\caption{Per-horizon MAE for the six predictor cells over the
-\(|\mathcal{D}| = 500\) post-cutoff delivery-day population. The
-six curves are tightly clustered: point error is dominated by
-hour-of-day-coupled diurnal structure (lowest at deep night, peak
-\(\approx 1130\)~MW at \(h \approx 11\)), not by the choice of
-propagation mode, bandwidth, or innovation law. Per-horizon
-numerics are tabulated in Appendix~\ref{app:backtest}.}
+\caption{Per-horizon \(\Delta\MAE\) of the five non-baseline cells
+against cell B (mean-iteration, \(\theta = 0\)), the lowest-MAE
+cell in the grid. Absolute MAE itself is dominated by the diurnal
+envelope of Figure~\ref{fig:diurnal} and obscures the cell-to-cell
+separation. The production-\(\theta\) cells (A, E) consistently
+sit above B by a few to a few-dozen MW; cells C, D, F sit within
+\(\pm 10\)~MW of B at most horizons. The cell-to-cell spread is
+small relative to the diurnal envelope of MAE
+(Appendix~\ref{app:backtest}).}
 \label{fig:per-horizon}
 \end{figure}
 
