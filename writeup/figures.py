@@ -54,15 +54,21 @@ FIGS = ROOT / "writeup" / "tex" / "figs"
 FIGS.mkdir(parents=True, exist_ok=True)
 
 
-# canonical cell ordering and palette
-CELLS = [
-    ("A", "meaniter_prod",     "A. mean-iter, prod-$\\theta$"),
-    ("B", "meaniter_global",   "B. mean-iter, $\\theta{=}0$"),
-    ("C", "smc_global_gauss",  "C. SMC, $\\theta{=}0$, Gaussian"),
-    ("D", "smc_global_emp",    "D. SMC, $\\theta{=}0$, empirical"),
-    ("E", "smc_prod_gauss",    "E. SMC, prod-$\\theta$, Gaussian"),
-    ("F", "smc_prod_emp",      "F. SMC, prod-$\\theta$, empirical"),
+# Six predictors of the §4.4 grid.  Internal letter codes (A..F) are kept
+# only as dict keys and file-name disambiguators; the labels shown to
+# the reader in figure legends are the numeric forms "1"..."6", and the
+# figure caption supplies the mapping in prose.  Predictor 1 (mean-iter,
+# θ(x)) ↔ A, ..., Predictor 6 (SMC, θ(x), empirical) ↔ F.
+PREDICTORS = [
+    ("A", "meaniter_prod",     "1"),
+    ("B", "meaniter_global",   "2"),
+    ("C", "smc_global_gauss",  "3"),
+    ("D", "smc_global_emp",    "4"),
+    ("E", "smc_prod_gauss",    "5"),
+    ("F", "smc_prod_emp",      "6"),
 ]
+# Back-compat alias for any external callers that still import CELLS.
+CELLS = PREDICTORS
 PALETTE_CELL = {
     "A": "#404040",   "B": "#808080",
     "C": "#2c7fb8",   "D": "#d95f0e",
@@ -102,10 +108,14 @@ def fig_per_horizon_mae() -> Path:
     )
     ax.axhline(0, color="black", linewidth=0.7)
     ax.set_xlabel("horizon $h$ (hours)")
-    ax.set_ylabel("$\\Delta$MAE vs cell B  (MW)")
+    ax.set_ylabel("$\\Delta$MAE vs predictor 2  (MW)")
     ax.set_xlim(0.5, 24.5)
     ax.set_xticks([1, 4, 8, 12, 16, 20, 24])
-    ax.legend(title=None, loc="upper left", ncol=2, frameon=False, fontsize=7.5)
+    # Legend outside the plot on the right so it never overlaps the curves.
+    ax.legend(title="predictor", loc="center left",
+              bbox_to_anchor=(1.01, 0.5),
+              frameon=False, fontsize=8, title_fontsize=8)
+    fig.subplots_adjust(right=0.84)
     out = FIGS / "fig_per_horizon_mae.pdf"
     fig.savefig(out)
     plt.close(fig)
@@ -116,8 +126,8 @@ def fig_per_horizon_mae() -> Path:
 # Figure 2: diurnal demand distribution by day-type (3-panel boxplot)
 # ---------------------------------------------------------------------------
 def fig_diurnal_envelope() -> Path:
-    # Use any SMC cell -- actuals and daytype are identical across cells;
-    # the mean-iter pickles (A, B) lack the daytype column. C is canonical.
+    # Use any SMC predictor pickle -- actuals + daytype are identical across
+    # predictors; the mean-iter pickles (1, 2) lack the daytype column.
     df = pd.read_pickle(SAMP / "cell_C_smc_global_gauss.pkl")
     # HE1..HE24 align to hour-of-day 0..23 under cfg.day_anchor_hours=0
     df = df.assign(hour=df["horizon_h"] - 1)
@@ -126,32 +136,36 @@ def fig_diurnal_envelope() -> Path:
               for dt in daytypes}
 
     fig, axes = plt.subplots(3, 1, figsize=(6.5, 5.4), sharex=True, sharey=True)
+    # Single neutral colour across all three rows -- the panels are
+    # separated by day-type already; colour adds nothing.
+    neutral = "#6c8eb8"
     for ax, dt in zip(axes, daytypes):
         sub = df[df["daytype"] == dt]
         sns.boxplot(
             data=sub, x="hour", y="actual_mw",
-            color=PALETTE_DT[dt], width=0.66,
+            color=neutral, width=0.66,
             fliersize=0, linewidth=0.5, ax=ax,
         )
         for patch in ax.patches:
-            patch.set_alpha(0.65)
+            patch.set_alpha(0.7)
             patch.set_edgecolor("black")
         ax.set_xlabel("")
     axes[-1].set_xlabel("hour of delivery day (HE)")
     axes[-1].set_xticks([0, 4, 8, 12, 16, 20, 23])
     axes[-1].set_xticklabels([1, 5, 9, 13, 17, 21, 24])
-    # Remove per-axes y-labels and use a single figure-level y-label.
+    # Strip per-axes y-labels; use a single figure-level shared label.
     for ax in axes:
         ax.set_ylabel("")
-    # Move the per-row daytype/count label to the right side so the left
-    # side is free for the shared "Ontario demand (MW)" label.
+    # Day-type/count chip on the right of each panel.
     for ax, dt in zip(axes, daytypes):
-        ax.text(1.02, 0.5, f"{dt}\n($n = {counts[dt]}$)",
+        ax.text(1.015, 0.5, f"{dt}\n($n = {counts[dt]}$)",
                 transform=ax.transAxes, rotation=0,
                 va="center", ha="left", fontsize=8.5)
-    fig.text(0.02, 0.5, "Ontario demand (MW)",
+    fig.text(0.015, 0.5, "Ontario demand (MW)",
              rotation="vertical", va="center", fontsize=9)
-    fig.subplots_adjust(left=0.10, right=0.86, hspace=0.12)
+    # Generous left margin so the shared y-label doesn't collide with
+    # tick labels, and a right margin reserved for the day-type chip.
+    fig.subplots_adjust(left=0.11, right=0.84, hspace=0.12)
     out = FIGS / "fig_diurnal_envelope.pdf"
     fig.savefig(out)
     plt.close(fig)
@@ -188,8 +202,9 @@ def fig_multisigma_coverage() -> Path:
         ax.set_yticks([0.5, 0.683, 0.8, 0.9, 0.95, 0.99])
         ax.set_yticklabels(["50", "68", "80", "90", "95", "99"], fontsize=7.5)
     g.set_axis_labels("nominal coverage (%)", "empirical coverage (%)")
-    g.set_titles("{col_name}", size=8.5)
+    g.set_titles("predictor {col_name}", size=8.5)
     g.figure.set_size_inches(6.5, 4.2)
+    g.figure.tight_layout()
     out = FIGS / "fig_multisigma_coverage.pdf"
     g.figure.savefig(out)
     plt.close(g.figure)
@@ -243,8 +258,9 @@ def fig_pit_panel() -> Path:
         ax.axhline(1.0, color="black", linewidth=0.7, linestyle=":")
         ax.set_xlim(0, 1)
     g.set_axis_labels("PIT", "density")
-    g.set_titles("{col_name}", size=8.5)
+    g.set_titles("predictor {col_name}", size=8.5)
     g.figure.set_size_inches(6.5, 4.2)
+    g.figure.tight_layout()
     out = FIGS / "fig_pit_panel.pdf"
     g.figure.savefig(out)
     plt.close(g.figure)
@@ -334,6 +350,7 @@ def fig_ck_divergence() -> Path:
     ax_s.set_xlabel("horizon $h$")
     ax_s.set_ylabel("diffusion rel err $\\|\\hat\\Sigma_{h\\Delta}-\\Sigma^{\\mathrm{iter}}_h\\|_F\\,/\\,\\|\\Sigma^{\\mathrm{iter}}_h\\|_F$")
     ax_s.set_xticks([1, 2, 4, 8, 12, 24])
+    fig.tight_layout()
 
     out = FIGS / "fig_ck_divergence.pdf"
     fig.savefig(out)

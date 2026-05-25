@@ -521,27 +521,54 @@ production state-dependent \(\theta(x)\) via Eq.~\ref{eq:simplextheta}
 and global-OLS \(\theta = 0\) --- and SMC under both Gaussian
 (Eq.~\ref{eq:smc-step}) and empirical-residual innovation sampling.
 The full \(\{\text{propagation}\} \times \{\theta\} \times
-\{\text{innovation law}\}\) grid is six cells, labelled
-\(\mathrm{A}\)--\(\mathrm{F}\). Point error follows a diurnal
-envelope (Figure~\ref{fig:diurnal}) --- a property of the demand
-process under a day-anchored delivery-day clock, not of any
-predictor --- with the lowest values at deep night and the peak
-near \(h \approx 11\) (HE\,11). The cell-to-cell separation, by
-contrast, is small: the grid's lowest \(\MAE\) is cell B
-(mean-iteration, \(\theta = 0\), \(751.6\)~MW), the highest is
-cell A (\(768.8\)~MW), and all six lie within a \(17\)-MW band
-over the full \(500\)-day population. The
-production-\(\theta\) cells (A, E) are uniformly worse than the
-\(\theta = 0\) counterparts (B, C, D, F) by a few to a few-dozen
-MW at most horizons (Figure~\ref{fig:per-horizon}); under
-multi-step iteration the simplex-interpolated \(\theta(x)\) field
-costs MAE rather than buying it. Point accuracy is not the
+\{\text{innovation law}\}\) grid gives six predictors,
+labelled 1--6 along the propagation \(\times\)
+\(\theta\) \(\times\) innovation grid as listed in
+Table~\ref{tab:predictors}. Point error follows a diurnal envelope
+(Figure~\ref{fig:diurnal}) --- a property of the demand process
+under a day-anchored delivery-day clock, not of any predictor ---
+with the lowest values at deep night and the peak near
+\(h \approx 11\) (HE\,11). The predictor-to-predictor separation,
+by contrast, is small: the lowest \(\MAE\) is predictor 2
+(mean-iteration, \(\theta = 0\); \(751.6\)~MW), the highest is
+predictor 1 (\(768.8\)~MW), and all six lie within a \(17\)-MW
+band over the full \(500\)-day population. The two
+state-dependent-\(\theta(x)\) predictors (1 and 5) are uniformly
+worse than their \(\theta = 0\) counterparts (2, 3, 4, 6) by a few
+to a few-dozen MW at most horizons (Figure~\ref{fig:per-horizon});
+under multi-step iteration the simplex-interpolated \(\theta(x)\)
+field costs MAE rather than buying it. Point accuracy is not the
 discriminating axis. Interval coverage is
 (Section~\ref{sec:distributional}): the Gaussian band of the
-mean-iteration cells covers \(\approx 21\%\) of actuals against a
-nominal \(\approx 68.3\%\) one-sigma band --- the under-coverage
-signature of a Gaussian interval around a heavy-tailed innovation
---- and SMC restores it to \(68\)--\(72\%\).
+mean-iteration predictors covers \(\approx 21\%\) of actuals
+against a nominal \(\approx 68.3\%\) one-sigma band --- the
+under-coverage signature of a Gaussian interval around a
+heavy-tailed innovation --- and SMC restores it to \(68\)--\(72\%\).
+
+\begin{table}[h]
+\centering
+\small
+\caption{The six predictors of Section~\ref{sec:backtest}.
+``\(\theta = 0\)'' is the global linear fit (uniform weights);
+``\(\theta(x)\)'' is the simplex-interpolated state-dependent
+bandwidth (Eq.~\ref{eq:simplextheta}). SMC predictors use \(M = 200\)
+particles; the per-step innovation is drawn either from the local
+Gaussian \(\Nrm(0, \Sj)\) (Eq.~\ref{eq:smc-step}) or by resampling
+the coordinate-0 residual array (the empirical variant).}
+\label{tab:predictors}
+\begin{tabular}{l l l l}
+\toprule
+\# & propagation       & \(\theta\)       & innovation law \\
+\midrule
+1  & mean-iteration    & \(\theta(x)\)    & --- \\
+2  & mean-iteration    & \(\theta = 0\)   & --- \\
+3  & SMC               & \(\theta = 0\)   & Gaussian       \\
+4  & SMC               & \(\theta = 0\)   & empirical      \\
+5  & SMC               & \(\theta(x)\)    & Gaussian       \\
+6  & SMC               & \(\theta(x)\)    & empirical      \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{figure}[h]
 \centering
@@ -558,22 +585,23 @@ gentler ramp, sunday the smallest amplitude and latest peak.}
 \begin{figure}[h]
 \centering
 \includegraphics[width=\linewidth]{fig_per_horizon_mae.pdf}
-\caption{Per-horizon \(\Delta\MAE\) of the five non-baseline cells
-against cell B (mean-iteration, \(\theta = 0\)), the lowest-MAE
-cell in the grid. Absolute MAE itself is dominated by the diurnal
-envelope of Figure~\ref{fig:diurnal} and obscures the cell-to-cell
-separation. The production-\(\theta\) cells (A, E) consistently
-sit above B by a few to a few-dozen MW; cells C, D, F sit within
-\(\pm 10\)~MW of B at most horizons. The cell-to-cell spread is
-small relative to the diurnal envelope of MAE
-(Appendix~\ref{app:backtest}).}
+\caption{Per-horizon \(\Delta\MAE\) of the five non-baseline
+predictors against predictor 2 (mean-iteration, \(\theta = 0\)),
+the lowest-MAE predictor in the grid. Absolute MAE itself is
+dominated by the diurnal envelope of Figure~\ref{fig:diurnal} and
+obscures the predictor-to-predictor separation. The
+state-dependent-\(\theta(x)\) predictors (1, 5) consistently sit
+above predictor 2 by a few to a few-dozen MW; predictors 3, 4, 6
+sit within \(\pm 10\)~MW of predictor 2 at most horizons. The
+predictor-to-predictor spread is small relative to the diurnal
+envelope of MAE (Appendix~\ref{app:backtest}).}
 \label{fig:per-horizon}
 \end{figure}
 
 \subsection{Distributional diagnostics on the SMC predictive law}
 \label{sec:distributional}
 
-The full ensemble at each \((d, h)\) of the SMC cells C--F of
+The full ensemble at each \((d, h)\) of the SMC predictors 3--6 of
 Section~\ref{sec:backtest} carries information the point/interval
 summary does not surface: how the predictive distribution is shaped,
 where in the level set the band misses, and whether the per-step
@@ -584,58 +612,60 @@ in the tails. Three diagnostics are reported.
 nominal central levels
 \(\alpha \in \{0.50, 0.683, 0.80, 0.90, 0.95, 0.99\}\), the
 empirical coverage of the corresponding sample-quantile band reveals
-which cells calibrate across the full range and which do not.
-Empirical-residual cells D and F ride the nominal diagonal within
-\(\approx 1\) percentage point at every level; Gaussian-SMC cells C
-and E bulge above the diagonal at small levels and dip below it at
-large levels, the signature of a Gaussian tail mildly
-under-dispersed against a heavier-tailed truth.
+which predictors calibrate across the full range and which do not.
+The two empirical-residual predictors (4 and 6) ride the nominal
+diagonal within \(\approx 1\) percentage point at every level; the
+two Gaussian-SMC predictors (3 and 5) bulge above the diagonal at
+small levels and dip below it at large levels, the signature of a
+Gaussian tail mildly under-dispersed against a heavier-tailed truth.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=\linewidth]{fig_multisigma_coverage.pdf}
 \caption{Empirical vs.\ nominal coverage at six central levels for
-the four SMC cells, pooled over horizons and day-types
+the four SMC predictors, pooled over horizons and day-types
 (\(|\mathcal{D}| = 500\)). Diagonal is perfect calibration. The
-empirical-residual cells (D, F) calibrate at every level; the
-Gaussian-SMC cells (C, E) are mildly under-dispersed in the
-extremes --- Section~\ref{sec:caveat} qualifier 2 visible in the
-predictive distribution.}
+two empirical-residual predictors (4 and 6) calibrate at every
+level; the two Gaussian-SMC predictors (3 and 5) are mildly
+under-dispersed in the extremes --- Section~\ref{sec:caveat}
+qualifier 2 visible in the predictive distribution.}
 \label{fig:multisigma}
 \end{figure}
 
 \emph{PIT shape} (Figure~\ref{fig:pit}). The probability-integral
 transform of the actual through the per-step predictive distribution
 exposes the residual mis-calibration the coverage diagonal smooths
-over. All four SMC cells exhibit a systematic right-decreasing
+over. All four SMC predictors exhibit a systematic right-decreasing
 density: actuals fall in the lower half of the predictive more often
 than uniform expectation, indicating a small forecast-high bias
 shared across propagation modes and innovation laws. The bias is a
-property of the conditional-mean factor \(\Cj\) and is not
-the SMC sampler's to repair.
+property of the conditional-mean factor \(\Cj\) and is not the SMC
+sampler's to repair.
 
 \emph{Ensemble shape and CRPS.} At \(h = 1\) the per-anchor sample
 excess-kurtosis averaged across the population is
 \(\overline{\mathrm{kurt}_{\mathrm{exc}}} \approx +4.8\) for the
-empirical-residual cells D and F and \(\approx -0.04\) for the
-Gaussian cells C and E: the empirical sampler injects the heavy tail
-measured at the library-residual layer (Section~\ref{sec:caveat},
-one-step \(\mathrm{kurt}_{\mathrm{exc}} \approx 24\)--\(33\)) into
-the predictive distribution; the Gaussian sampler does not. The
-sample-form CRPS (with the \(M/(M-1)\) unbiased correction), pooled
-over all \((d, h, \mathrm{daytype})\), ranks
-\(C\, (539.2) < D\, (542.2) < E\, (547.6) < F\, (550.7)\)~MW: the
-Gaussian-SMC cells score better on the proper rule (sharpness wins
-on average); the empirical-SMC cells match nominal coverage at
-every level. The classical sharpness-versus-calibration trade-off,
-made visible by the diagnostic.
+empirical-residual predictors (4 and 6) and \(\approx -0.04\) for
+the Gaussian predictors (3 and 5): the empirical sampler injects
+the heavy tail measured at the library-residual layer
+(Section~\ref{sec:caveat}, one-step \(\mathrm{kurt}_{\mathrm{exc}}
+\approx 24\)--\(33\)) into the predictive distribution; the
+Gaussian sampler does not. The sample-form CRPS (with the
+\(M/(M-1)\) unbiased correction), pooled over all
+\((d, h, \mathrm{daytype})\), ranks predictor~3 (\(539.2\)) \(<\)
+4 (\(542.2\)) \(<\) 5 (\(547.6\)) \(<\) 6 (\(550.7\))~MW: the
+Gaussian-SMC predictors score better on the proper rule (sharpness
+wins on average); the empirical-SMC predictors match nominal
+coverage at every level. The classical
+sharpness-versus-calibration trade-off, made visible by the
+diagnostic.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\linewidth]{fig_pit_panel.pdf}
 \caption{Probability-integral-transform histograms for the four SMC
-cells, pooled over the full population. Dotted line: the uniform
-density expected under perfect calibration. All four cells exhibit a
+predictors, pooled over the full population. Dotted line: the uniform
+density expected under perfect calibration. All four exhibit a
 right-decreasing PIT density, the signature of a small forecast-high
 bias shared across propagation modes and innovation laws ---
 attributable to the conditional-mean factor \(\Cj\), not the SMC
@@ -643,7 +673,7 @@ sampler.}
 \label{fig:pit}
 \end{figure}
 
-\paragraph{Liu--Gao pre-registration.} The six-cell grid of
+\paragraph{Liu--Gao pre-registration.} The six-predictor grid of
 Section~\ref{sec:backtest} was pre-registered as a test of
 contamination-pattern predictions adapted
 from~\cite{LiuGao2019} for local-Gaussian forecasters under
@@ -656,8 +686,8 @@ the population P4 is confirmed (\(\approx 50\) percentage-point
 coverage gain for SMC over mean iteration at the one-sigma band).
 Day-type-stratified, P4 is weekday-specific (\(+52\)-percentage-point
 gain to \(75\)--\(78\%\) coverage); on weekends the empirical-SMC
-cells under-cover the one-sigma band by \(12\)--\(19\) points,
-falsifying P2 for the sunday cell with statistical force under a
+predictors under-cover the one-sigma band by \(12\)--\(19\) points,
+falsifying P2 for sunday with statistical force under a
 day-bootstrap test. The sunday d-vs-day-type confound is not resolved
 within this paper.
 
@@ -947,12 +977,12 @@ hashed into each score.
 \section{Per-horizon backtest table}
 \label{app:backtest}
 
-The per-horizon error structure for cell B (mean-iteration,
+The per-horizon error structure for predictor 2 (mean-iteration,
 global-OLS \(\theta = 0\)) over the \(|\mathcal{D}| = 500\)
 post-cutoff delivery-day population is plotted with the other five
-cells in Figure~\ref{fig:per-horizon}; the diurnal envelope and the
-hour-of-day coupling are visible there. Selected horizons for cell
-B: \(\MAE(h{=}1) = 157.7\)~MW, \(\MAPE\,1.06\%\); peak
+predictors in Figure~\ref{fig:per-horizon}; the diurnal envelope and
+the hour-of-day coupling are visible there. Selected horizons for
+predictor 2: \(\MAE(h{=}1) = 157.7\)~MW, \(\MAPE\,1.06\%\); peak
 \(\MAE(h{=}11) = 1125.8\)~MW, \(\MAPE\,6.90\%\); decay to
 \(\MAE(h{=}24) = 597.9\)~MW, \(\MAPE\,3.75\%\). One-sigma coverage
 falls monotonically from \(60.4\%\) at \(h = 1\) (close to nominal)
