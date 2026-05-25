@@ -10,20 +10,29 @@
 #
 # Prereqs on Fir:
 #   - python 3.10 venv at $REPO/.venv with:
-#       pip install numpy pandas scipy matplotlib seaborn pyyaml \
-#                   torch ray bs4 dash plotly
-#   - sibling EmpiricalDynamics repo cloned at
-#       $REPO/../Takens_Whitney/EmpiricalDynamics
-#     installed editable into the venv:
-#       (.venv) $ pip install -e ../Takens_Whitney/EmpiricalDynamics
+#       module load python/3.10
+#       python -m venv .venv && source .venv/bin/activate
+#       python -m pip install --no-index numpy pandas scipy tqdm \
+#                                        torch ray wheel
+#   - sibling EmpiricalDynamics repo cloned at $REPO/../EmpiricalDynamics
+#       cd ..
+#       git clone https://github.com/pmahon3/EmpiricalDynamics.git
+#       cd MITACS
+#       pip install -e ../EmpiricalDynamics --no-build-isolation
+#     (--no-build-isolation skips the isolated build env so pip uses the
+#      runtime deps already in the venv, avoiding the CVMFS slow-read
+#      flakes that hit `setuptools`/`wheel` pulls on cold cache.)
 #   - The data cache:  data/ontario/*.pkl    (or scraped to the same
 #     locations).  load_actuals reads from there.
+#
+# Runtime: ~25 s of compute (per laptop profile post-optimization).
+# 15-minute wall is generous; short jobs typically dispatch fast.
 
 #SBATCH --job-name=rescore_W2y
 #SBATCH --account=def-CHANGE_ME           # set your DRA RAPI account
-#SBATCH --time=1:00:00
+#SBATCH --time=0:15:00
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=8G
+#SBATCH --mem=4G
 #SBATCH --output=logs/rescore_W2y_%j.out
 #SBATCH --error=logs/rescore_W2y_%j.err
 
