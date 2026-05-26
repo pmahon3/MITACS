@@ -1,0 +1,164 @@
+schema: thread
+written_at: '2026-05-26T10:30:00-04:00'
+git_sha: 84aa3d04602e4e340556c4f7a4ab1a5ff6fbd509
+git_clean: true
+body_sha256: 4bf2f5bb23beb90e26fd26195a8ecf535e1dda7472a32bea3e2d4202dbc5744f
+references:
+- file: ../2026-05-26_pit-calendar-fingerprint/arbiter.yaml
+  body_sha256: 376ebac7915643d6e75740ae94521e1175a37a2a6317d66cad0974311f7cf90d
+  relation: root
+topic: distributional-class-thread
+question: 'What predictive-distribution class would render the iterated kappa-predictor marginally PIT-calibrated on post-cutoff Ontario data, and does the cross-scale coherence defect (the v2 finding) survive the kernel-family lift?
+
+  '
+root:
+  description: 'The PIT-calendar-fingerprint arbiter (2026-05-26, SETTLED-AMBIGUOUS) documented that the iterated Gaussian forecast distribution has chi^2 = 22329 vs uniform PIT (critical 16.92), with 67% of values in extreme bins. This is the direct empirical consequence of treating the strongly non-Gaussian conditional innovation (mitacs-rebaseline-facts: excess kurtosis 24-33) as Gaussian. All current findings (including v2''s D_RATIO = 28.96) were computed within the Gaussian kernel commitment. Q1 lifts that commitment to the smallest non-trivial extension (Student-t) and tests both marginal calibration and the survival of the cross-scale coherence defect under the corrected kernel.
+
+    '
+  artifacts:
+  - file: ../2026-05-26_pit-calendar-fingerprint/arbiter.yaml
+    body_sha256: 376ebac7915643d6e75740ae94521e1175a37a2a6317d66cad0974311f7cf90d
+  scope_limits: 'This thread tests the PREDICTIVE-DISTRIBUTION CLASS axis only. It does NOT re-test missing-content (state-space dimension) questions under the corrected kernel; that is a separate follow-up thread if Q1 corroborates the kernel-family lift AND the v2 defect survives. It also does NOT propose a v3 registered predictor; that is downstream (and would require a fresh experiment.freeze registration).
+
+    '
+current_node_id: Q1
+state: planning
+nodes:
+  Q1:
+    id: Q1
+    name: student-t-vs-gaussian-on-marginal-PIT
+    parent_id: null
+    parent_branch: null
+    status: planned
+    phase_a_skeleton:
+      metric_class: "Three nested models compared on post-cutoff Ontario data:\n  M0: Gaussian (the registered predictor; null baseline)\n  M1: Student-t kernel with one global nu per day-type;\n      location and scale fit as for M0\n  M2: Student-t with full kernel-family commitment:\n      (mu_{m,h}, s_{m,h}, nu_{m,h}) fit per (month, hour-of-day)\n      bin via Student-t MLE for the climatology, plus the M1\n      kernel for the operator.\nIteration of M1/M2 kernels is via SMC particle propagation\n(M=200, matching existing distributional_smc infrastructure).\nPrimary metric: chi^2_{10-bin} of the post-cutoff marginal PIT\nunder each model.\n"
+      candidate_set:
+      - M0_gaussian_baseline
+      - M1_student_t_kernel_only
+      - M2_student_t_full_commitment
+      outcome_categories:
+      - R-A: marginal_PIT_chi2 <= 30 under M1 or M2 (Gaussian was the marginal problem; fixed by heavy-tailed kernel)
+      - R-B: marginal_PIT_chi2 in (30, 500] under M1/M2 (Student-t helps but doesn't fully calibrate; richer family needed)
+      - R-C: marginal_PIT_chi2 > 500 under both M1 and M2 (Student-t does not absorb S5; missing content not distributional class)
+      - R-D: MLE fit pathological (nu outside (2, 1000) or convergence failure); redesign
+      skeleton_thresholds_depend_on:
+      - source: null
+        field: null
+        rule: 'Q1 is the thread''s root; thresholds are pre-registered
+
+          standalone (chi^2 thresholds 30 / 500 derived from
+
+          critical-value scaling: 30 is roughly twice the 95%
+
+          critical value of 16.92; 500 is the order-of-magnitude
+
+          boundary between "improved" and "still pathological").
+
+          '
+    phase_a_path: null
+    notes: "Secondary tests (informational, not part of the verdict):\n\n(a) Empirical nu estimates per day-type. nu < 10 means\n    heavy-tailed is empirically required and propagates to all\n    future kernel-family decisions.\n\n(b) The Student-t analogue of D_RATIO at the v2 headline cell\n    (h=12, weekday), computed by SMC particle propagation of\n    M1's kernel and Wasserstein-2 (or sample-based KL) between\n    iterated and directly-fit kernels. Tests whether v2's\n    D_RATIO = 28.96 finding survives the kernel-family lift.\n    If D_RATIO_t shrinks to ~1, part of v2's signal was a\n    Gaussian-projection artifact. If it stays >= 5, picture (C)\n    survives the lift and the seed's working hypothesis is\n    independently corroborated.\n\nSynthetic gate: a known Student-t-VAR system (generator\n(L, Q, nu_true) producing finite-variance heavy-tailed data).\nM0 (Gaussian) should fail marginal PIT on the synthetic; M1\nand M2 should pass. Calibrates the test's discriminating power\n\
+      before any Ontario result is examined.\n"
+  Q2A:
+    id: Q2A
+    name: richer-family-mixture-or-nonparametric
+    parent_id: Q1
+    parent_branch: R-B
+    status: planned
+    phase_a_skeleton:
+      metric_class: 'If Q1 fires R-B (Student-t helps but doesn''t fully calibrate),
+
+        the missing distributional flexibility is beyond a single nu.
+
+        Test two richer families: (i) finite-mixture of Gaussians
+
+        with state-dependent component weights; (ii) non-parametric
+
+        predictive law via SMC with a kernel-density-estimated
+
+        residual law.
+
+        '
+      candidate_set:
+      - mixture_2_gaussians
+      - mixture_3_gaussians
+      - kde_residual_law
+      outcome_categories:
+      - R-A2: chi^2 < 30 under one of the richer families
+      - R-B2: chi^2 in (30, 500] (further distributional richness still needed)
+      - R-C2: chi^2 > 500 (the marginal pathology is non-distributional; loop back to state-space content)
+    phase_a_path: null
+  Q2B:
+    id: Q2B
+    name: non-distributional-marginal-pathology-investigation
+    parent_id: Q1
+    parent_branch: R-C
+    status: planned
+    phase_a_skeleton:
+      metric_class: 'If Q1 fires R-C (Student-t does not absorb the marginal
+
+        pathology at all), the chi^2 = 22329 has a non-distributional
+
+        cause. Candidates: (i) the iterated mean is systematically
+
+        biased (mean trajectory drifts from actuals so far that NO
+
+        Gaussian or Student-t predictive scale could cover them);
+
+        (ii) the iteration itself is divergent at large h (sample
+
+        variance explodes); (iii) the cross-day-anchor seam masks
+
+        a hidden cause. Test each via diagnostic decomposition of
+
+        the iterated forecast trajectory vs actuals trajectory
+
+        on a representative subset of post-cutoff days.
+
+        '
+      candidate_set:
+      - iterated_mean_trajectory_bias
+      - iterated_variance_divergence
+      - day_anchor_seam_artifact
+      outcome_categories:
+      - R-A3: one mechanism dominates and is fixable independent of kernel family
+      - R-B3: multiple mechanisms contribute; no single fix suffices
+      - R-C3: marginal PIT is irreducibly pathological; question reframes
+    phase_a_path: null
+  Q2D:
+    id: Q2D
+    name: redesign-Q1
+    parent_id: Q1
+    parent_branch: R-D
+    status: planned
+    phase_a_skeleton:
+      metric_class: 'If Q1 fires R-D (MLE pathological), the Student-t fit was
+
+        misconfigured. Redesign Q1 with corrected fit procedure
+
+        (constraint on nu range, alternative MLE algorithm, or
+
+        Bayesian regularization). This is a methodology amendment,
+
+        not a substantive next step.
+
+        '
+      candidate_set:
+      - student_t_mle_with_nu_bounded
+      - student_t_bayesian_posterior_mean
+      - student_t_method_of_moments_fallback
+      outcome_categories:
+      - any_converges_returns_to_Q1_with_corrected_fit
+    phase_a_path: null
+branching_rules:
+  Q1:
+    R-A: null
+    R-B: Q2A
+    R-C: Q2B
+    R-D: Q2D
+amendments: []
+state_history: []
+resolution:
+  resolved_at: null
+  final_state: null
+  summary: null
+  spawned_threads: []

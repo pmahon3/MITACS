@@ -573,48 +573,258 @@ first two moments specifically.
 \label{sec:student-t}
 
 The smallest non-Gaussian extension that admits a continuous limit
-to Gaussian is the Student-$t$ family. A Student-$t$ kernel is
-parameterized by location $\mu$, scale $s$, and degrees of freedom
-$\nu \in (0, \infty]$, with the Gaussian recovered in the limit
-$\nu \to \infty$. The conditional law
+to Gaussian is the Student-$t$ family. We give the density, the
+MLE, the explicit convolution non-closure, and the closed-form
+divergence (where one exists) at the same level of detail as
+\S\ref{sec:gaussian}.
+
+\paragraph{Density.}
+The univariate Student-$t$ location-scale density with degrees of
+freedom $\nu \in (0, \infty]$, location $\mu \in \Rb$, and scale
+$s > 0$ is
+\begin{equation}
+  \label{eq:t-density}
+  f_{\nu, \mu, s}(y) \;=\;
+  \frac{\Gamma\!\bigl(\tfrac{\nu+1}{2}\bigr)}
+       {\sqrt{\nu \pi}\, s\, \Gamma\!\bigl(\tfrac{\nu}{2}\bigr)}
+  \left(1 + \frac{(y - \mu)^{2}}{\nu\, s^{2}}\right)^{-\frac{\nu+1}{2}}.
+\end{equation}
+The first two moments are $\E[Y] = \mu$ (for $\nu > 1$) and
+$\Var[Y] = s^{2} \cdot \nu / (\nu - 2)$ (for $\nu > 2$;
+infinite for $\nu \in (1, 2]$). The Gaussian
+$\Nrm(\mu, s^{2})$ is recovered as $\nu \to \infty$. The CDF
+$F_{\nu, \mu, s}(y) = \int_{-\infty}^{y} f_{\nu, \mu, s}(y')\, dy'$ has
+no elementary form but is available in standard scientific libraries.
+
+The Student-$t$ kernel for the $h$-step conditional law is
 \begin{equation}
   \label{eq:t-kernel}
-  \hat\kappa_h(x, \cdot) \;=\;
-  \Studt_{\nu_h}\!\bigl(\hat C_h x,\; \hat s_h^{2}\bigr)
+  \hat\kappa_h^{(\Studt)}(x, \cdot) \;=\;
+  \Studt_{\nu_h}\!\bigl(\hat C_h x,\; \hat s_h^{2}\bigr),
+  \qquad y \sim \hat\kappa_h^{(\Studt)}(x, \cdot)
+  \;\Leftrightarrow\;
+  y \sim f_{\nu_h,\, \hat C_h x,\, \hat s_h}(\cdot).
 \end{equation}
-is parametric, fittable by maximum likelihood (with iteratively
-reweighted least squares for the regression part and a
-one-dimensional optimisation for $\nu$), and gives a closed-form
-PIT (the Student-$t$ CDF, available in any scientific library).
+The model has $d^{2}$ drift parameters (one per entry of $\hat C_h$),
+one scale parameter $\hat s_h^{2}$, and one degrees-of-freedom
+parameter $\nu_h$ per scale $h$.
 
-The Student-$t$ family is \emph{not} closed under convolution. If
-$\hat\kappa_1$ is Student-$t$, $\hat\kappa_1 \compose \hat\kappa_1$
-is a heavier-tailed distribution with a more complex form
-(asymptotically Student-$t$ with $\nu/2$ degrees of freedom or
-similar, depending on $\nu$). This makes the strict-semigroup
-picture (A) \emph{algebraically tighter} in Student-$t$ land than
-in Gaussian land: closure of the kernel family under convolution
-is no longer free.
+\paragraph{Maximum likelihood estimation.}
+Given $n$ regression pairs $\{(x_i, y_i)\}_{i=1}^{n}$ with $y_i \in \Rb$ the
+scalar one-step innovation, the log-likelihood under
+$y_i \sim f_{\nu, C x_i, s}$ is
+\begin{equation}
+  \label{eq:t-loglik}
+  \ell(C, s, \nu) \;=\; \sum_{i=1}^{n} \log f_{\nu, C x_i, s}(y_i)
+  \;=\; \text{const}(\nu)
+    \;-\; \frac{\nu + 1}{2} \sum_{i=1}^{n}
+      \log\!\left(1 + \frac{r_i^{2}}{\nu s^{2}}\right)
+\end{equation}
+with $r_i := y_i - C x_i$ and $\text{const}(\nu)
+:= n \log \Gamma(\tfrac{\nu+1}{2}) - n \log \Gamma(\tfrac{\nu}{2})
+- n \log(\sqrt{\nu \pi}\, s)$. The MLE alternates between two
+sub-problems:
 
-For the test \S\ref{sec:general-test}, we compute
-$\hat\kappa_h^{\mathrm{iter}}$ by SMC particle propagation
-($M = 200$ particles, as in the existing infrastructure), and we
-use either a closed-form Student-$t$-Student-$t$ approximation
-to KL or a sample-based divergence (Wasserstein-2). The synthetic
-calibration generator is a known Student-$t$-VAR system with
-matched dimension.
+\emph{Regression update} (with $\nu$ fixed). Setting
+$\partial \ell / \partial C = 0$ gives the iteratively-reweighted
+least-squares (IRLS) normal equations: the weights
+$w_i^{(k)} := (\nu + 1) / \bigl(\nu + (r_i^{(k)})^{2}/s^{(k)\, 2}\bigr)$
+yield the regression
+\begin{equation}
+  \label{eq:t-irls}
+  C^{(k+1)} \;=\;
+  \left(\sum_{i} w_i^{(k)}\, x_i x_i^{\top}\right)^{-1}
+  \left(\sum_{i} w_i^{(k)}\, x_i y_i\right),
+\end{equation}
+iterated with the residuals $r_i^{(k+1)} := y_i - C^{(k+1)} x_i$.
+The IRLS converges to a quasi-Newton step of the joint optimisation
+in $(C, s)$.
 
-The Student-$t$ extension addresses (S5) directly: a heavy-tailed
-predictive can absorb the marginal PIT pathology because the
-distributional class admits the kind of tail behaviour the
-empirical residuals carry. Whether it absorbs (S1)'s defect is
-the empirical question: if $\mathrm{D\_RATIO}_{\Studt}$ at the
-same $(h^{*}, g^{*})$ is much smaller than the Gaussian
-$\mathrm{D\_RATIO} = 29$, the relaxed-factorization conclusion was
-in part an artifact of the wrong kernel family. If it stays
-comparable, picture (C) survives the family lift, and the seed's
-working hypothesis (Hypothesis~\ref{hyp:working}) gains independent
-support.
+\emph{Scale and degrees-of-freedom updates}. With $C$ held fixed,
+$\partial \ell / \partial s^{2} = 0$ gives
+\begin{equation}
+  \label{eq:t-scale}
+  \hat s^{2} \;=\; \frac{1}{n} \sum_{i=1}^{n}
+    \frac{(\nu+1)\, r_i^{2}}{\nu + r_i^{2}/s^{2}}
+\end{equation}
+(implicit; solve by Newton iteration since $s$ appears on both
+sides), and the one-dimensional score
+$\partial \ell / \partial \nu = 0$ is solved by bracketing on a
+log-grid (typical search range $\nu \in [2, 300]$;
+boundary failures fall under outcome R-D of Q1).
+
+\emph{Bayesian-regularised alternative}: for finite samples with
+small $n$ per day-type, the joint MLE on $(C, s, \nu)$ can be
+unstable. A Jeffreys-prior posterior on $\nu$ (with the standard
+$\nu^{-1}$ prior, equivalent to a flat prior on $\log \nu$) tames
+the boundary behaviour and gives posterior-mean estimates that
+are well-defined for any $n$. Pre-registered fallback under R-D.
+
+\paragraph{Convolution non-closure: the explicit statement.}
+Let $T_1 \sim \Studt_{\nu}(0, s^{2})$ and $T_2 \sim \Studt_{\nu}(0, s^{2})$
+be independent. The density of $T_1 + T_2$ is the convolution
+\begin{equation}
+  \label{eq:t-convolution}
+  f_{T_1 + T_2}(z) \;=\;
+  \int_{-\infty}^{\infty}
+    f_{\nu, 0, s}(t)\, f_{\nu, 0, s}(z - t)\, dt.
+\end{equation}
+This integral does not yield a Student-$t$ density. For
+$\nu \in \Nb$, it has a closed form expressible via hypergeometric
+functions, but the result is itself a non-$t$ distribution. The
+tail behaviour is the salient feature: as $|z| \to \infty$, the
+density falls polynomially as $|z|^{-(\nu + 1)}$, the same rate as
+the original Student-$t$ (each iid summand contributes
+multiplicatively to the density, and the slowest-decaying factor
+dominates). Thus the \emph{tail index} $\nu$ is preserved under
+convolution, but the \emph{shape} of the distribution is not.
+In particular, $T_1 + T_2$ is not generally $\Studt_{\nu'}(0, s'^{2})$
+for any $(\nu', s')$, and the iterated kernel
+$\hat\kappa_h^{(\Studt)\, \mathrm{iter}}$ is outside the parametric
+Student-$t$ family for $h \geq 2$.
+
+This algebraic non-closure has the structural consequence we
+flagged in \S\ref{sec:drift-vs-rest}: the strict-factorization
+constraint (A) is \emph{tighter} in the Student-$t$ case than in
+the Gaussian case, because it imposes that $\hat\kappa_{h}^{(\Studt)}$
+(directly fit) and $\hat\kappa_h^{(\Studt)\, \mathrm{iter}}$
+(iterated) are equal as distributions, even though the latter is
+\emph{not Student-$t$}. In the Gaussian case, both sides are
+Gaussian by closure and the equality reduces to matching
+$(\hat C_h, \hat\Sigma_h)$ to $(\hat C_1^{\, h}, \hat\Sigma_h^{\mathrm{iter}})$.
+In the Student-$t$ case, no parameter match suffices; the test must
+compare the full distributions.
+
+\paragraph{The directly-fit factor at scale $h$.}
+For an independent observation pair $(x_t, y_{t+h})$ where
+$y_{t+h}$ is the scalar innovation coordinate at horizon $h$, fit
+\eqref{eq:t-irls}--\eqref{eq:t-scale}-and-$\nu$-update on the
+sample $\{(x_t, y_{t+h})\}_t$ from the pre-cutoff library. This
+yields $(\hat C_h^{(\Studt)}, \hat s_h^{(\Studt)\,2}, \hat\nu_h)$ for
+each $h \in \Hcal$. The directly-fit kernel is then
+$\hat\kappa_h^{(\Studt)}(x, \cdot) = \Studt_{\hat\nu_h}(\hat C_h^{(\Studt)} x,
+\hat s_h^{(\Studt)\,2})$, a closed-form Student-$t$.
+
+\paragraph{The iterated factor at scale $h$.}
+Iteration of $\hat\kappa_1^{(\Studt)}$ has no closed form
+(\ref{eq:t-convolution}). We compute it by sequential Monte Carlo:
+sample $M$ particles $\{u_j^{(1)}\}_{j=1}^{M}$ from $\hat\kappa_1^{(\Studt)}(x, \cdot)$
+using the location-scale-degrees-of-freedom representation
+$u_j^{(1)} = \hat C_1 x + \hat s_1 T_j$ with $T_j \sim \Studt_{\hat\nu_1}(0, 1)$;
+embed each particle by lagged shifts to form an updated state;
+iterate $h$ times. The resulting empirical distribution of the
+$h$-step coordinate-0 values is the SMC estimate of
+$\hat\kappa_h^{(\Studt)\,\mathrm{iter}}(x, \cdot)$, which we
+denote $\hat\kappa_h^{(\Studt)\,\mathrm{iter}, M}$ when the particle
+count matters. As $M \to \infty$, the SMC estimate converges weakly
+to the true iterated distribution.
+
+\paragraph{Closed-form Student-$t$ KL: the matched-$\nu$ case.}
+When two Student-$t$ distributions share the same degrees of freedom
+$\nu$, the KL divergence has the closed form (after lengthy
+calculation; see e.g.\ Bishop, \emph{Pattern Recognition and Machine
+Learning}, App.\ B):
+\begin{equation}
+  \label{eq:t-kl-matched}
+  \KL\!\bigl(\Studt_{\nu}(\mu_P, s_P^{2}) \,\|\, \Studt_{\nu}(\mu_Q, s_Q^{2})\bigr)
+  \;=\;
+  \log\!\frac{s_Q}{s_P}
+  + \frac{\nu+1}{2}\, \E_{Y \sim \Studt_{\nu}(\mu_P, s_P^{2})}
+    \!\left[\log\!\left(\frac{\nu s_Q^{2} + (Y - \mu_Q)^{2}}
+                              {\nu s_P^{2} + (Y - \mu_P)^{2}}\right)\right]
+\end{equation}
+where the expectation is over a Student-$t$ random variate and
+admits an exact representation in terms of digamma and Gauss
+hypergeometric ${}_2F_1$ functions, omitted here for brevity. For
+the Gaussian limit $\nu \to \infty$, \eqref{eq:t-kl-matched}
+recovers \eqref{eq:gauss-kl}.
+
+\paragraph{Mismatched-$\nu$ case: sample-based divergence.}
+For Q1, the directly-fit kernel has $\hat\nu_h$ and the iterated
+kernel is not Student-$t$ at all (it has tail index $\hat\nu_1$
+but non-Student-$t$ shape). The matched-$\nu$ closed form does
+not apply. Two practical alternatives:
+
+\emph{(i) Sample-based KL.} Estimate
+$\KL(\hat\kappa_h^{(\Studt)} \| \hat\kappa_h^{(\Studt)\,\mathrm{iter},M})$
+by
+\begin{equation}
+  \label{eq:sample-kl}
+  \widehat{\KL} \;=\; \frac{1}{N} \sum_{i=1}^{N}
+    \log f_h(Y_i)
+  \;-\; \frac{1}{N} \sum_{i=1}^{N}
+    \log \tilde f_h^{(M)}(Y_i)
+\end{equation}
+where $Y_i \sim \hat\kappa_h^{(\Studt)}(x, \cdot)$ (drawn from the
+fitted Student-$t$), $f_h$ is its closed-form density, and
+$\tilde f_h^{(M)}$ is a kernel-density estimate of the iterated
+particle ensemble. Bias and variance scale as $O(N^{-1/2})$ and
+the KDE bandwidth choice is pre-registered.
+
+\emph{(ii) Wasserstein-2 distance.} Compute
+$W_2^{2}\bigl(\hat\kappa_h^{(\Studt)}(x, \cdot),\,
+\hat\kappa_h^{(\Studt)\,\mathrm{iter}, M}(x, \cdot)\bigr)
+= \inf_{\pi} \int |y_1 - y_2|^{2}\, \pi(dy_1, dy_2)$
+between the two univariate distributions. For 1D, $W_2$ has the
+explicit formula
+\begin{equation}
+  \label{eq:w2}
+  W_2^{2}(P, Q) \;=\; \int_{0}^{1} \bigl(F_P^{-1}(u) - F_Q^{-1}(u)\bigr)^{2}\, du,
+\end{equation}
+i.e.\ the $L^2$ distance between quantile functions. The iterated
+distribution's quantile function is estimated from the $M$ SMC
+particles; the directly-fit distribution's quantile function is
+the Student-$t$ inverse CDF. $W_2$ is metric (symmetric and
+respects the triangle inequality) and has stable sample-estimator
+behaviour even with modest $M, N$.
+
+\paragraph{Coherence divergence under the Student-$t$ kernel.}
+The Student-$t$ analogue of the Gaussian coherence divergence
+\eqref{eq:gauss-cd} is
+\begin{equation}
+  \label{eq:t-cd}
+  \mathrm{w2}^{(\Studt)}(h, g) \;=\;
+  \E_{x \sim p_g}\!\left[
+    W_2^{2}\bigl(\hat\kappa_h^{(\Studt)}(x, \cdot),\,
+                  \hat\kappa_h^{(\Studt)\,\mathrm{iter}, M}(x, \cdot)\bigr)
+  \right]
+\end{equation}
+with units of (scalar-innovation)$^{2}$, comparable across $h$
+and across day-types $g$. The headline test statistic is
+\begin{equation}
+  \label{eq:dratio-t}
+  \mathrm{D\_RATIO}_{\Studt}
+  \;=\;
+  \frac{\mathrm{w2}^{(\Studt)}_{\text{empirical}}(h^{*}, g^{*})}
+       {\mathrm{w2}^{(\Studt)}_{\text{synthetic}}(h^{*})}
+\end{equation}
+calibrated against a synthetic Student-$t$-VAR system with known
+$(L, Q, \nu_{\text{true}})$ for which the strict factorization
+holds by construction in the sense that the data are generated by
+a single one-step kernel iterated $h$ times.
+
+\paragraph{What the Student-$t$ extension does and does not change.}
+The structural framework (Definitions \ref{def:factorization}--%
+\ref{def:coherence}, Hypothesis \ref{hyp:working}) is identical
+to the Gaussian case --- only \eqref{eq:t-density},
+\eqref{eq:t-kernel}, \eqref{eq:t-irls}--\eqref{eq:t-scale},
+\eqref{eq:t-convolution}, and the divergence statistic
+\eqref{eq:t-cd}--\eqref{eq:dratio-t} replace their Gaussian
+counterparts. The dispersion semigroup identity \eqref{eq:disp}
+still holds (when $\nu > 2$ so second moments exist) and gives
+the same first-and-second-moment cross-scale constraint; what
+changes is that the strict factorization additionally imposes
+constraints on higher moments and tail behaviour, all of which
+the sample-based $W_2$ test \eqref{eq:t-cd} captures at once.
+
+The empirical question is whether the Gaussian
+$\mathrm{D\_RATIO} = 29$ (S1) was driven mainly by the kernel-family
+mismatch or mainly by the cross-scale defect. If
+$\mathrm{D\_RATIO}_{\Studt}$ at the same $(h^{*}, g^{*})$ shrinks
+toward $1$, the family was the dominant issue and picture (C)
+collapses toward (A) under the correct kernel; if it stays
+$\gtrsim 5$, picture (C) survives the family lift and the seed's
+working hypothesis is corroborated independent of family.
 
 \subsection{Standardisation under a heavy-tailed kernel}
 \label{sec:nongauss-std}
