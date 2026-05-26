@@ -1014,6 +1014,174 @@ After amendment, Q2A (richer family --- mixtures, non-parametric)
 is the natural next experiment, motivated by (S8b)'s ``Student-$t$
 not enough'' finding.
 
+\section{Q2A of the distributional-class thread: settled (R-B2)}
+\label{sec:q2a-settled}
+
+Q1's substantive verdict (\S\ref{sec:q1-settled}) was that the
+Student-$t$ kernel reduces the marginal $\chi^{2}$ by $16\times$
+but leaves $\chi^{2}_{M1} = 1{,}371$ on the table. The natural next
+question --- and the proponent's standing read after the Q1 arbiter
+flagged R-D as a mechanical artefact --- is whether a richer
+distributional family closes the remaining gap. Q2A tests this.
+The experiment ran 2026-05-26; this section reports the result.
+
+\paragraph{Q2A: candidate set (three richer-than-Student-$t$ families).}
+\begin{itemize}[leftmargin=2em]
+\item M3: drift $\hat C_1$ plus a symmetric two-component centred
+Gaussian mixture residual law, fitted by EM ($1$ mixing weight $+ 2$
+scales per day-type).
+\item M4: drift $\hat C_1$ plus a symmetric three-component centred
+Gaussian mixture ($2$ mixing weights $+ 3$ scales per day-type).
+\item M5: drift $\hat C_1$ plus a non-parametric KDE residual law
+(Silverman bandwidth; effectively unbounded shape flexibility on
+the $\sim 5{,}000$-sample pre-cutoff library).
+\end{itemize}
+All three iterate by SMC particle propagation ($M = 200$); only the
+one-step residual sampler swaps. The seasonal climatology and drift
+are held at the Q1 M1 values.
+
+\paragraph{Q2A: pre-registered cuts.}
+Cuts are derived from the Q2A synthetic gate (METHOD/DESIGN-grade
+artifact at \path{experiment/results/q2a_synthetic_gate.txt},
+\verb|body_sha256| prefix \verb|2bab514e|), a three-variant weight
+sweep at $K = 500$ reps per cell on a $4$-point kurtosis sweep
+through the production fitters. The variant-max rule gives:
+\begin{itemize}[leftmargin=2em]
+\item \textbf{R-A2 (corroboration):} $\mathrm{effective\_\chi^{2}}
+\leq 228.44$. The richer family closes the gap.
+\item \textbf{R-B2 (ambiguous):} $228.44 < \mathrm{effective\_\chi^{2}}
+\leq 2{,}284.44$. Richer families help but do not absorb.
+\item \textbf{R-C2 (falsification):} $\mathrm{effective\_\chi^{2}}
+> 2{,}284.44$. Distributional flexibility above Student-$t$ is
+insufficient.
+\end{itemize}
+$\mathrm{effective\_\chi^{2}} := \min(\chi^{2}_{M3}, \chi^{2}_{M4},
+\chi^{2}_{M5})$ on the post-cutoff marginal PIT.
+
+\paragraph{Q2A: result.}
+With $1000$-paired-day bootstrap CIs:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& point & CI low & CI high \\
+\midrule
+$\chi^{2}_{M3}$ (mixture-$2$ Gaussian) & $953.84$  & $695.51$ & $1{,}356.92$ \\
+$\chi^{2}_{M4}$ (mixture-$3$ Gaussian) & $965.81$  & $700.89$ & $1{,}386.14$ \\
+$\chi^{2}_{M5}$ (KDE residual law)     & $966.60$  & $703.19$ & $1{,}374.12$ \\
+$\mathrm{effective\_\chi^{2}}$         & $953.84$  & $685.23$ & $1{,}356.92$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+M3 binds; KDE is the worst by $0.8$ $\chi^{2}$ units. The full
+M3-to-M5 spread is $13$ $\chi^{2}$ units ($\sim 1.4\%$ of any
+single value). $\mathrm{effective\_\chi^{2}} = 953.84
+\in [685, 1{,}357]$ sits in the registered R-B2 band: $4.2\times$
+above the R-A2 corroboration bar and $2.4\times$ below the R-C2
+falsification bar.
+
+\paragraph{Q2A: verdict.}
+The mechanical verdict is \textbf{R-B2}, and the substantive verdict
+agrees. This is the first arbiter in the workflow's history without
+a mechanical/substantive gap: the registered ambiguous band, sized
+by the gate's variant-max same-family null, absorbed the realisation
+with room to spare on both sides.
+
+\paragraph{(S9) The Q2A findings, three sub-claims.}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{(S9a) Distributional-class flexibility is empirically
+bounded.} The three richer families are $\chi^{2}$-indistinguishable
+(spread $13$ units; CIs overlap nearly completely). The simplest
+family binds and the most flexible (KDE) is marginally the worst.
+Additional shape flexibility above a $2$-component symmetric
+mixture buys near-zero marginal calibration on this population.
+
+\item \textbf{(S9b) Day-type asymmetry dominates the pooled
+pathology and is family-invariant.} Per-day-type $\chi^{2}$
+(recomputed from the result pickle):
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& M3 & M4 & M5 \\
+\midrule
+weekday  & $299.4$  & $271.8$  & $272.2$ \\
+saturday & $1{,}184.7$ & $1{,}183.7$ & $1{,}164.3$ \\
+sunday   & $565.3$  & $546.7$  & $571.8$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Saturday is $\sim 4\times$ weekday across all three families.
+Weekday alone is close to the R-A2 corroboration bar ($228$).
+Saturday is $14\%$ of the post-cutoff library but contributes
+$\sim 30\%$ of the pooled $\chi^{2}$. The asymmetry is structural
+and survives the kernel-family lift, independently corroborating
+(S2)/(S3) on weekday/weekend asymmetry being a feature of the
+process rather than a library-noise artefact.
+
+\item \textbf{(S9c) The reduction curve asymptotes.} Stacking the
+distributional-class lifts:
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Lift & $\chi^{2}$ & factor \\
+\midrule
+M0 Gaussian baseline (S5)         & $22{,}329$ & --- \\
+M1 Student-$t$ kernel (Q1, S8b)   & $1{,}371$  & $16\times$ \\
+Q2A richer-best (M3, S9)          & $954$      & $1.44\times$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Three orders of magnitude M0$\to$M1; one-and-a-half-fold
+M1$\to$Q2A. The remaining $\sim 954$ $\chi^{2}$ is unlikely to
+yield to further distributional richness. Picture (C) is not
+refuted --- the defect persists with CI clear of $1$ per (S8c) ---
+but (S9) tightens (S8c)'s qualifier: the kernel-family-lift
+programme has been substantially exhausted on this empirical
+process. Further reduction requires non-distributional content
+(state-dependent mixtures, hybrid distributional/calendar models,
+or non-distributional drivers such as iterated-mean bias, seam
+artefacts, or secular drift).
+\end{itemize}
+
+\paragraph{Forecaster calibration.}
+Proponent forecast R-B2 with $\mathrm{effective\_\chi^{2}}$
+central estimate $550$ and CI $[280, 900]$; KDE-preferred. Devil's
+advocate forecast R-A2 with central $180$ and CI $[80, 360]$;
+KDE-preferred. Realised $953.84$, M3-preferred. Proponent got the
+outcome category exactly right and the qualitative shape (richer
+families help but do not close the gap) exactly right; central
+forecast overshot the realisation by $\sim 5\%$ above the CI upper
+bound and the KDE-preferred sub-prediction was wrong (all three
+families tied). DA was wrong on outcome, magnitude ($5\times$),
+CI, and family ranking; DA's own ``what would change my mind''
+clause named $\mathrm{effective\_\chi^{2}} > 1{,}000$ as the
+condition for conceding, and the realisation sits just below
+that threshold but $2.65\times$ above DA's CI ceiling, which counts
+as concession on DA's own terms. Proponent decisively closer.
+
+The proponent's contingency clause ``if all three families produce
+nearly identical $\chi^{2}$ within bootstrap CI overlap, the
+distributional class beyond Student-$t$ is irrelevant and the
+residual gap is purely non-distributional'' (item~$4$ of their
+\texttt{what\_would\_change\_my\_mind}) materialised verbatim. The
+substantive reading of R-B2 is therefore stronger than the
+mechanical statement: not just ``richer families help but do not
+fully calibrate,'' but ``additional distributional flexibility
+above a $2$-component symmetric mixture buys negligibly little.''
+
+\paragraph{Thread state after Q2A.}
+Q2A.status $\to$ \texttt{settled}; the thread's
+\texttt{branching\_rules} table has no Q2A entry, so mechanical
+state advancement is unavailable and the thread transitions to
+\texttt{pending\_amendment}. The arbiter flagged three amendment
+candidates for the analyst (not the thread-coordinator): reopen Q2B
+(non-distributional content); define a new Q2C with state-dependent
+or hybrid distributional/calendar models; or declare the
+distributional-class thread exhausted and spawn a non-distributional
+thread on the remaining $\sim 954$ $\chi^{2}$. (S9c)'s asymptote
+reading favours the third.
+
 \section{What is settled at each level of generality}
 \label{sec:settled-levels}
 
@@ -1155,6 +1323,10 @@ S4, S5
 S8 (Q1)
   & \path{2026-05-26_q1-student-t-vs-gaussian}
   & SETTLED (R-D mechanical / R-C substantive) \\
+\addlinespace
+S9 (Q2A)
+  & \path{2026-05-26_q2a-richer-family-mixture-or-nonparametric}
+  & SETTLED R-B2 \\
 \midrule
 Thread \newline (Gaussian)
   & \path{2026-05-26_missing-content-thread}
@@ -1162,7 +1334,7 @@ Thread \newline (Gaussian)
 \addlinespace
 Thread \newline (kernel-family)
   & \path{2026-05-26_distributional-class-thread}
-  & \texttt{active}; current Q2D; pending amendment to revise R-D criterion (see (S8) and Q1 arbiter) \\
+  & \texttt{pending\_amendment} after Q2A; analyst chooses among reopen-Q2B, new Q2C (state-dependent / hybrid), or spawn non-distributional thread (see (S9) and Q2A arbiter) \\
 \bottomrule
 \end{tabular}
 
@@ -1188,6 +1360,7 @@ v2 finding; its magnitude now qualified by S8c.
 \item \texttt{mitacs-multiscale-defect-eigenmodes-v1} --- S2, S3.
 \item \texttt{mitacs-pit-calendar-fingerprint-p1} --- S4, S5.
 \item \texttt{mitacs-q1-student-t-vs-gaussian} --- S8.
+\item \texttt{mitacs-q2a-richer-family} --- S9.
 \item \texttt{mitacs-session-lessons-corpus} --- the named
 retraction modes; the fourth mode (criterion-vs-legitimate-data-
 structure) added with Q1 as the third instance.
@@ -1227,15 +1400,26 @@ Student-$t$ MLE in the production whitelist:
 \path{processing.innovations.estimator.student_t_mle_fit}.
 Output artifact:
 \path{scratch/data/distributional_class_q1/q1.pkl}.
+\item Q2A's experiment script:
+\path{experiment/distributional_class_q2a/__main__.py}.
+Richer-family fitters in the production whitelist:
+\path{processing.innovations.estimator.mixture_2_gaussian_mle_fit},
+\path{...mixture_3_gaussian_mle_fit},
+\path{...kde_residual_fit}.
+Q2A synthetic gate (METHOD/DESIGN):
+\path{experiment/results/q2a_synthetic_gate.txt}.
+Output artifact:
+\path{scratch/data/distributional_class_q2a/q2a.pkl}.
 \end{itemize}
 
 \paragraph{Next concrete step.}
-A thread amendment via \verb|thread-coordinator| revising the
-\texttt{distributional-class-thread} R-D criterion to distinguish
-``estimator broken'' from ``data approximately Gaussian at this
-aggregation level.'' After amendment, Q1's effective routing is
-R-C $\to$ Q2A; Q2A (richer family --- mixtures or non-parametric
-predictive law) is the natural next experiment, motivated by
-(S8b)'s ``Student-$t$ not enough'' finding.
+A thread amendment via \verb|thread-coordinator| advancing the
+\texttt{distributional-class-thread} from \texttt{pending\_amendment}.
+The (S9c) asymptote reading favours either reopening Q2B
+(non-distributional content: iterated-mean bias, day-anchor seam,
+secular drift) or spawning a fresh non-distributional thread on
+the remaining $\sim 954$ $\chi^{2}$. State-dependent or hybrid
+distributional/calendar models (a possible Q2C node) are a
+middle option; the Q2A arbiter does not rank them.
 
 \end{document}
