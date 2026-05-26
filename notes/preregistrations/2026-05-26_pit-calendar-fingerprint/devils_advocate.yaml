@@ -1,0 +1,129 @@
+schema: devils_advocate
+written_at: '2026-05-26T13:35:00-04:00'
+git_sha: 6d90dd55ca8fef30975cd2145a3adf7a265b5da4
+git_clean: true
+body_sha256: d56bb2da2ceba7a245fa90f8a36562806077b4befac69bf038a368d66d2041c5
+references:
+- file: phase_a.yaml
+  body_sha256: 8690194db3dacc2db96c83fca9a57d3e4255d009fe0401c34c2fa36d0ef4a69d
+strongest_argument: 'The eigenmodes-v1 finding was specifically that the defect is DIFFUSE
+
+  across modes - which is mechanically what happens when the missing
+
+  content has NO consistent alignment with the operator''s eigenstructure.
+
+  Calendar variables are precisely the dimensions that DO have aligned
+
+  structure (weekly cycle aligns with C_1''s slow mode; annual cycle has
+
+  a fixed temporal signature). If the defect projected onto these
+
+  calendar axes cleanly, we would expect the defect to be SOMEWHAT
+
+  more aligned with C_1''s eigenmodes too - because calendar-driven
+
+  content typically lives in the slow mode of demand history.
+
+
+  The diffuse-across-modes finding is more consistent with EITHER (a)
+
+  nonlinearity within the existing embedding (a nonlinear function of
+
+  (z_t-1, z_t-2) that doesn''t project cleanly onto C_1''s eigenbasis
+
+  OR onto smooth calendar functions); OR (b) high-frequency exogenous
+
+  content (weather noise rather than seasonal trend; or schedule SHOCKS
+
+  rather than DoW averages). Both of these would defeat the
+
+  cell-aggregated explanatory_score because the signal is fine-grained
+
+  within cells, not across-cell-mean-aligned.
+
+
+  Additionally: the analytic PIT here is computed against the iterated
+
+  Gaussian forecast, which assumes Gaussianity of the residual.
+
+  mitacs-rebaseline-facts established that residuals are STRONGLY
+
+  non-Gaussian (excess kurtosis ~24-33). A heavy-tailed residual
+
+  produces U-shaped marginal PIT but the conditional PIT residual
+
+  has additional structure that has nothing to do with calendar
+
+  variables - it has to do with the residual law being wrong. This
+
+  may inflate PIT residuals UNIFORMLY (no calendar pattern) and
+
+  produce O-D as an artifact of the metric''s Gaussian assumption.
+
+
+  Net: O-D is more likely than the proponent thinks. The metric may
+
+  not be sensitive enough to detect the calendar structure even if
+
+  it exists.
+
+  '
+specific_failure_modes:
+- rank: 1
+  mode: non-Gaussian-residual-inflates-PIT-uniformly-blocking-calendar-signal
+  memory_ref: mitacs-rebaseline-facts
+  likelihood: 0.3
+- rank: 2
+  mode: eigenmode-diffuse-implies-non-aligned-content
+  memory_ref: mitacs-multiscale-defect-eigenmodes-v1
+  likelihood: 0.25
+- rank: 3
+  mode: high-frequency-exogenous-shocks-defeat-cell-aggregation
+  memory_ref: mitacs-postcovid-probe
+  likelihood: 0.15
+severity: serious
+counter_prediction:
+  value:
+    outcome: O-D
+    top_seasonal_significant: false
+    top_weekly_significant: false
+    ratio_top_seasonal_over_top_weekly: null
+  units: 'outcome: categorical
+
+    '
+  reasoning: 'No calendar candidate will clear the null baseline at 95% CI lower
+
+    bound > 95th null percentile. The PIT residual will be dominated
+
+    by within-cell scatter (heavy tails, possibly high-frequency
+
+    exogenous shocks) that does not align with any of the smooth
+
+    calendar functions in the candidate set.
+
+    '
+what_would_change_my_mind:
+- Any single seasonal or weekly candidate clears null with substantial CI margin AND survives a sanity check that PIT is not just U-shaped from non-Gaussianity. If so, the calendar-vs-non-calendar question is settled in favour of the proponent's framing and I retract the metric-blindness concern.
+- The marginal PIT is itself NOT heavily U-shaped (mean of |u-0.5| over all cells < 0.05). That would refute the non-Gaussian-blinding concern empirically and undermine my mechanism 1.
+opportunity_cost:
+  alternative: 'Direct test of the non-Gaussian-residual mechanism: compute the
+
+    marginal PIT shape (chi-square vs uniform) BEFORE the cell-
+
+    conditioning. If marginal is heavily U-shaped, that explains the
+
+    inflation independent of calendar. If marginal is approximately
+
+    uniform, the metric is well-posed for the calendar question.
+
+    '
+  ranking: complementary
+  notes: 'The marginal-PIT check is a free byproduct of P1''s computation;
+
+    no extra work. It will be present in P1''s secondary results table.
+
+    Even if P1 fires O-D, the marginal-PIT shape is informative about
+
+    WHY.
+
+    '

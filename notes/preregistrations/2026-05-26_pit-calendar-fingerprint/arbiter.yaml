@@ -1,0 +1,152 @@
+schema: arbiter
+written_at: '2026-05-26T14:35:00-04:00'
+git_sha: b14434e3b2394a505e2559be3b127006da1630a0
+git_clean: true
+body_sha256: 376ebac7915643d6e75740ae94521e1175a37a2a6317d66cad0974311f7cf90d
+references:
+- file: phase_a.yaml
+  body_sha256: 8690194db3dacc2db96c83fca9a57d3e4255d009fe0401c34c2fa36d0ef4a69d
+- file: proponent.yaml
+  body_sha256: 76f2990e58ab94a7820f8d1f95f026355f13ac523bc9a833f3ffaf64222a9b4c
+- file: devils_advocate.yaml
+  body_sha256: d56bb2da2ceba7a245fa90f8a36562806077b4befac69bf038a368d66d2041c5
+- file: result.yaml
+  body_sha256: 125a4de042712de6da7c9750139278c973a817fbd9bb53b4a3c93ecfe83c0bdc
+preconditions:
+  code_path_passed: true
+  hash_chain_intact: true
+  result_from_clean_tree: true
+numerical_record:
+  outcome_mechanical: AMBIGUOUS
+  outcome_substantive: AMBIGUOUS_with_caveat
+  top_seasonal:
+  - sin_semi
+  - 0.9349
+  top_weekly:
+  - dow_he_interaction
+  - 3.4213
+  top_other:
+  - he_dev_from_daytype_mean
+  - 3.4256
+  ratio_top_seasonal_over_top_weekly: 0.2734
+  ratio_top_seasonal_over_top_weekly_excluding_tautological:
+    legitimate_top_weekly:
+    - dow_indicator_mon
+    - 0.4565
+    ratio: 2.048
+    notes: 'If both within-cell tautological candidates are excluded post-hoc
+
+      (informational only - not the registered verdict), the legitimate
+
+      top weekly is dow_indicator_mon (borderline p=0.043). The ratio
+
+      of legitimate top seasonal to legitimate top weekly is 2.05 -
+
+      just above O-A''s 2x threshold. This would mechanically fire O-A
+
+      under that exclusion. The exclusion is post-hoc; the verdict
+
+      stays AMBIGUOUS.
+
+      '
+  proponent_forecast: O-C
+  proponent_distance_from_result:
+    outcome_class_match: false
+    rationale: 'Proponent named O-C (multi-source missing content); reality
+
+      doesn''t cleanly slot into the registered taxonomy. Closer to
+
+      "all classes significant but tautology dominates the top
+
+      slots."
+
+      '
+  devils_advocate_forecast: O-D
+  devils_advocate_distance_from_result:
+    outcome_class_match: false
+    rationale: 'DA predicted no calendar candidate would clear null. WRONG -
+
+      multiple candidates cleared null, including all 4 seasonal,
+
+      year_since_cutoff, dow_he_interaction, and (borderline) Monday.
+
+      BUT: DA''s mechanism (non-Gaussian residual blinds the metric)
+
+      was empirically corroborated by the marginal PIT chi^2 = 22329.
+
+      Direction wrong; mechanism right.
+
+      '
+  marginal_PIT_pathology:
+    chi2_vs_uniform: 22328.6
+    fraction_in_extreme_bins: 0.673
+    interpretation: 'The iterated kappa_1 forecast is catastrophically under-dispersed.
+
+      67% of PIT values are in the extreme bins. This is the direct
+
+      consequence of treating the strongly non-Gaussian innovation
+
+      (mitacs-rebaseline-facts: excess kurtosis ~24-33) as Gaussian
+
+      in the predictive distribution. The Gaussian assumption is wrong
+
+      at the marginal level before any conditioning is done.
+
+      '
+  per_cell_PIT_T_pattern:
+    sunday_cells: positive (+0.05 to +0.20)
+    weekday_saturday_cells: negative (-0.13 to -0.33)
+    winter_amplitude: abs(T) reaches 0.33 (deepest at winter/morning/saturday)
+    summer_amplitude: abs(T) around 0.13-0.23 (smaller magnitude)
+    interpretation: 'The forecast over-predicts on weekday/saturday and under-predicts
+
+      on sunday, with the largest magnitudes in winter and shoulder.
+
+      This is a sign-specific cell pattern that the registered taxonomy
+
+      (annual cycle / weekly indicators) doesn''t naturally capture but
+
+      that suggests structural day-type and season effects in the
+
+      missing content. Whatever the missing dimension is, it has
+
+      day-type-correlated magnitude.
+
+      '
+verdict: AMBIGUOUS
+verdict_reasoning: "Mechanical: the pre-registered AMBIGUOUS criterion fires. The top\nseasonal/top weekly ratio = 0.27, outside O-C's required (0.5, 2.0)\nband, and the top weekly score does not exceed 2x the top other for\nO-B. Per phase_a, this triggers AMBIGUOUS and (per the thread's\nbranching_rules) sends branch_fired = AMBIGUOUS, next_node_id = null.\n\nSubstantive: the AMBIGUOUS verdict is NOT for lack of signal. It is\nfor TAXONOMIC INADEQUACY of the registered O-A/B/C/D categories.\nTwo findings are durable:\n\n  1. Multiple candidates cleared the null baseline at high\n     confidence: all 4 seasonal (cos/sin annual + semi), all three\n     within-cell-residual candidates (he_dev_from_daytype_mean,\n     dow_he_interaction, and year_since_cutoff), plus dow_indicator_mon\n     (borderline p=0.043). DA's \"no candidate clears null\"\n     prediction was empirically wrong.\n\n  2. The two top-scoring candidates (he_dev_from_daytype_mean = 3.43\n     and dow_he_interaction = 3.42)\
+  \ are TAUTOLOGICALLY CIRCULAR.\n     Each is a near-monotone function of z_actual within cells, and\n     the PIT residual within a cell is also a near-monotone function\n     of z_actual (verified: median within-cell |Spearman| = 0.65).\n     These two candidates measure the metric's input, not exogenous\n     content. PHASE A DESIGN HOLE - candidates constructed from\n     z_actual should have been excluded.\n\nIf the tautological candidates are excluded (post-hoc, informational):\nthe legitimate ranking is year_since_cutoff (1.11) > seasonal class\n(cos/sin tied around 0.7-0.9) > dow_indicator_mon (0.46, borderline).\nSecular drift is the single strongest non-circular signal -\nconsistent with mitacs-clim-gap-nonstationary's finding that\npost-cutoff actuals are growing year-over-year in a way the pre-\ncutoff climatology doesn't capture, NOW VISIBLE in the PIT residual\ntoo.\n\nCalibration on substantive forecasts:\n  Proponent (O-C): wrong outcome label, but partially-right shape\n\
+  \    (multiple classes significant). Their multi-source intuition was\n    correct; they did not anticipate the tautology.\n  DA (O-D): wrong outcome label (many candidates significant). BUT\n    their non-Gaussian-residual-inflates-PIT mechanism (failure\n    mode 1) was empirically corroborated by the marginal PIT chi^2.\n    DA wins partial credit for the mechanism even though their\n    headline outcome was wrong.\n\nThe marginal PIT pathology (chi^2 = 22329, 67% extreme) is itself\nthe strongest single empirical finding: the iterated kappa_1\nforecast is catastrophically miscalibrated as a Gaussian. This is\nconsistent with mitacs-rebaseline-facts (innovation strongly\nnon-Gaussian) and elevates that earlier finding to a forward-\nobservable consequence.\n"
+finding_status: SETTLED
+if_provisional_what_to_reaudit: []
+thread_state_update:
+  thread_topic: missing-content-thread
+  node_id: P1
+  branch_fired: AMBIGUOUS
+  next_node_id: null
+  sibling_branches_closed:
+  - P2A
+  - P2B
+  - P2C
+  - P2D
+  thread_state_transition: active_to_exhausted
+follow_up:
+  required: true
+  reasoning: "The thread is mechanically exhausted but the substantive findings\nstrongly suggest an amendment is warranted. Specifically:\n\n1. AMENDMENT CANDIDATE: P1' with corrected candidate set.\n   Exclude any variable constructed from z_actual (he_dev_from_\n   daytype_mean, dow_he_interaction). Add a \"secular drift\" outcome\n   category (which year_since_cutoff would fire). Same PIT data;\n   same null-baseline procedure; just re-evaluation against the\n   de-tautologized candidate set.\n\n2. DOWNSTREAM HYPOTHESIS (for P2 territory after amendment):\n   the strongest legitimate signal is year_since_cutoff (1.11),\n   which is essentially \"the post-cutoff regime is different\n   from pre-cutoff in a year-over-year way the climatology\n   doesn't capture.\" This is the same signal mitacs-clim-gap-\n   nonstationary documented as a STRUCTURAL feature of the\n   data, not a methodology artifact. A P2 follow-up could\n   quantify whether the secular drift is consistent with\n   known\
+    \ post-cutoff macro changes (population, electrification,\n   climate change) or whether it's specific to weather years\n   (post-cutoff 2025-2026 happen to be warmer/colder summers).\n\n3. THE BIGGER FINDING: marginal PIT chi^2 = 22329 means the\n   Gaussian assumption itself is wrong. This argues for a P-2-or-\n   beyond branch that addresses the predictive-DISTRIBUTION class,\n   not just the embedding content. The current iterated kappa_1\n   cannot be coverage-calibrated with any Gaussian-assumption\n   fix; the seed's relaxed-factorization picture is consistent\n   with this, but the calibration failure is its own object.\n"
+  proposed_phase_a: null
+calibration_record:
+  proponent_correct: false
+  devils_advocate_correct: partial
+  topic_difficulty: hard
+  notes: 'Hard because the metric has a subtle tautology that neither
+
+    forecaster anticipated. The marginal PIT pathology is itself
+
+    a tertiary positive finding that neither side predicted but
+
+    that both interpretations could absorb.
+
+    '
+memory_update_required: true
+memory_update_target: "~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md\n(add mitacs-pit-calendar-fingerprint-p1 SETTLED-AMBIGUOUS with the\n marginal-PIT-pathology + tautology-design-hole + secular-drift-\n leads findings).\n"

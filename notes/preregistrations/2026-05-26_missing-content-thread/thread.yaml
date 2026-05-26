@@ -1,8 +1,8 @@
 schema: thread
 written_at: '2026-05-26T13:00:00-04:00'
-git_sha: 7bda6fad2d84d36ebdfffe94cfa9f4065a4394ed
+git_sha: b14434e3b2394a505e2559be3b127006da1630a0
 git_clean: true
-body_sha256: 805df9d6b6d3cafc51d246f4106a58a69d060c29be54bf66c0f0200a11d83119
+body_sha256: 3ea52404dd973ed590871ad7ae8a4cd45bdd1be1faab3158a48072299454cb0e
 references:
 - file: ../2026-05-26_multiscale-defect-eigenmodes/arbiter.yaml
   body_sha256: 0e8349a973db26b7f9f59ca72723708e34aca1c55ff247994d279d954a93fd54
@@ -19,15 +19,15 @@ root:
   - file: ../2026-05-26_multiscale-defect-eigenmodes/arbiter.yaml
     body_sha256: 0e8349a973db26b7f9f59ca72723708e34aca1c55ff247994d279d954a93fd54
   scope_limits: "This thread is about CHARACTERISING the missing content statistically, not about building a candidate v2 predictor. Backtest-style \"does adding X make the predictor better?\" experiments are downstream (seed \xA76.3); they belong to a separate thread if and when this one resolves with a specific candidate identified. Joint-MLE on richer parameterizations within the existing embedding (seed \xA76.4) is OUT OF SCOPE here - those address operator-class questions, not what-is-missing questions.\n"
-current_node_id: P1
-state: planning
+current_node_id: null
+state: exhausted
 nodes:
   P1:
     id: P1
     name: conditional-PIT-calendar-fingerprint
     parent_id: null
     parent_branch: null
-    status: planned
+    status: settled
     phase_a_skeleton:
       metric_class: 'Conditional PIT analysis. For each post-cutoff timestamp t,
 
@@ -72,7 +72,7 @@ nodes:
           clear-margin criterion, etc.) before data.
 
           '
-    phase_a_path: null
+    phase_a_path: 2026-05-26_pit-calendar-fingerprint/phase_a.yaml
     notes: 'Cheap experiment: ~3-4 hours of code work, no data acquisition.
 
       Reuses v2''s (C_1, Sigma_1) from factors_v2_final.pkl. The
@@ -89,7 +89,7 @@ nodes:
     name: temperature-against-fingerprint
     parent_id: P1
     parent_branch: O-A
-    status: planned
+    status: closed
     phase_a_skeleton:
       metric_class: 'Acquire Toronto Pearson hourly temperature data via Environment
 
@@ -121,7 +121,7 @@ nodes:
     name: holiday-calendar-fine-structure
     parent_id: P1
     parent_branch: O-B
-    status: planned
+    status: closed
     phase_a_skeleton:
       metric_class: 'Test specific calendar fine-structures against P1''s fingerprint:
 
@@ -150,7 +150,7 @@ nodes:
     name: weather-plus-calendar-joint
     parent_id: P1
     parent_branch: O-C
-    status: planned
+    status: closed
     phase_a_skeleton:
       metric_class: 'Joint test of temperature + calendar against fingerprint.
 
@@ -175,7 +175,7 @@ nodes:
     name: nonlinearity-vs-exogenous
     parent_id: P1
     parent_branch: O-D
-    status: planned
+    status: closed
     phase_a_skeleton:
       metric_class: 'P1 found no calendar structure - the missing content is
 

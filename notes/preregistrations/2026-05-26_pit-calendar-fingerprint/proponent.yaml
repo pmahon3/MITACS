@@ -1,0 +1,40 @@
+schema: proponent
+written_at: '2026-05-26T13:35:00-04:00'
+git_sha: 6d90dd55ca8fef30975cd2145a3adf7a265b5da4
+git_clean: true
+body_sha256: 76f2990e58ab94a7820f8d1f95f026355f13ac523bc9a833f3ffaf64222a9b4c
+references:
+- file: phase_a.yaml
+  body_sha256: 8690194db3dacc2db96c83fca9a57d3e4255d009fe0401c34c2fa36d0ef4a69d
+forecast:
+  value:
+    outcome: O-C
+    top_seasonal_significant: true
+    top_weekly_significant: true
+    ratio_top_seasonal_over_top_weekly: 1.4
+  units: 'outcome: categorical (one of O-A/B/C/D)
+
+    ratio: dimensionless
+
+    '
+  reasoning: "Two converging signals from prior work point at multi-source missing content:\n\n1. eigenmodes-v1 showed weekday per-cell defect EXCEEDS library-noise\n   expectation. That asymmetry is genuine and aligned with day-of-\n   week structure (weekday > weekend in a way that is not just\n   library size). This is a WEEKLY signal.\n\n2. postcovid-probe + clim-gap-nonstationary both point at weather /\n   seasonal exogenous content. The mid-day forecast-high bias that\n   v2 corroborated has structural overlap with summer-peak demand\n   (cooling load) and winter morning ramps (heating + lighting).\n   This is a SEASONAL signal.\n\nNeither has been ruled out by prior data. Both should be present\nin the PIT residual; the question is which dominates. I expect\nSLIGHTLY-stronger seasonal because weather amplitude in Ontario\nis large and unmodeled, but not by the 2x margin - hence O-C with\nratio ~1.4.\n"
+forecast_ci:
+  width: 0.95
+  low:
+    ratio_top_seasonal_over_top_weekly: 0.7
+  high:
+    ratio_top_seasonal_over_top_weekly: 2.5
+  reasoning: 'Wide CI because the score metric''s noise floor and the relative
+
+    coupling of seasonal vs weekly through Ontario demand both have
+
+    substantial uncertainty. The CI bracket spans into the O-A regime
+
+    (ratio > 2.0) but the central forecast remains O-C.
+
+    '
+what_would_change_my_mind:
+- 'O-D fires (no candidate clears null): the missing content is non-calendar; my multi-source-calendar hypothesis is empirically wrong; pivot to caveat-1 framework (nonlinearity within embedding) via P2D.'
+- 'O-A fires cleanly (ratio > 2): seasonal dominates so cleanly that weather is the primary candidate without weekly structure mattering; P2A is the next experiment with confident framing.'
+- 'O-B fires cleanly: schedule effects dominate; weather acquisition (P2A) deferred; surprising given the seasonal-amplitude prior.'
+confidence: 0.45

@@ -1,0 +1,266 @@
+schema: result
+written_at: '2026-05-26T14:30:00-04:00'
+git_sha: b14434e3b2394a505e2559be3b127006da1630a0
+git_clean: true
+body_sha256: 125a4de042712de6da7c9750139278c973a817fbd9bb53b4a3c93ecfe83c0bdc
+references:
+- file: phase_a.yaml
+  body_sha256: 8690194db3dacc2db96c83fca9a57d3e4255d009fe0401c34c2fa36d0ef4a69d
+artifact:
+  path: scratch/data/missing_content_p1/pit_calendar_final.pkl
+  grade: INSPECTION
+  emitted_by: experiment.missing_content_p1_pit_calendar.__main__
+  inputs_fingerprint: null
+  body_sha256_artifact: null
+  notes: 'Pickle, not a make_result() artifact. Substantive content lives in
+
+    arbiter.yaml.
+
+    '
+code_path_audit:
+  verdict: PRODUCTION-PATH
+  artifact: '/audit code-path on experiment/missing_content_p1_pit_calendar/__main__.py:
+
+    6 production imports (load_actuals, zscore_params, zscore_transform,
+
+    _complete_delivery_days, freeze, _daytype); 0 suspicious inline patterns.
+
+    '
+  blocking: false
+primary_result:
+  metric: shape_verdict_per_phase_a
+  value: AMBIGUOUS
+  ci_low: null
+  ci_high: null
+  ci_method_actually_used: paired_day_bootstrap_n=1000_per_phase_a
+  notes: 'Mechanical verdict from pre-registered criteria: AMBIGUOUS. The
+
+    top-seasonal/top-weekly ratio = 0.27, outside O-C''s (0.5, 2.0)
+
+    requirement. Substantive interpretation in arbiter.yaml.
+
+    '
+secondary_results:
+- name: marginal_PIT_calibration
+  value:
+    mean: 0.3405
+    std: 0.3925
+    mean_abs_centered: 0.3986
+    chi2_uniform_10bin: 22328.6
+    hist_10bin:
+    - 5843
+    - 810
+    - 516
+    - 431
+    - 428
+    - 410
+    - 412
+    - 414
+    - 499
+    - 2237
+  notes: 'MARGINAL PIT IS PATHOLOGICALLY NON-UNIFORM. 67% of PIT values are
+
+    in the extreme bins [0, 0.1] or [0.9, 1.0]. Chi-square exceeds the
+
+    critical threshold by three orders of magnitude. The iterated
+
+    kappa_1 forecast is catastrophically under-dispersed - the
+
+    predicted Gaussian intervals don''t cover actuals. This is the
+
+    direct empirical confirmation of the DA''s metric-blindness
+
+    concern: the marginal PIT itself signals that the Gaussian
+
+    assumption is wrong (consistent with mitacs-rebaseline-facts''
+
+    strongly non-Gaussian innovation finding).
+
+    '
+- name: per_cell_mean_PIT_deviation
+  value:
+    shoulder/evening_ramp/saturday: -0.2662
+    shoulder/evening_ramp/sunday: 0.1985
+    shoulder/evening_ramp/weekday: -0.1527
+    shoulder/midday/saturday: -0.2774
+    shoulder/midday/sunday: 0.1464
+    shoulder/midday/weekday: -0.2395
+    shoulder/morning_ramp/saturday: -0.3215
+    shoulder/morning_ramp/sunday: 0.1301
+    shoulder/morning_ramp/weekday: -0.1906
+    shoulder/overnight/saturday: -0.2343
+    shoulder/overnight/sunday: 0.1943
+    shoulder/overnight/weekday: -0.1295
+    summer/evening_ramp/saturday: -0.1244
+    summer/evening_ramp/sunday: 0.0214
+    summer/evening_ramp/weekday: -0.1322
+    summer/midday/saturday: -0.2026
+    summer/midday/sunday: -0.0337
+    summer/midday/weekday: -0.2116
+    summer/morning_ramp/saturday: -0.2311
+    summer/morning_ramp/sunday: -0.0675
+    summer/morning_ramp/weekday: -0.1894
+    summer/overnight/saturday: -0.1152
+    summer/overnight/sunday: -0.0268
+    summer/overnight/weekday: -0.1336
+    winter/evening_ramp/saturday: -0.2916
+    winter/evening_ramp/sunday: 0.062
+    winter/evening_ramp/weekday: -0.2418
+    winter/midday/saturday: -0.3019
+    winter/midday/sunday: 0.0852
+    winter/midday/weekday: -0.2463
+    winter/morning_ramp/saturday: -0.3285
+    winter/morning_ramp/sunday: 0.0487
+    winter/morning_ramp/weekday: -0.2488
+    winter/overnight/saturday: -0.2468
+    winter/overnight/sunday: 0.0953
+    winter/overnight/weekday: -0.2374
+  notes: 'Striking day-type asymmetry: sunday cells systematically POSITIVE
+
+    (forecast under-predicts; +0.05 to +0.20); weekday/saturday cells
+
+    systematically NEGATIVE (forecast over-predicts; -0.13 to -0.33).
+
+    Magnitude is larger in winter and shoulder than summer; deepest
+
+    cells are winter/saturday combinations near -0.33.
+
+    '
+- name: explanatory_scores_observed_with_CI_and_null
+  value:
+    he_dev_from_daytype_mean (other):
+    - 3.4256
+    - 2.7401
+    - 4.5516
+    - 3.5988
+    - 0.4499
+    - 0.0
+    dow_he_interaction (weekly):
+    - 3.4213
+    - 2.7161
+    - 4.5447
+    - 3.5865
+    - 0.4542
+    - 0.0
+    year_since_cutoff (other):
+    - 1.1104
+    - 0.9267
+    - 2.5125
+    - 1.5863
+    - 0.4537
+    - 0.0
+    sin_semi (seasonal):
+    - 0.9349
+    - 0.7674
+    - 2.1313
+    - 1.2879
+    - 0.4517
+    - 0.0
+    sin_annual (seasonal):
+    - 0.8658
+    - 0.7321
+    - 2.155
+    - 1.303
+    - 0.4462
+    - 0.0
+    cos_semi (seasonal):
+    - 0.7568
+    - 0.758
+    - 2.1087
+    - 1.2942
+    - 0.4499
+    - 0.0
+    cos_annual (seasonal):
+    - 0.6769
+    - 0.7181
+    - 2.0603
+    - 1.225
+    - 0.4604
+    - 0.0
+    dow_indicator_mon (weekly):
+    - 0.4565
+    - 0.2813
+    - 0.7554
+    - 0.501
+    - 0.4525
+    - 0.043
+    dow_indicator_fri (weekly):
+    - 0.2696
+    - 0.1766
+    - 0.5523
+    - 0.3243
+    - 0.4511
+    - 0.974
+    holiday_indicator (other):
+    - 0.2568
+    - 0.1116
+    - 0.4892
+    - 0.296
+    - 0.4372
+    - 0.966
+    dow_indicator_thu (weekly):
+    - 0.2518
+    - 0.1053
+    - 0.5056
+    - 0.2686
+    - 0.4556
+    - 0.99
+    dow_indicator_wed (weekly):
+    - 0.1269
+    - 0.0762
+    - 0.4267
+    - 0.2004
+    - 0.4494
+    - 1.0
+    dow_indicator_tue (weekly):
+    - 0.1194
+    - 0.0695
+    - 0.4382
+    - 0.206
+    - 0.4555
+    - 1.0
+    dow_indicator_sat (weekly):
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.4568
+    - 1.0
+    dow_indicator_sun (weekly):
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.4574
+    - 1.0
+- name: tautological_candidates_diagnosis
+  value:
+    median_within_cell_spearman_he_dev: 0.6504
+    max_within_cell_spearman_he_dev: 0.9324
+    median_within_cell_spearman_dow_he: 0.647
+  notes: 'Both top-scoring candidates are TAUTOLOGICALLY CIRCULAR in this
+
+    metric. Within each (season, HE_bin, day_type) cell, both
+
+    he_dev_from_daytype_mean and dow_he_interaction are nearly
+
+    MONOTONE FUNCTIONS of z_actual (because they are constructed
+
+    from z_actual minus a near-constant offset). The PIT residual
+
+    within a cell is also a near-monotone function of z_actual
+
+    (because mu_iter and var_iter vary slowly within a cell). So
+
+    within-cell Spearman between these candidates and the PIT
+
+    residual is high BY CONSTRUCTION, not by physics.
+
+    Median |rho| = 0.65 across cells, with several cells exceeding
+
+    0.90. PHASE A DESIGN HOLE - the candidate set should have
+
+    excluded variables constructed from z_actual itself.
+
+    '
+execution_deviations: []

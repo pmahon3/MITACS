@@ -1,0 +1,286 @@
+schema: phase_a
+written_at: '2026-05-26T13:30:00-04:00'
+git_sha: 6d90dd55ca8fef30975cd2145a3adf7a265b5da4
+git_clean: true
+body_sha256: 8690194db3dacc2db96c83fca9a57d3e4255d009fe0401c34c2fa36d0ef4a69d
+references:
+- file: ../2026-05-26_missing-content-thread/thread.yaml
+  body_sha256: 805df9d6b6d3cafc51d246f4106a58a69d060c29be54bf66c0f0200a11d83119
+  relation: thread
+topic: pit-calendar-fingerprint
+research_question: 'Does the iterated kappa_1 predictor''s PIT calibration failure (post-cutoff Ontario demand, h-step forecasts at each delivery hour) correlate with calendar-based candidate variables in a way that identifies WHICH dimension of calendar variation the missing content lives along?
+
+  '
+hypothesis:
+  proponent: 'O-C will fire. Seasonal candidates (cos/sin annual + semi-annual) AND weekly/schedule candidates (DoW indicators, DoW*HE interactions) will both clear the null baseline; neither will dominate by the 2x margin. The signal will be multi-source: weather-driven annual variation that the embedding misses PLUS workday-specific fine- structure that day_type does not capture. Top seasonal candidate explanatory_score slightly higher than top weekly, but within 2x.
+
+    '
+  counter: 'See devils_advocate.yaml. O-D will fire. The eigenmodes diffuse defect finding may be a signature of exogenous shocks or nonlinearity-within-embedding rather than calendar-aligned content. If the missing content is high-frequency weather noise (rather than seasonal-cycle weather) or genuine intra-day stochasticity, the calendar candidates will not clear the null baseline.
+
+    '
+variables:
+  dependent:
+  - PIT_residual(t) = u(t) - 0.5
+  - cell_mean_PIT(season, HE_bin, day_type)
+  - explanatory_score(candidate)
+  independent:
+  - candidate variable (calendar-only; see candidate_set below)
+  - cell = (season_bin, HE_bin, day_type)
+  excluded:
+  - variable: temperature_and_weather_variables
+    reasoning: 'Phase 1 is intentionally calendar-only - the line of inquiry
+
+      is to CHARACTERISE the fingerprint statistically without
+
+      committing to which exogenous variable explains it. Weather
+
+      candidates are P2 territory (downstream nodes P2A, P2C).
+
+      '
+  - variable: anything_already_excluded_in_v2
+    reasoning: 'theta (rail-pinned), climatology window (frozen spec), embedding
+
+      dim (frozen spec) - all fixed at registered-spec values
+
+      inherited from v2 phase_a.
+
+      '
+data:
+  source: 'experiment._actuals.load_actuals (post-cutoff portion); v2 factor
+
+    pickle scratch/data/multiscale_factor/factors_v2_final.pkl
+
+    (for C_1, Sigma_1 per day_type).
+
+    '
+  partition:
+    train: not applicable (no fitting; analytic PIT on already-fit predictor)
+    dev: not applicable
+    test: 'Post-cutoff data 2025-01-01 to 2026-05-16 (the same 500-day
+
+      population v2 used). PIT values computed at every
+
+      (delivery_day, hour-of-day) where both the iterated forecast
+
+      and z_actual are well-defined.
+
+      '
+  cutoff_handling: 'Forecasts use (C_1, Sigma_1) fit on STRICTLY pre-cutoff data
+
+    (v2''s library). Actuals at post-cutoff timestamps. Standard
+
+    leakage guard: no post-cutoff data informs the fit; the fit
+
+    informs the forecast at post-cutoff timestamps.
+
+    '
+metric: "PRIMARY: explanatory_score(candidate)\n\nFor each post-cutoff timestamp t (covering delivery_day d, hour-of-day h):\n  1. Build the issue-time embedding state x(d) from z values up to and\n     including the day-anchor (1 hour before HE1 of day d).\n  2. Iterated forecast at horizon h (h=1..24 within the delivery day):\n       mu_iter(d, h) = (C_1[daytype(d)]^h x(d))[0]\n       var_iter(d, h) = iter_Sigma_h[daytype(d)][0, 0]\n                        = sum_{j=0..h-1} (C_1^j Sigma_1 C_1^{jT})[0, 0]\n  3. Analytic PIT: u(d, h) = Phi((z_actual(d, h) - mu_iter(d, h))\n                                  / sqrt(var_iter(d, h)))\n\nStratify by cell = (season_bin, HE_bin, day_type) per the BINNING\nblock below. Per cell c:\n  T_c = mean over (d, h) in cell c of (u(d, h) - 0.5)\n      # cell mean PIT deviation; signed; near 0 = calibrated cell\n\nFor each candidate variable v(t) in CANDIDATE_SET:\n  For each cell c:\n    rho_c(v) = Spearman(v(t), u(t) - 0.5) over t in cell c\n  explanatory_score(v)\
+  \ = sum over cells c of |T_c| * |rho_c(v)|\n\nSECONDARY:\n  cell_calibration_table = T_c for all 36 cells (informational)\n  p_value(v) per candidate = fraction of null permutations whose\n    score exceeded the observed (1000 random-permutation nulls;\n    candidate's time index permuted while everything else held fixed)\n"
+binning:
+  season_bin:
+    winter: months [12, 1, 2]
+    summer: months [6, 7, 8]
+    shoulder: months [3, 4, 5, 9, 10, 11]
+  HE_bin:
+    overnight: hours [1, 2, 3, 4, 5, 6]
+    morning_ramp: hours [7, 8, 9, 10]
+    midday: hours [11, 12, 13, 14, 15, 16]
+    evening_ramp: hours [17, 18, 19, 20, 21, 22, 23, 24]
+  day_type:
+    weekday: inherits from cfg.data.day_anchor_hours logic
+    saturday: as above
+    sunday: as above
+  total_cells: 36
+  expected_n_per_cell: '~500 delivery days * 24 hours / 36 cells = ~333 (uneven across
+
+    cells; sunday cells will have ~1/7 the days; saturday similar).
+
+    '
+candidate_set:
+  seasonal:
+  - name: cos_annual
+    definition: cos(2 * pi * doy(t) / 365)
+  - name: sin_annual
+    definition: sin(2 * pi * doy(t) / 365)
+  - name: cos_semi
+    definition: cos(2 * pi * doy(t) / 182.5)
+  - name: sin_semi
+    definition: sin(2 * pi * doy(t) / 182.5)
+  weekly:
+  - name: dow_indicator_mon
+    definition: indicator(day-of-week(t) == Monday)
+  - name: dow_indicator_tue
+    definition: indicator(day-of-week(t) == Tuesday)
+  - name: dow_he_interaction
+    definition: 'DoW(t) treated as 7-level categorical * HE(t) treated as
+
+      24-level categorical, encoded as one-hot-pair index (168
+
+      levels); scored via cell-aggregated indicator of the (DoW,
+
+      HE) cell.
+
+      '
+  other:
+  - name: holiday_indicator
+    definition: indicator(t is Canadian/Ontario statutory holiday)
+  - name: year_since_cutoff
+    definition: (year(t) - 2024.5)
+  - name: he_dev_from_daytype_mean
+    definition: 'For each (daytype, HE), compute mean z_actual across post-
+
+      cutoff data; candidate value = z_actual(t) - that mean.
+
+      Tests whether residual variation within-cell tracks PIT.
+
+      '
+falsification_criterion:
+  numeric: 'O-D fires: NO candidate has explanatory_score whose 95%-CI lower
+
+    bound (from paired-day bootstrap) exceeds the 95th percentile of
+
+    its random-permutation null distribution.
+
+
+    Equivalently: no calendar candidate clears the null baseline at
+
+    p<0.05 with confidence.
+
+    '
+  reasoning: 'O-D is the "no calendar structure" outcome. If the missing content
+
+    is non-calendar (exogenous shocks not aligned with annual / weekly
+
+    rhythms, or nonlinearity within the embedding), then no calendar
+
+    candidate explains the PIT residual. The DA''s prediction.
+
+    '
+corroboration_criterion:
+  numeric: 'O-C fires: at least one seasonal candidate AND at least one
+
+    weekly/work-schedule candidate BOTH have CI lower bound > 95th
+
+    null percentile, AND the ratio of top-seasonal-score to top-weekly-
+
+    score is in (0.5, 2.0) (neither dominates by the 2x margin).
+
+    '
+ambiguous_region:
+  range: "Anything that is not (O-A xor O-B xor O-C xor O-D). Specifically:\n- O-A or O-B fires partially (top candidate clears null but the\n  \"dominance\" criterion is borderline at the 2x threshold \xB110%).\n- Two outcomes seem to fire simultaneously (tolerance overlap).\n"
+  action: 'Report and characterise; treat the experiment as AMBIGUOUS.
+
+    Branching rule: AMBIGUOUS -> null (thread ends; analyst must
+
+    amend to continue).
+
+    '
+shape_outcomes:
+  O-A:
+    criterion: 'Top seasonal candidate score CI lower bound > 95th null percentile
+
+      AND top seasonal score >= 2.0 * top weekly score
+
+      AND top seasonal score >= 2.0 * top OTHER candidate score.
+
+      '
+    interpretation: 'Seasonal cycle dominates the fingerprint. The missing content is
+
+      annually-periodic (weather is the prime candidate; P2A acquires
+
+      temperature).
+
+      '
+  O-B:
+    criterion: 'Top weekly candidate (DoW or DoW*HE) score CI lower > 95th null
+
+      AND top weekly score >= 2.0 * top seasonal
+
+      AND top weekly score >= 2.0 * top other.
+
+      '
+    interpretation: 'Weekly/schedule fine-structure dominates. The missing content is
+
+      work-schedule-aligned (P2B tests holiday + DoW*HE interactions
+
+      without acquisition).
+
+      '
+  O-C:
+    criterion: see corroboration_criterion above
+    interpretation: 'Both seasonal and weekly substantial; the missing content is
+
+      multi-source (P2C joint weather + calendar test).
+
+      '
+  O-D:
+    criterion: see falsification_criterion above
+    interpretation: 'No calendar structure. The missing content is non-calendar
+
+      (P2D tests nonlinearity vs exogenous-non-calendar).
+
+      '
+baselines:
+  primary: "Iterated kappa_1 predictor as-registered in v2: C_1 from\nfactors_v2_final.pkl per day_type; iter_Sigma_h via the (\u2605) sum\nover j=0..h-1 of C_1^j Sigma_1 (C_1^j)^T. The PIT calibration\nagainst THIS predictor is what we're measuring.\n"
+  secondary: 'Random-permutation null per candidate (1000 permutations): permute
+
+    the candidate''s time index, recompute explanatory_score. The
+
+    null''s 95th percentile is the candidate''s significance threshold.
+
+    '
+stopping_criterion:
+  rule: 'Run: PIT computation over all post-cutoff (delivery_day, hour-of-day)
+
+    pairs; cell aggregation; explanatory_score for each of ~13
+
+    candidates; 1000-permutation null per candidate; paired-day
+
+    bootstrap (1000 resamples) for CI on each score. Evaluate four
+
+    outcomes; one fires. STOP.
+
+    '
+  reasoning: 'Everything pre-registered. No iteration, no parameter tuning,
+
+    no candidate addition mid-experiment.
+
+    '
+ci_method:
+  type: paired_day_bootstrap
+  details: '1000 bootstrap resamples of post-cutoff delivery days; per
+
+    resample, refit cell statistics and recompute all 13 explanatory
+
+    scores. 95% percentile interval. The null-permutation distribution
+
+    is a separate procedure (not bootstrapped; 1000 permutations of
+
+    the candidate''s time index, evaluated against the observed PIT
+
+    residuals).
+
+    '
+  width: 95% percentile interval
+affects_registered_spec: false
+thread:
+  thread_topic: missing-content-thread
+  thread_body_sha256: 805df9d6b6d3cafc51d246f4106a58a69d060c29be54bf66c0f0200a11d83119
+  node_id: P1
+  parent_branch: null
+  threshold_derivations: 'None - P1 is the thread''s root; thresholds are pre-registered
+
+    standalone (95th percentile null baseline; 2x dominance margin)
+
+    rather than derived from prior nodes.
+
+    '
+related_memory:
+- mitacs-multiscale-defect-eigenmodes-v1
+- mitacs-multiscale-direct-h-step-v2
+- mitacs-postcovid-probe
+- mitacs-clim-gap-nonstationary
+- mitacs-session-lessons-corpus
+related_seed:
+- notes/seeds/multiscale_factor_coherence.md
+- notes/seeds/applied_audit_workflow.md
