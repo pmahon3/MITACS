@@ -1,0 +1,30 @@
+schema: proponent
+written_at: '2026-05-26T11:05:00-04:00'
+git_sha: c58f984603eccb277e3a4b70807130d30677b8e1
+git_clean: true
+body_sha256: 917cd01fbde8801badb93522d6999a5d834e0b0768b4f9ded9f7bed50a2ab380
+references:
+- file: phase_a.yaml
+  body_sha256: f12858416ed43bf47d823510a58fb20af7947ac917d87891f7222d68c6bfbb5a
+forecast:
+  value:
+    shape_verdict: O1_single_mode_dominant
+    dominant_mode: slow_mode
+    expected_dominant_mode_share_at_h24_weekday: 0.85
+    asymmetry_verdict: library_consistent
+  units: dimensionless (share is fraction in [0,1]; verdicts are categorical)
+  reasoning: "Mechanism (drift side): C_1 = V Lambda V^{-1} with Lambda_slow ~ 0.977\nweekday, Lambda_fast ~ 0.43 weekday. Iterated diffusion at large h:\niter_Sigma_h \u2248 sum_{j=0..h-1} V Lambda^j V^{-1} Sigma_1 V^{-T} Lambda^{jT} V^T.\nFor Lambda_slow ~ 0.977, j=12 gives 0.977^12 \u2248 0.76 \u2014 still large.\nFor Lambda_fast ~ 0.43, j=12 gives 0.43^12 \u2248 5e-5 \u2014 vanishingly\nsmall. So at large h, iterated Sigma is dominated by the slow\nmode's contribution. The direct Sigma_h, by contrast, captures\nALL contributions at scale h. The defect = direct - iterated thus\ninherits the slow-mode dominance: whatever the direct fit measures\nalong the slow direction that iteration MISSES becomes the bulk\nof the defect.\n\nMechanism (mode-share): the seed \xA75.2 implies the missing DOF\nhas tau >> 1h. Weather-like exogenous variance enters slow-mode\ndirection (long autocorrelation) \u2014 exactly the slow mode of C_1\nby physics. So dominant_mode_share should be 0.85+ at h=24.\n\n\
+    Asymmetry: weekday/saturday ratio = 141908/28368 = 5.00. Library-\ndriven inflation gives expected ratio 5; tolerance [3, 8] is\ngenerous; library_consistent is the central call.\n"
+forecast_ci:
+  width: 0.95
+  low:
+    dominant_mode_share_at_h24_weekday: 0.65
+    asymmetry_ratio_h12_slow_mode: 3.5
+  high:
+    dominant_mode_share_at_h24_weekday: 0.95
+    asymmetry_ratio_h12_slow_mode: 7.5
+  reasoning: "Share lower bound (0.65) is below the O1 criterion threshold (0.70)\n\u2014 there's a real probability O3 (diffuse) fires instead, especially\non weekday h=2 where slow-mode contribution to iterated Sigma is\nsmallest. Asymmetry ratio CI brackets the [3, 8] library band.\n"
+what_would_change_my_mind:
+- "If O3 fires (diffuse across all cells), the rank-1 structure of Sigma_h dominates and the eigenmode question is ill-posed for this estimator. Picture (C) is right but un-decomposable in this basis. Retract the \xA75.2 interpretation, accept the \xA76.4 (joint MLE) framing instead."
+- If asymmetry_ratio is outside [3, 8] for any (h, k), the weekend/weekday gap is structural not statistical. The defect carries day-type-specific dynamical content.
+confidence: 0.45

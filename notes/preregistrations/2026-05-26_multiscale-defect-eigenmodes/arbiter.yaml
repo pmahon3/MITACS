@@ -1,0 +1,66 @@
+schema: arbiter
+written_at: '2026-05-26T11:25:00-04:00'
+git_sha: 6e3cc2876b935640f2e0d95e7cb47f8dcf83826f
+git_clean: true
+body_sha256: 0e8349a973db26b7f9f59ca72723708e34aca1c55ff247994d279d954a93fd54
+references:
+- file: phase_a.yaml
+  body_sha256: f12858416ed43bf47d823510a58fb20af7947ac917d87891f7222d68c6bfbb5a
+- file: proponent.yaml
+  body_sha256: 917cd01fbde8801badb93522d6999a5d834e0b0768b4f9ded9f7bed50a2ab380
+- file: devils_advocate.yaml
+  body_sha256: 043faabf657ad66af4e2edbdcbfcab131650a0352e2255ce50efc960ae38e3ee
+- file: result.yaml
+  body_sha256: 2e8ccb0baf766e28518a6e3c51d082f40a4f7fca0b6f11ac3528572fc8afbfcf
+preconditions:
+  code_path_passed: true
+  hash_chain_intact: true
+  result_from_clean_tree: true
+numerical_record:
+  shape_verdict_mechanical: O2_h_localized
+  shape_substantive_picture: diffuse_two_mode
+  proponent_forecast: O1_single_mode_dominant_slow
+  proponent_dominant_share_h24_weekday_forecast: 0.85
+  proponent_dominant_share_h24_weekday_observed: 0.503
+  devils_advocate_forecast: O3_diffuse_via_rank1_ill_posedness
+  devils_advocate_dominant_share_h24_weekday_forecast: 0.55
+  devils_advocate_dominant_share_h24_weekday_observed: 0.503
+  asymmetry_proponent_forecast: library_consistent
+  asymmetry_devils_advocate_forecast: library_consistent
+  asymmetry_observed: NOT_library_consistent
+verdict: MIXED
+verdict_reasoning: "The mechanical verdict is O2 (h-localized): one or more day_types\nshow the dominant mode INDEX changing with h, which fires O2 under\nthe pre-registered criterion. But \"dominant\" here is between\nmodes whose shares cluster at 0.50-0.53; the argmax flip is noise\non a near-tie, not the mechanism O2 was intended to capture.\n\nSubstantively, the picture is closer to O3 (diffuse across two\nmodes): every weekday/saturday cell has dominant_mode_share between\n0.50 and 0.53, well below O1's 0.70 threshold; sunday cells sit\nat 0.52-0.58 with the slow real mode consistently dominant but\nagain not by O1-grade margin.\n\nTwo Phase A criterion defects made this hole possible:\n\n  (1) O2's \"dominant_mode_index CHANGES with h\" condition lacks\n      a \"clearly above tie\" share threshold. Should have required\n      a dominant-share margin (e.g. > 0.55) before the index-change\n      criterion can bite. Otherwise any near-tie set of shares\n      produces argmax noise that\
+  \ mimics genuine h-localization.\n\n  (2) O3's even-split band for sunday was specified as [0.30, 0.50]\n      assuming 3 equally-weighted blocks. But sunday's blocks are\n      mixed: a 1D real fast mode (real_0), a 2D complex pair, and a\n      1D real slow mode (real_3). The \"even-split\" point should\n      account for block-dimension weighting \u2014 under which sunday's\n      observed 0.52-0.58 dominant shares are PRECISELY at the even-\n      split point (1+2 vs 1, i.e. about 0.50 for the slow mode vs\n      the combined fast subspace). v2 of this experiment with\n      corrected sunday band would likely deliver verdict O3\n      substantively and mechanically.\n\nForecast comparison: proponent forecast O1 with dominant_mode_share\n~0.85; observed 0.50-0.58. Proponent forecast empirically wrong on\nmagnitude (off by a large margin in the corroboration-direction).\nDevil's-advocate forecast O3 with dominant_mode_share ~0.55; observed\n0.50-0.58. DA forecast is approximately correct\
+  \ on magnitude (the\nshares cluster near DA's predicted 0.55), but DA's MECHANISM\n(\"rank-1 makes projection ill-posed\") was empirically refuted by\nthe synthetic gate cross-check (synthetic R values ~0.01, three\norders below Ontario's 0.3-20; the projection works cleanly on\nstrict-semigroup data).\n\nCALIBRATION: DA closer on magnitude (proponent's 0.85 vs observed\n0.51 is a 0.34 miss; DA's 0.55 vs 0.51 is a 0.04 miss). But DA's\nmechanism was wrong. Calibration credit goes to DA on the headline\nnumber; both lose on the asymmetry sub-test (both forecast\nlibrary_consistent; reality is NOT \u2014 see below).\n\nTHE INDEPENDENT SUBSTANTIVE FINDING (asymmetry sub-test): R_sat /\nR_wkd ratios are 1.26-2.44 across (h, k); library-noise scaling\nwould predict ~5.0. Observed ratios are ALL below the registered\nband [3, 8]. Direction-of-effect: weekday per-cell defect is\nlarger than library-noise alone would predict (or equivalently,\nsaturday per-cell defect is smaller). This is genuine\
+  \ dynamical\nasymmetry, NOT a library-size artifact. It partially RETRACTS one\nreading of v2's marginal-KL pattern, which appeared to show weekend\ncells with larger KL than weekday \u2014 that pattern is now visible\nas a mix of (genuine: weekend operator carries multi-block dynamics\nweekday doesn't) and (library: weekend has 5x fewer days so noise\ninflates Sigma_h estimates more).\n"
+finding_status: SETTLED
+if_provisional_what_to_reaudit: []
+follow_up:
+  required: true
+  reasoning: "Three follow-ups, in order:\n\n1. v2 of THIS experiment with corrected criteria: O2 share-margin\n   threshold + sunday block-dimension-weighted band. CHEAP (rerun\n   same script with corrected thresholds). Likely outcome: clean\n   O3 verdict for weekday/saturday; clean O3 (or O1 on the slow\n   mode) for sunday. Resolves the mechanical/substantive gap.\n\n2. \xA76.3 of seed (direct-factor backtest): the substantive finding\n   \"defect is diffuse, not single-mode\" RULES OUT the strategy\n   \"target the slow mode in a backtest\" and points toward \"use\n   the directly-fit family wholesale\". The backtest is now well-\n   motivated.\n\n3. Open question on the asymmetry: WHY weekday has larger per-cell\n   defect than library noise predicts. Hypothesis: weekday\n   dynamics have MORE structure that the d=2 embedding doesn't\n   capture (work-schedule effects? weather + workday interaction?)\n   precisely because weekday is the \"default\" pattern with the\n   most fine-structure.\
+    \ Weekend dynamics are more\n   weather-dominated by simple comparison. Testable via \xA76.3 +\n   day-type-stratified residuals.\n"
+  proposed_phase_a: 'notes/preregistrations/2026-MM-DD_multiscale-defect-eigenmodes-v2/phase_a.yaml
+
+    (corrected criteria; same data, ~10 min work)
+
+    '
+calibration_record:
+  proponent_correct: false
+  devils_advocate_correct: partial
+  topic_difficulty: hard
+  notes: 'Hard because the metric has subtle geometric concerns (the rank-1
+
+    issue) that the synthetic gate had to disambiguate. The criterion
+
+    defects (O2 share-margin, sunday band) are real Phase A bugs.
+
+    Calibration record for both forecasters is mixed; neither got the
+
+    asymmetry direction-of-effect right; both pre-registered
+
+    library_consistent and reality refuted it.
+
+    '
+memory_update_required: true
+memory_update_target: "~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md\n(add mitacs-multiscale-defect-eigenmodes-v1: SETTLED with mixed\n mechanical/substantive verdict + the asymmetry direction-of-effect\n finding + the Phase A criterion-defect lessons for v2).\n\nSubstantive content to record:\n  1. Defect is diffuse-across-two-modes (not single-mode dominant).\n     Picture (C) sharpened: the missing DOF has multi-timescale\n     structure, not concentrated at one tau.\n  2. The rank-1 ill-posedness concern is refuted by the synthetic\n     gate cross-check (synthetic projects to ~0 across modes).\n  3. Asymmetry is genuine, not library-driven. Weekday per-cell\n     defect EXCEEDS library-noise expectation; saturday FALLS BELOW\n     it. v2's marginal-KL weekend/weekday pattern is partly noise\n     inflation, partly real dynamical difference.\n  4. Phase A had two criterion defects (O2 share-margin; sunday\n     block-dim-weighted band). Future eigenmode-shape\
+  \ experiments\n     must include a \"clearly above tie\" condition.\n"

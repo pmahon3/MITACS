@@ -1,0 +1,204 @@
+schema: phase_a
+written_at: '2026-05-26T11:00:00-04:00'
+git_sha: c58f984603eccb277e3a4b70807130d30677b8e1
+git_clean: true
+body_sha256: f12858416ed43bf47d823510a58fb20af7947ac917d87891f7222d68c6bfbb5a
+references:
+- file: ../2026-05-26_multiscale-direct-h-step-v2/arbiter.yaml
+  body_sha256: 72eb451853844ccb74f0a2f027a515e226025b5bfec45b8fbf30b2ede46328f1
+  relation: follows
+  reason: "v2 settled \"the strict-semigroup picture (A) is empirically\ninadequate; picture (C) is supported with D_RATIO=28.96 [26.82, 31.43]\".\nThis experiment tests \xA75.2 of the multiscale seed: whether the\ndefect has eigenmode structure (\"coherence defect concentrates at\nspecific (h, eigenmode) pairs\"). It uses ONLY the existing factor\npickle (scratch/data/multiscale_factor/factors_v2_final.pkl); no\nnew fits, no new bootstrap. Pure linear-algebra characterization.\n"
+topic: multiscale-defect-eigenmodes
+research_question: "Does the coherence defect (Sigma_h - iter_Sigma_h) concentrate in\nspecific eigendirections of C_1, in a manner consistent with the\nmultiscale seed \xA75.2 (defect carries information about which\ndynamical modes the embedding misses)?\n"
+hypothesis:
+  proponent: 'The defect is dominated by ONE eigenmode of C_1 (single-mode
+
+    dominant outcome O1 below). That mode is the slow mode (eigenvalue
+
+    closest to 1, characteristic timescale comparable to or longer
+
+    than 24 h). The interpretation: the embedding misses a single
+
+    long-timescale degree of freedom (the seed''s intuition points at
+
+    weather, per the post-COVID probe).
+
+    '
+  counter: "See devils_advocate.yaml. Most plausibly: the defect is diffuse\n(O3) because Sigma_h is rank-1 by construction\n([[mitacs-rank1-structural]]) and the iterated Sigma_h is too,\nbut their alignment with C_1's eigenbasis happens by construction\nnot by physics \u2014 both span coord-0's image under iteration. The\n\"eigenmode concentration\" question may be ill-posed for a rank-1\ndiffusion.\n"
+variables:
+  dependent:
+  - R_k(h, dt)
+  - dominant_mode_share(h, dt)
+  - dominant_mode_index(h, dt)
+  - asymmetry_ratio(h, k)
+  independent:
+  - h
+  - day_type
+  - k
+  excluded:
+  - variable: anything_already_excluded_in_v2_phase_a
+    reasoning: 'All variables fixed in v2 Phase A (theta, climatology, dims,
+
+      embedding) remain fixed here. We are looking at a DERIVED
+
+      quantity of the v2 fits, not re-doing the fits.
+
+      '
+data:
+  source: scratch/data/multiscale_factor/factors_v2_final.pkl
+  partition:
+    train: not applicable (no fitting; pure linear algebra on v2 outputs)
+    dev: not applicable
+    test: not applicable
+  cutoff_handling: 'Inherits v2''s pre-cutoff partition (the underlying fits used
+
+    strict <= cutoff library). This experiment does not touch raw data.
+
+    '
+metric: "Per-eigenmode diagonal residual of the defect, in C_1's eigenbasis:\n\n  Eigendecompose C_1 per day_type:  C_1 = V Lambda V^{-1}\n  Defect at h:                       D_h = Sigma_h - iter_Sigma_h\n  Per-mode diagonal residual:        R_k(h, dt) = (V^{-1} D_h V^{-T})[k, k]\n\nSunday's d=4 has a complex-conjugate eigenpair (eigvals ~0.5997 are\npaired). For sunday, the two complex-pair modes are aggregated into\ntheir 2D real invariant subspace before reporting; the resulting \"modes\"\nare: real_mode_1 (eigval~0.245), real_mode_2 (eigval~0.977), and\npair_block (the 2D subspace). Tabulated 3 modes for sunday vs 2 for\nweekday/saturday.\n\nDerived per-(h, dt) summaries:\n  dominant_mode_share(h, dt) = max_k |R_k(h, dt)| / sum_k |R_k(h, dt)|\n  dominant_mode_index(h, dt) = argmax_k |R_k(h, dt)|\n\nAsymmetry sub-test:\n  asymmetry_ratio(h, k) = R_k(h, saturday) / R_k(h, weekday)    (for each shared mode index)\n  Library asymmetry expectation: ratio ~ n_weekday / n_saturday ~ 5\n  (140k\
+  \ / 28k = 5.0; same for sunday via its real modes).\n"
+primary_outcome: shape_verdict
+falsification_criterion:
+  numeric: 'None of (O1), (O2), (O3) below fires uniquely. Specifically:
+
+    multiple outcomes fire simultaneously (tolerance regions overlap)
+
+    OR no outcome fires (per-mode shares cluster at boundary regions).
+
+    Interpretation: the metric design is inconclusive on this dataset.
+
+    '
+  reasoning: 'A clean structural finding requires one of the three outcomes to
+
+    fire cleanly. If two fire, the structural picture is ambiguous and
+
+    a redesign is needed (similar to v1''s M1 degeneracy).
+
+    '
+corroboration_criterion:
+  numeric: 'Exactly one of (O1), (O2), (O3) below fires uniquely.
+
+    '
+  reasoning: "Any one of the three outcomes is a clean structural finding. (O1)\nsharpens the seed's \"missing one DOF\" intuition; (O2) directly\nsupports \xA75.2; (O3) refines picture (C) toward \"operator class is\nwrong\" rather than \"missing DOF\".\n"
+ambiguous_region:
+  range: 'One outcome fires but borderline (within 5% of a tolerance edge)
+
+    AND no other outcome fires.
+
+    '
+  action: Report and characterize; do not promote to v3 without re-test.
+shape_outcomes:
+  O1_single_mode_dominant:
+    criterion: 'For all 12 (h, dt) cells, dominant_mode_share(h, dt) > 0.70
+
+      AND dominant_mode_index(h, dt) is the same eigenmode within
+
+      each day_type across all h.
+
+      '
+    interpretation: 'The defect lives in one eigenmode. The seed''s "embedding misses
+
+      one DOF" picture is sharpened. The dominant mode''s characteristic
+
+      timescale tau_dom = -1/log|lambda_dom| identifies the timescale
+
+      of the missing DOF.
+
+      '
+  O2_h_localized:
+    criterion: 'Not (O1). AND: within at least one day_type, dominant_mode_index
+
+      CHANGES with h (different modes carry the defect at different
+
+      horizons). AND: in that day_type, the dominant mode at the cell
+
+      where dominant_mode_share is maximal has tau_k comparable to
+
+      that h (within factor of 2).
+
+      '
+    interpretation: "\xA75.2 fires: the defect concentrates at h where the missing mode\nis starting to matter. The seed's structured-defect picture is\ndirectly supported beyond v2's marginal scalar.\n"
+  O3_diffuse:
+    criterion: 'Not (O1), not (O2). AND: for all 12 cells, dominant_mode_share(h, dt)
+
+      is within [0.40, 0.65] (close to even split for 2 modes; equivalent
+
+      for sunday''s 3 modes adjusted to [0.30, 0.50]).
+
+      '
+    interpretation: "The defect spreads across all available modes. Picture (C) is\nright, but the operator class itself is what's wrong, not just\n\"missing one DOF\". Points to \xA76.4 (joint MLE on richer\nparameterization) over \xA76.3 (direct-factor backtest).\n"
+asymmetry_subtest:
+  question: 'Is the weekend/weekday KL asymmetry in v2 driven by library size
+
+    (5x more weekday-than-weekend days) or by genuine dynamical
+
+    asymmetry?
+
+    '
+  prediction:
+    library_consistent: asymmetry_ratio(h, k) in [3, 8] for all (h, k)
+    genuine_asymmetry: any asymmetry_ratio(h, k) outside [3, 8]
+  reasoning: 'Under OLS noise scaling, Sigma_h estimate''s variance goes as 1/n.
+
+    Iterated-vs-direct Sigma residual scales as 1/n. So library-driven
+
+    inflation should give weekend/weekday ratio close to n_weekday/n_weekend
+
+    ~ 5, with finite-sample tolerance [3, 8]. A ratio outside this band
+
+    means the asymmetry is structural, not statistical.
+
+    '
+baselines:
+  primary: 'Iterated Sigma_h from C_1, Sigma_1 (already in factors_v2_final.pkl).
+
+    The defect is direct minus iterated.
+
+    '
+  secondary: "Synthetic VAR(1) gate from v2 phase_a \u2014 same eigenmode decomposition\non the synthetic system should give R_k(h) close to zero for all\nmodes (strict semigroup holds by construction).\n"
+stopping_criterion:
+  rule: 'Compute R_k(h, dt) for all 12 (h, dt) cells, all modes; evaluate
+
+    each shape outcome; evaluate asymmetry sub-test; STOP. No iteration.
+
+    No new fits. No tuning.
+
+    '
+  reasoning: 'Question is fully determined before data; the criteria are mutually
+
+    exclusive; arbiter renders verdict.
+
+    '
+ci_method:
+  type: none
+  details: 'The factor pickle records POINT estimates (with bootstrap CIs on
+
+    M1, M2, D_RATIO at the marginal level). Eigenmode decomposition is
+
+    a deterministic transformation of those point estimates; uncertainty
+
+    on R_k(h, dt) would need a per-bootstrap recomputation. NOT included
+
+    in this experiment because the shape verdict is robust to noise
+
+    within the v2 bootstrap CIs (D_RATIO CI [26.82, 31.43] is 95% of
+
+    its central value; per-mode shares would have larger CIs but the
+
+    dominant-mode vs diffuse vs h-localized distinction is qualitative
+
+    not quantitative). If the verdict turns out borderline, a v2 of
+
+    THIS experiment will add per-eigenmode bootstrap CIs.
+
+    '
+  width: not applicable
+affects_registered_spec: false
+related_memory:
+- mitacs-multiscale-direct-h-step-v2
+- mitacs-rank1-structural
+- mitacs-clim-gap-nonstationary
+- mitacs-postcovid-probe
+- mitacs-session-lessons-corpus
+related_seed:
+- notes/seeds/multiscale_factor_coherence.md

@@ -1,0 +1,51 @@
+schema: devils_advocate
+written_at: '2026-05-26T11:05:00-04:00'
+git_sha: c58f984603eccb277e3a4b70807130d30677b8e1
+git_clean: true
+body_sha256: 043faabf657ad66af4e2edbdcbfcab131650a0352e2255ce50efc960ae38e3ee
+references:
+- file: phase_a.yaml
+  body_sha256: f12858416ed43bf47d823510a58fb20af7947ac917d87891f7222d68c6bfbb5a
+strongest_argument: "Sigma_1 is RANK-1 by construction at single-variable delay embedding\n(mitacs-rank1-structural). The \"eigenmode of C_1\" decomposition is\nthe basis for the DRIFT operator, not the diffusion. The diffusion's\nnatural eigenbasis is the eigenbasis of Sigma_1 itself, which is a\n1D subspace (one excited direction, the inner-coord innovation).\n\nProjecting Sigma_h onto C_1's eigenbasis is geometrically incoherent:\nV^{-1} Sigma_h V^{-T} mixes the drift modes with the diffusion's\nrank-1 structure in a way that has no clean interpretation. The\n\"per-mode residual R_k(h, dt)\" the metric computes is not a\ndiagonal of any natural quantity \u2014 it's an artifact of the chosen\nbasis.\n\nPredicted shape verdict: O3 (diffuse) by accident \u2014 because the basis\nis wrong, the residual will distribute across modes by projection\ngeometry rather than by physics. Even if the underlying defect IS\ncarried by one missing DOF, the chosen basis won't reveal it.\n"
+specific_failure_modes:
+- rank: 1
+  mode: rank-1-Sigma-makes-eigenmode-projection-ill-posed
+  memory_ref: mitacs-rank1-structural
+  likelihood: 0.5
+- rank: 2
+  mode: shape-verdict-ambiguous-tolerance-overlap
+  memory_ref: mitacs-multiscale-direct-h-step-v1
+  likelihood: 0.2
+- rank: 3
+  mode: weekend-asymmetry-genuinely-structural-not-library
+  memory_ref: mitacs-clim-gap-nonstationary
+  likelihood: 0.2
+severity: serious
+counter_prediction:
+  value:
+    shape_verdict: O3_diffuse
+    dominant_mode_share_h24_weekday: 0.55
+    asymmetry_verdict: library_consistent
+  units: dimensionless
+  reasoning: 'The defect''s projection onto C_1''s eigenbasis distributes across
+
+    available modes because Sigma is structurally not aligned with C_1''s
+
+    eigenvectors. Expect dominant_mode_share to hover near the even-split
+
+    point of ~0.50 for d=2 (both weekday/saturday) and ~0.33 for sunday''s
+
+    3-mode tabulation, putting it inside O3''s [0.40, 0.65] band most
+
+    cells. O1 will not fire cleanly because no single mode is consistently
+
+    above 70%.
+
+    '
+what_would_change_my_mind:
+- If O1 fires with dominant_mode_share > 0.80 at all (h>=6, dt) cells AND the dominant mode index is the same slow mode within each day_type, the geometric concern is empirically wrong on this data and the proponent's mechanistic argument (slow mode dominates iteration) is supported.
+- "If O2 fires (h-localized) cleanly, \xA75.2's specific prediction holds. I retract the rank-1 concern as a methodological obstruction."
+opportunity_cost:
+  alternative: "Direct \xA76.3 backtest \u2014 answers the practitioner question without\ndepending on the eigenmode geometry. If the shape verdict here is\nO3 or AMBIGUOUS, \xA76.3 is the immediate next step regardless.\n"
+  ranking: unclear
+  notes: "Eigenmode characterization is CHEAP (~30 lines NumPy on existing\npickle; no new fits). Cost is bounded. Worth running even if it\nproduces O3 or AMBIGUOUS \u2014 those are informative outcomes that\nrefine picture (C).\n"

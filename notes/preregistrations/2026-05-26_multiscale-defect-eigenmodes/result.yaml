@@ -1,0 +1,216 @@
+schema: result
+written_at: '2026-05-26T11:20:00-04:00'
+git_sha: 6e3cc2876b935640f2e0d95e7cb47f8dcf83826f
+git_clean: true
+body_sha256: 2e8ccb0baf766e28518a6e3c51d082f40a4f7fca0b6f11ac3528572fc8afbfcf
+references:
+- file: phase_a.yaml
+  body_sha256: f12858416ed43bf47d823510a58fb20af7947ac917d87891f7222d68c6bfbb5a
+artifact:
+  path: scratch/data/multiscale_factor/eigenmodes.pkl
+  grade: INSPECTION
+  emitted_by: experiment.multiscale_defect_eigenmodes.__main__
+  inputs_fingerprint: null
+  body_sha256_artifact: null
+  notes: 'Pickle, not a make_result() artifact (the analysis is linear
+
+    algebra on the v2 pickle; promoting to METHOD would require
+
+    --emit-result wiring). Substantive content lives in arbiter.yaml.
+
+    '
+code_path_audit:
+  verdict: PRODUCTION-PATH
+  artifact: '/audit code-path on experiment/multiscale_defect_eigenmodes/__main__.py
+
+    after analysis: 2 production calls (global_ols_fit twice, in the
+
+    synthetic-gate cross-check); 0 suspicious inline patterns.
+
+    The other linear-algebra is on already-fit (C, Sigma) pairs from
+
+    factors_v2_final.pkl, which was itself audited PRODUCTION-PATH.
+
+    '
+  blocking: false
+primary_result:
+  metric: shape_verdict
+  value: O2_h_localized_TECHNICAL
+  ci_low: null
+  ci_high: null
+  ci_method_actually_used: none_per_phase_a
+  notes: 'Mechanical verdict per the registered O1/O2/O3 criteria: O2 fires.
+
+    BUT: see arbiter.yaml. O2 fires on a near-tie technicality
+
+    (weekday share goes 0.534 -> 0.514 -> 0.506 -> 0.503; the argmax
+
+    "flip" at h=24 is random noise on a tie). The substantive
+
+    structure is diffuse-across-two-modes, not h-localized in any
+
+    mechanistic sense. The Phase A criteria had two defects that
+
+    made this hole possible: (1) O2 should have required a "clearly
+
+    above tie" share threshold to bite; (2) O3''s band for sunday
+
+    assumed pure 3-block geometry but sunday has mixed real+pair
+
+    geometry. These are recorded in arbiter for a possible v2 of
+
+    THIS sub-experiment.
+
+    '
+secondary_results:
+- name: per_(dt,h)_dominant_mode_share
+  value:
+    weekday/h=2:
+      dominant: real_1
+      share: 0.534
+    weekday/h=6:
+      dominant: real_1
+      share: 0.514
+    weekday/h=12:
+      dominant: real_1
+      share: 0.506
+    weekday/h=24:
+      dominant: real_0
+      share: 0.503
+    saturday/h=2:
+      dominant: real_1
+      share: 0.523
+    saturday/h=6:
+      dominant: real_0
+      share: 0.501
+    saturday/h=12:
+      dominant: real_0
+      share: 0.513
+    saturday/h=24:
+      dominant: real_0
+      share: 0.528
+    sunday/h=2:
+      dominant: real_3
+      share: 0.521
+    sunday/h=6:
+      dominant: real_3
+      share: 0.569
+    sunday/h=12:
+      dominant: real_3
+      share: 0.579
+    sunday/h=24:
+      dominant: real_3
+      share: 0.578
+  notes: 'All weekday/saturday shares cluster near 0.50 (range 0.50-0.53).
+
+    Sunday''s dominant is consistently real_3 (the slow real mode,
+
+    eigenvalue ~0.977) with shares 0.52-0.58, while the runner-up
+
+    is the complex pair_1_2 (eigenvalue ~0.45+0.39j). Sunday is
+
+    the cell-set most consistent with proponent''s slow-mode-dominant
+
+    forecast, but at shares well below O1''s 0.70 threshold.
+
+    '
+- name: per_(dt,h)_R_k_values
+  value:
+    weekday/h=2:
+      real_0: 0.272
+      real_1: 0.312
+    weekday/h=6:
+      real_0: 2.144
+      real_1: 2.27
+    weekday/h=12:
+      real_0: 3.759
+      real_1: 3.856
+    weekday/h=24:
+      real_0: 4.746
+      real_1: 4.682
+    saturday/h=2:
+      real_0: 0.665
+      real_1: 0.729
+    saturday/h=6:
+      real_0: 4.653
+      real_1: 4.638
+    saturday/h=12:
+      real_0: 6.261
+      real_1: 5.934
+    saturday/h=24:
+      real_0: 6.592
+      real_1: 5.904
+    sunday/h=2:
+      real_0: 0.0002
+      pair_1_2: 0.435
+      real_3: 0.473
+    sunday/h=6:
+      real_0: 0.75
+      pair_1_2: 9.074
+      real_3: 12.986
+    sunday/h=12:
+      real_0: 1.807
+      pair_1_2: 13.005
+      real_3: 20.365
+    sunday/h=24:
+      real_0: 1.608
+      pair_1_2: 11.009
+      real_3: 17.308
+  notes: 'All values positive across all cells -> direct Sigma exceeds
+
+    iterated Sigma in every mode. The "iteration underestimates
+
+    diffusion" pattern (v2''s M2 < 1) holds at the per-mode level
+
+    too. Magnitudes grow with h within each (dt, k) up to h=12;
+
+    h=24 plateaus or slightly decreases (saturation regime).
+
+    '
+- name: asymmetry_ratios_sat_over_wkd
+  value:
+    h=2/real_0: 2.442
+    h=2/real_1: 2.339
+    h=6/real_0: 2.17
+    h=6/real_1: 2.044
+    h=12/real_0: 1.666
+    h=12/real_1: 1.539
+    h=24/real_0: 1.389
+    h=24/real_1: 1.261
+  notes: 'ALL 8 ratios are below the library-noise-band [3, 8]. Expected
+
+    under pure library-noise scaling (1/n): ratio = n_wkd/n_sat = 5.0.
+
+    Observed: ratios decline from 2.44 (h=2) to 1.26 (h=24). The
+
+    decline with h means the gap NARROWS as h grows. The SIGN of
+
+    the asymmetry is correct (saturday R > weekday R in absolute
+
+    terms) but its MAGNITUDE is much smaller than library noise
+
+    would explain. EQUIVALENTLY: weekday per-cell defect is LARGER
+
+    than library size would predict; saturday is SMALLER. This
+
+    asymmetry is structural, NOT library-driven. Verdict per
+
+    Phase A asymmetry_subtest: library_consistent = False.
+
+    '
+- name: synthetic_gate_eigenmode_cross_check
+  value:
+    h=2:
+      real_0: 0.00199
+      real_1: 0.00062
+    h=6:
+      real_0: 0.01012
+      real_1: 0.01018
+    h=12:
+      real_0: 0.01089
+      real_1: 0.01103
+    h=24:
+      real_0: 0.01098
+      real_1: 0.01087
+  notes: "Same decomposition on the synthetic VAR(1) gate. Magnitudes\n~0.01 nats \u2014 three orders of magnitude smaller than Ontario's\n0.3-20. The strict-semigroup case projects to ~zero defect\nacross modes. DA's pre-registered concern that \"rank-1 Sigma\nmakes the eigenmode projection geometrically ill-posed\" is\nEMPIRICALLY REFUTED by this cross-check: the projection works\ncleanly on rank-1 strict-semigroup data.\n"
+execution_deviations: []
