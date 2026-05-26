@@ -92,6 +92,17 @@ REQUIRED_TOP_LEVEL: dict[str, set[str]] = {
         "references", "topic", "question", "root", "current_node_id",
         "state", "nodes", "branching_rules", "amendments",
     },
+    # phase-fidelity outputs (Check T / Check P / Check R; see
+    # .claude/agents/phase-fidelity.md). The schema is per-agent, not
+    # per-check variant; filename may differ
+    # (phase_fidelity_check_r.yaml, phase_fidelity_check_p.yaml, ...).
+    # Workflow gap surfaced by Q2A Check R: arbiter precondition
+    # hash_chain_intact calls registry.verify_entry, which requires the
+    # schema to be known. Adding here closes the gap once.
+    "phase_fidelity": {
+        "schema", "written_at", "git_sha", "git_clean", "body_sha256",
+        "references", "aggregate_verdict", "fidelity_coverage_passed",
+    },
 }
 
 # Optional fields per schema (not required for verify, but checked if present)
