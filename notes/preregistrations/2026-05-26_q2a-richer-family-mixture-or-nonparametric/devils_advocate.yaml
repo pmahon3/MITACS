@@ -1,0 +1,93 @@
+schema: devils_advocate
+written_at: '2026-05-26T22:10:00-04:00'
+references:
+- file: phase_a.yaml
+  body_sha256: c0a22c9e6cc708d3089a891a1eb7900e20e05e8816c673cad7bc77165bf138fe
+strongest_argument: 'The proponent''s central claim - that ~half of the chi^2 = 1371 marginal pathology is non-distributional and survives kernel-family lift by construction - is built on a chain of inferences
+  that the gate-validated cuts and KDE flexibility undercut.
+
+
+  First, the cited non-distributional drivers (secular year-since-cutoff drift, iterated-mean bias at large h, day-anchor seam) all affect the PIT distribution by ALTERING THE EFFECTIVE LOCATION-AND-SCALE
+  OF THE RESIDUAL at evaluation time. KDE is fit on residuals from a regression that already accounts for state-conditional location (via C_1) and scale (via the empirical residual spread). When the residual
+  law is fit nonparametrically with ~5000 library samples and resampled via SMC, the resulting marginal includes whatever distributional shape the residuals empirically have - which DOES include the historically-observed
+  effects of regime, season, hour-of-day, and library composition. The proponent is implicitly assuming KDE only models the within-library residual law and is naive about post-cutoff secular shifts; but
+  at SMC-evaluation time the issue-time state x(t) carries the post-cutoff calendar features through C_1 implicitly. The post-cutoff PIT is bad under Student-t (1371) primarily because Student-t''s 1-parameter
+  symmetric heavy tail cannot match the actual residual SHAPE - not because the iterated mean is biased (if it were, even the perfect distributional kernel would fail).
+
+
+  Second, the proponent estimates the non-distributional fraction by appeal to S5 / S8c. But S5''s verdict was AMBIGUOUS with a tautology design hole; the legitimate calendar signals it found were ranked
+  relatively, not absolutely. Year-since-cutoff being ''the strongest legitimate signal'' in PIT residuals means it''s the strongest of the calendar covariates tested, NOT that it dominates the absolute
+  chi^2. S8d explicitly settled that heavy-tailedness lives in the kappa_1 INNOVATION not the climatology - this is exactly what KDE on the residual is fit to capture, and it has ~5000 effective samples
+  to do so. Student-t hit 1371 with 1 free parameter; KDE has thousands of effective degrees of freedom. The reduction from 1371 to below 228 (a 6x factor) is well within KDE''s flexibility envelope.
+
+
+  Third, the gate''s R-A2 cut at 228.44 is the worst-case across three weight-sweep variants under same-family null. The binding cell (V3_rho10, KDE, kurt=12) is the noisiest case in the gate; under Ontario''s
+  actual residual distribution the same-family chi^2 will likely be lower than this conservative ceiling. The ''true'' KDE-fits-KDE noise floor on Ontario-scale data is closer to 50-100, leaving room for
+  KDE to land at 150-200 and clear the bar.
+
+
+  Net: R-A2 fires with effective_chi2 around 180, KDE binding. Mixture-2 and mixture-3 hit floors around 600-800 because their symmetric centred parametric form cannot capture residual skewness or multimodality,
+  but KDE absorbs both.
+
+  '
+specific_failure_modes:
+- rank: 1
+  mode: proponent_invokes_S5_year_since_cutoff_as_dominant_chi2_contributor_but_S5_verdict_was_AMBIGUOUS_with_tautology_caveat_not_a_clean_absolute_chi2_decomposition
+  memory_ref: mitacs-pit-calendar-fingerprint-p1
+  likelihood: 0.4
+- rank: 2
+  mode: proponent_treats_KDE_as_lower-flexibility_than_it_is_relative_to_5000-sample_library
+  memory_ref: mitacs-q1-student-t-vs-gaussian
+  likelihood: 0.3
+- rank: 3
+  mode: gate_R-A2_cut_is_conservative_variant-max_so_Ontario_actual_residual_likely_clears_the_bar_with_room_to_spare
+  memory_ref: null
+  likelihood: 0.2
+- rank: 4
+  mode: proponent_conflates_residual_pathology_with_iterated-mean_bias_which_are_actually_dissociable_because_PIT_is_scale-normalized
+  memory_ref: mitacs-rebaseline-facts
+  likelihood: 0.15
+severity: serious
+counter_prediction:
+  value:
+    outcome: R-A2
+    marginal_PIT_chi2_M3: 750
+    marginal_PIT_chi2_M4: 600
+    marginal_PIT_chi2_M5: 180
+    effective_chi2: 180
+    preferred_family: kde_residual_law
+  units: dimensionless (chi^2 for 10-bin uniform)
+  reasoning: Agreeing with proponent that KDE is the preferred family (most flexible), but disagreeing on the verdict bin. KDE on a 5000-sample library has enough flexibility to match the actual residual
+    marginal to within the gate's same-family noise envelope on Ontario-scale data (~150-200). Effective_chi2 falls below 228.44, R-A2 fires, picture (C) is strongly corroborated, the thread routes to a
+    successor for the survival-of-defect question. The mixtures (M3, M4) underperform KDE materially because their symmetric centred parametric form is too restrictive.
+forecast_ci:
+  width: 0.95
+  low:
+    marginal_PIT_chi2_M3: 450
+    marginal_PIT_chi2_M4: 350
+    marginal_PIT_chi2_M5: 80
+    effective_chi2: 80
+  high:
+    marginal_PIT_chi2_M3: 1200
+    marginal_PIT_chi2_M4: 950
+    marginal_PIT_chi2_M5: 360
+    effective_chi2: 360
+  reasoning: CI on effective_chi2 [80, 360] crosses the R-A2 / R-B2 boundary (228.44) on the upper side, reflecting that the central R-A2 call has real risk of falling into R-B2. The CI is tighter than
+    the proponent's because the central pessimism about non-distributional contribution is, in my view, the load-bearing speculation that has wide uncertainty in the proponent's frame but not in mine.
+what_would_change_my_mind:
+- If effective_chi2 > 1000 (the upper range of R-B2), the proponent's non-distributional-contribution hypothesis is corroborated in absolute chi^2 terms and the counter-argument that S5 was a relative-ranking
+  finding loses force.
+- If KDE_chi^2 > 500 specifically while mixtures stay above 800, the failure mode is KDE-specific (bandwidth too wide, library too narrow, sampling noise too large at M = 200), not a corroboration of the
+  proponent's non-distributional hypothesis. Different objection.
+- If R-C2 fires (effective_chi2 > 2284), my disagreement with the proponent is moot - the distributional-class programme is wrong end-to-end.
+opportunity_cost:
+  alternative: A pre-experiment KDE-bandwidth sensitivity sweep would have been cheap (one extra fit per day-type with bandwidth = 0.5 x Silverman and 2 x Silverman) and would have hedged against the failure
+    mode where Silverman over-smooths the actual Ontario residual law. Pinning bandwidth at Silverman per the production fitter default makes the verdict cheaper but more brittle to that one choice; if
+    KDE narrowly misses R-A2, the analyst will want to ask whether bandwidth was the binding constraint, and that question cannot be answered without rerunning with different bandwidths (which post-hoc
+    bandwidth tuning would void the pre-registration).
+  ranking: complementary
+  notes: 'The pre-registration is well-formed AS WRITTEN. The opportunity cost is a one-shot risk: the Silverman bandwidth choice is the single non-trivial hyperparameter and the experiment cannot sweep
+    it post-hoc without invalidating the registration.'
+git_sha: c6677e41cec46c651e9a037903e95cc6615f32c1
+git_clean: true
+body_sha256: 913120e60f6557d85e7f7b32309f17c134227d8a04eb38d7126419265a6d8023

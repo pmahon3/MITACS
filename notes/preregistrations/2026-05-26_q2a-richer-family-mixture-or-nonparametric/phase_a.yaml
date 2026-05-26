@@ -1,0 +1,209 @@
+schema: phase_a
+written_at: '2026-05-26T22:00:00-04:00'
+references:
+- file: ../2026-05-26_distributional-class-thread/thread.yaml
+  body_sha256: 042f997c3e46ad04bda5761eddf6800b76835132531bc24c7dcef92ccee8adc8
+  relation: thread
+topic: q2a-richer-family-mixture-or-nonparametric
+research_question: 'Does lifting the predictive-distribution class of the iterated kappa predictor from Student-t to a richer family (finite mixture of Gaussians or kernel-density-estimated residual law)
+  close the marginal PIT calibration gap left by Q1 (chi^2 = 1371 under Student-t kernel)?
+
+  '
+hypothesis:
+  proponent: 'R-B2 fires. Each of the three richer families (mixture-2-Gaussians, mixture-3-Gaussians, KDE-residual-law) reduces the marginal PIT chi^2 below Q1''s Student-t baseline (1371) but none of
+    them reaches the synthetic-gate-validated corroboration bar (228.44). The effective_chi2 = min over the three lands in (228, 1370], with KDE the preferred family (most flexible, weakest assumptions).
+    This continues Q1''s substantive R-C reading (S8c): the marginal pathology has a non-distributional component (iterated mean bias, h-pooling, day-anchor seam, year-since-cutoff drift) that no purely
+    distributional fit can fully absorb. Picture (C) is partly corroborated (distributional class does close some of the gap; the verdict number falls roughly in half) but not fully; the thread needs amendment
+    for a next node that combines distributional richness with non-distributional content (e.g., state-dependent mixtures or hybrid distributional/calendar models).
+
+    '
+  counter: 'See devils_advocate.yaml. Most plausibly R-A2: KDE (nonparametric) absorbs enough residual distributional structure (skewness, multimodality, regime-dependence) that effective_chi2 falls below
+    228.44. The proponent''s reasoning that "non-distributional content exists" was speculation; KDE is flexible enough to handle whatever distributional shape the residuals genuinely have, including state-dependent
+    mixtures the proponent pessimistically rules out.
+
+    '
+variables:
+  dependent:
+  - marginal_PIT_chi2_M3
+  - marginal_PIT_chi2_M4
+  - marginal_PIT_chi2_M5
+  - effective_chi2
+  - mixture_2_weights_and_scales_per_day_type
+  - mixture_3_weights_and_scales_per_day_type
+  - kde_bandwidth_per_day_type
+  independent:
+  - kernel_family
+  - day_type
+  excluded:
+  - variable: M1_student_t_kernel
+    reasoning: 'Already tested in Q1 (settled chi^2 = 1371.6 pooled, day-type-stratified 1069.1 / 1817.2 / 1631.1). Q2A''s verdict metric is min over the THREE richer families M3 / M4 / M5 only; the question
+      is whether ANY of these closes the gap on its own merit, NOT "do they beat Q1''s Student-t". The Q1 result is the "what we beat" reference baseline (logged under baselines.primary) but is NOT part
+      of the candidate set.
+
+      '
+  - variable: climatology_refit_per_family
+    reasoning: 'Q1 (S8d) settled that heavy-tailedness lives in the kappa_1 INNOVATION, not the seasonal climatology: Q1''s M2 (full Student-t commitment with climatology refit) underperformed M1 (kernel
+      only). Refitting climatology under each Q2A family would add estimation noise without capturing real signal. Use the existing Gaussian-moment climatology from M0 / v2_final.pkl (same as Q1''s M1).
+
+      '
+  - variable: theta_or_embedding_dim_or_bandwidth_tuning
+    reasoning: 'All frozen by registered spec; orthogonal to the distributional-class question.
+
+      '
+data:
+  source: 'Pre-cutoff Ontario demand (load_actuals, cutoff = spec.data_cutoff) for family fits; post-cutoff for marginal PIT evaluation. Same 500-day population that v2, PIT-calendar-fingerprint, and Q1
+    used.
+
+    '
+  partition:
+    train: pre-cutoff library (<= 2024-12-31 23:00)
+    dev: not used (no hyperparameter tuning; KDE bandwidth pinned at Silverman per the production fitter default)
+    test: post-cutoff 2025-01-01 .. 2026-05-16
+  cutoff_handling: 'Strict pre-cutoff library for all MLE / KDE fits. Post-cutoff data only at PIT evaluation step. Standard leakage guard (same as Q1).
+
+    '
+metric: "PRIMARY: effective_chi2 = min(chi2_M3, chi2_M4, chi2_M5) where each chi2_Mk is the 10-bin chi-square statistic of the post-cutoff marginal PIT under family Mk.\n\nFor each post-cutoff timestamp\
+  \ t at horizon h from the day-anchor:\n  1. Build issue-time state x(t).\n  2. Under model M_k (k in {3, 4, 5}), compute the iterated predictive distribution of z_actual(t) by SMC particle propagation\n\
+  \     with M = 200 particles, sampling one-step residuals from the\n     family-fitted kernel at each step:\n       - M3 (mixture_2_gaussian): residuals drawn from the fitted\n         symmetric two-component\
+  \ centred mixture; (C_1, weights_2, scales_2)\n         per day-type from processing.innovations.estimator.\n         mixture_2_gaussian_mle_fit on the same pre-cutoff library Q1's\n         M1 used.\n\
+  \       - M4 (mixture_3_gaussian): residuals drawn from the fitted\n         symmetric three-component centred mixture; same fitter API\n         (mixture_3_gaussian_mle_fit).\n       - M5 (kde_residual_law):\
+  \ residuals drawn by KDE-sampling -\n         draw index uniformly from the fitted KDE sample set, add\n         Gaussian noise at fitted bandwidth (standard KDE sampling).\n         Fitter: processing.innovations.estimator.kde_residual_fit\n\
+  \         with bandwidth='silverman' (default).\n     Iteration mirrors Q1's M1 SMC propagation logic (same particle\n     count, same per-step independence assumption, same day-anchor\n     handling);\
+  \ only the residual sampler swaps.\n  3. PIT: u = empirical CDF of particle distribution at z_actual\n     (sample-based; rank with U(0, 1) jitter per the existing\n     distributional_smc convention).\n\
+  \  4. Aggregate u over all post-cutoff (day, hour-of-day) pairs.\n  5. chi^2_k = sum_{bin=1..10} (observed - expected)^2 / expected\n     with expected = N / 10 per bin (uniform null).\n  6. effective_chi2\
+  \ = min(chi^2_M3, chi^2_M4, chi^2_M5).\n\nSECONDARY (sanity-check reporting; not part of the verdict):\n  - chi^2 per family stratified by day_type.\n  - Per-family fitted parameters at the headline cell:\n\
+  \      mixture_2: weights (w_1, w_2), scales (s_1, s_2)\n      mixture_3: weights (w_1, w_2, w_3), scales (s_1, s_2, s_3)\n      kde: bandwidth\n  - Pre-experiment same-family sanity check: simulate data\
+  \ from each\n    of mixture_2 / mixture_3 / kde with known true params, run the\n    same fitter + SMC pipeline, confirm chi^2 lands inside the gate's\n    per-cell same-family 95th-pct null band. (Re-uses\
+  \ the gate's\n    _solve_mix2_s2 / _solve_mix3_s3 generators.)\n"
+models:
+  M3_mixture_2_gaussian:
+    description: 'Drift (C_1) plus a symmetric two-component centred Gaussian mixture residual law, fitted by EM via processing.innovations.estimator.mixture_2_gaussian_mle_fit on the same pre-cutoff library
+      Q1''s M1 used. Iteration via SMC particle propagation with M = 200, sampling residuals from the fitted mixture at each step.
+
+      '
+    free_parameters: per day-type, 1 mixing weight + 2 scales = 3 shape parameters (plus refit C_1, mu)
+    notes: 'Smallest non-trivial mixture extension. Tests whether two-component flexibility (bulk + heavy tail mode) materially absorbs more than Q1''s single-nu Student-t.
+
+      '
+  M4_mixture_3_gaussian:
+    description: 'Drift (C_1) plus a symmetric three-component centred Gaussian mixture residual law, fitted by EM via processing.innovations.estimator.mixture_3_gaussian_mle_fit. Iteration as M3.
+
+      '
+    free_parameters: per day-type, 2 mixing weights + 3 scales = 5 shape parameters (plus refit C_1, mu)
+    notes: 'Richer parametric mixture. Tests whether moving from 2 to 3 components meaningfully improves marginal calibration, or whether returns diminish quickly.
+
+      '
+  M5_kde_residual_law:
+    description: 'Drift (C_1) plus non-parametric KDE residual law, fitted via processing.innovations.estimator.kde_residual_fit with bandwidth = "silverman" (default). Iteration via SMC particle propagation
+      with M = 200; residual sampler draws an index uniformly from the fitted KDE sample set and adds Gaussian noise at fitted bandwidth.
+
+      '
+    free_parameters: per day-type, 1 bandwidth (nonparametric otherwise; library size ~5000 samples)
+    notes: 'Most flexible family in the candidate set. If KDE cannot close the gap, no purely distributional fit can; the marginal pathology has a non-distributional component.
+
+      '
+shape_outcomes:
+  R-A2:
+    criterion: 'effective_chi2 <= 228.44
+
+      '
+    interpretation: 'A richer-than-Student-t distributional family closes the marginal PIT gap. The missing content was distributional class; the lab just needed flexibility beyond a single Student-t nu.
+      Picture (C) corroborated under the kernel-family-lift programme.
+
+      '
+  R-B2:
+    criterion: 'effective_chi2 in (228.44, 2284.44]
+
+      '
+    interpretation: 'Richer families help but do not fully calibrate. Missing content is partly distributional, partly not. Triggers a thread amendment by thread-coordinator (NOT an automatic next-node
+      fire) to define the next investigation - candidates include state-dependent mixtures, hybrid distributional / non-distributional models, or pivot to the Q2B non-distributional axis.
+
+      '
+  R-C2:
+    criterion: 'effective_chi2 > 2284.44
+
+      '
+    interpretation: 'Even the most flexible family (KDE) cannot close the marginal pathology. The pathology is non-distributional. Picture (C) and the kernel-family-lift programme need to be re-scoped to
+      allow for non-distributional content (state-space dimension, exogenous variables, iteration-induced bias). Routes to Q2B-class investigations.
+
+      '
+falsification_criterion:
+  numeric: 'R-C2 fires (effective_chi2 > 2284.44)
+
+    '
+  reasoning: 'If even KDE - a nonparametric residual law with library-size flexibility - cannot close the marginal pathology, the residual chi^2 cannot be explained by distributional class. The Direction-II
+    kernel-family-lift framing of Q1 / Q2A fails as a strategy for marginal calibration. Threshold 2284.44 is the gate-validated R-C2 cut (10x R-A2_cut binds; cross-family 99th-pct ceiling is 208.45 which
+    does not bind).
+
+    '
+corroboration_criterion:
+  numeric: 'R-A2 fires (effective_chi2 <= 228.44)
+
+    '
+  reasoning: 'If a richer family closes the gap below the gate-validated same-family null ceiling, distributional class IS the dominant missing content. Q1''s Student-t shortfall was insufficient flexibility
+    (one nu), not a non-distributional cause. Threshold 228.44 is the gate-validated 95th-pct same-family null ceiling under the variant-max conservative rule (binding cell: V3_rho10 KDE kurt = 12).
+
+    '
+ambiguous_region:
+  range: 'effective_chi2 in (228.44, 2284.44]
+
+    '
+  action: 'Report and characterize. R-B2 triggers a thread amendment via thread-coordinator rather than an automatic next-node fire (the thread''s Q2A skeleton outcome categories were planned at the rule-of-thumb
+    30 / 500 level; the next-node design after R-B2 requires substantive thread-level decision-making about whether to pursue state-dependent distributional models, hybrid distributional / non-distributional
+    models, or pivot to the Q2B-class non-distributional axis). Verdict informative but not terminal.
+
+    '
+baselines:
+  primary: 'Q1 M1 (Student-t kernel only) chi^2 = 1371.6 pooled (1069.1 weekday, 1817.2 saturday, 1631.1 sunday per Q1 result.yaml). This is the "what we beat" reference; Q2A''s improvement is measured
+    against it. Q1 M0 (Gaussian baseline) chi^2 ~ 22329 is the "where we started" reference.
+
+    '
+  secondary: 'Per-family pre-experiment sanity check on synthetic data drawn from each candidate family''s own true generator (mixture-2 / mixture-3 / KDE generators with known true params from the Q2A
+    synthetic gate). Each family''s same-family chi^2 should land inside the gate''s per-cell 95th-pct null band when its own true generator is used. Re-uses the gate''s _solve_mix2_s2 / _solve_mix3_s3
+    helpers.
+
+    '
+stopping_criterion:
+  rule: 'Run: M3 / M4 / M5 fits on pre-cutoff library; SMC propagation per family (M = 200 particles per state, all post-cutoff days, all hours); marginal PIT chi^2 per family; effective_chi2 = min across
+    families; evaluate R-A2 / R-B2 / R-C2 against pre-registered cuts; STOP. No iteration, no parameter tuning. KDE bandwidth pinned at Silverman (the fitter''s default).
+
+    '
+  reasoning: 'Pre-registration complete; verdict determined by data once the experiment runs. The gate already calibrated the cuts; running and reporting is the only remaining step.
+
+    '
+ci_method:
+  type: paired_day_bootstrap
+  details: '1000 paired-day bootstraps of post-cutoff days. Per resample, recompute chi^2 per family and effective_chi2 = min across families. Report 95% CI on each headline number (per-family chi^2 and
+    effective_chi2).
+
+    '
+  width: 95 percent percentile interval
+affects_registered_spec: false
+thread:
+  thread_topic: distributional-class-thread
+  thread_body_sha256: 042f997c3e46ad04bda5761eddf6800b76835132531bc24c7dcef92ccee8adc8
+  node_id: Q2A
+  parent_branch: R-D
+  threshold_derivations: "The thread's Q2A skeleton lists outcome categories at the rule-of-thumb level inherited from Q1's root pre-registration (R-A2: chi^2 < 30, R-B2: chi^2 in (30, 500], R-C2: chi^2\
+    \ > 500). Those numbers were placeholders scaled from the 10-bin uniform chi^2 95% critical value (16.92). They are NOT the cuts used here.\n\nQ2A's actual numeric cuts are derived from the Q2A synthetic\
+    \ gate at experiment/results/q2a_synthetic_gate.txt (METHOD/DESIGN grade, body_sha256 2bab514e1049a89643ab69f45568400969c78c37939c3b188166e1a89c775c42, git_sha 5e9cebebf5e4c3dadfe58a6d3e227183af4fcf2d).\
+    \ The gate ran a three-variant weight sweep (V1_fixed, V2_alpha0.5, V3_rho10) at K = 500 reps per (variant, family, kurt) on a 4-point kurtosis sweep (12, 20, 28, 40), through the production fitters\
+    \ (mixture_2_gaussian_mle_fit, mixture_3_gaussian_mle_fit, kde_residual_fit).\n\nR-A2 cut = max over (variant, family, kurt) of the 95th-pct same-family chi^2 null distribution\n         = 228.44 (binding\
+    \ cell: V3_rho10, kde, kurt = 12).\nR-C2 cut = max(10 * R-A2_cut, max cross-family 99th-pct chi^2)\n         = max(2284.44, 208.45)\n         = 2284.44 (10x R-A2 binds; cross-family ceiling does not\
+    \ bind because variants V1 and V3 had weak family discriminability, with cross/same ratios 0.84-1.11; see gate WARNINGS).\nR-B2 band = (228.44, 2284.44].\n\nStructural outcome shape (corroboration /\
+    \ ambiguous / falsification) is PRESERVED from the skeleton; only the numeric bounds are tightened to gate-validated values. This is a specialization, not a contradiction.\n\nNote: the binding R-A2\
+    \ cell is V3_rho10 KDE kurt = 12, which is in the discriminability-warning region of the gate (cross/same ratio 0.84 < 1.20 means families are barely discriminable in that variant - KDE on rho = 10\
+    \ spike-and-bulk data has wider chi^2 tails than the other variants). Using the variant-max conservative rule rather than a single-variant cut means Q2A is robust to which variant the residuals actually\
+    \ resemble; the trade-off is a higher cut. The R-B2 band consequently absorbs Q1's Student-t chi^2 = 1371 (it sits cleanly inside (228.44, 2284.44]), which matches the proponent's substantive forecast.\n"
+related_memory:
+- mitacs-q1-student-t-vs-gaussian
+- mitacs-multiscale-direct-h-step-v2
+- mitacs-pit-calendar-fingerprint-p1
+- mitacs-rebaseline-facts
+- mitacs-rank1-structural
+related_seed:
+- notes/seeds/multiscale_factor_coherence.md
+- writeup/tex/missing_content_memo.tex
+git_sha: c6677e41cec46c651e9a037903e95cc6615f32c1
+git_clean: true
+body_sha256: c0a22c9e6cc708d3089a891a1eb7900e20e05e8816c673cad7bc77165bf138fe

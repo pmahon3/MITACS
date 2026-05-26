@@ -1,0 +1,71 @@
+schema: proponent
+written_at: '2026-05-26T22:05:00-04:00'
+references:
+- file: phase_a.yaml
+  body_sha256: c0a22c9e6cc708d3089a891a1eb7900e20e05e8816c673cad7bc77165bf138fe
+forecast:
+  value:
+    outcome: R-B2
+    marginal_PIT_chi2_M3: 850
+    marginal_PIT_chi2_M4: 700
+    marginal_PIT_chi2_M5: 550
+    effective_chi2: 550
+    preferred_family: kde_residual_law
+  units: dimensionless (chi^2 for 10-bin uniform)
+  reasoning: 'Three lines of evidence converge on R-B2 with effective_chi2 around 550 (KDE binding):
+
+
+    (a) Q1 settled chi^2_M1 = 1371 under Student-t kernel only. Q1''s substantive arbiter verdict was R-C (S8c notes that the marginal pathology has a partly non-distributional component); the mechanical
+    R-D was a kernel-degeneracy artifact, not a substantive corroboration of distributional class. The substantive Q1 reading is that Student-t halved the gap relative to Gaussian''s 22329 (a 16x reduction)
+    but landed nowhere near calibration. Richer parametric mixtures (M3, M4) have 3-5 free shape parameters per day-type vs Student-t''s 1 (nu); they will reduce chi^2 further but the leading-order signal
+    in the Ontario residual is the kappa_1 INNOVATION heavy tail (per S8d), which Student-t already captures most of. I forecast M3 chi^2 around 850 and M4 around 700: a 1.5-2x improvement over Q1''s M1,
+    with the marginal returns of M4 over M3 modest because the bulk of the residual structure beyond Student-t is on the second and third moments around the bulk, not in extreme tails.
+
+
+    (b) KDE is the most flexible family in the candidate set (nonparametric, library-size ~5000 samples). It will absorb whatever distributional shape the residuals have, INCLUDING multimodality or skewness
+    that mixtures of symmetric centred Gaussians cannot capture. I forecast KDE chi^2 around 550 - the lowest of the three, hence preferred_family = kde. However it still does NOT cross the gate-validated
+    R-A2 bar (228.44). The reason: the marginal PIT integrates over all 24 hours x ~500 days x 3 day-types, pooling across systematic non-distributional drivers: (i) the year-since-cutoff drift documented
+    in mitacs-clim-gap-nonstationary (post-cutoff actual-mu gap ~+1000 MW hour-flat, growing through 2025-2026); (ii) the iterated-mean bias at large h (the same conceptual driver Q2B was designed to investigate);
+    (iii) day-anchor seam artifacts in particle propagation. These are non-distributional contributors to the marginal pathology, and no purely distributional fit (including KDE) can fully absorb them.
+
+
+    (c) S5 and S8c framing: PIT-calendar-fingerprint settled that year_since_cutoff (secular drift) is the strongest legitimate calendar signal in PIT residuals AFTER excluding the tautology. This is a
+    non-distributional driver that survives kernel-family lifts by construction. The Q2A experiment cannot fix it; the verdict number must be bounded above 0 by whatever fraction of the marginal chi^2 the
+    secular drift contributes. I forecast that fraction is large enough to keep effective_chi2 in the high hundreds, well above the gate''s 228 bar.
+
+
+    Overall: R-B2 fires; effective_chi2 around 550; KDE preferred; thread amendment needed for a next node that combines distributional richness with non-distributional content (state-dependent mixtures
+    or hybrid calendar-distributional models).
+
+    '
+forecast_ci:
+  width: 0.95
+  low:
+    marginal_PIT_chi2_M3: 500
+    marginal_PIT_chi2_M4: 400
+    marginal_PIT_chi2_M5: 280
+    effective_chi2: 280
+  high:
+    marginal_PIT_chi2_M3: 1300
+    marginal_PIT_chi2_M4: 1100
+    marginal_PIT_chi2_M5: 900
+    effective_chi2: 900
+  reasoning: 'Wide CIs reflect three sources of uncertainty: (i) SMC particle noise at M = 200 (per-state std on chi^2 contribution roughly 5-10%); (ii) the paired-day-bootstrap sampling distribution of
+    marginal chi^2 across ~500 post-cutoff days (Q1''s CI on M1 chi^2 spanned roughly 1100-1700); (iii) substantive uncertainty about how much of the residual pathology is distributional vs non-distributional.
+    The CI upper bound for effective_chi2 (900) stays inside R-B2; the lower bound (280) is just above the R-A2 boundary, so R-A2 is within forecast risk but not the central call. The CI on M3 (upper 1300)
+    approaches Q1''s M1 baseline (1371), reflecting that mixture-2-Gaussian may not materially outperform Student-t (both are 1-shape-parameter-class families in different parameterizations).
+
+    '
+what_would_change_my_mind:
+- If R-A2 fires (effective_chi2 <= 228.44), the non-distributional contributors (secular drift, iterated-mean bias, seam artifacts) are empirically subdominant in the marginal PIT - KDE absorbs more than
+  I expected. The S5 / mitacs-clim-gap-nonstationary signal would be revealed as small in absolute chi^2 terms even if it's real, and the Q2B-class investigation could be deprioritized.
+- If R-C2 fires (effective_chi2 > 2284.44), even KDE cannot help - the distributional-class programme as a whole is empirically wrong for marginal calibration. This would force a major thread reset and
+  a pivot to non-distributional investigations.
+- If KDE is NOT the preferred family (e.g., mixture_3 outperforms KDE), the assumption that nonparametric flexibility wins over richer parametric was wrong, and the residual structure may be smoother than
+  I think (well-captured by 5 parameters; KDE bandwidth = Silverman is over-smoothing).
+- If all three families produce nearly identical chi^2 within bootstrap CI overlap, the distributional class beyond Student-t is irrelevant and the residual gap is purely non-distributional - this would
+  also support routing to Q2B-class investigations, but on stronger grounds than (b)/(c) above.
+confidence: 0.5
+git_sha: c6677e41cec46c651e9a037903e95cc6615f32c1
+git_clean: true
+body_sha256: 2fe5db3786395b55bb5728f2de2fd5400a9adb70d9da2248bdf2684c88074b33
