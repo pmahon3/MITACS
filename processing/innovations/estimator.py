@@ -269,6 +269,38 @@ def _local_fit_at(
     return C, Sigma, mu, theta, resid
 
 
+def global_ols_fit(
+    X: np.ndarray, Y: np.ndarray
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Global (theta=0) OLS fit on a pre-built library ``(X, Y)``.
+
+    Production-grade analogue of :func:`_local_fit_at` for the global
+    case. Used by callers that need the global linear drift directly
+    (the estimator-as-run reduces to this at the registered d=2 z-lag
+    embedding: see memory ``mitacs-theta-rail-pinning`` RESOLVED).
+    Without this function, callers reimplement the same `np.linalg.lstsq`
+    + plain covariance inline and trigger /audit code-path REIMPLEMENTED.
+
+    ``Y`` may be any same-row-count shift of ``X`` -- the canonical
+    one-step ``Y = X.iloc[1:]`` for the standard drift, or an h-step
+    ``Y = X.iloc[h:]`` (call site supplies the shape) for the direct
+    h-step factor used by the multiscale-factor-coherence programme
+    (notes/seeds/multiscale_factor_coherence.md). The estimator does
+    not assume a particular relationship; it fits ``Y = X @ C + e``
+    on whatever pairs the caller provides.
+
+    Returns ``(C, Sigma, mu, resid)`` in the same shape conventions
+    :func:`_local_fit_at` uses (drift, plain mu-centred residual
+    covariance, residual mean, raw residuals).
+    """
+    C = np.linalg.lstsq(X, Y, rcond=None)[0]
+    resid = Y - X @ C
+    mu = resid.mean(axis=0)
+    rc = resid - mu[None, :]
+    Sigma = rc.T @ rc / max(len(rc) - 1, 1)
+    return C, Sigma, mu, resid
+
+
 def innovation_diagnostics(
     *,
     embedding: Embedding,

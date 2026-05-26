@@ -1,0 +1,133 @@
+# Arbiter verdict — written LAST. The only file that may declare
+# SETTLED status on a finding.
+#
+# Required by .claude/agents/arbiter.md. Adapted from Mellers/Kahneman
+# adversarial-collaboration role split: a neutral third agent grades
+# the proponent and devil's-advocate predictions against the result.
+
+schema: arbiter
+written_at: <ISO 8601>
+git_sha: <REQUIRED>
+git_clean: <REQUIRED>
+body_sha256: <REQUIRED — auto-filled>
+references:
+  - file: phase_a.yaml
+    body_sha256: <REQUIRED>
+  - file: phase_b.yaml
+    body_sha256: <REQUIRED>
+  - file: proponent.yaml
+    body_sha256: <REQUIRED>
+  - file: devils_advocate.yaml
+    body_sha256: <REQUIRED>
+  - file: result.yaml
+    body_sha256: <REQUIRED>
+  - file: multiverse.yaml  # optional; required if /audit multiverse ran
+    body_sha256: <hash, or null>
+
+# ------------------------------------------------------------------
+# Pre-arbitration checks
+# ------------------------------------------------------------------
+
+preconditions:
+  code_path_passed: <REQUIRED — bool; reads result.yaml.code_path_audit.verdict>
+  # If false: arbiter MUST refuse. Do not arbitrate findings from
+  # scripts that reimplement production logic.
+
+  hash_chain_intact: <REQUIRED — bool; recomputed by registry.py>
+  # If false: arbiter MUST refuse. Tampered files invalidate the
+  # entire claim.
+
+  result_from_clean_tree: <REQUIRED — bool; reads result.yaml.git_clean>
+  # If false: arbiter MUST refuse. A recorded SHA must reproduce the
+  # artifact (freeze.py-equivalent policy at the claim level).
+
+# ------------------------------------------------------------------
+# Numerical record
+# ------------------------------------------------------------------
+
+numerical_record:
+  result:
+    value: <copy from result.yaml.primary_result.value>
+    ci_low: <copy>
+    ci_high: <copy>
+
+  falsification_bar:
+    value: <copy from phase_a.yaml.falsification_criterion.numeric>
+    cleared: <REQUIRED — bool>
+
+  corroboration_bar:
+    value: <copy from phase_a.yaml.corroboration_criterion.numeric>
+    cleared: <REQUIRED — bool>
+
+  ambiguous_region:
+    range: <copy from phase_a.yaml.ambiguous_region.range>
+    result_inside: <REQUIRED — bool>
+
+  proponent_forecast:
+    value: <copy from proponent.yaml.forecast.value>
+    distance_from_result: <REQUIRED — in units of SE>
+
+  devils_advocate_forecast:
+    value: <copy from devils_advocate.yaml.counter_prediction.value>
+    distance_from_result: <REQUIRED — in units of SE>
+
+# ------------------------------------------------------------------
+# Verdict
+# ------------------------------------------------------------------
+
+verdict: <REQUIRED — PROPONENT-CONFIRMED |
+                    DEVILS-ADVOCATE-CONFIRMED |
+                    AMBIGUOUS |
+                    MIXED>
+
+# Decision rules (from .claude/agents/arbiter.md):
+# PROPONENT-CONFIRMED:       result clears corroboration AND closer to proponent
+# DEVILS-ADVOCATE-CONFIRMED: result clears falsification AND closer to DA
+# AMBIGUOUS:                 result inside ambiguous region
+# MIXED:                     clears one bar, but point forecast leans the other way
+
+verdict_reasoning: <REQUIRED — one paragraph; which criterion fires,
+                               which point forecast wins>
+
+# ------------------------------------------------------------------
+# Finding status
+# ------------------------------------------------------------------
+
+finding_status: <REQUIRED — SETTLED | PROVISIONAL>
+# SETTLED: may be cited as fact. PROVISIONAL: re-audit needed.
+
+if_provisional_what_to_reaudit:
+  - <e.g. /audit multiverse — effect may be cosmetic>
+  - <e.g. /audit pre-experiment — CI method was not actually used>
+
+# ------------------------------------------------------------------
+# Follow-up
+# ------------------------------------------------------------------
+
+follow_up:
+  required: <REQUIRED — bool>
+  reasoning: <if required, why>
+  proposed_phase_a: <path to a new phase_a.yaml stub if follow-up
+                     experiment is needed>
+
+# ------------------------------------------------------------------
+# Calibration record (for tracking proponent + DA over time)
+# ------------------------------------------------------------------
+
+calibration_record:
+  proponent_correct: <REQUIRED — bool; was forecast within ambiguous bound?>
+  devils_advocate_correct: <REQUIRED — bool>
+  topic_difficulty: <REQUIRED — easy | medium | hard>
+  # Tracked across topics by registry.py for systematic miscalibration
+  # detection (e.g. an analyst whose forecasts are right >90% of the
+  # time is being conservative; <50% is overconfident).
+
+# ------------------------------------------------------------------
+# Memory update
+# ------------------------------------------------------------------
+
+memory_update_required: <REQUIRED — bool>
+memory_update_target: <e.g. ~/.claude/projects/.../memory/MEMORY.md
+                            and the corresponding topic memory>
+# If SETTLED, the finding may be cited; if PROVISIONAL, all
+# citations must carry the [PROVISIONAL] tag.

@@ -1,0 +1,91 @@
+# Multiverse / specification-curve audit — written when /audit
+# multiverse runs.
+#
+# Distinguishes mechanistic effects (survive across defensible
+# specifications) from cosmetic effects (live in one cell). Adapted
+# from Simonsohn et al. 2020 and Steegen et al. 2016.
+#
+# Required by .claude/agents/multiverse.md.
+
+schema: multiverse
+written_at: <ISO 8601>
+git_sha: <REQUIRED>
+git_clean: <REQUIRED>
+body_sha256: <REQUIRED — auto-filled>
+references:
+  - file: phase_a.yaml
+    body_sha256: <REQUIRED>
+  - file: phase_b.yaml
+    body_sha256: <REQUIRED>
+  - file: <relative path to result.yaml or the make_result() artifact>
+    body_sha256: <REQUIRED>
+
+# ------------------------------------------------------------------
+# Specification grid
+# ------------------------------------------------------------------
+
+specification_grid:
+  - choice_point: <name, e.g. climatology_window>
+    varied:       # values varied in this audit
+      - <e.g. 2y>
+      - <e.g. 5y>
+      - <e.g. full>
+    fixed_upstream: <bool — true if frozen by registered spec>
+    reasoning: <why this choice point is included or excluded>
+
+  - choice_point: <e.g. sigma_scaling>
+    varied: [included, omitted]
+    fixed_upstream: false
+    reasoning: <e.g. "tested in mitacs-clim-gap-nonstationary as separable">
+
+# Cell count target: >= 16 (4 dimensions x 2 levels each). If fewer
+# free choices, reduce levels per dimension first, dimensions
+# second.
+
+# ------------------------------------------------------------------
+# Effect-size distribution across the grid
+# ------------------------------------------------------------------
+
+cells:
+  - coordinates: <dict mapping choice_point -> value>
+    effect_size: <number>
+    sign: <+ | -1 | 0>
+    passes_threshold: <bool>
+    artifact: <path to per-cell pickle, e.g. scratch/data/multiverse_<topic>/cell_001.pkl>
+
+n_cells_run: <REQUIRED — integer>
+median_effect: <REQUIRED — number>
+iqr: [<low>, <high>]
+fraction_same_sign: <REQUIRED — float 0-1>
+fraction_passes_threshold: <REQUIRED — float 0-1>
+
+# ------------------------------------------------------------------
+# Verdict
+# ------------------------------------------------------------------
+
+verdict: <REQUIRED — MECHANISTIC | COSMETIC | MIXED>
+
+# Verdict rules (from .claude/agents/multiverse.md):
+# MECHANISTIC: effect survives in >= 75% of cells with same sign and
+#              >= half the original magnitude.
+# COSMETIC:    effect lives in <= 25% of cells, OR sign flips.
+# MIXED:       between these.
+
+# ------------------------------------------------------------------
+# COSMETIC / MIXED only: cell-dependent drivers
+# ------------------------------------------------------------------
+
+drivers:
+  - choice_point: <name>
+    attribution: <fraction of effect-size variance>
+    notes: <why this drives>
+
+# ------------------------------------------------------------------
+# Recommendation
+# ------------------------------------------------------------------
+
+recommendation: <REQUIRED — one of the three options below>
+# Options:
+#   "MECHANISTIC — proceed to /audit arbiter"
+#   "COSMETIC — escalate to /audit framework"
+#   "MIXED — report both regimes; characterize first"

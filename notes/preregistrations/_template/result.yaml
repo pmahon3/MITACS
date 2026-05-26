@@ -1,0 +1,67 @@
+# Result pointer — written after the experiment runs.
+#
+# Links the registry entry to the make_result() artifact (or, for
+# inspection-grade work, to the scratch pickle that holds the data).
+# This file is the input to /audit code-path and /audit arbiter.
+
+schema: result
+written_at: <ISO 8601>
+git_sha: <REQUIRED — at experiment execution time>
+git_clean: <REQUIRED>
+body_sha256: <REQUIRED — auto-filled>
+references:
+  - file: phase_a.yaml
+    body_sha256: <REQUIRED>
+  - file: phase_b.yaml
+    body_sha256: <REQUIRED>
+
+# ------------------------------------------------------------------
+# Result artifact location
+# ------------------------------------------------------------------
+
+artifact:
+  path: <REQUIRED — relative to PROJECT_ROOT, e.g. experiment/results/c1_backtest_<hash>.md>
+  grade: <REQUIRED — CLAIM | METHOD | INSPECTION>
+  emitted_by: <REQUIRED — production entry point, e.g. experiment.backtest.main --emit-result>
+  inputs_fingerprint: <hash from the make_result() header, if applicable>
+  body_sha256_artifact: <hash from the make_result() header>
+
+# ------------------------------------------------------------------
+# Code-path audit result (mandatory before arbitration)
+# ------------------------------------------------------------------
+
+code_path_audit:
+  verdict: <REQUIRED — PRODUCTION-PATH | REIMPLEMENTED | MIXED>
+  artifact: <path to /audit code-path output>
+  blocking: <true if REIMPLEMENTED or MIXED — arbiter refuses on these>
+
+# ------------------------------------------------------------------
+# Primary numeric result
+# ------------------------------------------------------------------
+
+primary_result:
+  metric: <REQUIRED — same as phase_a.metric>
+  value: <REQUIRED — numeric>
+  ci_low: <REQUIRED — numeric, from phase_a.ci_method>
+  ci_high: <REQUIRED — numeric>
+  ci_method_actually_used: <REQUIRED — must match phase_a.ci_method>
+
+# ------------------------------------------------------------------
+# Secondary analyses (if planned in phase_b)
+# ------------------------------------------------------------------
+
+secondary_results:
+  - name: <as named in phase_b.planned_secondary_analyses>
+    value: <numeric>
+    ci_low: <numeric>
+    ci_high: <numeric>
+
+# ------------------------------------------------------------------
+# Deviations from phase_b (if any actually occurred during execution)
+# ------------------------------------------------------------------
+
+execution_deviations:
+  - field: <which phase_b field>
+    change: <what actually happened>
+    reasoning: <why>
+    advisor_consulted: <bool>

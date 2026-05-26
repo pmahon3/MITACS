@@ -1,0 +1,73 @@
+# Phase B — written BEFORE touching held-out test data.
+#
+# By this point phase_a.yaml has been locked. Phase B specifies the
+# algorithm, the hyperparameter rule, the random seeds, and any
+# deviations from Phase A. A deviation without principled reasoning
+# is the failure mode this file guards against.
+#
+# Required by .claude/agents/preregister.md.
+
+schema: phase_b
+written_at: <ISO 8601>
+git_sha: <REQUIRED>
+git_clean: <REQUIRED>
+body_sha256: <REQUIRED — auto-filled>
+references:
+  - file: phase_a.yaml
+    body_sha256: <REQUIRED — hash of phase_a.yaml>
+
+# ------------------------------------------------------------------
+# Algorithm specification
+# ------------------------------------------------------------------
+
+algorithm:
+  description: <REQUIRED — short prose>
+  config_refs:
+    - <REQUIRED — e.g. config/pipeline.yaml:fit.theta_grid>
+    - <e.g. spec hash from experiment/freeze.py>
+  production_entry_point: <REQUIRED — e.g. experiment.backtest.main, experiment.predict_multistep.main>
+  # If not in the entry-point whitelist above, /audit code-path will
+  # flag this experiment.
+
+hyperparameter_selection_rule:
+  rule: <REQUIRED — e.g. "argmin LOO_CV + bootstrap-SE check on the argmin">
+  reasoning: <REQUIRED — why this rule, not argmin alone>
+  # NOTE: a bare "argmin <metric>" is the #2 retraction source.
+  # /audit pre-experiment-checklist will block on this.
+
+random_seeds: <REQUIRED — list of integers actually used>
+
+test_set_untouched: <REQUIRED — bool; auto-verify before saving>
+# Verification protocol: load the test partition via the same loader
+# as the production path, hash it, compare to a stashed hash at the
+# end of Phase A.
+
+# ------------------------------------------------------------------
+# Planned secondary analyses
+# ------------------------------------------------------------------
+
+planned_secondary_analyses:
+  - name: <e.g. by-day-type stratification>
+    rule: <how to compute, when to report>
+    purpose: <why this is secondary, not primary>
+
+# ------------------------------------------------------------------
+# Deviations
+# ------------------------------------------------------------------
+
+deviations_from_phase_a:
+  # A deviation is any change from a Phase A field. Empty list is
+  # the desired state; if non-empty, each MUST have principled
+  # reasoning. Opportunism is the failure mode.
+  - field: <which Phase A field>
+    change: <what changed>
+    reasoning: <why the change is principled, not opportunistic>
+    advisor_consulted: <bool — was advisor() called on this change?>
+
+# ------------------------------------------------------------------
+# Pre-experiment checklist linkage
+# ------------------------------------------------------------------
+
+pre_experiment_checklist:
+  status: <REQUIRED — READY | BLOCKED | CONDITIONAL>
+  artifact: <path to checklist output, if /audit pre-experiment was run>

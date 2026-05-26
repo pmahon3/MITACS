@@ -1,0 +1,94 @@
+# Phase A — written BEFORE any data is touched.
+#
+# Required by .claude/agents/preregister.md. The lab's largest
+# retraction category is in-sample / on-development reading; this
+# file is the wall between dev and test. Refuse to start the
+# experiment if any <REQUIRED> field is left as a placeholder.
+#
+# Hash primitives: experiment._prov_core (git_sha, sha256_hex).
+
+schema: phase_a
+written_at: <ISO 8601, e.g. 2026-05-26T14:00:00-04:00>
+git_sha: <REQUIRED — commit SHA at write time>
+git_clean: <REQUIRED — bool>
+body_sha256: <REQUIRED — auto-filled by experiment/audit/registry.py>
+references: []  # phase A has no prerequisites
+
+# ------------------------------------------------------------------
+# The claim itself
+# ------------------------------------------------------------------
+
+topic: <REQUIRED — short kebab-case slug, also the directory name>
+research_question: <REQUIRED — one sentence>
+
+hypothesis:
+  proponent: <REQUIRED — one sentence; what the analyst expects>
+  # The counter is also captured in devils_advocate.yaml (separate file
+  # for symmetric grading by /audit arbiter). Keep them aligned.
+  counter: <REQUIRED — one sentence; see devils_advocate.yaml>
+
+variables:
+  dependent:   <REQUIRED — list>
+  independent: <REQUIRED — list>
+  excluded:    # list of {variable, reasoning} pairs
+    - variable: <name>
+      reasoning: <why excluded>
+
+data:
+  source: <REQUIRED — e.g. cfg.paths.historical_csvs>
+  partition:
+    train: <REQUIRED — criterion>
+    dev:   <REQUIRED — criterion>
+    test:  <REQUIRED — criterion>
+  cutoff_handling: <REQUIRED — pre-cutoff only? leakage guard?>
+
+metric: <REQUIRED — e.g. MAE_mw, signed_err_HE11, SMC_coverage_pct>
+
+# ------------------------------------------------------------------
+# The numeric bars (the load-bearing fields)
+# ------------------------------------------------------------------
+
+falsification_criterion:
+  numeric:   <REQUIRED — exact numeric bar, e.g. "MAE_mw >= 720 MW">
+  reasoning: <REQUIRED — why this number is the right bar>
+
+corroboration_criterion:
+  numeric:   <REQUIRED — symmetric to falsification, e.g. "MAE_mw <= 650 MW">
+  reasoning: <REQUIRED — why>
+
+ambiguous_region:
+  range:     <REQUIRED — between falsification and corroboration, e.g. "650 < MAE_mw < 720">
+  action:    <REQUIRED — e.g. "trigger follow-up; do not claim either way">
+  # The ambiguous region MUST be non-empty. A criterion with no
+  # ambiguity has already been bent.
+
+baselines:
+  primary:   <REQUIRED — e.g. climatology + persistence>
+  secondary: <REQUIRED — prior best registered operator>
+
+stopping_criterion:
+  rule:      <REQUIRED — e.g. "stop after one experiment passes/fails the bar">
+  reasoning: <REQUIRED — what this stops>
+
+# ------------------------------------------------------------------
+# CI / variance method (locks the #2 retraction source)
+# ------------------------------------------------------------------
+
+ci_method:
+  type: <REQUIRED — bootstrap_se | block_bootstrap | asymptotic>
+  details: <REQUIRED — e.g. "1000 paired-day-bootstrap samples">
+  width: <REQUIRED — e.g. 95% CI>
+
+# ------------------------------------------------------------------
+# Linkage
+# ------------------------------------------------------------------
+
+affects_registered_spec: <REQUIRED — bool>
+# If true, experiment/freeze.py must be consulted; a new registration
+# may be required. See mitacs-honing-methodology for the dev/test wall.
+
+related_memory:
+  - <slug of relevant memory file, e.g. mitacs-clim-gap-nonstationary>
+
+related_seed:
+  - <path to seed, e.g. notes/seeds/multiscale_factor_coherence.md>

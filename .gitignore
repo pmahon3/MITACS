@@ -28,7 +28,12 @@ archive/
 
 # IDE / editor and Claude Code local state (machine-specific, not project)
 .idea/
-.claude/
+# .claude/ holds two kinds of files:
+#   - project-level agent + skill definitions (the applied-audit workflow):
+#     .claude/agents/, .claude/skills/, .claude/README.md — TRACKED.
+#   - per-machine harness state — ignored individually below.
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
 
 # Third-party competition data: IEEE DataPort Post-COVID load-forecasting
 # dataset (re-hosting governed by IEEE DataPort terms). The probe scripts
