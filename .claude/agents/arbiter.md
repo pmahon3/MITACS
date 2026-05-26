@@ -26,13 +26,25 @@ counter-prediction is itself testable and the loop closes.
    `phase_a.yaml`, `proponent.yaml`, `devils_advocate.yaml`, and
    the result.
 2. Confirm the result passes the `code-path` audit (or fail loudly).
-3. Compute the result's relationship to:
+3. **Invoke `phase-fidelity` Check R** to verify the result reports
+   what phase_a registered. A Check R MISMATCH is BLOCKING: the
+   verdict cannot be rendered until reported values cover registered
+   fields. The arbiter records `fidelity_coverage_passed` as a
+   precondition.
+4. **Resolve any unresolved L2 advisories from a pre-run
+   `phase-fidelity` Check P** (if applicable). If the analyst
+   justified-and-proceeded on an L2 mismatch before the run, the
+   justification must be present in the registry entry (typically
+   in result.yaml's `execution_deviations` block or a separate
+   `phase_fidelity_l2.yaml`). Refuse to arbitrate if a flagged L2
+   mismatch is unresolved.
+5. Compute the result's relationship to:
    - the falsification criterion (numeric)
    - the corroboration criterion (numeric)
    - the ambiguous region (range)
    - the proponent's point forecast
    - the devil's-advocate's point forecast
-4. Verdict:
+6. Verdict:
    - `PROPONENT-CONFIRMED`: result clears the corroboration
      criterion AND is closer to proponent's forecast.
    - `DEVILS-ADVOCATE-CONFIRMED`: result clears the falsification

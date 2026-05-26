@@ -1,0 +1,48 @@
+schema: proponent
+written_at: '2026-05-26T15:05:00-04:00'
+git_sha: 42d52e712bacaa6c57be0869c86bb4e17d47b137
+git_clean: true
+body_sha256: 35a1ec5afbe75ccfed5f66a5f2358ad4bebf4a7ff54ce85bcfa2a25de75f69e1
+references:
+- file: phase_a.yaml
+  body_sha256: 6bb2e6da7d7bad4c8c5ff6831c3a210b805eb73e543d355d62785e3db84f6fc5
+forecast:
+  value:
+    outcome: R-A
+    marginal_PIT_chi2_M1: 18
+    marginal_PIT_chi2_M2: 16
+    nu_weekday_M1: 4.5
+    nu_saturday_M1: 4.5
+    nu_sunday_M1: 4.5
+    D_RATIO_t_at_h12_weekday: 9
+  units: dimensionless (chi^2 for 10-bin uniform; nu in degrees of freedom; D_RATIO_t dimensionless)
+  reasoning: "Three mutually-reinforcing prior observations point at R-A:\n\n(a) mitacs-rebaseline-facts established the production-validated\n    innovation has excess kurtosis 24-33 on the coord-0 residual.\n    For Student-t with nu degrees of freedom, the excess kurtosis\n    is 6/(nu-4) for nu > 4. Setting 6/(nu-4) = 27 gives\n    nu = 4 + 6/27 = 4.22; setting it to 24 gives nu = 4.25;\n    setting it to 33 gives nu = 4.18. The excess kurtosis\n    constrains nu to roughly (3.5, 5). I forecast nu_M1 = 4.5\n    per day-type (central; not finely calibrated across day-types).\n\n(b) At nu = 4.5, the Student-t marginal PIT under known location\n    and scale will be nearly uniform by construction. The 22329\n    chi^2 of M0 is dominated by the 67% of values in extreme\n    bins; under Student-t with matched nu, those values map\n    approximately uniformly to (0, 1) via Phi -> F_nu\n    substitution. M1's marginal PIT chi^2 should fall to the\n    range of 10-30 (above unity only because\
+    \ the iteration's\n    SMC particles add modest sampling noise).\n\n(c) On the secondary D_RATIO_t: v2's 29 was computed under the\n    Gaussian-to-Gaussian KL. Under Student-t-iterated-vs-direct\n    with Wasserstein-2, the distributional component of the\n    defect partly absorbs into the kernel-family change. I\n    forecast D_RATIO_t in (5, 15) - shrunk substantially from\n    29 but staying above the corroboration bar 5 (consistent\n    with picture (C) surviving the lift in attenuated form).\n"
+forecast_ci:
+  width: 0.95
+  low:
+    marginal_PIT_chi2_M1: 8
+    marginal_PIT_chi2_M2: 8
+    nu_weekday_M1: 3.5
+    D_RATIO_t_at_h12_weekday: 5
+  high:
+    marginal_PIT_chi2_M1: 32
+    marginal_PIT_chi2_M2: 30
+    nu_weekday_M1: 6.0
+    D_RATIO_t_at_h12_weekday: 15
+  reasoning: 'Wide CI on marginal chi^2 because the SMC particle noise and
+
+    finite post-cutoff sample (~12000 PIT values) produce a
+
+    distribution of chi^2 that my point forecast cannot pin to
+
+    better than a factor of 2. The chi^2 upper bound crosses 30 into
+
+    R-B, so R-A is the central call but R-B is within the CI.
+
+    '
+what_would_change_my_mind:
+- If R-C fires (chi^2 > 500), the marginal pathology has a non-distributional cause; the lab's mitacs-rebaseline-facts kurtosis finding is empirically misaligned with the marginal forecast, requiring a separate explanation.
+- If R-D fires (MLE pathology), the candidate Student-t family is mis-specified and we need a more careful estimation procedure or a different family.
+- If R-A fires AND D_RATIO_t shrinks to <= 2, v2's signal was largely a distributional-class artifact and the seed's picture (C) is reduced (not refuted, but the magnitude is meaningfully smaller). Picture (C) would still hold qualitatively, but the 29x figure was inflated by the wrong kernel family.
+confidence: 0.55

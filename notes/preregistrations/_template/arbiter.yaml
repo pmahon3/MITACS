@@ -41,6 +41,18 @@ preconditions:
   # If false: arbiter MUST refuse. A recorded SHA must reproduce the
   # artifact (freeze.py-equivalent policy at the claim level).
 
+  fidelity_coverage_passed: <REQUIRED — bool; phase-fidelity Check R verdict>
+  # If false: arbiter MUST refuse. The result.yaml must cover the
+  # dependent variables and CI method phase_a registered. See
+  # .claude/agents/phase-fidelity.md.
+
+  fidelity_L2_resolved: <REQUIRED — bool; true if no unresolved L2
+                                       advisories from a pre-run
+                                       Check P>
+  # If false: arbiter MUST refuse. L2 methodological advisories raised
+  # before the run must be either fixed (script amended) or justified
+  # in the registry entry (execution_deviations) before verdict.
+
 # ------------------------------------------------------------------
 # Numerical record
 # ------------------------------------------------------------------

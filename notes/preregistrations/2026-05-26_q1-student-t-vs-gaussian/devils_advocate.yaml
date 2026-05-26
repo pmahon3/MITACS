@@ -1,0 +1,72 @@
+schema: devils_advocate
+written_at: '2026-05-26T15:05:00-04:00'
+git_sha: 42d52e712bacaa6c57be0869c86bb4e17d47b137
+git_clean: true
+body_sha256: 3cc3cda74d54d39e06758a9b783e7c6f1cb348c1973226a0927e7a0f90a856b2
+references:
+- file: phase_a.yaml
+  body_sha256: 6bb2e6da7d7bad4c8c5ff6831c3a210b805eb73e543d355d62785e3db84f6fc5
+strongest_argument: "The proponent's calculation (kurt ~27 -> nu ~4.5) is correct for the\n*one-step* innovation but ignores how the iteration interacts with\nthe heavy tail. The iterated forecast over 24 hours convolves 24\none-step Student-t innovations. The proponent waves at the SMC\npropagation as if it transparently produces the right marginal -\nbut at large h the iterated distribution under heavy-tailed noise\nhas the following features the M0 baseline did NOT have to handle:\n\n(i) The variance of the iterated forecast at h = 24 grows roughly\n    linearly with h (under stationary linear AR with kappa < 1 and\n    finite-variance innovations: Var = sigma^2 * (1 - kappa^{2h}) /\n    (1 - kappa^2), bounded). But heavy-tailed innovations with\n    finite-variance-but-large-kurt produce iterated distributions\n    whose extreme tails grow faster than Gaussian. The marginal\n    forecast scale at h=24 may overshoot the actual h=24\n    distribution.\n\n(ii) The Student-t MLE on the one-step\
+  \ residual implicitly assumes\n     the residuals are iid. They are not - the residuals from the\n     iterated kappa_1 fit have temporal correlation that the MLE\n     ignores. Effective sample size is smaller than n; nu estimates\n     biased.\n\n(iii) The marginal PIT integrates over all 24 hours x all 500 days.\n      It pools across a span where the iterated kernel's tail\n      behavior changes with h (heavier-relative-to-Gaussian at\n      small h, less so as iteration averages). The aggregate PIT\n      shape under M1 may be closer to a bimodal U-shape than a flat\n      line.\n\nNet: M1 reduces chi-square substantially (likely by 50-100x, from\n22329 to 200-500) but does not get below 30. This is exactly R-B.\n"
+specific_failure_modes:
+- rank: 1
+  mode: iid_assumption_in_t_MLE_breaks_due_to_iterated_residual_correlation
+  memory_ref: mitacs-rebaseline-facts
+  likelihood: 0.35
+- rank: 2
+  mode: marginal_PIT_pools_across_h_with_changing_tail_shape
+  memory_ref: mitacs-pit-calendar-fingerprint-p1
+  likelihood: 0.3
+- rank: 3
+  mode: skewed_or_regime_dependent_residual_not_captured_by_single_nu
+  memory_ref: mitacs-rebaseline-facts
+  likelihood: 0.2
+severity: serious
+counter_prediction:
+  value:
+    outcome: R-B
+    marginal_PIT_chi2_M1: 250
+    marginal_PIT_chi2_M2: 200
+    nu_weekday_M1: 4.5
+    D_RATIO_t_at_h12_weekday: 12
+  units: dimensionless
+  reasoning: 'Agreeing with proponent on the empirical nu (the kurtosis
+
+    calculation is sound), but disagreeing on what that means for
+
+    the marginal chi^2. The aggregation across h and the iid-violation
+
+    in MLE means the calibration is improved but not finished.
+
+    Q2A (richer family) will be the next experiment.
+
+    '
+what_would_change_my_mind:
+- If marginal_PIT_chi2_M1 < 30 (R-A fires), the iid-violation and the across-h aggregation concerns are empirically irrelevant in this sample, and the proponent is right that one nu per day-type suffices.
+- If R-D fires for a reason I didn't anticipate (e.g., the Student-t MLE on z is unstable at small nu), the experiment hasn't yet given a real answer; Q2D redesign needed.
+opportunity_cost:
+  alternative: 'Skip M1, go directly to M2 (full Student-t commitment) - the M2
+
+    climatology refit could absorb part of what M1 leaves on the
+
+    table. Pre-registering both M1 and M2 separately costs nothing
+
+    extra; the worry is that the proponent''s claim "M1 ~ M2" may be
+
+    wrong (M2 could be markedly better than M1 because the
+
+    Gaussian-moment climatology was misspecified). If so, the
+
+    M1/M2 comparison is itself the interesting finding.
+
+    '
+  ranking: complementary
+  notes: 'Q1 as pre-registered runs both M1 and M2; no methodology change
+
+    needed. The opportunity-cost remark is just noting that the
+
+    proponent''s prediction that M1 ~ M2 is a substantive sub-claim
+
+    that could easily be wrong even under R-A.
+
+    '

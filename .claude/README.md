@@ -20,6 +20,7 @@ from corpus review: `memory/mitacs-session-lessons-corpus.md`.
     editorial-pass.md         ← 16-rule writeup polish (ported from theory)
     literature-scout.md       ← applied-ML literature search (ported from theory)
     thread-coordinator.md     ← line-of-inquiry lifecycle owner (FRESH design)
+    phase-fidelity.md         ← cross-artifact consistency check (FRESH design)
   skills/
     audit/
       SKILL.md                ← /audit dispatcher

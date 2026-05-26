@@ -148,3 +148,11 @@ inquiry), the phase_a's `thread` block declares `thread_topic`,
 The thread-coordinator agent (separate, sole writer of `thread.yaml`)
 advances thread state after the arbiter renders. preregister is the
 READER of the thread, not its writer.
+
+After phase_a is hash-stamped and verified, **invoke `phase-fidelity`
+Check T** to formally verify the consistency rules above. The
+informal check in this agent (steps 1-5 of this section) is the
+basis; `phase-fidelity` is the audit artifact that records the
+verdict per item in a separate hash-stamped output. A Check T
+MISMATCH is BLOCKING — the phase_a must be amended or the thread
+amended (via thread-coordinator) before any other agent proceeds.

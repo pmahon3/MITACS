@@ -36,7 +36,8 @@ design are in `notes/seeds/applied_audit_workflow.md`.
 | `literature` | `literature-scout` | When a seed needs prior-art context, or a finding needs citation |
 | `thread-coordinator` | `thread-coordinator` | At thread creation, amendment, state advancement, or closure |
 | `thread` | full thread chain verification (all child experiments + thread.yaml + amendments) | When auditing a complete line of inquiry |
-| `full` | runs `code-path` → `preregister` → `pre-experiment` → `arbiter` in sequence | Use for a claim-grade result going into the writeup or `make_result()` |
+| `phase-fidelity` | `phase-fidelity` | Three cross-artifact checks: thread→phase_a after Phase A locks; phase_a→script after `code-path` returns PRODUCTION-PATH and before run; result→phase_a after run, before arbiter renders verdict |
+| `full` | runs `code-path` → `phase-fidelity (T+P)` → `pre-experiment` → (RUN) → `phase-fidelity (R)` → `arbiter` in sequence | Use for a claim-grade result going into the writeup or `make_result()` |
 
 ---
 
@@ -65,6 +66,18 @@ audit, mark SESSION-PROVISIONAL, etc.]
 
 - A `code-path` failure is BLOCKING: no finding may be cited without
   resolution.
+- A `phase-fidelity` Check T mismatch (phase_a violates thread
+  skeleton) is BLOCKING: the thread workflow's whole point is to
+  make pivots visible, so silent skeleton violations cannot be
+  allowed.
+- A `phase-fidelity` Check P mismatch at L1 (script structurally
+  missing what phase_a registered) is BLOCKING for the run.
+- A `phase-fidelity` Check P mismatch at L2 only (methodological
+  detail differs) is ADVISORY: the analyst resolves or justifies
+  before run; unresolved L2 advisories at result time become a
+  precondition for the arbiter.
+- A `phase-fidelity` Check R mismatch (result does not cover
+  registered fields) is BLOCKING for the arbiter.
 - `multiverse` "cosmetic" verdicts MUST escalate to `framework`.
 - `arbiter` is the only agent that may write "SETTLED" status on a
   finding; all others write "PROVISIONAL" or leave status unset.

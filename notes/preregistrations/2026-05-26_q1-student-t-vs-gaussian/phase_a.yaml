@@ -1,0 +1,287 @@
+schema: phase_a
+written_at: '2026-05-26T15:00:00-04:00'
+git_sha: 42d52e712bacaa6c57be0869c86bb4e17d47b137
+git_clean: true
+body_sha256: 6bb2e6da7d7bad4c8c5ff6831c3a210b805eb73e543d355d62785e3db84f6fc5
+references:
+- file: ../2026-05-26_distributional-class-thread/thread.yaml
+  body_sha256: 4bf2f5bb23beb90e26fd26195a8ecf535e1dda7472a32bea3e2d4202dbc5744f
+  relation: thread
+topic: q1-student-t-vs-gaussian
+research_question: 'Does lifting the predictive-distribution class of the iterated kappa predictor from Gaussian to Student-t calibrate the post-cutoff marginal PIT, and does v2''s cross-scale coherence defect (D_RATIO = 28.96 at (h=12, weekday)) survive the kernel-family lift?
+
+  '
+hypothesis:
+  proponent: 'R-A fires. M1 (Student-t kernel with one global nu per day-type) will reduce marginal PIT chi-square from M0''s 22329 to below 30, matching the empirical heavy-tailed innovation (excess kurtosis 24-33 per mitacs-rebaseline-facts). The fitted nu per day-type will be in the (3, 8) range, consistent with the kurtosis. M2 (full Student-t commitment with climatology refit) will not materially improve over M1 because the climatology variance was already a reasonable approximation; the kernel-family lift is the load-bearing change. Secondary: D_RATIO_t at (h=12, weekday) will shrink to between 5 and 15 (down from 29), corroborating picture (C) survives the lift but with reduced magnitude (some of the Gaussian D_RATIO was absorbing distributional misspecification).
+
+    '
+  counter: 'See devils_advocate.yaml. Most plausibly R-B: Student-t helps but
+
+    does not fully calibrate (chi-square in 30-500). Reasons:
+
+    (i) the innovation may be more complex than Student-t (skewed,
+
+    bimodal across regimes); (ii) the iterated kernel under SMC
+
+    propagation introduces particle-noise variance that interacts
+
+    with the marginal aggregation in ways the proponent has not
+
+    fully accounted for.
+
+    '
+variables:
+  dependent:
+  - marginal_PIT_chi2_M0
+  - marginal_PIT_chi2_M1
+  - marginal_PIT_chi2_M2
+  - nu_estimates_M1
+  - nu_estimates_M2
+  - D_RATIO_t_at_h12_weekday
+  independent:
+  - kernel_family
+  - day_type
+  excluded:
+  - variable: anything_already_excluded_in_v2_phase_a
+    reasoning: 'theta (rail-pinned), climatology window (frozen spec for M0/M1;
+
+      refit under M2 only via Student-t MLE), embedding dim (frozen
+
+      per registered spec).
+
+      '
+  - variable: richer_distributional_families
+    reasoning: 'Mixtures, kernel-density-estimated residual laws, and other
+
+      non-parametric families are Q2A territory if Q1 fires R-B.
+
+      Excluded from Q1 by design - the line of inquiry tests the
+
+      smallest non-trivial extension first.
+
+      '
+data:
+  source: 'Pre-cutoff Ontario demand (load_actuals, cutoff=spec.data_cutoff)
+
+    for kernel fits; post-cutoff for marginal PIT evaluation. Same
+
+    500-day population v2 and PIT-calendar-fingerprint used.
+
+    '
+  partition:
+    train: pre-cutoff library (<= 2024-12-31 23:00)
+    dev: not used (no hyperparameter tuning)
+    test: post-cutoff 2025-01-01 .. 2026-05-16
+  cutoff_handling: 'Strict pre-cutoff library for all MLE fits including M2''s
+
+    climatology refit. Post-cutoff data only at PIT evaluation step.
+
+    Standard leakage guard.
+
+    '
+metric: "PRIMARY: marginal_PIT_chi2 per model, computed on post-cutoff data.\n\nFor each post-cutoff timestamp t at horizon h from the day-anchor:\n  1. Build issue-time state x(t).\n  2. Under model M_k (k in {0, 1, 2}), compute the iterated\n     predictive distribution of z_actual(t):\n       - M0: Nrm(mu_iter, sigma_iter^2) -- as v2 and PIT-calendar\n         computed; analytic.\n       - M1: SMC propagation with M=200 particles from\n         Student-t_{nu_h}(C_1 x_prev, s_1) at each step;\n         h-step marginal is the empirical particle distribution.\n       - M2: as M1, but with z = (raw - mu_{m,h}^{(t)}) /\n         s_{m,h}^{(t)} where (mu, s, nu)_{m,h} are MLE under\n         Student-t per (month, hour-of-day) bin.\n  3. PIT:\n       - M0: u = Phi((z_actual - mu_iter) / sigma_iter)  (analytic)\n       - M1, M2: u = empirical CDF of particle distribution at\n         z_actual  (sample-based; rank with U(0, 1) jitter per\n         the existing distributional_smc convention).\n\
+  \  4. Aggregate u over all post-cutoff (day, hour-of-day) pairs.\n  5. chi^2 = sum_{bin=1..10} (observed - expected)^2 / expected\n     with expected = N/10 per bin (uniform null).\n\nSECONDARY: D_RATIO_t at (h=12, weekday) per dratio-t in \xA74.4 of the\nmemo. Computed under M1 (the kernel-family lift only; M2's\nclimatology change is orthogonal). SMC iteration of Student-t kernel\nwith M=200; directly-fit Student-t at h=12; W2 distance between the\ntwo predictive distributions at each post-cutoff weekday state x;\nexpectation over the empirical state distribution. Synthetic\nbaseline computed on a known Student-t-VAR system (matched\ndimension, finite-variance heavy tails).\n"
+models:
+  M0_gaussian_baseline:
+    description: 'The registered Gaussian predictor. (C_1, Sigma_1) per day-type
+
+      from factors_v2_final.pkl. Iterated forecast is analytic.
+
+      '
+    free_parameters: 0
+    expected_chi2: ~22329
+  M1_student_t_kernel_only:
+    description: 'Re-fit (C_1, s_1, nu_1) per day-type via Student-t MLE on the
+
+      same pre-cutoff library v2 used. IRLS for the regression
+
+      component (eq. t-irls in memo); implicit equation t-scale for
+
+      s; one-dimensional ML optimization on nu over [2.5, 300] with
+
+      Brent''s method. The climatology (mu_{m,h}, sigma_{m,h}) is
+
+      UNCHANGED from M0. SMC propagation for iteration.
+
+      '
+    free_parameters: 3 nu values (one per day-type) plus the refit (C, s) per day-type
+    notes: 'M1 tests whether the kernel family alone explains the marginal
+
+      PIT pathology. If yes (R-A or R-B), the climatology
+
+      mu_{m,h} / sigma_{m,h} estimated under Gaussian moments was a
+
+      reasonable approximation for the Student-t case.
+
+      '
+  M2_student_t_full_commitment:
+    description: 'M1''s kernel PLUS a full Student-t climatology: for each
+
+      (month, hour-of-day) bin, fit (mu_{m,h}, s_{m,h}, nu_{m,h}) by
+
+      Student-t MLE on the bin''s pre-cutoff samples. Standardise raw
+
+      demand via z = (raw - mu_{m,h}) / s_{m,h}. Re-fit (C, s, nu) on
+
+      the new z. The climatology and the kernel are now consistent
+
+      under Student-t. SMC propagation for iteration.
+
+      '
+    free_parameters: M1's parameters plus the per-(m, h) Student-t triples (12 months * 24 hours * 3 day-types = 864 bins; each bin has 3 parameters from Student-t MLE)
+    notes: 'M2 tests whether the implicit Gaussian commitment in the
+
+      climatology (sample-mean / sample-std) was masking signal that
+
+      a heavy-tailed climatology MLE could absorb. If M2 markedly
+
+      outperforms M1, the standardisation layer was contributing to
+
+      the marginal PIT pathology. If M1 ~ M2, the kernel family was
+
+      the load-bearing change.
+
+      '
+shape_outcomes:
+  R-A:
+    criterion: 'min(marginal_PIT_chi2_M1, marginal_PIT_chi2_M2) <= 30
+
+      '
+    interpretation: 'Heavy-tailed innovation absorbs the marginal pathology. The
+
+      Gaussian kernel family was the issue. Thread resolves at Q1
+
+      (per branching_rules; spawn successor for the survival-of-defect
+
+      question if the D_RATIO_t secondary stays >= 5).
+
+      '
+  R-B:
+    criterion: 'min(marginal_PIT_chi2_M1, marginal_PIT_chi2_M2) in (30, 500]
+
+      '
+    interpretation: 'Student-t helps but doesn''t fully calibrate. Either richer
+
+      distributional family needed or mechanism is partly
+
+      non-distributional. Fires Q2A (richer family).
+
+      '
+  R-C:
+    criterion: 'min(marginal_PIT_chi2_M1, marginal_PIT_chi2_M2) > 500
+
+      '
+    interpretation: 'Student-t does not absorb the marginal pathology. Missing
+
+      content not distributional class. Fires Q2B (non-distributional
+
+      cause: iterated mean bias, variance divergence, seam artefact).
+
+      '
+  R-D:
+    criterion: "MLE fit pathological under M1 OR M2 \u2014 defined as:\n  any fitted nu < 2.5 (variance infinite)\n  OR any fitted nu > 200 (effectively Gaussian, suggesting\n     ill-conditioning rather than a Gaussian-vs-Student-t\n     question)\n  OR MLE non-convergence (>=1 day-type or (m, h) bin fails\n     to converge within 100 IRLS iterations).\n"
+    interpretation: 'The Student-t fit itself is misconfigured. Redesign Q1 via Q2D.
+
+      '
+falsification_criterion:
+  numeric: R-C fires (min chi^2 > 500)
+  reasoning: 'R-C is the substantive falsification of the Direction-II framing.
+
+    If Student-t doesn''t help at all, the marginal pathology has a
+
+    non-distributional cause and the kernel-family lift is the wrong
+
+    direction for the seed.
+
+    '
+corroboration_criterion:
+  numeric: R-A fires (min chi^2 <= 30)
+  reasoning: 'R-A is the substantive corroboration: the Gaussian forecast
+
+    assumption was the dominant issue at the marginal level, and the
+
+    minimal non-Gaussian extension fixes it. Picture (C) survives at
+
+    least to the question of whether v2''s defect persists, answered
+
+    by the secondary D_RATIO_t.
+
+    '
+ambiguous_region:
+  range: R-B fires (chi^2 in 30-500)
+  action: 'Report and characterize. R-B fires Q2A (richer family) as the next thread node; the verdict is informative but not terminal.
+
+    '
+baselines:
+  primary: 'M0 = the registered Gaussian predictor with the existing
+
+    factors_v2_final.pkl. Its marginal PIT chi^2 is the null
+
+    baseline (~22329 from PIT-calendar-fingerprint).
+
+    '
+  secondary: 'Synthetic Student-t-VAR system with known generator
+
+    (L_synth, Q_synth, nu_synth = 5). M0 should fail marginal PIT
+
+    on this synthetic; M1/M2 should pass. Pre-experiment sanity
+
+    check that the M1/M2 fit procedure can produce a calibrated
+
+    forecast under known generative ground truth.
+
+    '
+stopping_criterion:
+  rule: 'Run: M0/M1/M2 fits; SMC propagation for M1/M2 (M=200 particles
+
+    per state, all post-cutoff days, all hours); marginal PIT
+
+    chi-square per model; D_RATIO_t at (h=12, weekday) under M1;
+
+    synthetic gate check. Evaluate R-A/B/C/D and arbiter; STOP.
+
+    No iteration, no parameter tuning.
+
+    '
+  reasoning: 'Pre-registration is complete; verdict is fully determined by
+
+    the data once the experiment runs.
+
+    '
+ci_method:
+  type: paired_day_bootstrap
+  details: '1000 paired-day bootstraps of post-cutoff days. Per resample,
+
+    recompute marginal PIT chi-square per model AND D_RATIO_t at
+
+    (h=12, weekday). Report 95% CI on each headline number.
+
+    '
+  width: 95 percent percentile interval
+affects_registered_spec: false
+thread:
+  thread_topic: distributional-class-thread
+  thread_body_sha256: 4bf2f5bb23beb90e26fd26195a8ecf535e1dda7472a32bea3e2d4202dbc5744f
+  node_id: Q1
+  parent_branch: null
+  threshold_derivations: 'None - Q1 is the thread root. chi-square thresholds (30 and 500)
+
+    pre-registered standalone: 30 is roughly 2x the 95% critical
+
+    value for 10-bin uniform chi-square (16.92); 500 is the
+
+    order-of-magnitude boundary between "improved" and "still
+
+    pathological". D_RATIO_t thresholds inherited from v2 (5x is
+
+    the corroboration bar).
+
+    '
+related_memory:
+- mitacs-pit-calendar-fingerprint-p1
+- mitacs-multiscale-direct-h-step-v2
+- mitacs-rebaseline-facts
+- mitacs-rank1-structural
+related_seed:
+- notes/seeds/multiscale_factor_coherence.md
+- writeup/tex/missing_content_memo.tex
