@@ -1,0 +1,173 @@
+<<<PROVENANCE
+{
+  "body_sha256": "7696370326df8b9be392513c456cf4faafc534c97f3f352af31251ec26137a06",
+  "generated_utc": "2026-05-26T19:23:32+00:00",
+  "git_clean": true,
+  "git_sha": "6c3e74785b1f4a7144bd26bc5140a4abec29c539",
+  "grade": "METHOD/DESIGN",
+  "inputs_fingerprint": "4592614a5db7adad7cd2cc4bc677a60551af31e9d6413cab51591202efbf7faa",
+  "reproducibility": {
+    "frozen_spec_hash": "f0dd9c8795fda781fa8cab80ddd9ec9fb844af284cdb3077c0d1116b13e0536d",
+    "git_sha": "6c3e74785b1f4a7144bd26bc5140a4abec29c539",
+    "inputs": {
+      "c_true": [
+        0.7,
+        0.2
+      ],
+      "d_embed": 2,
+      "discriminability_warnings": [
+        "kurt=12.0: cross/same ratio 1.09 < 1.20 \u2014 families barely discriminable",
+        "kurt=20.0: cross/same ratio 1.11 < 1.20 \u2014 families barely discriminable",
+        "kurt=28.0: cross/same ratio 1.13 < 1.20 \u2014 families barely discriminable",
+        "kurt=40.0: cross/same ratio 1.14 < 1.20 \u2014 families barely discriminable"
+      ],
+      "families": [
+        "mixture_2",
+        "mixture_3",
+        "kde"
+      ],
+      "k_reps": 500,
+      "kurt_sweep": [
+        12.0,
+        20.0,
+        28.0,
+        40.0
+      ],
+      "m_particles": 200,
+      "mix2_w2": 0.05,
+      "mix3_s2_fixed": 2.0,
+      "mix3_w": [
+        0.8,
+        0.15,
+        0.05
+      ],
+      "n_library": 5000,
+      "n_pit_bins": 10,
+      "n_runs": 18000,
+      "r_a2_cut": 66.96903594771236,
+      "r_a2_cut_arg": [
+        "kde",
+        40.0
+      ],
+      "r_b2_band": [
+        66.96903594771236,
+        669.6903594771236
+      ],
+      "r_c2_binding": "10*R-A2_cut",
+      "r_c2_cross_p99_arg": [
+        "mixture_3",
+        "kde",
+        40.0
+      ],
+      "r_c2_cross_p99_max": 78.59084967320258,
+      "r_c2_cut": 669.6903594771236,
+      "rng_seed_base": 20260526,
+      "synthetic_trajectory_len": 12240,
+      "wall_clock_s": 477.68094396591187
+    },
+    "lib_versions": {
+      "edynamics": "0.3.14",
+      "numpy": "2.2.4",
+      "pandas": "2.2.3",
+      "scipy": "1.15.2"
+    },
+    "seeds": {
+      "rng_per_cell_rule": "_cell_seed(library_kind, fit_kind, kurt, rep): (lib<<30)|(fit<<28)|((int(kurt)&0xFF)<<20)|(rep&0xFFFFF), offset by RNG_SEED_BASE, mod 2^32",
+      "rng_seed_base": 20260526
+    }
+  },
+  "schema": "mitacs.experiment.result_provenance/1",
+  "title": "Q2A synthetic gate: chi^2 cuts from sample-size-matched null (production-fitter path)"
+}
+PROVENANCE>>>
+
+Q2A synthetic gate -- chi^2 cuts from sample-size-matched null
+
+  KURT_SWEEP             = (12.0, 20.0, 28.0, 40.0)  (Pearson kurtosis; Gaussian=3)
+  K_REPS                 = 500
+  M_PARTICLES            = 200
+  N_PIT_BINS             = 10
+  FAMILIES               = ('mixture_2', 'mixture_3', 'kde')
+  N_LIBRARY              = 5000
+  SYNTHETIC_TRAJECTORY_LEN = 12240
+  RNG_SEED_BASE          = 20260526
+  D_EMBED                = 2
+  C_TRUE                 = [0.7, 0.2]
+  mix-2 generator w2     = 0.05
+  mix-3 generator w      = (0.8, 0.15, 0.05), s2 = 2.0
+
+  same-family cells      = 12 (3 families x 4 kurts)
+  cross-family cells     = 24 (6 ordered pairs x 4 kurts)
+  total runs             = 18000
+
+  wall-clock             = 477.7s (8.0min)
+
+## Same-family cells (library = fit)
+
+        family   kurt       mean         sd      50pct      95pct
+     mixture_2   12.0      10.79       5.82       9.51      21.63
+     mixture_2   20.0      11.07       6.02       9.94      21.54
+     mixture_2   28.0      10.90       5.63       9.82      21.09
+     mixture_2   40.0      11.59       6.26      10.41      22.79
+     mixture_3   12.0      12.61       6.93      11.31      25.21
+     mixture_3   20.0      11.85       6.15      10.85      23.09
+     mixture_3   28.0      11.59       5.97      10.38      23.06
+     mixture_3   40.0      11.77       5.95      10.79      22.72
+           kde   12.0      21.65      10.84      19.99      43.68
+           kde   20.0      22.70      11.74      20.38      44.32
+           kde   28.0      25.00      13.25      22.39      50.20
+           kde   40.0      30.23      19.62      25.47      66.97
+
+## Cross-family cells (library != fit)
+
+       library          fit   kurt       mean         sd      50pct      99pct
+     mixture_2    mixture_3   12.0      11.61       5.99      10.19      28.97
+     mixture_2    mixture_3   20.0      11.09       6.11      10.01      31.37
+     mixture_2    mixture_3   28.0      11.39       5.83      10.07      30.64
+     mixture_2    mixture_3   40.0      11.34       5.87      10.33      30.85
+     mixture_2          kde   12.0      20.32      10.92      18.20      55.69
+     mixture_2          kde   20.0      20.97      11.49      18.52      57.48
+     mixture_2          kde   28.0      21.73       9.91      20.00      51.30
+     mixture_2          kde   40.0      26.33      15.61      23.27      78.45
+     mixture_3    mixture_2   12.0      13.98       7.54      12.98      36.90
+     mixture_3    mixture_2   20.0      17.05       9.19      15.40      44.88
+     mixture_3    mixture_2   28.0      19.81      10.68      17.61      60.68
+     mixture_3    mixture_2   40.0      26.03      14.38      22.60      71.28
+     mixture_3          kde   12.0      20.42      10.40      18.70      49.87
+     mixture_3          kde   20.0      21.39      10.98      19.45      55.99
+     mixture_3          kde   28.0      23.64      12.37      21.16      59.28
+     mixture_3          kde   40.0      27.60      16.76      23.81      78.59
+           kde    mixture_2   12.0      15.54       7.83      13.90      39.75
+           kde    mixture_2   20.0      15.41       8.02      14.01      39.76
+           kde    mixture_2   28.0      15.41       7.43      13.68      39.07
+           kde    mixture_2   40.0      14.94       7.26      13.36      35.36
+           kde    mixture_3   12.0      16.19       8.17      15.09      41.28
+           kde    mixture_3   20.0      15.01       7.48      13.63      36.98
+           kde    mixture_3   28.0      15.70       8.02      14.11      38.68
+           kde    mixture_3   40.0      15.71       7.92      14.19      36.94
+
+## Derived cuts (pre-registered Q2A inputs)
+
+  R-A2 cut = max over (family, kurt) of 95th-pct same-family chi^2
+           = 66.97   at cell ('kde', 40.0)
+  cross-family 99pct max = 78.59  at cell ('mixture_3', 'kde', 40.0)
+  R-C2 cut = max(10 * R-A2_cut, cross-family 99pct max)
+           = max(669.69, 78.59)
+           = 669.69   (binding: 10*R-A2_cut)
+  R-B2 band = (66.97, 669.69]
+
+## Discriminability sanity (mean same-family vs mean cross-family per kurt)
+
+    kurt    mean_same   mean_cross      ratio
+    12.0        15.02        16.34       1.09
+    20.0        15.21        16.82       1.11
+    28.0        15.83        17.94       1.13
+    40.0        17.86        20.33       1.14
+
+## Discriminability WARNINGS
+
+  - kurt=12.0: cross/same ratio 1.09 < 1.20 — families barely discriminable
+  - kurt=20.0: cross/same ratio 1.11 < 1.20 — families barely discriminable
+  - kurt=28.0: cross/same ratio 1.13 < 1.20 — families barely discriminable
+  - kurt=40.0: cross/same ratio 1.14 < 1.20 — families barely discriminable
+
