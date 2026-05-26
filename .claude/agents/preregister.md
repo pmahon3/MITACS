@@ -87,8 +87,11 @@ deviations_from_phase_a:
    change my mind" rule — the analyst commits to a prediction
    *before* seeing the result. Without it, post-hoc rationalisation
    is silent.
-6. Hash-stamp both YAML files. Use `experiment.provenance._prov_core`
-   helpers for git SHA + body SHA. Save to
+6. Hash-stamp both YAML files via
+   `experiment.audit.registry.stamp(data, self_path=p)`. The
+   `self_path` argument excludes the YAML's own existence from the
+   `git_clean` check (the artifact-being-stamped is not its own
+   source change). Save to
    `notes/preregistrations/<date>_<topic>/phase_a.yaml` and `phase_b.yaml`.
 7. Update `notes/preregistrations/README.md` with the new entry.
 8. Confirm `experiment/freeze.py` is consulted if the registered
