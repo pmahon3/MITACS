@@ -1,0 +1,121 @@
+<<<PROVENANCE
+{
+  "body_sha256": "de3110cb3a512f7784d0a7a7a624619c1b35833b365cf0a8701b6b7fc52b94ba",
+  "generated_utc": "2026-05-26T21:58:25+00:00",
+  "git_clean": true,
+  "git_sha": "f83a157a031da9f8c47dff0d384289ad6ed57d18",
+  "grade": "CLAIM-GRADE",
+  "inputs_fingerprint": "187dbd976963f553a03bd7144370cb680b103b723cdc9c788b1938486bc6edcc",
+  "reproducibility": {
+    "frozen_spec_hash": "f0dd9c8795fda781fa8cab80ddd9ec9fb844af284cdb3077c0d1116b13e0536d",
+    "git_sha": "f83a157a031da9f8c47dff0d384289ad6ed57d18",
+    "inputs": {
+      "R_A2_cut": 228.44,
+      "R_C2_cut": 2284.44,
+      "anchor_h": 0,
+      "data_cutoff": "2024-12-31T23:00:00",
+      "embedding_dims": {
+        "saturday": 2,
+        "sunday": 4,
+        "weekday": 2
+      },
+      "phase_a_body_sha256": "c0a22c9e6cc708d3089a891a1eb7900e20e05e8816c673cad7bc77165bf138fe",
+      "synthetic_gate_body_sha256": "2bab514e1049a89643ab69f45568400969c78c37939c3b188166e1a89c775c42",
+      "thread_body_sha256": "042f997c3e46ad04bda5761eddf6800b76835132531bc24c7dcef92ccee8adc8"
+    },
+    "lib_versions": {
+      "edynamics": "0.3.14",
+      "numpy": "2.2.4",
+      "pandas": "2.2.3",
+      "scipy": "1.15.2"
+    },
+    "seeds": {
+      "rng_purpose_offsets": {
+        "bootstrap": "args.seed + 7919",
+        "sanity_check_base": "SEED_BASE + 1001 + _FAM_SEED_OFFSET[fam]",
+        "sanity_check_fam_offsets": {
+          "kde": 53,
+          "mixture_2": 23,
+          "mixture_3": 37
+        },
+        "smc_per_model": "args.seed + 100 + _TAG_SEED_OFFSET[tag]",
+        "smc_tag_offsets": {
+          "M3": 31,
+          "M4": 41,
+          "M5": 59
+        }
+      },
+      "seed_base": 20260526
+    }
+  },
+  "schema": "mitacs.experiment.result_provenance/1",
+  "title": "Q2A: richer-family residual law (mix-2 / mix-3 / KDE) on the marginal PIT calibration gap"
+}
+PROVENANCE>>>
+
+Q2A -- richer-family residual law on the marginal PIT
+======================================================================
+
+Pre-registration: notes/preregistrations/
+  2026-05-26_q2a-richer-family-mixture-or-nonparametric/phase_a.yaml
+  phase_a body_sha256: c0a22c9e6cc708d3089a891a1eb7900e20e05e8816c673cad7bc77165bf138fe
+Cuts from synthetic gate METHOD/DESIGN artifact:
+  experiment/results/q2a_synthetic_gate.txt
+  gate body_sha256: 2bab514e1049a89643ab69f45568400969c78c37939c3b188166e1a89c775c42
+  R-A2 (corroboration):     effective_chi2 <= 228.44
+  R-C2 (falsification):     effective_chi2  > 2284.44
+  R-B2 (ambiguous band):    (228.44, 2284.44]
+
+MARGINAL PIT CHI^2 PER FAMILY (post-cutoff, 10-bin)
+----------------------------------------------------------------------
+  chi2_M3:      953.8    bootstrap 95% CI [695.5, 1356.9]  median 979.1
+  chi2_M4:      965.8    bootstrap 95% CI [700.9, 1386.1]  median 990.7
+  chi2_M5:      966.6    bootstrap 95% CI [703.2, 1374.1]  median 994.4
+
+EFFECTIVE CHI^2 (verdict metric)
+----------------------------------------------------------------------
+  effective_chi2 = min(M3, M4, M5) = 953.8
+  preferred_family               = M3
+  effective_chi2 bootstrap 95% CI [685.2, 1356.9]  median 966.6
+
+PRE-REGISTERED VERDICT
+----------------------------------------------------------------------
+  verdict: R-B2
+  reason:  effective_chi2 = min(M3=953.8, M4=965.8, M5=966.6) = 953.8 in (R-A2_cut 228.44, R-C2_cut 2284.44]; preferred family M3; richer families help but do not fully calibrate; thread amendment required.
+
+Q1 REFERENCE BASELINES (NOT recomputed; loaded from Q1 pickle)
+----------------------------------------------------------------------
+  Q1_chi2_M0_gaussian: 22328.6
+  Q1_chi2_M1_studt_kernel: 1371.6
+  Q1_chi2_M2_studt_climatology: 1754.1
+
+PER-FAMILY FITTED PARAMETERS @ headline cell (weekday)
+----------------------------------------------------------------------
+  M3 (mix-2): w=(0.8539, 0.1461)  s=(0.0945, 0.2405)  n=141908
+  M4 (mix-3): w=(0.5523, 0.4385, 0.0092)  s=(0.0745, 0.1548, 0.5217)  n=141908
+  M5 (kde): bandwidth=0.0084  n_samples=141908  n=141908
+
+PIT HISTOGRAMS (10-bin) -- post-cutoff marginal
+----------------------------------------------------------------------
+  M3: [np.int64(1671), np.int64(1558), np.int64(1556), np.int64(1385), np.int64(1278), np.int64(1229), np.int64(1026), np.int64(890), np.int64(764), np.int64(643)]
+  M4: [np.int64(1697), np.int64(1592), np.int64(1460), np.int64(1423), np.int64(1323), np.int64(1192), np.int64(1003), np.int64(908), np.int64(744), np.int64(658)]
+  M5: [np.int64(1687), np.int64(1583), np.int64(1470), np.int64(1477), np.int64(1254), np.int64(1198), np.int64(1025), np.int64(908), np.int64(752), np.int64(646)]
+
+PRE-EXPERIMENT SAME-FAMILY SANITY CHECK
+----------------------------------------------------------------------
+  [OK] mixture_2: chi^2=16.5  (N=2000, M=50, ceiling=60, kurt=12.0)
+  [OK] mixture_3: chi^2=5.5  (N=2000, M=50, ceiling=60, kurt=12.0)
+  [OK] kde: chi^2=7.8  (N=2000, M=50, ceiling=60, kurt=12.0)
+
+CONFIG
+----------------------------------------------------------------------
+  n_particles: 200
+  n_bootstrap: 1000
+  n_pit_bins: 10
+  seed: 20260526
+  headline_daytype: weekday
+  R_A2_cut: 228.44
+  R_C2_cut: 2284.44
+  synthetic_gate_body_sha256: 2bab514e1049a89643ab69f45568400969c78c37939c3b188166e1a89c775c42
+  phase_a_body_sha256: c0a22c9e6cc708d3089a891a1eb7900e20e05e8816c673cad7bc77165bf138fe
+
