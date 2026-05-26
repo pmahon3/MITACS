@@ -166,6 +166,31 @@ amendments:
   []  # empty at thread creation
 
 # ----------------------------------------------------------------------
+# State history — append-only record of state-advancement events
+# ----------------------------------------------------------------------
+
+state_history:
+  # Each state advancement (node settled, siblings closed, current_node_id
+  # changed, thread state transition) MUST record an entry here. The
+  # prior_hash field is used by descendant artifacts' reference
+  # verification — back-references can be matched against this list
+  # if the current thread.yaml hash differs from the recorded one due
+  # to legitimate state advancement.
+  #
+  # Format:
+  #   - advancement_id: S1
+  #     written_at: <ISO>
+  #     git_sha: <SHA at advancement time>
+  #     prior_hash: <body_sha256 of thread.yaml BEFORE this advancement>
+  #     transition: <e.g. active_to_exhausted, active_to_resolved, or
+  #                  null if just a node settled without thread state change>
+  #     triggered_by_arbiter: <path to the arbiter.yaml that caused this>
+  #     branch_fired: <branch_label>
+  #     node_settled: <node_id>
+  #     siblings_closed: [<node_id>, ...]
+  []  # empty at thread creation
+
+# ----------------------------------------------------------------------
 # Resolution / exhaustion record — populated when state transitions to
 # resolved/exhausted/abandoned
 # ----------------------------------------------------------------------

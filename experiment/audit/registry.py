@@ -94,6 +94,11 @@ REQUIRED_TOP_LEVEL: dict[str, set[str]] = {
     },
 }
 
+# Optional fields per schema (not required for verify, but checked if present)
+OPTIONAL_TOP_LEVEL: dict[str, set[str]] = {
+    "thread": {"state_history", "resolution"},
+}
+
 
 # Valid thread states (lifecycle state machine).
 _THREAD_STATES = {"planning", "active", "exhausted", "resolved", "abandoned"}
@@ -205,6 +210,38 @@ def verify_file(path: Path) -> tuple[bool, list[str]]:
             actual_hash = ref_data.get(_HASH_FIELD)
         except (FileNotFoundError, ValueError) as e:
             errors.append(f"reference {ref_file} unreadable: {e}")
+            continue
+        # Threads legitimately evolve via state advancement and append-
+        # internal amendments. A reference to a thread.yaml should be
+        # treated as "this thread exists; here's the snapshot I pinned
+        # at write time" — not as a tamper-detection check on the
+        # thread's current hash. We tolerate the hash mismatch IF the
+        # reference's recorded hash matches any prior thread snapshot
+        # in the amendments chain. (The phase_a's `thread` block carries
+        # the snapshot pin separately for tamper-detection on the
+        # specific version the experiment was registered against.)
+        if ref_data.get("schema") == "thread":
+            # Accept current hash OR any prior hash in amendments / state_history
+            prior_hashes = {
+                am.get("prior_tree_hash")
+                for am in (ref_data.get("amendments") or [])
+                if isinstance(am, dict)
+            }
+            prior_hashes |= {
+                sh.get("prior_hash")
+                for sh in (ref_data.get("state_history") or [])
+                if isinstance(sh, dict)
+            }
+            prior_hashes.discard(None)
+            if ref_hash == actual_hash or ref_hash in prior_hashes:
+                continue
+            errors.append(
+                f"reference {ref_file} (thread): recorded hash "
+                f"{ref_hash!r} matches neither current "
+                f"({actual_hash!r}) nor any prior hash in amendments + "
+                f"state_history ({sorted(prior_hashes)!r}). Thread "
+                f"tampering suspected."
+            )
             continue
         if actual_hash != ref_hash:
             errors.append(

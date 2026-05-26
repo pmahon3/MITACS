@@ -104,6 +104,12 @@ Triggered by the `arbiter` agent rendering SETTLED on a phase_a that
 belongs to this thread (the arbiter's `thread_state_update` block
 declares `branch_fired` and `next_node_id`).
 
+State advancement is NOT an amendment (the tree structure is
+unchanged; the pre-registered branching_rules execute as written).
+But it does change the thread.yaml's hash, so a `state_history`
+entry MUST be recorded to preserve the prior hash for descendant
+back-references.
+
 1. Read the experiment's `arbiter.yaml`. Confirm:
    - `thread_state_update.thread_topic` matches the thread's `topic`.
    - `thread_state_update.node_id` exists in `nodes`.
@@ -112,8 +118,12 @@ declares `branch_fired` and `next_node_id`).
    - `thread_state_update.next_node_id` matches
      `branching_rules[node_id][branch_fired]`.
    Mismatch is BLOCKING — refuse to advance.
-2. Update the thread:
-   - Set the settled node's `status` to `settled`.
+2. **Record the prior_hash BEFORE making any change**. Compute the
+   thread.yaml's `body_sha256` as it currently stands; this is the
+   `prior_hash` for the upcoming state_history entry.
+3. Update the thread:
+   - Set the settled node's `status` to `settled`; record its
+     `phase_a_path`.
    - Close all sibling branches in `branching_rules[node_id]` that
      were not fired: set those child nodes' `status` to `closed`.
    - If `next_node_id` is not null, set
@@ -124,8 +134,15 @@ declares `branch_fired` and `next_node_id`).
        (rare — usually only if O-resolves-the-question was registered);
      - to `exhausted` if all reachable branches have been consumed
        and the question remains open.
-3. Re-stamp the thread.yaml.
-4. Verify.
+   - **Append a new entry to `state_history`** with: advancement_id
+     (`S<N>` where N = len(state_history)+1), written_at, git_sha,
+     prior_hash (from step 2), transition (or null), triggered_by_arbiter
+     (path), branch_fired, node_settled, siblings_closed.
+4. Re-stamp the thread.yaml.
+5. Verify via `registry verify <topic>` AND `registry verify <child_phase_a_dir>` —
+   the descendant phase_a's reference to the thread must now be
+   verifiable against either the new hash or the state_history's
+   prior_hash.
 
 ### 4. Thread closure
 

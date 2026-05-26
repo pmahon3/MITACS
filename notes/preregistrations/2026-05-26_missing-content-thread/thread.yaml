@@ -1,8 +1,8 @@
 schema: thread
 written_at: '2026-05-26T13:00:00-04:00'
-git_sha: b14434e3b2394a505e2559be3b127006da1630a0
-git_clean: true
-body_sha256: 3ea52404dd973ed590871ad7ae8a4cd45bdd1be1faab3158a48072299454cb0e
+git_sha: 217b09183fa4500a71445eed125ea974c534dd57
+git_clean: false
+body_sha256: 782474a72dfef54d56ab6c6913e02b580aad6e2dc8c9ef42764fc4df08845690
 references:
 - file: ../2026-05-26_multiscale-defect-eigenmodes/arbiter.yaml
   body_sha256: 0e8349a973db26b7f9f59ca72723708e34aca1c55ff247994d279d954a93fd54
@@ -221,3 +221,18 @@ resolution:
   final_state: null
   summary: null
   spawned_threads: []
+state_history:
+- advancement_id: S1
+  written_at: '2026-05-26T14:35:30-04:00'
+  git_sha: b14434e3b2394a505e2559be3b127006da1630a0
+  prior_hash: 805df9d6b6d3cafc51d246f4106a58a69d060c29be54bf66c0f0200a11d83119
+  transition: active_to_exhausted
+  triggered_by_arbiter: 2026-05-26_pit-calendar-fingerprint/arbiter.yaml
+  branch_fired: AMBIGUOUS
+  node_settled: P1
+  siblings_closed:
+  - P2A
+  - P2B
+  - P2C
+  - P2D
+  notes: Back-filled record. The state advancement happened live before state_history existed in the schema. The retroactive record makes the prior_hash available for back-reference verification.
