@@ -1,0 +1,223 @@
+schema: thread
+written_at: '2026-05-26T13:00:00-04:00'
+git_sha: 7bda6fad2d84d36ebdfffe94cfa9f4065a4394ed
+git_clean: true
+body_sha256: 805df9d6b6d3cafc51d246f4106a58a69d060c29be54bf66c0f0200a11d83119
+references:
+- file: ../2026-05-26_multiscale-defect-eigenmodes/arbiter.yaml
+  body_sha256: 0e8349a973db26b7f9f59ca72723708e34aca1c55ff247994d279d954a93fd54
+  relation: root
+topic: missing-content-thread
+question: 'What content is missing from the iterated kappa_1 predictor that produces the coherence defect documented in v2 SETTLED + eigenmodes SETTLED MIXED?
+
+  '
+root:
+  description: 'eigenmodes-v1 established that the defect (Sigma_h - iter_Sigma_h on Ontario weekday h=12) is diffuse across both eigendirections of C_1 (dominant_mode_share ~0.50), not concentrated in one mode. Synthetic VAR(1) cross-check ruled out projection ill-posedness. Weekday per-cell defect exceeds library-noise expectation, pointing at genuine dynamical asymmetry, not finite-sample noise. The next question is what the missing content IS - what dimensions of variation the demand-history embedding does not span that the data actually carries.
+
+    '
+  artifacts:
+  - file: ../2026-05-26_multiscale-defect-eigenmodes/arbiter.yaml
+    body_sha256: 0e8349a973db26b7f9f59ca72723708e34aca1c55ff247994d279d954a93fd54
+  scope_limits: "This thread is about CHARACTERISING the missing content statistically, not about building a candidate v2 predictor. Backtest-style \"does adding X make the predictor better?\" experiments are downstream (seed \xA76.3); they belong to a separate thread if and when this one resolves with a specific candidate identified. Joint-MLE on richer parameterizations within the existing embedding (seed \xA76.4) is OUT OF SCOPE here - those address operator-class questions, not what-is-missing questions.\n"
+current_node_id: P1
+state: planning
+nodes:
+  P1:
+    id: P1
+    name: conditional-PIT-calendar-fingerprint
+    parent_id: null
+    parent_branch: null
+    status: planned
+    phase_a_skeleton:
+      metric_class: 'Conditional PIT analysis. For each post-cutoff timestamp t,
+
+        compute the analytic PIT u(t) = Phi((z_actual(t) - mu_pred(t))
+
+        / sqrt(var_pred(t))) under the iterated kappa_1 forecast.
+
+        Stratify by (season-bin, HE-bin, day_type) per phase_a''s binning.
+
+        Per cell: mean PIT deviation from 0.5; per-candidate
+
+        explanatory_score on PIT residual after cell-conditioning.
+
+        '
+      candidate_set: 'Calendar candidates only (Phase 1 of the line of inquiry; no
+
+        data acquisition). Standard set:
+
+        cos/sin(2*pi*doy/365), cos/sin(2*pi*doy/365/2) [semi-annual],
+
+        day-of-week indicators, holiday indicator,
+
+        year-since-cutoff [secular trend],
+
+        hour-of-day-deviation-from-daytype-mean.
+
+        '
+      outcome_categories:
+      - O-A: seasonal cycle dominates (annual cos/sin scores highest by clear margin)
+      - O-B: weekly/work-schedule dominates (DoW or DoW*HE interactions score highest)
+      - O-C: both substantial (no single class dominates; multi-source missing content)
+      - O-D: no calendar structure (no candidate clears null baseline; the missing content is non-calendar - nonlinearity within embedding, exogenous shocks, or unknown)
+      skeleton_thresholds_depend_on:
+      - source: null
+        field: null
+        rule: 'P1 uses standalone thresholds - it does not derive from any
+
+          prior thread node since it IS the root. Its thresholds are
+
+          pre-registered in phase_a directly (null baseline percentile,
+
+          clear-margin criterion, etc.) before data.
+
+          '
+    phase_a_path: null
+    notes: 'Cheap experiment: ~3-4 hours of code work, no data acquisition.
+
+      Reuses v2''s (C_1, Sigma_1) from factors_v2_final.pkl. The
+
+      analytic PIT requires the v2 production-path predictor evaluated
+
+      against post-cutoff actuals - the existing experiment/predict
+
+      machinery handles this.
+
+      '
+  P2A:
+    id: P2A
+    name: temperature-against-fingerprint
+    parent_id: P1
+    parent_branch: O-A
+    status: planned
+    phase_a_skeleton:
+      metric_class: 'Acquire Toronto Pearson hourly temperature data via Environment
+
+        Canada. Test temperature against the P1 fingerprint: rank
+
+        correlation of temperature with PIT residual within each
+
+        (season-bin, HE-bin, day_type) cell. Compare to the best
+
+        calendar candidate''s explanatory_score from P1.
+
+        '
+      candidate_set:
+      - temperature_at_t
+      - temperature_lagged_1h
+      - temperature_lagged_24h
+      - temperature_anomaly (vs same-hour-same-month historical mean)
+      outcome_categories:
+      - O-A1: temperature dominates calendar candidates (explanatory_score > 2x the best calendar candidate from P1)
+      - O-A2: temperature comparable to calendar (within 1.5x; weather is part but not all)
+      - O-A3: temperature does not exceed calendar (the seasonal signal is calendar-mediated, not weather; e.g., holiday clustering with weather)
+      skeleton_thresholds_depend_on:
+      - source: P1
+        field: best_calendar_explanatory_score
+        rule: temperature_threshold = 2x that value for O-A1; 1.5x for O-A2
+    phase_a_path: null
+  P2B:
+    id: P2B
+    name: holiday-calendar-fine-structure
+    parent_id: P1
+    parent_branch: O-B
+    status: planned
+    phase_a_skeleton:
+      metric_class: 'Test specific calendar fine-structures against P1''s fingerprint:
+
+        federal holidays (statutory), provincial holidays (Family Day,
+
+        Civic Holiday), summer-vacation indicator, school-term
+
+        indicator, day-of-week x hour-of-day interactions beyond
+
+        day-type. No data acquisition; constructed from timestamps.
+
+        '
+      candidate_set:
+      - federal_holiday_indicator
+      - provincial_holiday_indicator
+      - summer_vacation_window (Jul-Aug indicator)
+      - school_term_indicator (Sep-Jun ex Dec-Jan break)
+      - DoW_x_HE_interaction_terms
+      outcome_categories:
+      - O-B1: holiday calendar dominates (specific holiday indicator scores highest)
+      - O-B2: schedule fine-structure dominates (DoW*HE interactions or summer-vacation window)
+      - O-B3: weekly structure is uninformative beyond what day_type captures (the O-B signal from P1 was day_type-mediated)
+    phase_a_path: null
+  P2C:
+    id: P2C
+    name: weather-plus-calendar-joint
+    parent_id: P1
+    parent_branch: O-C
+    status: planned
+    phase_a_skeleton:
+      metric_class: 'Joint test of temperature + calendar against fingerprint.
+
+        Requires temperature data acquisition (same as P2A). Test:
+
+        explanatory_score of (temperature + best_P1_calendar_candidate)
+
+        vs each alone; partial correlations to assess additivity.
+
+        '
+      candidate_set:
+      - temperature_at_t
+      - best_P1_calendar_candidate
+      - temperature x calendar interaction
+      outcome_categories:
+      - O-C1: weather x calendar interaction is the load-bearing term
+      - O-C2: temperature and calendar are additive (each independently explanatory)
+      - O-C3: one or the other dominates when both are in the model (the apparent O-C from P1 was confounded)
+    phase_a_path: null
+  P2D:
+    id: P2D
+    name: nonlinearity-vs-exogenous
+    parent_id: P1
+    parent_branch: O-D
+    status: planned
+    phase_a_skeleton:
+      metric_class: 'P1 found no calendar structure - the missing content is
+
+        non-calendar. Two remaining hypotheses: (a) nonlinearity within
+
+        the existing embedding (linear C_1 cannot capture a nonlinear
+
+        function of (z_t-1, z_t-2) that produces the defect); (b)
+
+        non-calendar exogenous content (weather without calendar
+
+        proxy, economic shocks, etc.). Test: fit a small MLP / kernel
+
+        ridge regression on the existing embedding; if the nonlinear
+
+        model substantially closes the defect, (a) is supported;
+
+        if not, switch to acquiring weather data (back to P2A territory
+
+        but routed through this branch''s amendment).
+
+        '
+      candidate_set:
+      - linear OLS (baseline, the v2 case)
+      - small MLP on (z_t-1, z_t-2)
+      - kernel ridge regression on the same embedding
+      outcome_categories:
+      - O-D1: nonlinearity within embedding closes most of the defect
+      - O-D2: nonlinearity helps marginally; weather acquisition justified
+      - O-D3: neither nonlinearity nor weather plausibly explains; embedding needs structural revision (richer state, e.g., d-augmentation or different observable)
+    phase_a_path: null
+branching_rules:
+  P1:
+    O-A: P2A
+    O-B: P2B
+    O-C: P2C
+    O-D: P2D
+    AMBIGUOUS: null
+    MIXED: null
+amendments: []
+resolution:
+  resolved_at: null
+  final_state: null
+  summary: null
+  spawned_threads: []
