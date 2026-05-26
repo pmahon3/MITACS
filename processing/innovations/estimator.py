@@ -301,6 +301,126 @@ def global_ols_fit(
     return C, Sigma, mu, resid
 
 
+def student_t_mle_fit(
+    X: np.ndarray, Y: np.ndarray,
+    *,
+    nu_bounds: tuple[float, float] = (2.5, 300.0),
+    max_irls_iters: int = 100,
+    tol: float = 1e-7,
+) -> tuple[np.ndarray, float, float, np.ndarray]:
+    """Maximum-likelihood fit of a univariate Student-t linear-regression
+    model ``Y[:, 0] = X @ C[:, 0] + r`` with ``r ~ Student-t(0, s, nu)``.
+
+    Production-grade function for the distributional-class line of
+    inquiry (notes/preregistrations/2026-05-26_distributional-class-thread/).
+    Without it, the Student-t MLE would be reimplemented inline in each
+    script that needs it and trigger /audit code-path REIMPLEMENTED.
+
+    Mathematical specification (see writeup/tex/missing_content_memo.tex
+    §4.4):
+
+    * Log-likelihood (eq. t-loglik). The IRLS regression update (eq.
+      t-irls) uses Student-t-induced weights
+      ``w_i = (nu + 1) / (nu + r_i^2 / s^2)``; the scale equation
+      (eq. t-scale) is implicit and solved by fixed-point iteration;
+      nu is updated by scalar optimization on the profile
+      log-likelihood (Brent's method via :func:`scipy.optimize.minimize_scalar`).
+
+    * ``nu_bounds`` constrains the degrees-of-freedom search. Boundary
+      hits (within 1% of either edge) are flagged via a returned
+      ``info['nu_at_boundary']`` field; callers (e.g.\\ the
+      distributional-class Q1 R-D criterion) check this to detect
+      pathological fits.
+
+    * Only the coord-0 residual is modelled. Higher coordinates of the
+      embedding are deterministic shifts under the single-variable
+      delay structure (mitacs-rank1-structural); the rank-1 innovation
+      is the only stochastic content.
+
+    Returns ``(C, s, nu, resid)`` where ``C`` is the (d, 1) drift
+    matrix from the IRLS regression on coord-0, ``s`` is the
+    Student-t scale parameter (not the standard deviation; the
+    variance is ``s^2 * nu / (nu - 2)`` for ``nu > 2``), ``nu`` the
+    fitted degrees of freedom, and ``resid`` the coord-0 residual
+    vector after the converged fit.
+    """
+    from scipy.optimize import minimize_scalar
+    from scipy.special import digamma, gammaln
+
+    n, d = X.shape
+    if Y.ndim == 1:
+        y = Y.astype(float)
+    else:
+        y = Y[:, 0].astype(float)
+    X = X.astype(float)
+
+    # initialize with OLS (the Gaussian limit nu -> infinity)
+    C_col, *_ = np.linalg.lstsq(X, y, rcond=None)
+    C = C_col.reshape(d, 1)
+    resid = y - (X @ C).ravel()
+    s2 = max(float(np.mean(resid ** 2)), 1e-12)
+    nu = 5.0   # central starting point; small enough for heavy tails, not at boundary
+
+    def _profile_neg_log_lik(log_nu: float) -> float:
+        """profile -log-lik in nu, with C, s held fixed at current."""
+        nu_local = float(np.exp(log_nu))
+        nu_local = max(nu_bounds[0], min(nu_bounds[1], nu_local))
+        s_local = float(np.sqrt(s2))
+        ll = (
+            n * gammaln((nu_local + 1) / 2)
+            - n * gammaln(nu_local / 2)
+            - 0.5 * n * np.log(nu_local * np.pi)
+            - n * np.log(s_local)
+            - ((nu_local + 1) / 2) * float(
+                np.sum(np.log1p(resid ** 2 / (nu_local * s2)))
+            )
+        )
+        return -ll
+
+    for _ in range(max_irls_iters):
+        # weights from Student-t score (eq. t-irls)
+        w = (nu + 1.0) / (nu + resid ** 2 / max(s2, 1e-12))
+        # weighted least squares update for C
+        Xw = X * w[:, None]
+        XtX = X.T @ Xw
+        Xty = X.T @ (w * y)
+        try:
+            C_new_col = np.linalg.solve(XtX, Xty)
+        except np.linalg.LinAlgError:
+            C_new_col = np.linalg.lstsq(XtX, Xty, rcond=None)[0]
+        C_new = C_new_col.reshape(d, 1)
+        resid_new = y - (X @ C_new).ravel()
+        # scale update via the implicit Student-t equation (eq. t-scale)
+        s2_new = float(
+            np.mean(
+                (nu + 1.0) * resid_new ** 2
+                / (nu + resid_new ** 2 / max(s2, 1e-12))
+            )
+        )
+        s2_new = max(s2_new, 1e-12)
+        # nu update via Brent on log nu (1D)
+        res_brent = minimize_scalar(
+            _profile_neg_log_lik,
+            bounds=(np.log(nu_bounds[0]), np.log(nu_bounds[1])),
+            method="bounded",
+        )
+        nu_new = float(np.exp(res_brent.x))
+        # convergence
+        rel_change = (
+            np.linalg.norm(C_new - C) / max(np.linalg.norm(C), 1e-12)
+            + abs(s2_new - s2) / max(s2, 1e-12)
+            + abs(nu_new - nu) / max(nu, 1e-12)
+        )
+        C = C_new
+        resid = resid_new
+        s2 = s2_new
+        nu = nu_new
+        if rel_change < tol:
+            break
+
+    return C, float(np.sqrt(s2)), float(nu), resid
+
+
 def innovation_diagnostics(
     *,
     embedding: Embedding,

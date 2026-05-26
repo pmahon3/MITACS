@@ -65,6 +65,7 @@ PRODUCTION_SYMBOLS: set[str] = {
     "processing.innovations.estimator._theta_loo_cv",
     "processing.innovations.estimator._local_fit_at",
     "processing.innovations.estimator.global_ols_fit",
+    "processing.innovations.estimator.student_t_mle_fit",
     # processing.innovations.validation
     "processing.innovations.validation.synthetic",
     "processing.innovations.validation.rebaseline",
