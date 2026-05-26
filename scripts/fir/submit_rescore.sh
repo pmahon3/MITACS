@@ -9,13 +9,19 @@
 # a 2-year climatology refit. Output: scratch/data/rescore_W2y/.
 #
 # Prereqs on Fir:
-#   - python 3.10 venv at $REPO/.venv with:
+#   - python 3.10 venv at $SCRATCH/mitacs_venv (separate from $HOME
+#     so DRA's small home quota isn't hit by torch/ray wheels):
 #       module load python/3.10
-#       python -m venv .venv && source .venv/bin/activate
+#       python -m venv $SCRATCH/mitacs_venv
+#       source $SCRATCH/mitacs_venv/bin/activate
 #       python -m pip install --upgrade pip wheel
-#       python -m pip install edynamics==0.4.0
-#         # pulls runtime deps (numpy, pandas, scipy, tqdm, ray, torch)
-#         # transitively from the wheel's metadata; no sibling clone needed.
+#       python -m pip install --no-index pandas scipy matplotlib \
+#           seaborn pyyaml bs4 numpy tqdm ray torch python-dateutil pytz
+#       python -m pip install --no-deps edynamics==0.4.0
+#     (--no-index pulls from the DRA wheelhouse; --no-deps on edynamics
+#     because its deps are already wheelhouse-satisfied and the
+#     transitive PyPI lookups otherwise drag in rpds-py / maturin which
+#     needs Rust, not available in the wheelhouse.)
 #   - The data cache:  data/ontario/*.pkl    (or scraped to the same
 #     locations).  load_actuals reads from there.
 #
@@ -34,19 +40,28 @@ set -euo pipefail
 cd "${SLURM_SUBMIT_DIR:-$(pwd)}"
 mkdir -p logs scratch/data/rescore_W2y
 
-# Activate the project venv. The local .venv layout (python3.10
-# site-packages) is the assumed structure; see CLAUDE.md.
-if [ -f .venv/bin/activate ]; then
-    # shellcheck disable=SC1091
-    source .venv/bin/activate
-else
-    echo "ERROR: .venv not found.  See header comment for setup." >&2
+# Activate the venv.  Look in $SCRATCH/mitacs_venv first (the DRA-
+# friendly location, used by the standard setup in the header
+# comment).  Fall back to a local .venv/ in the repo for laptop /
+# personal-cluster setups.
+VENV_PATH=""
+if [ -n "${SCRATCH:-}" ] && [ -f "$SCRATCH/mitacs_venv/bin/activate" ]; then
+    VENV_PATH="$SCRATCH/mitacs_venv"
+elif [ -f .venv/bin/activate ]; then
+    VENV_PATH=".venv"
+fi
+if [ -z "$VENV_PATH" ]; then
+    echo "ERROR: no venv found at \$SCRATCH/mitacs_venv or ./.venv" >&2
+    echo "       See header comment for setup instructions." >&2
     exit 1
 fi
+echo "[$(date)] activating venv: $VENV_PATH"
+# shellcheck disable=SC1091
+source "$VENV_PATH/bin/activate"
 
 # Sanity check the edynamics install
 python -c "from edynamics.modelling_tools import Embedding, Lag" \
-    || { echo "ERROR: edynamics import failed.  Try: pip install edynamics==0.4.0" >&2 ; exit 2; }
+    || { echo "ERROR: edynamics import failed.  Try: pip install --no-deps edynamics==0.4.0" >&2 ; exit 2; }
 
 echo "[$(date)] starting rescore_W2y on $(hostname)"
 python -m scripts.fir.rescore_climatology \
