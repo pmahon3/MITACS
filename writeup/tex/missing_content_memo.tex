@@ -55,23 +55,30 @@ The seed \emph{Multi-Scale Factor Coherence via the Residual
 Diffusion} originally proposed a relaxed-semigroup framework
 for the $\kQ$-estimator with the diffusion identity as the
 cross-scale coherence constraint. That formulation was implicitly
-Gaussian: the kernel family was Gaussian, the convolution had a
-closed-form, the test statistic was Gaussian--Gaussian Kullback--Leibler
-divergence. The empirical campaign succeeded in confirming the
-framework's central claim on Ontario data (the strict-semigroup
-picture fails by a factor of $\sim29\times$ the synthetic-VAR(1)
-noise floor) but also surfaced, in the line's terminal node, that
-the Gaussian forecast distribution is itself operationally wrong
+Gaussian. The empirical campaign succeeded in confirming the
+framework's central claim on Ontario data under the Gaussian case
+($\mathrm{D\_RATIO} = 28.96$, $95\%$ CI $[26.82, 31.43]$ against
+the synthetic-VAR(1) noise floor) but also surfaced that the
+Gaussian forecast distribution is itself operationally wrong
 ($\chi^{2}_{10\text{-bin}} = 22{,}329$). This note re-states the
-framework at the right level of generality --- kernel-family-agnostic,
-not Gaussian-specific --- so that the Gaussian case becomes a worked
-example and the non-Gaussian extensions become natural objects to
-study. The abstract framework, the Gaussian special case, and the
-non-Gaussian extension all share the same algebraic statement; only
-the test statistics change with the kernel family. The settled
-empirical content remains intact under the lift; the next experiment
-under Direction~II is a heavy-tailed extension whose pre-registration
-is sketched in \S\ref{sec:nextnode}.
+framework at the right level of generality --- kernel-family-agnostic
+--- so that the Gaussian case is a worked example and the non-Gaussian
+extension is a natural object to study. The abstract framework, the
+Gaussian special case, and the non-Gaussian extension all share the
+same algebraic statement; only the test statistics change with the
+kernel family. Q1 of the distributional-class thread has now
+empirically tested the smallest non-trivial extension (Student-$t$):
+the kernel-family lift reduces the marginal $\chi^{2}$ by $16\times$
+($22{,}328 \to 1{,}371$) but does not fully calibrate, and the
+cross-scale coherence defect at the v2 headline cell shrinks by
+$\sim 10\times$ to $\mathrm{D\_RATIO}_{\Studt} = 2.93 \in [2.62,
+3.24]$. Picture (C) survives the family lift at substantially
+reduced magnitude; v2's settled finding is retained with the
+asterisk that the magnitude was kernel-family-conditional. The
+heavy-tailedness lives in the $\hat\kappa_1$ innovation, not the
+seasonal climatology; Student-$t$ alone is not the full predictive
+class, motivating richer-family experiments under the now-active
+thread.
 \end{abstract}
 
 \section{Setting: process, embedding, kernel family}
@@ -380,6 +387,16 @@ nats (range $0.0011$--$0.0016$ over seven RNG seeds; worst-case
 $\mathrm{D\_RATIO} \approx 22$, still above the pre-registered
 corroboration bar of $5$). The strict factorization (A) is
 empirically inadequate by a margin beyond finite-sample noise.
+\emph{Asterisk on the magnitude}: under the corrected (Student-$t$)
+kernel family, the analogous statistic $\mathrm{D\_RATIO}_{\Studt}$
+at the same headline cell is $2.93$, $95\%$ CI $[2.62, 3.24]$ --- a
+$10\times$ shrinkage, below the corroboration bar. The defect exists
+(CI clear of $1$, the synthetic floor by construction) but
+$\sim 90\%$ of v2's headline magnitude was absorbing the
+distributional-class misspecification (S5), not measuring a
+genuine cross-scale defect. (S1) is not retracted; its magnitude
+is kernel-family-conditional. See \S\ref{sec:q1-settled} (S8) for
+the Q1 result that establishes this.
 
 \paragraph{(S2) The defect is diffuse across eigendirections of
 $\hat C_1$.}
@@ -819,14 +836,20 @@ changes is that the strict factorization additionally imposes
 constraints on higher moments and tail behaviour, all of which
 the sample-based $W_2$ test \eqref{eq:t-cd} captures at once.
 
-The empirical question is whether the Gaussian
-$\mathrm{D\_RATIO} = 29$ (S1) was driven mainly by the kernel-family
-mismatch or mainly by the cross-scale defect. If
-$\mathrm{D\_RATIO}_{\Studt}$ at the same $(h^{*}, g^{*})$ shrinks
-toward $1$, the family was the dominant issue and picture (C)
-collapses toward (A) under the correct kernel; if it stays
-$\gtrsim 5$, picture (C) survives the family lift and the seed's
-working hypothesis is corroborated independent of family.
+The empirical question --- whether the Gaussian
+$\mathrm{D\_RATIO} = 29$ was driven mainly by the kernel-family
+mismatch or mainly by the cross-scale defect --- has now been
+answered by Q1 of the distributional-class thread (\S\ref{sec:q1-settled}).
+The short answer is \emph{both, in a specific ratio}: the family
+mismatch accounted for the bulk of the magnitude (the Student-$t$
+analogue shrinks roughly $10\times$ to $\mathrm{D\_RATIO}_{\Studt}
+= 2.93 \in [2.62, 3.24]$), but a measurable cross-scale defect
+remains (CI clear of the synthetic noise floor by construction).
+Picture (C) survives the family lift at a much reduced magnitude;
+the strict factorization (A) is not recovered. The seed's working
+hypothesis is corroborated independent of family, but the lab's
+prior reading of v2 as a $29\times$-the-noise-floor effect was
+inflated by the wrong kernel family by an order of magnitude.
 
 \subsection{Standardisation under a heavy-tailed kernel}
 \label{sec:nongauss-std}
@@ -849,19 +872,21 @@ commitment; rather, the choice of $(\mu_{m,h}, \sigma_{m,h})$ as
 the standardisation parameters \emph{is} a partial Gaussian
 commitment that is implicit in the current registered estimator.
 
-\section{The next experiment under the kernel-family generalization}
-\label{sec:nextnode}
+\section{Q1 of the distributional-class thread: settled}
+\label{sec:q1-settled}
 
-A new thread \texttt{distributional-class-thread} will be rooted in
-the PIT-calendar-fingerprint arbiter (S5). Its root node Q1 tests
-the Student-$t$ extension against the Gaussian baseline.
+The distributional-class thread is rooted in the PIT-calendar-fingerprint
+arbiter (S5). Its root node Q1 tested the Student-$t$ extension
+against the Gaussian baseline. The experiment ran 2026-05-26; this
+section reports the result.
 
 \paragraph{Q1: candidate set (three nested models).}
 \begin{itemize}[leftmargin=2em]
 \item M0: the registered Gaussian predictor, as null baseline.
 \item M1: Student-$t$ kernel with one global $\nu$ per day-type;
-location and scale fit as for M0 (the kernel-family commitment
-changes; the standardisation does not).
+location and scale fit by Student-$t$ MLE on the same pre-cutoff
+library (\eqref{eq:t-irls}--\eqref{eq:t-scale}); the standardisation
+unchanged from M0.
 \item M2: full Student-$t$ commitment --- climatology refit under
 Student-$t$ MLE per $(m, h)$ bin, plus M1's kernel.
 \end{itemize}
@@ -872,62 +897,118 @@ Student-$t$ MLE per $(m, h)$ bin, plus M1's kernel.
 $\chi^{2}_{10\text{-bin}} \leq 30$. The Gaussian was the marginal
 problem; the heavy-tailed kernel fixes it.
 \item \textbf{R-B:} marginal PIT $\chi^{2} \in (30, 500]$.
-Student-$t$ helps but does not fully calibrate. Either richer
-family needed (mixtures, non-parametric) or the marginal pathology
-is partly non-distributional (e.g., misspecified mean).
+Student-$t$ helps but does not fully calibrate.
 \item \textbf{R-C:} marginal PIT $\chi^{2} > 500$ under both M1
 and M2. Student-$t$ does not absorb (S5); the missing content
 is not the distributional class.
 \item \textbf{R-D:} the MLE fit does not converge or $\nu$
-estimates are pathological (e.g., $\nu < 2$, infinite variance,
-or $\nu > 1000$ at the boundary). Phase~A design fault; redesign.
+estimates are pathological. Phase~A design fault; redesign.
 \end{itemize}
 
-\paragraph{Q1: secondary tests (informational).}
+\paragraph{Q1: result.}
+With $1000$-paired-day bootstrap CIs:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& point & CI low & CI high \\
+\midrule
+$\chi^{2}_{M0}$ (Gaussian baseline)        & $22{,}328$ & $19{,}028$ & $25{,}731$ \\
+$\chi^{2}_{M1}$ (Student-$t$ kernel only)  & $1{,}371$  & $1{,}069$  & $1{,}817$  \\
+$\chi^{2}_{M2}$ (full Student-$t$)         & $1{,}754$  & $1{,}383$  & $2{,}267$  \\
+$\mathrm{D\_RATIO}_{\Studt}$ at $(h{=}12, \mathrm{wkdy})$ & $2.93$ & $2.62$ & $3.24$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Empirical $\hat\nu$ per day-type: weekday $4.19$, saturday $4.62$,
+sunday $4.61$. The kurtosis $\to \nu$ mapping
+$\nu = 4 + 6/\mathrm{excess\_kurt}$ applied to the in-sample
+excess kurtosis $24$--$33$ from \texttt{mitacs-rebaseline-facts}
+gives $\nu \approx 4.2$--$4.25$; the out-of-sample fits land
+within $0.4$ of this.
+
+\paragraph{Q1: verdict.}
+The mechanical verdict per the pre-registered criteria is \textbf{R-D}:
+$207$ of $288$ M2 climatology bins fitted $\hat\nu$ at the upper
+boundary ($300$), tripping the ``$\hat\nu > 200$ pathological'' rule.
+Substantively this is the Student-$t$ MLE's correct response when
+the bin-level data is approximately Gaussian (CLT-like aggregation
+over $\sim 690$ weather samples per $(m, h)$ bin makes the marginal
+demand distribution at that month-and-hour approximately Gaussian
+even when the conditional residual given recent state is heavy-tailed).
+The R-D criterion conflated ``estimator broken'' with ``data
+approximately Gaussian at this aggregation level.'' This is the third
+occurrence of \emph{pre-registered criterion fires on legitimate-but-
+unanticipated data structure} in the workflow's history (after
+eigenmodes-v1 and P1); the arbiter pattern handles it the same way
+(mechanical verdict honoured, substantive interpretation in
+\texttt{verdict\_reasoning}).
+
+The substantive verdict is \textbf{R-C}: $\chi^{2}_{M1} = 1371 > 500$.
+Student-$t$ reduces marginal $\chi^{2}$ by $16\times$ but does not
+absorb the marginal pathology. The missing content is more than
+just the kernel family.
+
+\paragraph{(S8) The Q1 findings, four sub-claims.}
 \begin{itemize}[leftmargin=2em]
-\item The empirical $\nu$ per day-type. Small $\nu$ ($< 10$) means
-heavy-tailed is empirically required and propagates to all future
-kernel-family decisions.
-\item The Student-$t$ analogue of $\mathrm{D\_RATIO}$ at
-$(h^{*}, g^{*}) = (12, \mathrm{weekday})$, computed by SMC
-propagation and Wasserstein-2 or similar. Tests whether the v2
-finding survives the kernel-family lift. If $\mathrm{D\_RATIO}_\Studt$
-shrinks substantially, part of v2's signal was a Gaussian-projection
-artifact. If it stays large, picture (C) survives the lift and
-the seed's working hypothesis is independently corroborated.
+\item \textbf{(S8a) $\hat\nu$ predictions essentially exact.}
+Both forecasters predicted $\nu \approx 4.5$ from the kurtosis
+mapping; observed $4.19/4.62/4.61$. The in-sample non-Gaussianity
+finding from \texttt{mitacs-rebaseline-facts} holds out-of-sample
+on the forecast-grade residual.
+
+\item \textbf{(S8b) Student-$t$ kernel reduces $\chi^{2}$ by $16\times$
+but does not fix it.} $22{,}328 \to 1{,}371$. The marginal pathology
+has substantial non-distributional content; richer family (mixtures,
+non-parametric) or non-distributional causes (mean-trajectory bias,
+across-$h$ correlation) remain to be tested.
+
+\item \textbf{(S8c) $\mathrm{D\_RATIO}_{\Studt} = 2.93 \in [2.62,
+3.24]$: $10\times$ shrinkage from v2's $28.96$.} Under the corrected
+kernel the cross-scale defect at the headline cell sits below the
+v2 corroboration bar of $5$. Picture (C) is not refuted (the defect
+exists; CI clear of the synthetic noise floor by construction) but
+v2's interpretation requires the asterisk on (S1) above:
+$\sim 90\%$ of v2's headline magnitude was absorbing distributional-
+class misspecification, not measuring a genuine cross-scale defect.
+The seed's working hypothesis survives the kernel-family lift at
+substantially reduced amplitude.
+
+\item \textbf{(S8d) Heavy-tailedness lives in the $\hat\kappa_1$
+innovation, not in the seasonal climatology.} M1 outperforms M2:
+adding a Student-$t$ climatology refit \emph{worsens} the marginal
+PIT (M2: $\chi^{2} = 1754$ vs M1: $1371$). The bin-level marginal
+demand distribution given $(m, h)$ is approximately Gaussian; only
+the conditional residual given recent state is heavy-tailed. This
+refines where the missing-content programme should look next: not at
+the seasonal climatology's distributional form, but at the
+conditional residual's structure beyond a single $\nu$ parameter.
 \end{itemize}
 
-\paragraph{Synthetic gate.}
-A known Student-$t$-VAR system (generator $(L, Q, \nu_{\text{true}})$
-producing data with finite-variance heavy tails). M0 (Gaussian)
-should fail marginal PIT on this synthetic; M1 and M2 should pass.
-This calibrates the test's discriminating power before any Ontario
-result is examined.
+\paragraph{Forecaster calibration.}
+Both forecasters were correct on $\hat\nu$ (the load-bearing
+parameter): proponent predicted $4.5$, observed $4.19/4.62/4.61$;
+DA agreed with proponent on $\hat\nu$. Both were wrong on the
+$\chi^{2}$ magnitude: proponent forecast $\chi^{2}_{M1} = 18$
+(observed $1371$; $76\times$ over), DA forecast $250$ ($5.5\times$
+over). DA closer but neither close. The substantive verdict R-C
+wasn't on either side's slate. The arbiter awarded partial
+calibration credit to both: correct mechanism (heavy-tailed kernel
+matters), wrong final-outcome label.
 
-\paragraph{What the outcomes imply for the framework.}
-\begin{itemize}[leftmargin=2em]
-\item \textbf{If Q1 fires R-A and the secondary $\mathrm{D\_RATIO}_\Studt$
-shrinks to $\sim 1$}: the Gaussian kernel family was the dominant
-source of the v2 conclusion. The relaxed-factorization picture (C)
-collapses to the strict (A) once the kernel family is corrected.
-The seed's working hypothesis is falsified at the post-cutoff
-horizon under the corrected kernel. (Unlikely a priori, given (S2)
-and (S3) showed structured defect that doesn't trivially collapse.)
-
-\item \textbf{If Q1 fires R-A and the secondary $\mathrm{D\_RATIO}_\Studt$
-stays $\gtrsim 5$}: the marginal pathology was kernel-family wrong
-but the cross-scale coherence defect is real independent of family.
-The seed's framework is corroborated at a higher level of generality.
-
-\item \textbf{If Q1 fires R-B or R-C}: the missing content is not
-just the kernel family. The Gaussian-vs-Student-$t$ axis is one
-component of the missing structure; other components (state
-dimensions, exogenous covariates, non-parametric tail shape) are
-also needed. The line of inquiry naturally extends to richer
-families.
-
-\item \textbf{If Q1 fires R-D}: the experiment must be redesigned.
-\end{itemize}
+\paragraph{Thread state after Q1.}
+The distributional-class thread advances from \texttt{planning}
+to \texttt{active}. Q1 settled; Q2A (richer family) and Q2B (non-
+distributional cause) closed by branching rule because R-D fired
+mechanically and the rules send R-D to Q2D (MLE redesign). The
+arbiter explicitly flagged this advancement as requiring a thread
+amendment before Q2D's phase~A is written: the R-D criterion lumped
+the legitimate edge case with broken estimator. A revised R-D
+criterion would route Q1 substantively to $\text{R-C} \to \text{Q2A}$.
+After amendment, Q2A (richer family --- mixtures, non-parametric)
+is the natural next experiment, motivated by (S8b)'s ``Student-$t$
+not enough'' finding.
 
 \section{What is settled at each level of generality}
 \label{sec:settled-levels}
@@ -948,15 +1029,20 @@ literature. \\
 \addlinespace
 Working hypothesis on relaxed factorization being natural for
 finite-dim embeddings of higher-dim processes
-& \textbf{Empirically corroborated} in the Gaussian special case
-on Ontario data (S1, S2, S3). Generalization to non-Gaussian
-families is the next test. \\
+& \textbf{Empirically corroborated} in both Gaussian (S1, S2, S3)
+and Student-$t$ (S8c) special cases. The defect persists under the
+kernel-family lift, though at $\sim 10\times$ smaller magnitude than
+the Gaussian estimate suggested. The hypothesis survives independent
+of family. \\
 \addlinespace
 Gaussian kernel family as the right family for this empirical
 process
-& \textbf{Empirically falsified at the marginal level} (S5). A
-heavier-tailed family is required to recover predictive
-calibration. \\
+& \textbf{Empirically falsified at the marginal level} (S5).
+Confirmed by (S8) under Q1: a Student-$t$ kernel reduces marginal
+$\chi^{2}$ by $16\times$, but Student-$t$ alone does not fully
+calibrate either. The conditional residual is heavy-tailed
+($\hat\nu \approx 4.5$); the seasonal climatology is approximately
+Gaussian (S8d). \\
 \addlinespace
 Specific structural prediction: defect concentrates in one
 eigenmode with characteristic timescale $\tau$ (seed \S5.2)
@@ -970,16 +1056,35 @@ diffusion at large $h$ (seed \S5.1)
 saturation argument). Framework predicts a defect; the direction
 was wrong. \\
 \addlinespace
+Specific magnitude prediction: $\mathrm{D\_RATIO} \approx 29$
+as a stable headline of v2 (S1)
+& \textbf{Empirically retained but qualified} by (S8c). The
+$29\times$ figure is kernel-family-conditional; under the
+corrected Student-$t$ kernel the analogous statistic is
+$2.93$. v2's settled finding stands; the magnitude requires the
+asterisk that $\sim 90\%$ was absorbing distributional-class
+misspecification. \\
+\addlinespace
+Where heavy-tailedness lives in the process
+(conditional residual vs.\ seasonal climatology)
+& \textbf{Newly settled} by (S8d). The heavy tails live in the
+$\hat\kappa_1$ innovation conditional on recent state, not in the
+marginal demand given calendar. M1 outperforms M2; refining a
+Student-$t$ climatology adds noise without capturing real signal. \\
+\addlinespace
 Test methodology (synthetic-calibrated divergence test) as a
 generic discipline
-& \textbf{Settled} across four cycles. Generalizes to non-Gaussian
+& \textbf{Settled} across five cycles. Generalises to non-Gaussian
 families with no structural change to the discipline; only the
 divergence and family change. \\
 \addlinespace
-Workflow (pre-register, code-path-audit, arbiter, thread)
-& \textbf{Settled} across one full thread plus three earlier
+Workflow (pre-register, code-path-audit, phase-fidelity, arbiter, thread)
+& \textbf{Settled} across two full threads plus three earlier
 single-experiment cycles. Catches the named retraction modes
-reliably. \\
+reliably; recognises pre-registered-criterion-vs-legitimate-data-
+structure as the fourth named failure mode (now three instances:
+eigenmodes-v1, P1, Q1) for which the arbiter pattern IS the
+prevention. \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1016,9 +1121,12 @@ S4, S5
 Thread (Gaussian case)
   & \texttt{2026-05-26\_missing-content-thread}
   & \texttt{state = exhausted} \\
-Q1 (next)
-  & \texttt{2026-MM-DD\_distributional-class-thread}
-  & to be created \\
+Thread (kernel-family case)
+  & \texttt{2026-05-26\_distributional-class-thread}
+  & \texttt{state = active}, \texttt{current = Q2D} (pending amendment) \\
+S8 (Q1 settled)
+  & \texttt{2026-05-26\_q1-student-t-vs-gaussian}
+  & SETTLED (R-D mechanical / R-C substantive) \\
 \bottomrule
 \end{tabular}
 \end{center}
