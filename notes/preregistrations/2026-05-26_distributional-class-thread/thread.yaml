@@ -1,8 +1,8 @@
 schema: thread
 written_at: '2026-05-26T10:30:00-04:00'
-git_sha: 84aa3d04602e4e340556c4f7a4ab1a5ff6fbd509
+git_sha: 920fcbc4ccb1a9744b979fcf321f15a4fcf7a383
 git_clean: true
-body_sha256: 4bf2f5bb23beb90e26fd26195a8ecf535e1dda7472a32bea3e2d4202dbc5744f
+body_sha256: bea8f70cd904f98a8af5ca9d0be39fd807b30e524b2d89b8e00dd3045080ddcb
 references:
 - file: ../2026-05-26_pit-calendar-fingerprint/arbiter.yaml
   body_sha256: 376ebac7915643d6e75740ae94521e1175a37a2a6317d66cad0974311f7cf90d
@@ -21,15 +21,15 @@ root:
   scope_limits: 'This thread tests the PREDICTIVE-DISTRIBUTION CLASS axis only. It does NOT re-test missing-content (state-space dimension) questions under the corrected kernel; that is a separate follow-up thread if Q1 corroborates the kernel-family lift AND the v2 defect survives. It also does NOT propose a v3 registered predictor; that is downstream (and would require a fresh experiment.freeze registration).
 
     '
-current_node_id: Q1
-state: planning
+current_node_id: Q2D
+state: active
 nodes:
   Q1:
     id: Q1
     name: student-t-vs-gaussian-on-marginal-PIT
     parent_id: null
     parent_branch: null
-    status: planned
+    status: settled
     phase_a_skeleton:
       metric_class: "Three nested models compared on post-cutoff Ontario data:\n  M0: Gaussian (the registered predictor; null baseline)\n  M1: Student-t kernel with one global nu per day-type;\n      location and scale fit as for M0\n  M2: Student-t with full kernel-family commitment:\n      (mu_{m,h}, s_{m,h}, nu_{m,h}) fit per (month, hour-of-day)\n      bin via Student-t MLE for the climatology, plus the M1\n      kernel for the operator.\nIteration of M1/M2 kernels is via SMC particle propagation\n(M=200, matching existing distributional_smc infrastructure).\nPrimary metric: chi^2_{10-bin} of the post-cutoff marginal PIT\nunder each model.\n"
       candidate_set:
@@ -55,7 +55,7 @@ nodes:
           boundary between "improved" and "still pathological").
 
           '
-    phase_a_path: null
+    phase_a_path: 2026-05-26_q1-student-t-vs-gaussian/phase_a.yaml
     notes: "Secondary tests (informational, not part of the verdict):\n\n(a) Empirical nu estimates per day-type. nu < 10 means\n    heavy-tailed is empirically required and propagates to all\n    future kernel-family decisions.\n\n(b) The Student-t analogue of D_RATIO at the v2 headline cell\n    (h=12, weekday), computed by SMC particle propagation of\n    M1's kernel and Wasserstein-2 (or sample-based KL) between\n    iterated and directly-fit kernels. Tests whether v2's\n    D_RATIO = 28.96 finding survives the kernel-family lift.\n    If D_RATIO_t shrinks to ~1, part of v2's signal was a\n    Gaussian-projection artifact. If it stays >= 5, picture (C)\n    survives the lift and the seed's working hypothesis is\n    independently corroborated.\n\nSynthetic gate: a known Student-t-VAR system (generator\n(L, Q, nu_true) producing finite-variance heavy-tailed data).\nM0 (Gaussian) should fail marginal PIT on the synthetic; M1\nand M2 should pass. Calibrates the test's discriminating power\n\
       before any Ontario result is examined.\n"
   Q2A:
@@ -63,7 +63,7 @@ nodes:
     name: richer-family-mixture-or-nonparametric
     parent_id: Q1
     parent_branch: R-B
-    status: planned
+    status: closed
     phase_a_skeleton:
       metric_class: 'If Q1 fires R-B (Student-t helps but doesn''t fully calibrate),
 
@@ -92,7 +92,7 @@ nodes:
     name: non-distributional-marginal-pathology-investigation
     parent_id: Q1
     parent_branch: R-C
-    status: planned
+    status: closed
     phase_a_skeleton:
       metric_class: 'If Q1 fires R-C (Student-t does not absorb the marginal
 
@@ -129,7 +129,7 @@ nodes:
     name: redesign-Q1
     parent_id: Q1
     parent_branch: R-D
-    status: planned
+    status: active
     phase_a_skeleton:
       metric_class: 'If Q1 fires R-D (MLE pathological), the Student-t fit was
 
@@ -156,7 +156,29 @@ branching_rules:
     R-C: Q2B
     R-D: Q2D
 amendments: []
-state_history: []
+state_history:
+- advancement_id: S1
+  written_at: '2026-05-26T16:50:00-04:00'
+  git_sha: 920fcbcd
+  prior_hash: 4bf2f5bb23beb90e26fd26195a8ecf535e1dda7472a32bea3e2d4202dbc5744f
+  transition: planning_to_active
+  triggered_by_arbiter: 2026-05-26_q1-student-t-vs-gaussian/arbiter.yaml
+  branch_fired: R-D
+  node_settled: Q1
+  siblings_closed:
+  - Q2A
+  - Q2B
+  notes: Mechanical R-D advancement per pre-registered branching_rules. The arbiter explicitly flagged this transition as requiring a thread amendment to revise the R-D criterion (Q2D is the planned MLE redesign, but the substantive picture says criterion redesign is needed instead). See arbiter.yaml.thread_state_update.notes_for_thread_coordinator and arbiter.yaml.follow_up.
+- advancement_id: S2
+  written_at: '2026-05-26T16:51:00-04:00'
+  git_sha: pending
+  prior_hash: 739ff33509ccde94c7217608cd64181773dfb027789b03ed4252cb2e860800d1
+  transition: null
+  triggered_by_arbiter: null
+  branch_fired: null
+  node_settled: null
+  siblings_closed: []
+  notes: Path-string fix on Q1.phase_a_path (registry-root-relative form). No state change.
 resolution:
   resolved_at: null
   final_state: null
