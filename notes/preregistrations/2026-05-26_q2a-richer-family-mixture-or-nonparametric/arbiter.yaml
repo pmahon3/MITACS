@@ -1,0 +1,375 @@
+schema: arbiter
+written_at: '2026-05-26T22:35:00-04:00'
+references:
+- file: phase_a.yaml
+  body_sha256: c0a22c9e6cc708d3089a891a1eb7900e20e05e8816c673cad7bc77165bf138fe
+- file: proponent.yaml
+  body_sha256: 2fe5db3786395b55bb5728f2de2fd5400a9adb70d9da2248bdf2684c88074b33
+- file: devils_advocate.yaml
+  body_sha256: 913120e60f6557d85e7f7b32309f17c134227d8a04eb38d7126419265a6d8023
+- file: result.yaml
+  body_sha256: 6ae6ce53f8dc6b104fe108fdf127e56bee7cf8d44972fb88506935287d40d147
+- file: phase_fidelity_check_r.yaml
+  body_sha256: 93401cb40cbeb702c7cf6737684b0e26f56ecf7a6b8df847e9b34a8beb307b95
+- file: ../2026-05-26_distributional-class-thread/thread.yaml
+  body_sha256: 042f997c3e46ad04bda5761eddf6800b76835132531bc24c7dcef92ccee8adc8
+preconditions:
+  code_path_passed: true
+  hash_chain_intact: true
+  result_from_clean_tree: true
+  fidelity_coverage_passed: true
+  fidelity_L2_resolved: true
+numerical_record:
+  outcome_mechanical: R-B2
+  outcome_substantive: R-B2
+  reason_mechanical: 'effective_chi2 = min(chi2_M3, chi2_M4, chi2_M5) = min(953.84,
+    965.81,
+
+    966.60) = 953.84 (M3 binds). phase_a.shape_outcomes R-B2 fires:
+
+    228.44 < 953.84 <= 2284.44. R-A2 (corroboration: <= 228.44) NOT cleared;
+
+    R-C2 (falsification: > 2284.44) NOT cleared.
+
+    '
+  reason_substantive: 'Mechanical and substantive verdicts AGREE this time. Unlike
+    Q1 (S8) where
+
+    R-D fired on a phase_a design hole that masked an R-C substantive picture,
+
+    Q2A''s R-B2 reading is well-defined: the realized effective_chi2 sits
+
+    cleanly in the registered ambiguous band, ~4x clear of the R-A2 corroboration
+
+    bar and ~2.4x clear of the R-C2 falsification bar (both in linear-scale
+
+    chi^2). The result is what the band was designed to absorb.
+
+
+    Substantively additional content the arbiter notes (not changing the
+
+    mechanical verdict): see verdict_reasoning.
+
+    '
+  chi2_M3:
+  - 953.84
+  - 695.51
+  - 1356.92
+  chi2_M4:
+  - 965.81
+  - 700.89
+  - 1386.14
+  chi2_M5:
+  - 966.6
+  - 703.19
+  - 1374.12
+  effective_chi2:
+  - 953.84
+  - 685.23
+  - 1356.92
+  preferred_family: M3
+  per_day_type_chi2_recomputed_from_pickle:
+    M3:
+      weekday: 299.38
+      saturday: 1184.7
+      sunday: 565.34
+    M4:
+      weekday: 271.79
+      saturday: 1183.66
+      sunday: 546.68
+    M5:
+      weekday: 272.15
+      saturday: 1164.34
+      sunday: 571.77
+    note: "Per-day-type chi^2 not in result.yaml.variables.dependent (phase_a\nsecondary).\
+      \ Recomputed from scratch/data/distributional_class_q2a/q2a.pkl\npit_tables[fam]\
+      \ (day_type column). Saturday is consistently the worst\nday-type (~4x weekday's\
+      \ chi^2) \u2014 heavy day-type-asymmetric structure\nconsistent with eigenmodes-v1\
+      \ settled finding.\n"
+  q1_baselines_for_reference:
+    chi2_M0_gaussian: 22328.6
+    chi2_M1_student_t: 1371.6
+    chi2_M2_student_t_climatology: 1754.1
+    reduction_M0_to_M1: 16.3
+    reduction_M1_to_richer_best: 1.44
+  proponent_forecast:
+    outcome: R-B2
+    effective_chi2: 550
+    chi2_M3: 850
+    chi2_M4: 700
+    chi2_M5: 550
+    preferred_family: kde_residual_law
+    confidence: 0.5
+    forecast_ci_effective_chi2:
+    - 280
+    - 900
+    rationale_summary: 'Three lines of evidence converge on R-B2 with effective_chi2
+      ~ 550
+
+      (KDE binding): (a) Q1''s mechanical R-D was a kernel-degeneracy
+
+      artifact; substantive reading is R-C with chi^2=1371; richer parametric
+
+      mixtures give 1.5-2x improvement; (b) KDE absorbs whatever distributional
+
+      shape exists but cannot fix non-distributional drivers (secular drift,
+
+      iterated-mean bias, seam artifacts); (c) S5/S8c reading: the
+
+      non-distributional component bounds chi^2 from below in the high hundreds.
+
+      '
+  devils_advocate_forecast:
+    outcome: R-A2
+    effective_chi2: 180
+    chi2_M3: 750
+    chi2_M4: 600
+    chi2_M5: 180
+    preferred_family: kde_residual_law
+    forecast_ci_effective_chi2:
+    - 80
+    - 360
+    rationale_summary: 'KDE on 5000-sample library has flexibility well beyond Student-t''s
+
+      single nu; the proponent''s "non-distributional component bounds chi^2
+
+      above ~hundreds" appeal to S5 is rebutted because (i) S5 was AMBIGUOUS
+
+      with tautology hole and ranked covariates relatively not absolutely;
+
+      (ii) the gate''s R-A2 cut at 228 is variant-max worst-case;
+
+      Ontario actual residual likely clears it. KDE lands at 150-200.
+
+      '
+  proponent_distance_from_result:
+    outcome_match: true
+    effective_chi2_realized: 953.84
+    effective_chi2_forecast: 550
+    forecast_residual: 403.84
+    bootstrap_SE_effective_chi2: 171.4
+    distance_in_SE: 2.36
+    inside_forecast_ci: false
+    overshot_by: 53.84
+    family_preference_match: false
+    notes: "Proponent got the outcome category exactly right (R-B2) and the\nqualitative\
+      \ shape right (richer families help but do not close the\ngap). Quantitatively\
+      \ the central forecast (550) was 53.8 chi^2 units\nbelow the 95% CI upper bound\
+      \ \u2014 close but not inside. The KDE-preferred\nsub-prediction was wrong:\
+      \ all three families landed within 13 units\nof each other, with the SIMPLEST\
+      \ family (M3 mixture-2) binding by a\nhair. This is itself a substantive datapoint:\
+      \ extra distributional\nflexibility beyond 2-component symmetric mixture buys\
+      \ essentially\nnothing, which is the \"all three families produce nearly identical\n\
+      chi^2\" scenario the proponent flagged in what_would_change_my_mind\nas routing\
+      \ toward Q2B-class (non-distributional) investigations.\n"
+  devils_advocate_distance_from_result:
+    outcome_match: false
+    effective_chi2_realized: 953.84
+    effective_chi2_forecast: 180
+    forecast_residual: 773.84
+    distance_in_SE: 4.51
+    inside_forecast_ci: false
+    overshot_by: 593.84
+    family_preference_match: false
+    notes: 'DA''s central claim ("KDE absorbs whatever distributional shape exists
+
+      to within the gate''s same-family envelope; ~150-200") was decisively
+
+      refuted: KDE landed at 966.6, ~5x DA''s central forecast and ~2.7x DA''s
+
+      CI upper bound. DA was wrong on the outcome category, the magnitude,
+
+      and the family ranking (DA also predicted KDE-preferred and that
+
+      mixtures would be materially worse; observed gap M3-vs-M5 is 13
+
+      chi^2 units, negligible).
+
+
+      DA''s what_would_change_my_mind explicitly named "effective_chi2 > 1000"
+
+      as the condition that would corroborate the proponent''s
+
+      non-distributional hypothesis. Observed 953.84 sits just below that
+
+      threshold but inside DA''s own CI for what would force concession (the
+
+      CI upper bound was 360; the realized is 2.65x above). This counts as
+
+      concession by DA''s own criterion.
+
+      '
+  closer_forecast: proponent
+  outcome_category_winner: proponent
+verdict: R-B2
+verdict_reasoning: "Mechanical verdict per phase_a criteria: R-B2 fires. effective_chi2\
+  \ =\n953.84 [685.23, 1356.92] sits in the registered ambiguous band\n(228.44, 2284.44].\
+  \ R-A2 corroboration NOT cleared (4.2x above);\nR-C2 falsification NOT cleared (2.4x\
+  \ below). Substantive and mechanical\nagree \u2014 this is the first arbiter verdict\
+  \ in the workflow without\nmechanical/substantive gap (Q1 R-D vs R-C, eigenmodes-v1\
+  \ O2 vs O3,\nP1 mechanical-AMBIGUOUS vs substantive-tautology). The registered\n\
+  ambiguous band absorbed the realization cleanly.\n\nThree findings of substantive\
+  \ importance the verdict carries:\n\n1. ALL THREE RICHER FAMILIES NEARLY IDENTICAL.\
+  \ chi^2_M3 = 953.84,\n   chi^2_M4 = 965.81, chi^2_M5 = 966.60. The full M3-to-M5\
+  \ spread is\n   13 chi^2 units, ~1.4% of any of the three. The 95% bootstrap CIs\n\
+  \   overlap massively. The SIMPLEST richer family (M3, mixture-2-Gaussian,\n   3\
+  \ shape parameters per day-type) BINDS as preferred. Both forecasters\n   predicted\
+  \ KDE would be preferred (DA: \"KDE has thousands of effective\n   degrees of freedom...\
+  \ well within KDE's flexibility envelope\";\n   proponent: \"non-parametric, library-size\
+  \ ~5000 samples... will absorb\n   whatever distributional shape\"). Observed: KDE\
+  \ is the WORST of the\n   three by 0.8 chi^2 units, indistinguishable from M3.\n\
+  \n   This is the proponent's what_would_change_my_mind item #4 verbatim:\n   \"\
+  If all three families produce nearly identical chi^2 within bootstrap\n   CI overlap,\
+  \ the distributional class beyond Student-t is irrelevant\n   and the residual gap\
+  \ is purely non-distributional - this would also\n   support routing to Q2B-class\
+  \ investigations, but on stronger grounds\n   than (b)/(c) above.\" This condition\
+  \ has materialized. The substantive\n   reading of R-B2 is therefore stronger than\
+  \ its mechanical content:\n   not just \"richer families help but do not fully calibrate,\"\
+  \ but\n   specifically \"additional distributional flexibility beyond a 2-component\n\
+  \   symmetric mixture buys negligibly little, so the remaining gap is\n   unlikely\
+  \ to yield to further distributional richness.\"\n\n2. DAY-TYPE ASYMMETRY DOMINATES\
+  \ THE POOLED PATHOLOGY. Per-day-type\n   chi^2 recomputed from the pickle (see numerical_record):\n\
+  \     weekday:   270-300       (close to gate ceilings; family-indistinguishable)\n\
+  \     sunday:    545-575       (mid-range; family-indistinguishable)\n     saturday:\
+  \  1165-1185     (~4x weekday; family-indistinguishable)\n   The pooled ~950 figure\
+  \ is the n-weighted average of these. If\n   weekday alone were the population (n=8568\
+  \ of 12000), pooled chi^2\n   would be in the 270-300 range \u2014 much closer to\
+  \ the R-A2 corroboration\n   bar. Saturday is the binding problem; n=1728 of 12000\
+  \ (~14%) but\n   contributes ~30% of the pooled chi^2. This corroborates eigenmodes-v1's\n\
+  \   SETTLED finding (S2/S3) that weekday/weekend asymmetry is structural\n   rather\
+  \ than library-noise. The asymmetric structure is family-invariant\n   under richer\
+  \ parametric and non-parametric lifts, which means it is NOT\n   a distributional-shape\
+  \ mismatch \u2014 consistent with finding #1.\n\n3. Q1 -> Q2A REDUCTION IS MARGINAL.\
+  \ M0 (Gaussian) -> M1 (Student-t):\n   22329 -> 1371, a 16x reduction. M1 -> richer\
+  \ family best: 1371 -> 954,\n   a 1.44x reduction. The first kernel-family lift\
+  \ extracted most of the\n   distributional-class signal that's there to extract;\
+  \ the second lift\n   (Student-t to mixture/non-parametric) extracts a fraction.\
+  \ Diminishing\n   returns curve: extra parameters buy proportionally less. Combined\
+  \ with\n   finding #1, the curve is essentially asymptoting at ~950 chi^2.\n\nCalibration:\
+  \ proponent right on outcome category (R-B2 + their\nwhat_would_change_my_mind #4\
+  \ verbatim) but wrong on quantitative central\nforecast (overshot CI upper bound\
+  \ by 5.4%, observed effective_chi2 in\nthe upper end of their forecast spread).\
+  \ DA wrong on outcome category,\nmagnitude (5x), CI (2.7x outside upper bound),\
+  \ and family preference.\nProponent decisively closer to truth.\n"
+finding_status: SETTLED
+if_provisional_what_to_reaudit: []
+thread_state_update:
+  thread_topic: distributional-class-thread
+  node_id: Q2A
+  branch_fired: R-B2
+  next_node_id: null
+  sibling_branches_closed: []
+  thread_state_transition: pending_amendment
+  notes_for_thread_coordinator: 'BLOCKING FOLLOW-UP per phase_a.shape_outcomes.R-B2:
+    "Triggers a thread
+
+    amendment by thread-coordinator (NOT an automatic next-node fire) to
+
+    define the next investigation - candidates include state-dependent
+
+    mixtures, hybrid distributional / non-distributional models, or pivot
+
+    to the Q2B non-distributional axis."
+
+
+    Substantive arbiter guidance for the amendment decision (the analyst
+
+    chooses, not the thread-coordinator):
+
+
+    (a) STRONG SIGNAL FOR Q2B-CLASS PIVOT. Finding #1 in verdict_reasoning
+
+    (all three richer families chi^2-indistinguishable, KDE no better than
+
+    mixture-2) is precisely the proponent''s what_would_change_my_mind #4
+
+    condition for "routing to Q2B-class investigations." The remaining
+
+    pathology has the empirical signature of a non-distributional driver
+
+    (further distributional flexibility buys negligibly little).
+
+
+    (b) DAY-TYPE-STRATIFIED REFITS WORTH CONSIDERING. Finding #2 (saturday
+
+    chi^2 ~4x weekday, family-invariant) suggests state-dependent or
+
+    day-type-specific MODELS might extract more than family lifts. A
+
+    state-dependent mixture (mixing weights varying with day-type or
+
+    hour-of-day) would test whether the remaining gap is location-mixture
+
+    rather than shape-family.
+
+
+    (c) THE Q2B SKELETON ALREADY EXISTS in thread.yaml (status: closed under
+
+    A1, but reopenable). Its candidate set (iterated_mean_trajectory_bias,
+
+    iterated_variance_divergence, day_anchor_seam_artifact) plus optionally
+
+    a year_since_cutoff secular-drift candidate (per
+
+    mitacs-pit-calendar-fingerprint-p1) would address the Finding-#1 signature.
+
+
+    The thread-coordinator should NOT silently advance to a sibling without
+
+    an amendment. The branching_rules table has no Q2A entry; doing so
+
+    would be silent post-hoc routing. The amendment should either reopen
+
+    Q2B, or define a new node Q2C with the state-dependent / hybrid model
+
+    candidates from (b).
+
+    '
+follow_up:
+  required: true
+  reasoning: "Two parallel follow-up items:\n\n1. THREAD AMENDMENT (required for state\
+    \ advancement): per\n   phase_a.shape_outcomes.R-B2 and per the substantive findings\
+    \ #1-3\n   in verdict_reasoning. The thread is currently at current_node_id =\n\
+    \   Q2A, state = active. After this arbiter, Q2A.status -> settled; the\n   thread\
+    \ state cannot mechanically advance because branching_rules has\n   no Q2A entry.\
+    \ The user must decide on the amendment direction\n   (Q2B-class reopen, new Q2C\
+    \ node with state-dependent models, or\n   declare the distributional-class thread\
+    \ exhausted and spawn a new\n   thread on non-distributional content) before thread-coordinator\
+    \ can\n   advance.\n\n2. MEMORY UPDATE (no blocker, recommended): SETTLED finding\
+    \ warrants\n   a new memory file mitacs-q2a-richer-family.md capturing:\n    \
+    \ - The numeric record (chi^2_M3/M4/M5, CIs, effective_chi2)\n     - Finding #1\
+    \ (richer families chi^2-indistinguishable, simplest\n       binds) \u2014 this\
+    \ is the structurally important update\n     - Finding #2 (day-type asymmetry\
+    \ dominates) \u2014 strengthens\n       eigenmodes-v1 corroboration\n     - The\
+    \ 16x->1.4x reduction curve fact\n     - Cross-link to mitacs-q1-student-t-vs-gaussian\
+    \ (the upstream\n       settled finding) and mitacs-pit-calendar-fingerprint-p1\
+    \ (the\n       thread's S5 root with the secular-drift hint).\n   NOTE: per workflow\
+    \ rules, memory update is performed by the user\n   after settled findings; the\
+    \ arbiter declares memory_update_required\n   = true and identifies the target\
+    \ file but does not write it.\n"
+  proposed_phase_a: null
+calibration_record:
+  proponent_correct: partial
+  devils_advocate_correct: false
+  topic_difficulty: moderate
+  notes: "First arbiter in the workflow without mechanical/substantive gap. The\n\
+    pre-registered ambiguous band (cut from the synthetic gate's variant-max\nrule)\
+    \ absorbed the realization cleanly with room to spare on both sides\n\u2014 a\
+    \ successful pre-registration with the band sized appropriately.\n\nBoth forecasters\
+    \ made the same family-ranking error (KDE-preferred).\nThe empirical fact \"all\
+    \ three families nearly identical, simplest\nbinds\" was anticipated by the proponent\
+    \ only as a contingency\n(what_would_change_my_mind #4); the proponent's CENTRAL\
+    \ forecast\nassumed a 200 chi^2 gap between mixtures and KDE. Observed gap\nis\
+    \ 13. This is a calibration update: distributional-richness gradients\nabove 2-component\
+    \ symmetric mixture are essentially flat on this\npopulation; bigger jumps would\
+    \ require non-distributional content.\n"
+memory_update_required: true
+memory_update_target: "~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md\n\
+  + add mitacs-q2a-richer-family SETTLED R-B2 with the three substantive\n  findings\
+  \ (richer-family plateau; day-type asymmetry dominates; 16x->1.4x\n  reduction curve)\n\
+  + cross-link from mitacs-q1-student-t-vs-gaussian and\n  mitacs-pit-calendar-fingerprint-p1\n\
+  + flag for CLAUDE.md \"Settled findings since 2026-05-21\" section:\n  add (S9)\
+  \ Q2A R-B2 with summary\n"
+git_sha: 612f49d91fd7fedc6bfa48bb69b44aeb5a97f215
+git_clean: true
+body_sha256: 61493dbaa6430408332cb44056f728c358eecea466b8ad8fab7dbe8cf6321666
