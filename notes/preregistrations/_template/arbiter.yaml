@@ -131,3 +131,34 @@ memory_update_target: <e.g. ~/.claude/projects/.../memory/MEMORY.md
                             and the corresponding topic memory>
 # If SETTLED, the finding may be cited; if PROVISIONAL, all
 # citations must carry the [PROVISIONAL] tag.
+
+# ------------------------------------------------------------------
+# Thread state update (only if this experiment belongs to a thread)
+# ------------------------------------------------------------------
+# If phase_a.yaml declared a thread membership, arbiter MUST fire
+# one of the thread's pre-registered branches. The arbiter's job under
+# a thread is twofold: render the experiment verdict AND advance the
+# thread state. /audit thread <slug> enforces both.
+
+thread_state_update:
+  thread_topic: <thread slug, or null if standalone experiment>
+  node_id: <which thread node this experiment fulfilled>
+  branch_fired: |
+    <which outcome from the thread's branching_rules fires next.
+    MUST be one of: the keys in branching_rules[node_id] of the
+    referenced thread; OR the special arbiter-level values
+    PROPONENT-CONFIRMED, DEVILS-ADVOCATE-CONFIRMED, AMBIGUOUS, MIXED
+    if the thread's branching_rules explicitly accept them.>
+  next_node_id: |
+    <which node should become current_node_id in the thread. Derived
+    from branching_rules[node_id][branch_fired]. May be null if the
+    branch ends the thread (resolution or exhaustion).>
+  sibling_branches_closed:
+    # All sibling branches under the same parent that did NOT fire
+    # are now closed. Listed here for explicit recording.
+    - <node_id>
+  thread_state_transition: |
+    <Optional: planning -> active, active -> resolved, active ->
+    exhausted, active -> abandoned. If state changes, the
+    thread-coordinator will write a corresponding update to
+    thread.yaml's resolution block.>

@@ -91,3 +91,48 @@ SE.
   collaboration role split" — Mellers et al.).
 - After verdict: update MEMORY.md. If `SETTLED`, the finding may
   be cited; if `PROVISIONAL`, all citations must carry the tag.
+
+## Thread membership (when arbitrating an experiment in a thread)
+
+If the experiment's phase_a declared a `thread` block, the arbiter
+must additionally select one of the thread's pre-registered branches
+and fire it. Procedure:
+
+1. **Read the thread's `branching_rules[node_id]`.** The keys are
+   the valid choices for `branch_fired`. Arbitrating outside this
+   set is silent pivoting — REFUSE.
+2. **Select branch_fired based on the verdict.** The mapping
+   depends on how the thread author defined the branching:
+   - If `branching_rules[node_id]` keys match the phase_a's
+     `outcome_categories` (e.g., O-A, O-B, O-C, O-D), fire the
+     outcome that the data triggered per the phase_a's criteria.
+   - If `branching_rules[node_id]` keys include arbiter-level
+     values (PROPONENT-CONFIRMED, DEVILS-ADVOCATE-CONFIRMED,
+     AMBIGUOUS, MIXED), fire the one that matches your verdict.
+   - If both kinds of keys are present, prefer the
+     outcome-category match when one fires cleanly.
+3. **Populate `thread_state_update`** in arbiter.yaml:
+   - `thread_topic`: copy from phase_a's `thread.thread_topic`.
+   - `node_id`: copy from phase_a's `thread.node_id`.
+   - `branch_fired`: the chosen branch.
+   - `next_node_id`: lookup
+     `branching_rules[node_id][branch_fired]` from thread.yaml.
+   - `sibling_branches_closed`: all child node_ids reachable from
+     other keys in `branching_rules[node_id]` that did not fire.
+   - `thread_state_transition`: declared if the thread should
+     transition state (e.g., active → exhausted if next_node_id is
+     null and no further branches exist).
+4. **Invoke `thread-coordinator`** with the rendered arbiter to
+   advance the thread state. The arbiter writes the experiment's
+   `arbiter.yaml`; the thread-coordinator writes the thread.yaml
+   update. Two-step handoff so the experiment's arbiter and the
+   thread's state record stay separately verifiable.
+
+Mixed-substantive-verdict handling under a thread: if the arbiter's
+overall verdict is MIXED (mechanical fires X, substantive picture is
+Y), the `branch_fired` is the *mechanical* match (the registered
+criterion that fired) — the substantive interpretation goes in
+`verdict_reasoning` but does not override the branching rule. The
+thread's `branching_rules` are themselves data; if MIXED verdicts
+should be handled specially, the thread author should pre-register
+the MIXED → child mapping.

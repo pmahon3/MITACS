@@ -19,6 +19,7 @@ from corpus review: `memory/mitacs-session-lessons-corpus.md`.
     devils-advocate.md        ← counter-prediction generator (tuned from theory)
     editorial-pass.md         ← 16-rule writeup polish (ported from theory)
     literature-scout.md       ← applied-ML literature search (ported from theory)
+    thread-coordinator.md     ← line-of-inquiry lifecycle owner (FRESH design)
   skills/
     audit/
       SKILL.md                ← /audit dispatcher
@@ -45,20 +46,23 @@ Each agent addresses one or more of these. See the seed doc
 
 ## Implementation status
 
-- ✅ **Agents specified** (this directory): 9 `.md` files, all with
-  frontmatter + procedure + output schema + rules.
-- ⏳ **Registry not built**: `notes/preregistrations/` directory and
-  YAML templates not yet implemented. Per the seed §9.1, this is
-  the natural extension of `experiment/freeze.py` and
-  `experiment/provenance/_prov_core.py`.
-- ⏳ **`experiment/audit/` package not built**: `code_path.py` and
-  `registry.py` referenced in the seed do not yet exist.
-- ⏳ **Workflow itself unaudited**: the design has not been validated
-  by running it on a known-retracted finding to confirm it would
-  have caught the failure. Highest-leverage validation step
-  (per seed §9.5): re-audit `mitacs-honing-methodology` TEST B
-  retraction with `/audit code-path` and `/audit preregister`
-  retrospectively.
+- ✅ **Agents specified**: 10 `.md` files (9 original + thread-coordinator).
+- ✅ **Registry built**: `notes/preregistrations/` with 8 templates
+  including thread.yaml; hash-chained verification + CLI in
+  `experiment/audit/registry.py`.
+- ✅ **`experiment/audit/` package built**: `code_path.py` and
+  `registry.py` with thread support (`thread new`, `thread status`,
+  `thread list` subcommands).
+- ✅ **Workflow validated retroactively** (TEST B retraction would
+  have been caught) AND prospectively (v2 multiscale settled cleanly,
+  v3 eigenmode characterization caught a mechanical-vs-substantive
+  gap via MIXED verdict).
+- ✅ **Threads added** as a new artifact type for lines of inquiry —
+  pre-registered branching trees that prevent silent post-hoc
+  pivoting at the cross-experiment level.
+- ⏳ **First thread not yet written**: missing-content thread for the
+  multiscale follow-up programme is the first live use of the
+  thread workflow.
 
 ## Reading order for a new collaborator
 

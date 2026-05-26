@@ -26,18 +26,22 @@ Kahneman/Mellers adversarial-collaboration role split. See
 
 ## Directory structure
 
+Two kinds of entries live here: **individual experiments** and **threads**.
+
 ```
 notes/preregistrations/
   README.md                       ← this file
-  _template/                      ← stubs for each phase artifact
-    phase_a.yaml
+  _template/                      ← stubs for each artifact type
+    phase_a.yaml                  ← individual experiment (or thread node)
     phase_b.yaml
     proponent.yaml
     devils_advocate.yaml
     multiverse.yaml
     arbiter.yaml
     result.yaml
-  <YYYY-MM-DD>_<topic-slug>/      ← one per claim, append-only
+    thread.yaml                   ← thread (line of inquiry)
+
+  <YYYY-MM-DD>_<topic-slug>/      ← one per experiment, append-only
     phase_a.yaml                  ← (written first; before any data)
     devils_advocate.yaml          ← (written simultaneously with phase_a)
     proponent.yaml                ← (written simultaneously with phase_a)
@@ -46,7 +50,49 @@ notes/preregistrations/
     result.yaml                   ← (written after experiment runs)
     arbiter.yaml                  ← (written last; the only file that may
                                      declare SETTLED)
+
+  <YYYY-MM-DD>_<topic-slug>-thread/   ← one per thread, append-internal
+    thread.yaml                   ← the line-of-inquiry artifact
+                                     (amendments append inside the same
+                                     file; see "Threads" below)
 ```
+
+## Individual experiments vs threads
+
+An **individual experiment** answers one scoped question with one
+arbiter verdict. Phase A pre-registers the question, the metric, the
+criteria, the forecasts; arbiter renders the verdict; the entry is
+done. Most entries to date follow this pattern.
+
+A **thread** is a *line of inquiry*: a sequence of experiments whose
+structure is itself pre-registered. The thread artifact (`thread.yaml`)
+holds the scientific question, the planned tree of experiment nodes,
+the branching rules (which parent verdict fires which child), and the
+current state pointer. Individual experiments under the thread
+register normally as `phase_a.yaml` under their own dated entries, but
+each MUST reference the thread and node it belongs to, and the
+arbiter MUST fire one of the thread's pre-registered branches.
+
+Threads exist because the lab's common failure mode at the *cross-
+experiment* level is silent post-hoc pivoting: results come in, the
+analyst chooses the most interesting follow-up post-hoc, the choice
+looks decisive because it was informed by the result. Threads make
+the next-experiment decision pre-registered against the prior
+verdict, so a pivot is visible.
+
+A thread may end in three ways:
+
+  - **resolved** — the question is answered; final claim in the
+    thread's resolution block.
+  - **exhausted** — all branches consumed without resolving; to
+    continue requires an amendment.
+  - **abandoned** — analyst chose to drop; reason recorded.
+
+Threads may be **amended** during their lifetime (new branches added,
+old branches closed, skeletons rewritten). Amendments are
+**append-internal**: the thread.yaml file is overwritten but each
+amendment appends to the `amendments` list inside it, chained by
+prior-tree-hash for tamper detection.
 
 ## File invariants
 
@@ -96,14 +142,32 @@ the registry records why.
 
 | Agent | Reads | Writes |
 |-------|-------|--------|
-| `preregister` | `_template/phase_a.yaml`, `_template/phase_b.yaml` | `<topic>/phase_a.yaml`, `<topic>/phase_b.yaml` |
+| `thread-coordinator` | `_template/thread.yaml`, prior thread state | `<topic>-thread/thread.yaml` (creation + amendments + state advancement) |
+| `preregister` | `_template/phase_a.yaml`, `_template/phase_b.yaml`, optionally `<thread>/thread.yaml` | `<topic>/phase_a.yaml`, `<topic>/phase_b.yaml` |
 | `devils-advocate` | `<topic>/phase_a.yaml` | `<topic>/devils_advocate.yaml` |
 | `multiverse` | `<topic>/phase_a.yaml`, `<topic>/phase_b.yaml` | `<topic>/multiverse.yaml` |
-| `arbiter` | the entire `<topic>/` directory + the result artifact | `<topic>/arbiter.yaml` + memory update |
+| `arbiter` | the entire `<topic>/` directory + the result artifact + (if thread) the thread.yaml | `<topic>/arbiter.yaml` + memory update + (if thread) thread state update via `thread-coordinator` |
 
 The proponent forecast is captured by `preregister` (inside `phase_a.yaml`'s
 `hypothesis.proponent` field) AND in a separate `<topic>/proponent.yaml`
 for symmetric grading against `devils_advocate.yaml`.
+
+### Thread-specific agent contracts
+
+When an experiment belongs to a thread:
+
+- `preregister` MUST verify the new `phase_a.yaml`'s content matches
+  the thread's pre-registered skeleton for the declared `node_id`.
+  Mismatch is a registration violation; the agent refuses.
+
+- `arbiter` MUST set `branch_fired` from the thread's pre-registered
+  `branching_rules[node_id]`. The arbiter cannot render SETTLED
+  without selecting a branch. After SETTLED, `thread-coordinator`
+  advances the thread state.
+
+- `/audit thread <slug>` verifies the entire thread's chain:
+  hash-chain across all child experiments, branch consistency,
+  amendment-chain integrity.
 
 ## Status tags
 

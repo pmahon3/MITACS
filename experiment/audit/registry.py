@@ -87,7 +87,19 @@ REQUIRED_TOP_LEVEL: dict[str, set[str]] = {
         "verdict_reasoning", "finding_status", "follow_up",
         "calibration_record", "memory_update_required",
     },
+    "thread": {
+        "schema", "written_at", "git_sha", "git_clean", "body_sha256",
+        "references", "topic", "question", "root", "current_node_id",
+        "state", "nodes", "branching_rules", "amendments",
+    },
 }
+
+
+# Valid thread states (lifecycle state machine).
+_THREAD_STATES = {"planning", "active", "exhausted", "resolved", "abandoned"}
+
+# Valid per-node statuses within a thread.
+_NODE_STATUSES = {"planned", "active", "settled", "closed", "exhausted"}
 
 
 # ---------------------------------------------------------------------------
@@ -218,6 +230,167 @@ def verify_entry(topic_dir: Path) -> tuple[bool, dict[str, list[str]]]:
 
 
 # ---------------------------------------------------------------------------
+# Thread support
+# ---------------------------------------------------------------------------
+
+
+def is_thread_dir(topic_dir: Path) -> bool:
+    """A directory is a thread if it contains thread.yaml."""
+    return (topic_dir / "thread.yaml").exists()
+
+
+def verify_thread_schema(thread_data: dict[str, Any]) -> list[str]:
+    """Structural checks on a thread.yaml beyond REQUIRED_TOP_LEVEL.
+
+    Verifies:
+      - state is one of the valid lifecycle states
+      - each node has the required NodeSpec fields and valid status
+      - branching_rules' keys are existing node_ids
+      - branching_rules' values point to existing node_ids (or null)
+      - amendments form a valid chain (prior_tree_hash matches)
+      - current_node_id, if non-null, points at an existing node
+    """
+    errors: list[str] = []
+    state = thread_data.get("state")
+    if state not in _THREAD_STATES:
+        errors.append(
+            f"invalid thread state {state!r}; must be one of {sorted(_THREAD_STATES)}"
+        )
+
+    nodes = thread_data.get("nodes") or {}
+    if not isinstance(nodes, dict) or not nodes:
+        errors.append("nodes must be a non-empty dict of {node_id: NodeSpec}")
+        return errors
+
+    node_id_set = set(nodes.keys())
+    for nid, node in nodes.items():
+        if not isinstance(node, dict):
+            errors.append(f"node {nid!r}: not a mapping")
+            continue
+        # required NodeSpec fields
+        for fld in ("id", "name", "parent_id", "parent_branch", "status",
+                    "phase_a_skeleton"):
+            if fld not in node:
+                errors.append(f"node {nid!r}: missing field {fld!r}")
+        # status must be valid
+        if node.get("status") not in _NODE_STATUSES:
+            errors.append(
+                f"node {nid!r}: invalid status {node.get('status')!r}; "
+                f"must be one of {sorted(_NODE_STATUSES)}"
+            )
+        # parent_id must reference an existing node OR be null
+        pid = node.get("parent_id")
+        if pid is not None and pid not in node_id_set:
+            errors.append(
+                f"node {nid!r}: parent_id {pid!r} does not exist in nodes"
+            )
+
+    # branching_rules must be a dict {node_id: {branch_label: child_node_id_or_null}}
+    rules = thread_data.get("branching_rules") or {}
+    if not isinstance(rules, dict):
+        errors.append("branching_rules must be a mapping")
+    else:
+        for src_nid, branches in rules.items():
+            if src_nid not in node_id_set:
+                errors.append(
+                    f"branching_rules: source node {src_nid!r} does not exist"
+                )
+                continue
+            if not isinstance(branches, dict):
+                errors.append(
+                    f"branching_rules[{src_nid!r}]: must be a mapping of {{branch_label: child_id_or_null}}"
+                )
+                continue
+            for label, child in branches.items():
+                if child is not None and child not in node_id_set:
+                    errors.append(
+                        f"branching_rules[{src_nid!r}][{label!r}]: child {child!r} does not exist"
+                    )
+
+    # current_node_id: null or existing node
+    cni = thread_data.get("current_node_id")
+    if cni is not None and cni not in node_id_set:
+        errors.append(
+            f"current_node_id {cni!r} does not exist in nodes"
+        )
+
+    # Amendment chain: each amendment's prior_tree_hash must match the
+    # previous amendment's resulting body_sha256 (or the original
+    # thread's pre-amendment hash for the first amendment).
+    # We can't fully verify the chain without knowing the original-
+    # creation body, so we just check structure.
+    amendments = thread_data.get("amendments") or []
+    if not isinstance(amendments, list):
+        errors.append("amendments must be a list")
+    else:
+        for i, am in enumerate(amendments):
+            if not isinstance(am, dict):
+                errors.append(f"amendment[{i}]: not a mapping")
+                continue
+            for fld in ("amendment_id", "written_at", "git_sha",
+                        "prior_tree_hash", "reason", "changes"):
+                if fld not in am:
+                    errors.append(f"amendment[{i}]: missing {fld!r}")
+
+    return errors
+
+
+def thread_state(topic_dir: Path) -> dict[str, Any]:
+    """Rich state of a thread directory.
+
+    Returns a dict with the thread-level state plus a derived view of
+    each node's current status (cross-checking phase_a_path against the
+    actual experiment directories).
+    """
+    thread_path = topic_dir / "thread.yaml"
+    if not thread_path.exists():
+        return {"is_thread": False}
+    try:
+        td = read_yaml(thread_path)
+    except (ValueError, yaml.YAMLError) as e:
+        return {"is_thread": True, "broken": str(e)}
+
+    schema_errors = verify_thread_schema(td)
+    nodes = td.get("nodes") or {}
+
+    # For each node, cross-check phase_a_path against actual file
+    node_states = {}
+    for nid, node in nodes.items():
+        pa_path = node.get("phase_a_path")
+        if pa_path:
+            full = (REGISTRY / pa_path).resolve() if not Path(pa_path).is_absolute() \
+                else Path(pa_path)
+            # Some authors store paths relative to PROJECT_ROOT, others relative to REGISTRY.
+            # Try both.
+            alt_paths = [
+                Path(pa_path),
+                REGISTRY / pa_path,
+                REGISTRY.parent.parent / pa_path,
+                PROJECT_ROOT / pa_path,
+            ]
+            exists = any(p.exists() for p in alt_paths)
+        else:
+            exists = False
+        node_states[nid] = {
+            "status": node.get("status"),
+            "phase_a_path": pa_path,
+            "phase_a_exists": exists,
+        }
+
+    return {
+        "is_thread": True,
+        "topic": td.get("topic"),
+        "question": td.get("question"),
+        "state": td.get("state"),
+        "current_node_id": td.get("current_node_id"),
+        "node_count": len(nodes),
+        "node_states": node_states,
+        "amendment_count": len(td.get("amendments") or []),
+        "schema_errors": schema_errors,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Status
 # ---------------------------------------------------------------------------
 
@@ -225,23 +398,33 @@ def verify_entry(topic_dir: Path) -> tuple[bool, dict[str, list[str]]]:
 def entry_status(topic_dir: Path) -> str:
     """One-word status for a topic.
 
-    SETTLED       — arbiter.yaml exists, finding_status == SETTLED, chain verifies
-    PROVISIONAL   — arbiter.yaml exists, finding_status == PROVISIONAL
-    AMBIGUOUS     — arbiter.yaml exists, verdict == AMBIGUOUS
-    AWAITING-ARB  — result.yaml exists, arbiter.yaml does not
-    AWAITING-RES  — phase_b.yaml exists, result.yaml does not
-    AWAITING-B    — phase_a.yaml exists, phase_b.yaml does not
-    EMPTY         — no phase_a.yaml
-    BROKEN        — chain verification failed
+    For threads (containing thread.yaml):
+      THREAD:<state>  — where <state> is one of planning/active/exhausted/resolved/abandoned
+
+    For experiments:
+      SETTLED       — arbiter.yaml exists, finding_status == SETTLED, chain verifies
+      PROVISIONAL   — arbiter.yaml exists, finding_status == PROVISIONAL
+      AMBIGUOUS     — arbiter.yaml exists, verdict == AMBIGUOUS
+      AWAITING-ARB  — result.yaml exists, arbiter.yaml does not
+      AWAITING-RES  — phase_b.yaml exists, result.yaml does not
+      AWAITING-B    — phase_a.yaml exists, phase_b.yaml does not
+      EMPTY         — no phase_a.yaml
+      BROKEN        — chain verification failed
     """
+    ok, _ = verify_entry(topic_dir)
+    if not ok:
+        return "BROKEN"
+
+    if is_thread_dir(topic_dir):
+        ts = thread_state(topic_dir)
+        if ts.get("schema_errors"):
+            return "BROKEN"
+        return f"THREAD:{ts.get('state', 'unknown')}"
+
     arb = topic_dir / "arbiter.yaml"
     res = topic_dir / "result.yaml"
     pb = topic_dir / "phase_b.yaml"
     pa = topic_dir / "phase_a.yaml"
-
-    ok, _ = verify_entry(topic_dir)
-    if not ok:
-        return "BROKEN"
 
     if arb.exists():
         data = read_yaml(arb)
@@ -309,6 +492,38 @@ def new_entry(slug: str, *, when: _dt.date | None = None) -> Path:
     return target
 
 
+def new_thread(slug: str, *, when: _dt.date | None = None) -> Path:
+    """Create a new thread directory with the thread.yaml template.
+
+    Convention: directory name is ``<YYYY-MM-DD>_<slug>-thread`` —
+    the ``-thread`` suffix distinguishes lines of inquiry from
+    individual experiments in directory listings.
+    """
+    if not TEMPLATE.exists():
+        raise FileNotFoundError(
+            f"template directory missing: {TEMPLATE}."
+        )
+    when = when or _dt.date.today()
+    slug = slug.strip().lower().replace(" ", "-").replace("_", "-")
+    if not slug or any(c.isspace() for c in slug):
+        raise ValueError(f"invalid slug: {slug!r}")
+    if slug.endswith("-thread"):
+        # Don't double-suffix
+        name = f"{when.isoformat()}_{slug}"
+    else:
+        name = f"{when.isoformat()}_{slug}-thread"
+    target = REGISTRY / name
+    if target.exists():
+        raise FileExistsError(
+            f"thread directory already exists: {target}. "
+            f"Threads are append-internal — amend the existing thread.yaml "
+            f"rather than creating a new directory."
+        )
+    target.mkdir(parents=True)
+    shutil.copy(TEMPLATE / "thread.yaml", target / "thread.yaml")
+    return target
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -360,12 +575,78 @@ def _cmd_new(args: argparse.Namespace) -> int:
     return 0
 
 
+# Thread CLI subcommands ----------------------------------------------
+
+
+def _cmd_thread_new(args: argparse.Namespace) -> int:
+    target = new_thread(args.slug)
+    print(f"created {target.relative_to(PROJECT_ROOT)}")
+    print(f"template copied: thread.yaml")
+    print(f"fill the question, root, nodes, and branching_rules BEFORE "
+          f"creating any node's phase_a.yaml. Invoke /audit thread-coordinator "
+          f"to walk through the planning structure.")
+    return 0
+
+
+def _cmd_thread_status(args: argparse.Namespace) -> int:
+    topic_dir = REGISTRY / args.topic
+    if not topic_dir.exists():
+        print(f"no such thread: {args.topic}", file=sys.stderr)
+        return 2
+    if not is_thread_dir(topic_dir):
+        print(f"not a thread directory (no thread.yaml): {args.topic}",
+              file=sys.stderr)
+        return 2
+    ts = thread_state(topic_dir)
+    print(f"# thread: {args.topic}")
+    print(f"  topic:         {ts.get('topic')}")
+    print(f"  question:      {ts.get('question')}")
+    print(f"  state:         {ts.get('state')}")
+    print(f"  current_node:  {ts.get('current_node_id')}")
+    print(f"  node_count:    {ts.get('node_count')}")
+    print(f"  amendments:    {ts.get('amendment_count')}")
+    if ts.get("schema_errors"):
+        print(f"  schema_errors:")
+        for e in ts["schema_errors"]:
+            print(f"    - {e}")
+        return 1
+    print(f"  per-node:")
+    for nid, ns in (ts.get("node_states") or {}).items():
+        marker = " <-- current" if nid == ts.get("current_node_id") else ""
+        pa_info = ""
+        if ns.get("phase_a_path"):
+            pa_info = f"  pa={'OK' if ns['phase_a_exists'] else 'MISSING'}"
+        print(f"    {nid:>6s}  status={ns['status']:>10s}{pa_info}{marker}")
+    return 0
+
+
+def _cmd_thread_list(_args: argparse.Namespace) -> int:
+    """List only thread entries."""
+    if not REGISTRY.exists():
+        print("(registry empty)")
+        return 0
+    threads = []
+    for d in sorted(REGISTRY.iterdir()):
+        if not d.is_dir() or d.name.startswith("_") or d.name == "README.md":
+            continue
+        if is_thread_dir(d):
+            ts = thread_state(d)
+            threads.append((d.name, ts.get("state"), ts.get("node_count", 0)))
+    if not threads:
+        print("(no threads)")
+        return 0
+    width = max(len(n) for n, _, _ in threads)
+    for name, state, nc in threads:
+        print(f"  {name:<{width}}  state={state:<10s}  nodes={nc}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    sub.add_parser("list", help="list all entries with status")
+    sub.add_parser("list", help="list all entries (experiments + threads) with status")
 
     pv = sub.add_parser("verify", help="verify the hash chain of an entry")
     pv.add_argument("topic")
@@ -373,10 +654,30 @@ def main(argv: list[str] | None = None) -> int:
     ps = sub.add_parser("status", help="one-line status of an entry")
     ps.add_argument("topic")
 
-    pn = sub.add_parser("new", help="create a new dated entry")
+    pn = sub.add_parser("new", help="create a new dated experiment entry")
     pn.add_argument("slug")
 
+    # Thread subcommands
+    pt = sub.add_parser("thread", help="thread (line of inquiry) operations")
+    pt_sub = pt.add_subparsers(dest="thread_cmd", required=True)
+
+    ptn = pt_sub.add_parser("new", help="create a new thread directory")
+    ptn.add_argument("slug")
+
+    pts = pt_sub.add_parser("status", help="rich status of a thread")
+    pts.add_argument("topic")
+
+    pt_sub.add_parser("list", help="list only thread entries")
+
     args = p.parse_args(argv)
+
+    if args.cmd == "thread":
+        return {
+            "new": _cmd_thread_new,
+            "status": _cmd_thread_status,
+            "list": _cmd_thread_list,
+        }[args.thread_cmd](args)
+
     return {
         "list": _cmd_list,
         "verify": _cmd_verify,

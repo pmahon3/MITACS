@@ -110,3 +110,41 @@ deviations_from_phase_a:
   Phase B or the registration is invalid.
 - The registry directory is append-only. To revise an artifact,
   emit a new dated entry that references the prior one.
+
+## Thread membership (when phase_a is a node in a thread)
+
+If the experiment belongs to a pre-registered thread (line of
+inquiry), the phase_a's `thread` block declares `thread_topic`,
+`node_id`, and `parent_branch`. Additional rules apply:
+
+1. **Read the thread's current state.** Run `python -m
+   experiment.audit.registry thread status <thread_topic>` to see
+   which node is currently active and what its skeleton specifies.
+2. **Refuse if node_id is not the thread's current_node_id.**
+   The thread's pointer is the lab's record of which experiment
+   should be filling phase_a right now; bypassing it is silent
+   pivoting.
+3. **Verify skeleton consistency.** The phase_a's `metric`,
+   `falsification_criterion`, `corroboration_criterion`, etc., must
+   be specializations of the thread's `nodes[node_id].phase_a_skeleton`:
+   - `metric_class` in the skeleton constrains the phase_a's `metric`.
+   - `candidate_set` in the skeleton constrains the variables tested.
+   - `outcome_categories` in the skeleton constrains the
+     pre-registered outcomes (they may match exactly or be a
+     more-detailed subdivision).
+   The phase_a may legitimately add detail (concrete numeric
+   thresholds, full forecast values) but cannot contradict the
+   skeleton. Mismatch is BLOCKING — refuse.
+4. **Record `thread_body_sha256`.** Hash of the referenced
+   thread.yaml at phase_a write time. Tampered or amended threads
+   after phase_a registration are detected by hash mismatch.
+5. **Handle threshold_derivations explicitly.** If the phase_a's
+   numeric thresholds were derived from a prior node's data per the
+   thread's `skeleton_thresholds_depend_on`, the derivation must be
+   documented in the phase_a's `thread.threshold_derivations` block.
+   Refuse if a threshold is "derived from P1's data" but no
+   derivation is written.
+
+The thread-coordinator agent (separate, sole writer of `thread.yaml`)
+advances thread state after the arbiter renders. preregister is the
+READER of the thread, not its writer.

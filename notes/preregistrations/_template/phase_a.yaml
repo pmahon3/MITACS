@@ -87,6 +87,30 @@ affects_registered_spec: <REQUIRED — bool>
 # If true, experiment/freeze.py must be consulted; a new registration
 # may be required. See mitacs-honing-methodology for the dev/test wall.
 
+# ------------------------------------------------------------------
+# Thread membership (optional)
+# ------------------------------------------------------------------
+# If this experiment is a node in a pre-registered thread, declare
+# the membership here. /audit preregister enforces that the content
+# of this phase_a is consistent with the thread's skeleton for the
+# named node_id; mismatch is a registration violation.
+
+thread:
+  # Set to null if this experiment is standalone (not part of a thread).
+  thread_topic: <e.g. missing-content-thread, or null>
+  thread_body_sha256: <hash of the referenced thread.yaml at the time
+                     this phase_a was written; for tamper detection
+                     across thread amendments>
+  node_id: <which node in the thread this phase_a fulfils, e.g. P1>
+  parent_branch: <which parent outcome triggered this node; null for
+                 the thread's root node; otherwise must match the
+                 thread's pre-registered branching_rules>
+  threshold_derivations: |
+    <If phase_a's numeric thresholds were derived from a prior node's
+    data per the thread's skeleton_thresholds_depend_on rule, document
+    each derivation here. Empty for standalone experiments.>
+
+
 related_memory:
   - <slug of relevant memory file, e.g. mitacs-clim-gap-nonstationary>
 

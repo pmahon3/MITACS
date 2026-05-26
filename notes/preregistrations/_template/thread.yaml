@@ -1,0 +1,183 @@
+# Thread — a line of inquiry composed of conditionally-linked experiments.
+#
+# A thread answers a single scientific question through a (potentially-branching)
+# sequence of experiments whose structure is pre-registered as a tree. The
+# tree's branching rules pin which experiment fires next based on the
+# previous experiment's arbiter verdict — silent post-hoc pivoting is
+# therefore detectable. Threads may resolve (question answered), exhaust
+# (all branches consumed, question open) or be abandoned (analyst's
+# decision to drop the question).
+#
+# Design: notes/seeds/applied_audit_workflow.md (extended for threads).
+# Coordinator: .claude/agents/thread-coordinator.md.
+#
+# File invariants (in addition to the standard frontmatter):
+#   - Append-internal: amendments to the tree do NOT create new
+#     thread.yaml files; they append amendment blocks below. Each
+#     amendment chains via prior_tree_hash so tampering is detectable.
+#   - phase_a_skeleton in each node is partial-by-design: it specifies
+#     the experiment's SHAPE (metric class, candidate set, outcome
+#     categories) without committing to concrete numeric thresholds
+#     that may legitimately depend on prior experiments' data. The
+#     dependence is itself pre-registered via skeleton_thresholds_depend_on.
+
+schema: thread
+written_at: <ISO 8601>
+git_sha: <REQUIRED>
+git_clean: <REQUIRED — bool>
+body_sha256: <REQUIRED — auto-filled>
+references:
+  # Threads typically reference the parent finding (the arbiter.yaml or
+  # memory file that motivated the thread). Empty if the thread is
+  # rooted in a seed rather than a prior result.
+  - file: <relative path>
+    body_sha256: <hash>
+    relation: <root | supersedes | informs>
+
+# ----------------------------------------------------------------------
+# The thread itself
+# ----------------------------------------------------------------------
+
+topic: <REQUIRED — short kebab-case slug; the thread directory name>
+
+question: <REQUIRED — one sentence; the scientific question the thread answers>
+
+root:
+  description: <REQUIRED — what motivated this thread; one paragraph>
+  artifacts:
+    - file: <path to motivating arbiter / seed / memory>
+      body_sha256: <hash>
+  scope_limits: |
+    <REQUIRED — what this thread does NOT try to answer. The boundary
+    matters because thread expansion to cover adjacent questions is a
+    common silent-pivot failure mode.>
+
+# ----------------------------------------------------------------------
+# State pointer + status
+# ----------------------------------------------------------------------
+
+current_node_id: <REQUIRED — which node is live (i.e., whose phase_a we
+                            should be filling next). Null after thread
+                            reaches a terminal state.>
+
+state: <REQUIRED — planning | active | exhausted | resolved | abandoned>
+# planning   - tree is being defined; no nodes have fired yet
+# active     - at least one node has fired; current_node_id points at the live node
+# exhausted  - all branches consumed without resolving; further work requires amendment
+# resolved   - the thread's question is answered; final claim in resolution block below
+# abandoned  - analyst chose to drop; reason in resolution block
+
+# ----------------------------------------------------------------------
+# Nodes — the planned tree of experiments
+# ----------------------------------------------------------------------
+
+nodes:
+  # Root node — usually the first concrete experiment the thread spawns.
+  P1:
+    id: P1
+    name: <REQUIRED — short descriptive label>
+    parent_id: null                              # null for root nodes
+    parent_branch: null                          # null for root nodes (no parent verdict to condition on)
+    status: <REQUIRED — planned | active | settled | closed | exhausted>
+    # planned   - not yet fired; awaiting parent verdict (or thread activation for root)
+    # active    - phase_a.yaml is being filled; experiment in progress
+    # settled   - arbiter has rendered SETTLED verdict on this node's experiment
+    # closed    - parent fired a sibling branch; this branch never fires
+    # exhausted - fired and ran, but arbiter delivered MIXED or AMBIGUOUS; the
+    #             question advances but not via this node's pre-registered branches
+
+    phase_a_skeleton:
+      # Partial specification — what the experiment will TEST without
+      # committing to specific numeric thresholds. Sufficient to verify
+      # consistency when the actual phase_a.yaml is written; insufficient
+      # to constitute the experiment's full registration.
+      metric_class: <REQUIRED — e.g. "explanatory_score on conditional-PIT residual">
+      candidate_set: <REQUIRED — list of variables/treatments tested>
+      outcome_categories: <REQUIRED — list of mutually-exclusive outcome IDs>
+      skeleton_thresholds_depend_on:
+        # If the numeric thresholds in the phase_a will depend on data
+        # from a prior node, document the dependence here.
+        - source: <node_id whose data informs the threshold>
+          field: <which value from the prior result>
+          rule: <how the threshold is derived from it>
+
+    phase_a_path: <null until the node fires; then path to the written phase_a.yaml>
+
+    notes: |
+      <Optional — analyst-level rationale for this node, its relation
+      to neighbouring nodes, expected duration, etc.>
+
+  # Child node — depends on P1's outcome
+  P2A:
+    id: P2A
+    name: <name>
+    parent_id: P1
+    parent_branch: <REQUIRED — outcome ID from P1's outcome_categories
+                              OR an arbiter-level verdict (PROPONENT-CONFIRMED,
+                              DA-CONFIRMED, AMBIGUOUS, MIXED)>
+    status: planned
+    phase_a_skeleton:
+      metric_class: <...>
+      candidate_set: <...>
+      outcome_categories: <...>
+    phase_a_path: null
+
+  # ... additional nodes as needed
+
+# ----------------------------------------------------------------------
+# Branching rules — explicit mapping from parent outcomes to children
+# ----------------------------------------------------------------------
+
+branching_rules:
+  # For each node with >= 1 child, map each possible arbiter outcome
+  # (or pre-registered outcome category) to the child node_id that fires.
+  # Outcomes mapped to null close the thread (or escalate to amendment).
+  # In a real thread, define a child node for every branch you want to
+  # take; null branches are explicit "stop here" markers.
+  P1:
+    O-A: P2A         # outcome O-A from P1 fires node P2A
+    O-B: null        # add a real child node_id here if you want O-B to spawn an experiment
+    O-C: null        # ...
+    O-D: null        # outcome O-D ends the thread without resolution at P1
+    MIXED: null      # MIXED arbiter verdict ends the thread (or requires amendment)
+    AMBIGUOUS: null
+
+# ----------------------------------------------------------------------
+# Amendments — append-only, hash-chained internal revisions
+# ----------------------------------------------------------------------
+
+amendments:
+  # Each amendment is itself an immutable record. Adding new nodes,
+  # closing branches, or rewriting skeletons all happen via amendment.
+  # The thread.yaml file is overwritten on amendment, but the amendments
+  # array preserves the prior state.
+  #
+  # Initial creation has no amendments. Subsequent amendments append.
+  #
+  # Format of one amendment:
+  #   - amendment_id: A1
+  #     written_at: <ISO>
+  #     git_sha: <SHA at amendment time>
+  #     prior_tree_hash: <body_sha256 of the thread.yaml BEFORE this amendment>
+  #     reason: <one paragraph; why the tree needed to change>
+  #     changes:
+  #       - <e.g. "added node P3X downstream of P2A's MIXED outcome">
+  #       - <e.g. "closed branch P1 -> O-E (formerly led to P2E); reason: ruled out by P1">
+  []  # empty at thread creation
+
+# ----------------------------------------------------------------------
+# Resolution / exhaustion record — populated when state transitions to
+# resolved/exhausted/abandoned
+# ----------------------------------------------------------------------
+
+resolution:
+  resolved_at: <ISO or null>
+  final_state: <resolved | exhausted | abandoned | null>
+  summary: |
+    <Populated when the thread terminates. For resolved: the answer to
+    the question. For exhausted: which candidates were ruled out and
+    what remains open. For abandoned: why.>
+  spawned_threads:
+    # If the thread's resolution itself opens new questions, record the
+    # new threads it spawned. Empty unless resolution naturally branches.
+    - <slug of follow-up thread>
