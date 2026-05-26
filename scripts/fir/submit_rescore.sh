@@ -12,16 +12,10 @@
 #   - python 3.10 venv at $REPO/.venv with:
 #       module load python/3.10
 #       python -m venv .venv && source .venv/bin/activate
-#       python -m pip install --no-index numpy pandas scipy tqdm \
-#                                        torch ray wheel
-#   - sibling EmpiricalDynamics repo cloned at $REPO/../EmpiricalDynamics
-#       cd ..
-#       git clone https://github.com/pmahon3/EmpiricalDynamics.git
-#       cd MITACS
-#       pip install -e ../EmpiricalDynamics --no-build-isolation
-#     (--no-build-isolation skips the isolated build env so pip uses the
-#      runtime deps already in the venv, avoiding the CVMFS slow-read
-#      flakes that hit `setuptools`/`wheel` pulls on cold cache.)
+#       python -m pip install --upgrade pip wheel
+#       python -m pip install edynamics==0.4.0
+#         # pulls runtime deps (numpy, pandas, scipy, tqdm, ray, torch)
+#         # transitively from the wheel's metadata; no sibling clone needed.
 #   - The data cache:  data/ontario/*.pkl    (or scraped to the same
 #     locations).  load_actuals reads from there.
 #
@@ -50,9 +44,9 @@ else
     exit 1
 fi
 
-# Sanity check the editable edynamics install
+# Sanity check the edynamics install
 python -c "from edynamics.modelling_tools import Embedding, Lag" \
-    || { echo "ERROR: edynamics import failed.  pip install -e the sibling repo." >&2 ; exit 2; }
+    || { echo "ERROR: edynamics import failed.  Try: pip install edynamics==0.4.0" >&2 ; exit 2; }
 
 echo "[$(date)] starting rescore_W2y on $(hostname)"
 python -m scripts.fir.rescore_climatology \

@@ -22,7 +22,7 @@ would require a fresh `experiment.freeze` registration.
   `scratch/data/smc_smap_samples/cell_B_meaniter_global.pkl`.
 
 - `submit_rescore.sh` — SLURM submission for Fir (DRA conventions).
-  1h wall-clock, 1 CPU, 8 GB. Edit the `--account=` line to your
+  15-min wall-clock, 1 CPU, 4 GB. Edit the `--account=` line to your
   RAPI before submitting.
 
 ## Local smoke test (run this first)
@@ -34,10 +34,11 @@ would require a fresh `experiment.freeze` registration.
     --max-days 10
 ```
 
-Expected: ~30 s wall-clock, MAE around 600 MW over the 10 days,
-prints headline numbers and writes the pickle. (The first-10-days
-2025-01-01..2025-01-10 sample is winter — magnitudes there don't
-match the full-500-day average and shouldn't be over-read.)
+Expected: ~3 s wall-clock (post-optimization), MAE around 607 MW
+over the 10 days, prints headline numbers and writes the pickle.
+(The first-10-days 2025-01-01..2025-01-10 sample is winter —
+magnitudes there don't match the full-500-day average and shouldn't
+be over-read.)
 
 ## Submitting on Fir
 
@@ -45,32 +46,31 @@ match the full-500-day average and shouldn't be over-read.)
    project's pip set:
    ```bash
    cd ~/Research/Dynamics/MITACS
-   python3.10 -m venv .venv
+   module load python/3.10
+   python -m venv .venv
    source .venv/bin/activate
-   pip install numpy pandas scipy matplotlib seaborn pyyaml \
-               torch ray bs4 dash plotly
+   python -m pip install --upgrade pip wheel
+   python -m pip install edynamics==0.4.0 \
+                          pandas scipy matplotlib seaborn pyyaml \
+                          bs4 dash plotly
    ```
+   `edynamics==0.4.0` is on PyPI; the install transitively pulls
+   `numpy`, `scipy`, `tqdm`, `ray`, and `torch`.  No need to clone
+   the EmpiricalDynamics sibling repo or do an editable install.
 
-2. Install the editable `edynamics` sibling package:
-   ```bash
-   git clone <Takens_Whitney URL> ../Takens_Whitney
-   pip install -e ../Takens_Whitney/EmpiricalDynamics
-   ```
-
-3. Verify the data cache is present (`data/ontario/*.pkl`); the
+2. Verify the data cache is present (`data/ontario/*.pkl`); the
    `load_actuals` call reads from there. If absent, scrape via
    `python -m data.scraping`.
 
-4. Edit `submit_rescore.sh`:
+3. Edit `submit_rescore.sh`:
    - Set `--account=def-<your-RAPI>` (currently `def-CHANGE_ME`).
-   - Confirm the venv activation path and the data location.
 
-5. Submit:
+4. Submit:
    ```bash
    sbatch scripts/fir/submit_rescore.sh
    ```
 
-6. Wait for completion. Outputs:
+5. Wait for completion. Outputs:
    - `scratch/data/rescore_W2y/cell_B_meaniter_global_W2y.pkl`
    - `logs/rescore_W2y_<jobid>.out`
    - `logs/rescore_W2y_<jobid>.err`
