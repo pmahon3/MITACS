@@ -41,6 +41,16 @@ archive/
 # primary source per scratch/data/postcovid/README.md.
 scratch/data/postcovid/*.csv
 
+# Q2A run scratch + log: pickle is regenerable from the experiment
+# (script reseeds deterministically); run log is recorded inside the
+# .txt provenance header. Both would otherwise dirty the tree during
+# make_result(--emit-result), failing the provenance refuse-on-dirty
+# check. Q1's pickle was committed (06eaefd) before --emit-result was
+# the entry point; here --emit-result is the canonical path, so the
+# scratch pickle and the log are ephemeral.
+scratch/data/distributional_class_q2a/
+experiment/distributional_class_q2a/*.log
+
 # Experiment ledger: gitignored UNTIL a live collect run produces genuine
 # accrued forecasts/actuals. Current/offline-test contents are regenerable
 # placeholder rows, NOT the experiment record. Track it (remove this rule)
