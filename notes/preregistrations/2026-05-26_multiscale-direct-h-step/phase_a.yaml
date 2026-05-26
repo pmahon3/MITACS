@@ -1,0 +1,87 @@
+schema: phase_a
+written_at: '2026-05-26T13:00:00-04:00'
+git_sha: d57d73da20b9f6fba4df6e54e4e6a3d9685b5b64
+git_clean: false
+body_sha256: bafe377f3e745951249430a0e72cee11ff02cff8d6544c74532526bbcc167080
+references: []
+topic: multiscale-direct-h-step
+research_question: 'Do directly-fit h-step factors (C_h, Sigma_h) diverge structurally from the iterated 1-step factors (P_1^h, iterated-Sigma) on pre-cutoff Ontario demand data, in a manner consistent with the relaxed-factorization picture (C) of the multiscale seed?
+
+  '
+hypothesis:
+  proponent: 'The drift agreement holds approximately (relative drift ||C_h - P_1^h||_F / ||C_h||_F is below 0.20 for h in {2, 6, 12, 24}), but the diffusion comparison shows a structured divergence: the iterated covariance underestimates the directly-fit covariance, with the under-estimation ratio Sigma_{h,1,1} / iterated_Sigma_{h,1,1} > 1.5 at h=12 (the weekday day-type peak hour). Picture (C) is the right framing.
+
+    '
+  counter: 'See devils_advocate.yaml. Most plausibly: the directly-fit factors are degenerate at large h because z(t) is approximately stationary in the embedded coordinates, so x_t and x_{t+h} decorrelate, and the OLS coefficient C_h collapses to zero plus noise. In that case the seed''s framing is wrong: the iterated-vs-direct comparison is not informative because both are estimating zero at large h.
+
+    '
+variables:
+  dependent:
+  - drift_relative_frobenius_norm
+  - diffusion_diagonal_ratio
+  - eigenmode_residual_per_scale
+  independent:
+  - h
+  - day_type
+  excluded:
+  - variable: theta_bandwidth
+    reasoning: 'The estimator-as-run reduces to global OLS at the d=2 z-lag embedding (mitacs-theta-rail-pinning); locality is empirically non-discriminating. Fixing theta to the production value (0) avoids re-litigating a closed question.
+
+      '
+  - variable: climatology_window
+    reasoning: 'The frozen spec uses full-history month-hour climatology; this experiment must inherit that, not re-tune it (mitacs-clim-gap-nonstationary section "Verdict on the framework-level fix attempt").
+
+      '
+  - variable: embedding_dim
+    reasoning: 'Frozen at the registered spec''s per-day-type dims (weekday=2, saturday=2, sunday=4). Re-litigating embedding dim is task #30, out of scope for this experiment.
+
+      '
+data:
+  source: experiment._actuals.load_pre_cutoff_actuals
+  partition:
+    train: pre-cutoff Ontario demand
+    dev: not used (no hyperparameters)
+    test: "not used at this stage; \xA76.3 is the test-stage experiment"
+  cutoff_handling: 'Strict pre-cutoff library. Directly-fit Sigma_h uses (t, t+h) pairs from pre-cutoff only; t+h must also be pre-cutoff, so the effective library shrinks slightly with h. This is the leakage guard.
+
+    '
+metric: 'Composite. Two primary metrics, one per direction of the seed''s prediction. M1 = max over h in {2, 6, 12, 24} and day_type of drift_relative_frobenius_norm. M2 = diffusion_diagonal_ratio at (h=12, day_type=weekday).
+
+  '
+falsification_criterion:
+  numeric: 'M1 > 0.50  OR  (M2 in [0.7, 1.3] AND M1 <= 0.20)
+
+    '
+  reasoning: "The seed predicts (M1 small, M2 large). Two distinct ways to refute: M1 huge (defect is in drift not diffusion \u2014 the seed's \"diffusion is the load-bearing object\" claim is wrong); OR M2 near 1 with M1 small (no divergence \u2014 strict semigroup holds).\n"
+corroboration_criterion:
+  numeric: M1 <= 0.20 AND M2 > 1.5
+  reasoning: "Drift agrees within 20% relative error AND diffusion under-estimation by iteration is at least 50% \u2014 the qualitative shape the seed predicts in \xA75.1.\n"
+ambiguous_region:
+  range: M1 in (0.20, 0.50] OR M2 in (1.3, 1.5]
+  action: "Report results and characterise; do not claim the seed picture (C) is the right framing yet. Follow up with \xA76.3 (direct-factor backtest) to see whether the magnitude of divergence translates to the expected per-HE bias-shape change.\n"
+baselines:
+  primary: 'Iterated 1-step factor (P_1^h, P_1^(h-1) Sigma_1 P_1^(h-1)^T) computed from production-fit C_1, Sigma_1.
+
+    '
+  secondary: "Synthetic VAR(1) validation gate \u2014 on synthetic data with known L, the directly-fit and iterated factors should agree within sampling noise; this is the consistency check that the estimator works.\n"
+stopping_criterion:
+  rule: 'Run the 15 (C_h, Sigma_h) fits and the 24 comparison numbers, then stop. No iteration, no parameter tuning.
+
+    '
+  reasoning: 'The criterion is fully determined before data; no decision needs to be made after the result is in except by the arbiter.
+
+    '
+ci_method:
+  type: paired_day_bootstrap
+  details: '1000 bootstrap resamples of the library at the (delivery_day, day_type) level (paired across h to preserve cross-horizon correlation). For each resample, refit (C_h, Sigma_h) and recompute M1 and M2.
+
+    '
+  width: 95 percent percentile interval
+affects_registered_spec: false
+related_memory:
+- mitacs-clim-gap-nonstationary
+- mitacs-theta-fibre-simplex
+- mitacs-theta-rail-pinning
+- mitacs-session-lessons-corpus
+related_seed:
+- notes/seeds/multiscale_factor_coherence.md

@@ -1,0 +1,30 @@
+schema: proponent
+written_at: '2026-05-26T13:05:00-04:00'
+git_sha: d57d73da20b9f6fba4df6e54e4e6a3d9685b5b64
+git_clean: false
+body_sha256: 498354be4b421b665e2f022d06546f0936efa7eb77f3f339bb2227f008f529cd
+references:
+- file: phase_a.yaml
+  body_sha256: bafe377f3e745951249430a0e72cee11ff02cff8d6544c74532526bbcc167080
+forecast:
+  value:
+    M1: 0.12
+    M2: 2.4
+  units: dimensionless ratios; M1 = relative Frobenius norm, M2 = diffusion diagonal ratio
+  reasoning: "M1: iterated drift composes well for small h (P_1^2 close to C_2 within numerical OLS noise) but slowly accumulates rotational drift at larger h. By h=12 the relative-Frobenius gap should be roughly 10 to 15 percent; capping at 0.12 as headline. M2: iterated covariance discards cross-step noise covariance that the directly-fit Sigma_h captures. The seed's \xA73 mechanism argues this defect is on the order of the destandardize-by-sigma amplification ratio, which at HE12 is roughly 1500 MW over 600 MW on the inner scalar coordinate \u2014 about 2.5x. Forecast: 2.4.\n"
+forecast_ci:
+  width: 0.95
+  low:
+    M1: 0.07
+    M2: 1.7
+  high:
+    M1: 0.2
+    M2: 3.5
+  reasoning: 'CI widths drawn from rough heuristic on the noise floor of the paired-day bootstrap (about 1300 pre-cutoff weekdays); M1 has tighter relative noise than M2 because Frobenius norm averages over matrix elements while M2 is a single scalar ratio.
+
+    '
+what_would_change_my_mind:
+- If M2 < 1.3 (no diffusion divergence), the seed's diffusion-as-load-bearing-object claim is empirically refuted; I retract picture (C).
+- "If M1 > 0.40 (drift divergence dominates), the seed's framing has the wrong axis \u2014 diffusion is not the load-bearing object."
+- If the synthetic VAR(1) baseline shows the same iterated-vs-direct gap, the gap is a methodological artifact, not Ontario dynamics.
+confidence: 0.55

@@ -1,0 +1,37 @@
+schema: devils_advocate
+written_at: '2026-05-26T13:05:00-04:00'
+git_sha: d57d73da20b9f6fba4df6e54e4e6a3d9685b5b64
+git_clean: false
+body_sha256: 2ad43ca72d8ebce1842161decb9f50d3b09763d2cd3e3d6b4896957be17d76d8
+references:
+- file: phase_a.yaml
+  body_sha256: bafe377f3e745951249430a0e72cee11ff02cff8d6544c74532526bbcc167080
+strongest_argument: "The directly-fit h-step factor C_h is an OLS coefficient relating z(t) to z(t+h) at the d=2 embedding. As h grows, z(t) and z(t+h) decorrelate (the AR(2) on z has all eigenvalues less than 1 \u2014 the production rebaseline confirms global OLS is what is run). The OLS slope collapses to zero plus noise at large h. Sigma_h correspondingly saturates at the unconditional variance of z. The iterated factor P_1^h Sigma_1 P_1^(h-1)^T does the same thing \u2014 but more slowly. So the iterated and directly-fit Sigma_h converge to the same number from different directions, and the seed's \"iteration underestimates\" prediction has the wrong sign at large h. At small h the iterated covariance may be larger than the direct one, not smaller. The seed's mechanism is plausible at intermediate h, but the sign of the inequality flips somewhere in the range. Empirically, M2 may be near 1, or even below 1.\n"
+specific_failure_modes:
+- rank: 1
+  mode: degenerate-large-h-factor
+  memory_ref: mitacs-theta-rail-pinning
+  likelihood: 0.45
+- rank: 2
+  mode: cosmetic-via-sigma-shrinkage
+  memory_ref: mitacs-clim-gap-nonstationary
+  likelihood: 0.15
+- rank: 3
+  mode: diagnostic-reimplements-production
+  memory_ref: mitacs-dayanchor-seam
+  likelihood: 0.1
+severity: serious
+counter_prediction:
+  value:
+    M1: 0.55
+    M2: 1.1
+  units: dimensionless ratios
+  reasoning: 'OLS estimate of C_h collapses toward zero as h grows (the correlation between z(t) and z(t+h) decays); the relative Frobenius gap ||C_h - P_1^h||_F / ||C_h||_F divides by a small number and becomes large. At the same time, iterated Sigma_h accumulates noise covariance that overshoots the direct Sigma_h (which is bounded by the unconditional variance of z), so the ratio is close to 1 or below.
+
+    '
+what_would_change_my_mind:
+- If M1 <= 0.20 (drift composes cleanly across h in {2,6,12,24}), the OLS-degeneracy concern is empirically wrong on this dataset.
+- If M2 > 1.5 with M1 small, the diffusion-divergence mechanism is real and structurally non-degenerate. Picture (C) is supported.
+opportunity_cost:
+  alternative: "Direct \xA76.3 backtest (skip \xA76.1 + \xA76.2 and go straight to the end-to-end direct-factor predictor). The backtest answers the practitioner question \u2014 does it predict better; the factor comparison answers a structural question.\n"
+  ranking: unclear

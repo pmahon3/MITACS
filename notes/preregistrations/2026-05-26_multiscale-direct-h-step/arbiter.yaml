@@ -1,0 +1,70 @@
+schema: arbiter
+written_at: '2026-05-26T15:35:00-04:00'
+git_sha: d57d73da20b9f6fba4df6e54e4e6a3d9685b5b64
+git_clean: false
+body_sha256: 772809ca8c8977d1cd1a393033ac5eef501e4b4adb93c0be3ca3fade33111b9f
+references:
+- file: phase_a.yaml
+  body_sha256: bafe377f3e745951249430a0e72cee11ff02cff8d6544c74532526bbcc167080
+- file: proponent.yaml
+  body_sha256: 498354be4b421b665e2f022d06546f0936efa7eb77f3f339bb2227f008f529cd
+- file: devils_advocate.yaml
+  body_sha256: 2ad43ca72d8ebce1842161decb9f50d3b09763d2cd3e3d6b4896957be17d76d8
+- file: result.yaml
+  body_sha256: 121a4ceb0ed89366395687e254e65441b668e5ee17255aa5a4bb689e506074fa
+preconditions:
+  code_path_passed: true
+  hash_chain_intact: true
+  result_from_clean_tree: false
+numerical_record:
+  result:
+    M1: 0.8471
+    M2: 0.7298
+    M1_ci_low: 0.8261
+    M1_ci_high: 0.896
+    M2_ci_low: 0.7192
+    M2_ci_high: 0.74
+  falsification_bar:
+    expression: M1 > 0.50  OR  (M2 in [0.7, 1.3] AND M1 <= 0.20)
+    M1_clause_fires: true
+    M2_AND_M1_clause_fires: false
+    cleared: true
+  corroboration_bar:
+    expression: M1 <= 0.20 AND M2 > 1.5
+    cleared: false
+  ambiguous_region:
+    expression: M1 in (0.20, 0.50] OR M2 in (1.3, 1.5]
+    result_inside: false
+  proponent_forecast:
+    M1: 0.12
+    M2: 2.4
+    M1_distance_from_result: 0.7271
+    M2_distance_from_result: 1.6702
+  devils_advocate_forecast:
+    M1: 0.55
+    M2: 1.1
+    M1_distance_from_result: 0.2971
+    M2_distance_from_result: 0.3702
+  closer_forecast_M1: devils_advocate
+  closer_forecast_M2: devils_advocate
+verdict: DEVILS-ADVOCATE-CONFIRMED
+verdict_reasoning: 'The falsification clause M1 > 0.50 fires cleanly (point estimate 0.847, CI [0.826, 0.896] entirely above 0.50). The result lies closer to the devils-advocate forecast than to the proponent on BOTH M1 and M2. The combination matches the arbiter rule for DEVILS-ADVOCATE-CONFIRMED. Critically, the synthetic VAR(1) consistency gate (secondary baseline) produced M1 = 1.83 on a system where the strict semigroup holds by construction. The devils-advocate explicitly predicted this in failure mode 1 (degenerate-large-h-factor): ||C_h||_F shrinks to the noise floor as h grows, making M1 = ||C_h - C_1^h||_F / ||C_h||_F divergent even when the numerator is comparably small. The metric M1 as defined in phase_a does not discriminate strict-semigroup from non-strict at large h. The diffusion ratio M2 also runs in the opposite direction from the proponent''s prediction (0.73 vs forecast 2.4): iterated Sigma_h is LARGER than direct Sigma_h at large h, not smaller. This is the devils-advocate''s
+  saturation-of-direct-Sigma argument, observed empirically.
+
+  '
+finding_status: PROVISIONAL
+if_provisional_what_to_reaudit:
+- Commit the audit-package + experiment-script additions; rerun with git_clean=true to clear the preconditions block.
+- Redefine M1 (e.g. absolute Frobenius norm, OR normalize by ||C_1||_F^h, OR a metric immune to the C_h -> 0 limit) and re-preregister; rerun with the same script.
+follow_up:
+  required: true
+  reasoning: 'The seed''s framing is falsified, but the metric M1 is degenerate at large h so the falsification reads partly as a metric artifact. Before declaring picture (C) refused, the metric needs to be re-specified. Pre-register a v2 experiment with a metric that handles the OLS-degeneracy regime.
+
+    '
+  proposed_phase_a: notes/preregistrations/2026-05-XX_multiscale-direct-h-step-v2/phase_a.yaml (TODO)
+calibration_record:
+  proponent_correct: false
+  devils_advocate_correct: true
+  topic_difficulty: hard
+memory_update_required: true
+memory_update_target: ~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md and a new entry mitacs-multiscale-direct-h-step-v1.md tagged PROVISIONAL.

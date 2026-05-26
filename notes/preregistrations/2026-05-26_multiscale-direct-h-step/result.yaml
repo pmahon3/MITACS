@@ -1,0 +1,78 @@
+schema: result
+written_at: '2026-05-26T15:30:00-04:00'
+git_sha: d57d73da20b9f6fba4df6e54e4e6a3d9685b5b64
+git_clean: false
+body_sha256: 121a4ceb0ed89366395687e254e65441b668e5ee17255aa5a4bb689e506074fa
+references:
+- file: phase_a.yaml
+  body_sha256: bafe377f3e745951249430a0e72cee11ff02cff8d6544c74532526bbcc167080
+artifact:
+  path: scratch/data/multiscale_factor/factors_final.pkl
+  grade: INSPECTION
+  emitted_by: experiment.multiscale_factor_coherence.__main__
+  inputs_fingerprint: null
+  body_sha256_artifact: null
+  notes: Pickle, not a make_result() artifact. Grade INSPECTION because the experiment script does not yet emit a make_result() envelope. Could be promoted to METHOD by adding --emit-result; this run was for the workflow validation.
+code_path_audit:
+  verdict: PRODUCTION-PATH
+  artifact: '/audit code-path on experiment/multiscale_factor_coherence/__main__.py: 8 production calls (load_pre_cutoff_actuals, zscore_params, zscore_transform, freeze.load_verified, _build_pre_cutoff, _daytype, global_ols_fit x2); 0 suspicious inline matches.'
+  blocking: false
+primary_result:
+  metric: composite_M1_M2
+  value:
+    M1: 0.8471
+    M2: 0.7298
+  ci_low:
+    M1: 0.8261
+    M2: 0.7192
+  ci_high:
+    M1: 0.896
+    M2: 0.74
+  ci_method_actually_used: paired_day_bootstrap_n=1000
+secondary_results:
+- name: synthetic_VAR1_gate
+  value:
+    M1: 1.8346
+    M2: 1.0671
+  ci_low: null
+  ci_high: null
+  notes: 'BOOTSTRAP NOT RUN ON SYNTHETIC GATE (single ground-truth realisation, n=50000 samples). M1=1.83 here on a system where the strict semigroup holds BY CONSTRUCTION reveals that M1 as defined is degenerate at large h: ||C_h||_F shrinks to noise floor as h grows, dividing by a near-zero number explodes M1 even when iterated and direct factors are numerically identical. The DEVILS-ADVOCATE specifically predicted this (failure mode 1: degenerate-large-h-factor). This is a methodology finding that QUALIFIES the Ontario M1 reading.'
+- name: per_dt_h_drift_rel
+  value:
+    saturday/h=2: 0.0889
+    saturday/h=6: 0.6555
+    saturday/h=12: 0.6793
+    saturday/h=24: 0.2684
+    sunday/h=2: 0.0317
+    sunday/h=6: 0.2998
+    sunday/h=12: 0.8471
+    sunday/h=24: 0.7207
+    weekday/h=2: 0.0495
+    weekday/h=6: 0.3174
+    weekday/h=12: 0.8425
+    weekday/h=24: 0.5311
+  ci_low: null
+  ci_high: null
+  notes: "At h=2 (across all day types): 0.03-0.09 \u2014 drift composes cleanly at short horizons. At h>=6: drift gap grows substantially. Pattern consistent with C_h decorrelating to noise floor."
+- name: per_dt_h_diffusion_ratio
+  value:
+    saturday/h=2: 1.0693
+    saturday/h=6: 0.6988
+    saturday/h=12: 0.4375
+    saturday/h=24: 0.3022
+    sunday/h=2: 0.9892
+    sunday/h=6: 0.8997
+    sunday/h=12: 0.6303
+    sunday/h=24: 0.3213
+    weekday/h=2: 1.033
+    weekday/h=6: 0.9046
+    weekday/h=12: 0.7298
+    weekday/h=24: 0.553
+  ci_low: null
+  ci_high: null
+  notes: "The diffusion ratio is below 1 at large h: iterated covariance is LARGER than directly-fit covariance. This is the OPPOSITE direction from the seed's proponent prediction (M2 > 1.5 = iteration UNDERESTIMATES). Mechanism is the devil's-advocate's saturation argument: direct Sigma_h saturates at the unconditional variance of z while iterated Sigma_h continues to accumulate via the (\u2605) sum past the saturation point."
+execution_deviations:
+- field: bootstrap_n
+  change: 1000 ran as registered
+  reasoning: no deviation; recording for completeness
+  advisor_consulted: false
