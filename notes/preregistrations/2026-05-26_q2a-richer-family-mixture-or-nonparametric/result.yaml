@@ -1,0 +1,175 @@
+schema: result
+written_at: 2026-05-26T21:58:25.565802+00:00Z
+references:
+- file: phase_a.yaml
+  body_sha256: c0a22c9e6cc708d3089a891a1eb7900e20e05e8816c673cad7bc77165bf138fe
+artifact:
+  primary_txt: experiment/results/q2a_richer_family.txt
+  pickle: scratch/data/distributional_class_q2a/q2a.pkl
+  grade: CLAIM
+  emitted_by: experiment.distributional_class_q2a.__main__
+  notes: Primary CLAIM artifact is the .txt under experiment/results/ written via
+    experiment.provenance.make_result (carries its own header + body hash). Pickle
+    holds the full PIT tables and fitted-params dicts for re-analysis.
+code_path_audit:
+  verdict: PRODUCTION-PATH
+  tool: .venv/bin/python -m experiment.audit.code_path experiment/distributional_class_q2a/__main__.py
+  blocking: false
+primary_result:
+  metric: effective_chi2 = min(chi2_M3, chi2_M4, chi2_M5) on post-cutoff marginal
+    PIT
+  value:
+    marginal_PIT_chi2_M3: 953.8433333333334
+    marginal_PIT_chi2_M4: 965.8066666666666
+    marginal_PIT_chi2_M5: 966.5966666666666
+    effective_chi2: 953.8433333333334
+    preferred_family: M3
+  ci_low:
+    marginal_PIT_chi2_M3: 695.510375
+    marginal_PIT_chi2_M4: 700.8931666666667
+    marginal_PIT_chi2_M5: 703.1903333333333
+    effective_chi2: 685.2315416666667
+  ci_high:
+    marginal_PIT_chi2_M3: 1356.91875
+    marginal_PIT_chi2_M4: 1386.1414166666666
+    marginal_PIT_chi2_M5: 1374.120375
+    effective_chi2: 1356.91875
+  ci_method_actually_used: paired_day_bootstrap_n=1000
+  outcome_verdict: R-B2
+  outcome_reason: effective_chi2 = min(M3=953.8, M4=965.8, M5=966.6) = 953.8 in (R-A2_cut
+    228.44, R-C2_cut 2284.44]; preferred family M3; richer families help but do not
+    fully calibrate; thread amendment required.
+secondary_results:
+- name: mixture_2_weights_and_scales_per_day_type
+  value:
+    weekday:
+      available: true
+      weights:
+      - 0.853928012247688
+      - 0.146071987752312
+      scales:
+      - 0.09451159021163125
+      - 0.240451778272014
+      n_library: 141908
+    saturday:
+      available: true
+      weights:
+      - 0.7135759301033521
+      - 0.2864240698966479
+      scales:
+      - 0.08823051777261376
+      - 0.20335374020797428
+      n_library: 28368
+    sunday:
+      available: true
+      weights:
+      - 0.7611026157565324
+      - 0.23889738424346763
+      scales:
+      - 0.09381354196721561
+      - 0.2083268642957325
+      n_library: 28389
+- name: mixture_3_weights_and_scales_per_day_type
+  value:
+    weekday:
+      available: true
+      weights:
+      - 0.5523076415749135
+      - 0.43849683851176985
+      - 0.00919551991331656
+      scales:
+      - 0.07451260038666072
+      - 0.15477489910023282
+      - 0.5216550369991383
+      n_library: 141908
+    saturday:
+      available: true
+      weights:
+      - 0.5427002462802558
+      - 0.4450102925180409
+      - 0.012289461201703164
+      scales:
+      - 0.07710925563242495
+      - 0.16533778577472244
+      - 0.40416478146669127
+      n_library: 28368
+    sunday:
+      available: true
+      weights:
+      - 0.5016926954298924
+      - 0.4845501056252681
+      - 0.013757198944839628
+      scales:
+      - 0.07676363230051611
+      - 0.15684455117538984
+      - 0.39901072239462465
+      n_library: 28389
+- name: kde_bandwidth_per_day_type
+  value:
+    weekday:
+      available: true
+      bandwidth: 0.008405920556460621
+      n_kde_samples: 141908
+      n_library: 141908
+    saturday:
+      available: true
+      bandwidth: 0.012229431595424549
+      n_kde_samples: 28368
+      n_library: 28368
+    sunday:
+      available: true
+      bandwidth: 0.012331093322390322
+      n_kde_samples: 28389
+      n_library: 28389
+- name: per_family_fitted_params_at_headline
+  value:
+    M3:
+      available: true
+      weights:
+      - 0.853928012247688
+      - 0.146071987752312
+      scales:
+      - 0.09451159021163125
+      - 0.240451778272014
+      n_library: 141908
+    M4:
+      available: true
+      weights:
+      - 0.5523076415749135
+      - 0.43849683851176985
+      - 0.00919551991331656
+      scales:
+      - 0.07451260038666072
+      - 0.15477489910023282
+      - 0.5216550369991383
+      n_library: 141908
+    M5:
+      available: true
+      bandwidth: 0.008405920556460621
+      n_kde_samples: 141908
+      n_library: 141908
+  notes: 'headline cell day-type: weekday'
+- name: pre_experiment_same_family_sanity
+  value:
+    mixture_2:
+      chi2: 16.48
+      n_lib: 2000
+      M: 50
+    mixture_3:
+      chi2: 5.55
+      n_lib: 2000
+      M: 50
+    kde:
+      chi2: 7.829999999999999
+      n_lib: 2000
+      M: 50
+  notes: Same-family null sanity check at kurt = 12.0; ceiling 60.0; per phase_a baselines.secondary.
+- name: pre_registered_cuts
+  value:
+    R-A2_cut: 228.44
+    R-C2_cut: 2284.44
+    source: experiment/results/q2a_synthetic_gate.txt body_sha256 2bab514e1049a89643ab69f45568400969c78c37939c3b188166e1a89c775c42
+execution_deviations: []
+git_sha: a904e7a0e3869c1a20b8965e6da46148fa0721db
+git_clean: true
+body_sha256: 6ae6ce53f8dc6b104fe108fdf127e56bee7cf8d44972fb88506935287d40d147
