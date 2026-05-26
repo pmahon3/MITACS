@@ -1,27 +1,42 @@
+---
 schema: thread
 written_at: '2026-05-26T10:30:00-04:00'
-git_sha: 920fcbc4ccb1a9744b979fcf321f15a4fcf7a383
+git_sha: c6487ec78fd0253d597c78dfe4b3c694dedf23bb
 git_clean: true
-body_sha256: bea8f70cd904f98a8af5ca9d0be39fd807b30e524b2d89b8e00dd3045080ddcb
+body_sha256: 042f997c3e46ad04bda5761eddf6800b76835132531bc24c7dcef92ccee8adc8
 references:
 - file: ../2026-05-26_pit-calendar-fingerprint/arbiter.yaml
   body_sha256: 376ebac7915643d6e75740ae94521e1175a37a2a6317d66cad0974311f7cf90d
   relation: root
 topic: distributional-class-thread
-question: 'What predictive-distribution class would render the iterated kappa-predictor marginally PIT-calibrated on post-cutoff Ontario data, and does the cross-scale coherence defect (the v2 finding) survive the kernel-family lift?
+question: 'What predictive-distribution class would render the iterated kappa-predictor
+  marginally PIT-calibrated on post-cutoff Ontario data, and does the cross-scale
+  coherence defect (the v2 finding) survive the kernel-family lift?
 
   '
 root:
-  description: 'The PIT-calendar-fingerprint arbiter (2026-05-26, SETTLED-AMBIGUOUS) documented that the iterated Gaussian forecast distribution has chi^2 = 22329 vs uniform PIT (critical 16.92), with 67% of values in extreme bins. This is the direct empirical consequence of treating the strongly non-Gaussian conditional innovation (mitacs-rebaseline-facts: excess kurtosis 24-33) as Gaussian. All current findings (including v2''s D_RATIO = 28.96) were computed within the Gaussian kernel commitment. Q1 lifts that commitment to the smallest non-trivial extension (Student-t) and tests both marginal calibration and the survival of the cross-scale coherence defect under the corrected kernel.
+  description: 'The PIT-calendar-fingerprint arbiter (2026-05-26, SETTLED-AMBIGUOUS)
+    documented that the iterated Gaussian forecast distribution has chi^2 = 22329
+    vs uniform PIT (critical 16.92), with 67% of values in extreme bins. This is the
+    direct empirical consequence of treating the strongly non-Gaussian conditional
+    innovation (mitacs-rebaseline-facts: excess kurtosis 24-33) as Gaussian. All current
+    findings (including v2''s D_RATIO = 28.96) were computed within the Gaussian kernel
+    commitment. Q1 lifts that commitment to the smallest non-trivial extension (Student-t)
+    and tests both marginal calibration and the survival of the cross-scale coherence
+    defect under the corrected kernel.
 
     '
   artifacts:
   - file: ../2026-05-26_pit-calendar-fingerprint/arbiter.yaml
     body_sha256: 376ebac7915643d6e75740ae94521e1175a37a2a6317d66cad0974311f7cf90d
-  scope_limits: 'This thread tests the PREDICTIVE-DISTRIBUTION CLASS axis only. It does NOT re-test missing-content (state-space dimension) questions under the corrected kernel; that is a separate follow-up thread if Q1 corroborates the kernel-family lift AND the v2 defect survives. It also does NOT propose a v3 registered predictor; that is downstream (and would require a fresh experiment.freeze registration).
+  scope_limits: 'This thread tests the PREDICTIVE-DISTRIBUTION CLASS axis only. It
+    does NOT re-test missing-content (state-space dimension) questions under the corrected
+    kernel; that is a separate follow-up thread if Q1 corroborates the kernel-family
+    lift AND the v2 defect survives. It also does NOT propose a v3 registered predictor;
+    that is downstream (and would require a fresh experiment.freeze registration).
 
     '
-current_node_id: Q2D
+current_node_id: Q2A
 state: active
 nodes:
   Q1:
@@ -31,16 +46,31 @@ nodes:
     parent_branch: null
     status: settled
     phase_a_skeleton:
-      metric_class: "Three nested models compared on post-cutoff Ontario data:\n  M0: Gaussian (the registered predictor; null baseline)\n  M1: Student-t kernel with one global nu per day-type;\n      location and scale fit as for M0\n  M2: Student-t with full kernel-family commitment:\n      (mu_{m,h}, s_{m,h}, nu_{m,h}) fit per (month, hour-of-day)\n      bin via Student-t MLE for the climatology, plus the M1\n      kernel for the operator.\nIteration of M1/M2 kernels is via SMC particle propagation\n(M=200, matching existing distributional_smc infrastructure).\nPrimary metric: chi^2_{10-bin} of the post-cutoff marginal PIT\nunder each model.\n"
+      metric_class: "Three nested models compared on post-cutoff Ontario data:\n \
+        \ M0: Gaussian (the registered predictor; null baseline)\n  M1: Student-t\
+        \ kernel with one global nu per day-type;\n      location and scale fit as\
+        \ for M0\n  M2: Student-t with full kernel-family commitment:\n      (mu_{m,h},\
+        \ s_{m,h}, nu_{m,h}) fit per (month, hour-of-day)\n      bin via Student-t\
+        \ MLE for the climatology, plus the M1\n      kernel for the operator.\nIteration\
+        \ of M1/M2 kernels is via SMC particle propagation\n(M=200, matching existing\
+        \ distributional_smc infrastructure).\nPrimary metric: chi^2_{10-bin} of the\
+        \ post-cutoff marginal PIT\nunder each model.\n"
       candidate_set:
       - M0_gaussian_baseline
       - M1_student_t_kernel_only
       - M2_student_t_full_commitment
       outcome_categories:
-      - R-A: marginal_PIT_chi2 <= 30 under M1 or M2 (Gaussian was the marginal problem; fixed by heavy-tailed kernel)
-      - R-B: marginal_PIT_chi2 in (30, 500] under M1/M2 (Student-t helps but doesn't fully calibrate; richer family needed)
-      - R-C: marginal_PIT_chi2 > 500 under both M1 and M2 (Student-t does not absorb S5; missing content not distributional class)
-      - R-D: MLE fit pathological (nu outside (2, 1000) or convergence failure); redesign
+      - R-A: marginal_PIT_chi2 <= 30 under M1 or M2 (Gaussian was the marginal problem;
+          fixed by heavy-tailed kernel)
+      - R-B: marginal_PIT_chi2 in (30, 500] under M1/M2 (Student-t helps but doesn't
+          fully calibrate; richer family needed)
+      - R-C: marginal_PIT_chi2 > 500 under both M1 and M2 (Student-t does not absorb
+          S5; missing content not distributional class)
+      - R-D: 'MLE pathological IFF the M1 (kernel) fit shows nu at boundary OR fewer
+          than 50% of M2 bins have a meaningful nu (< 200); under this revised criterion
+          Q1''s verdict would have read R-C (substantive). Original text (pre-amendment
+          A1): ''MLE fit pathological (nu outside (2, 1000) or convergence failure);
+          redesign''.'
       skeleton_thresholds_depend_on:
       - source: null
         field: null
@@ -56,14 +86,26 @@ nodes:
 
           '
     phase_a_path: 2026-05-26_q1-student-t-vs-gaussian/phase_a.yaml
-    notes: "Secondary tests (informational, not part of the verdict):\n\n(a) Empirical nu estimates per day-type. nu < 10 means\n    heavy-tailed is empirically required and propagates to all\n    future kernel-family decisions.\n\n(b) The Student-t analogue of D_RATIO at the v2 headline cell\n    (h=12, weekday), computed by SMC particle propagation of\n    M1's kernel and Wasserstein-2 (or sample-based KL) between\n    iterated and directly-fit kernels. Tests whether v2's\n    D_RATIO = 28.96 finding survives the kernel-family lift.\n    If D_RATIO_t shrinks to ~1, part of v2's signal was a\n    Gaussian-projection artifact. If it stays >= 5, picture (C)\n    survives the lift and the seed's working hypothesis is\n    independently corroborated.\n\nSynthetic gate: a known Student-t-VAR system (generator\n(L, Q, nu_true) producing finite-variance heavy-tailed data).\nM0 (Gaussian) should fail marginal PIT on the synthetic; M1\nand M2 should pass. Calibrates the test's discriminating power\n\
-      before any Ontario result is examined.\n"
+    notes: "Secondary tests (informational, not part of the verdict):\n\n(a) Empirical\
+      \ nu estimates per day-type. nu < 10 means\n    heavy-tailed is empirically\
+      \ required and propagates to all\n    future kernel-family decisions.\n\n(b)\
+      \ The Student-t analogue of D_RATIO at the v2 headline cell\n    (h=12, weekday),\
+      \ computed by SMC particle propagation of\n    M1's kernel and Wasserstein-2\
+      \ (or sample-based KL) between\n    iterated and directly-fit kernels. Tests\
+      \ whether v2's\n    D_RATIO = 28.96 finding survives the kernel-family lift.\n\
+      \    If D_RATIO_t shrinks to ~1, part of v2's signal was a\n    Gaussian-projection\
+      \ artifact. If it stays >= 5, picture (C)\n    survives the lift and the seed's\
+      \ working hypothesis is\n    independently corroborated.\n\nSynthetic gate:\
+      \ a known Student-t-VAR system (generator\n(L, Q, nu_true) producing finite-variance\
+      \ heavy-tailed data).\nM0 (Gaussian) should fail marginal PIT on the synthetic;\
+      \ M1\nand M2 should pass. Calibrates the test's discriminating power\nbefore\
+      \ any Ontario result is examined.\n"
   Q2A:
     id: Q2A
     name: richer-family-mixture-or-nonparametric
     parent_id: Q1
     parent_branch: R-B
-    status: closed
+    status: active
     phase_a_skeleton:
       metric_class: 'If Q1 fires R-B (Student-t helps but doesn''t fully calibrate),
 
@@ -85,8 +127,10 @@ nodes:
       outcome_categories:
       - R-A2: chi^2 < 30 under one of the richer families
       - R-B2: chi^2 in (30, 500] (further distributional richness still needed)
-      - R-C2: chi^2 > 500 (the marginal pathology is non-distributional; loop back to state-space content)
+      - R-C2: chi^2 > 500 (the marginal pathology is non-distributional; loop back
+          to state-space content)
     phase_a_path: null
+    reopened_by_amendment: A1
   Q2B:
     id: Q2B
     name: non-distributional-marginal-pathology-investigation
@@ -129,7 +173,7 @@ nodes:
     name: redesign-Q1
     parent_id: Q1
     parent_branch: R-D
-    status: active
+    status: closed
     phase_a_skeleton:
       metric_class: 'If Q1 fires R-D (MLE pathological), the Student-t fit was
 
@@ -149,13 +193,51 @@ nodes:
       outcome_categories:
       - any_converges_returns_to_Q1_with_corrected_fit
     phase_a_path: null
+    closure_reason: 'Closed under amendment A1. Mechanical advancement S1 routed Q1.R-D
+      -> Q2D (MLE redesign), but the substantive arbiter verdict was R-C: the M2 ν-saturation
+      that tripped the R-D criterion was the Student-t MLE''s correct response to
+      approximately-Gaussian bin-level data, not estimator failure. Q2D (MLE redesign)
+      would have rebuilt a working estimator. The substantive routing per the revised
+      R-D criterion is R-C -> Q2A (richer family).'
 branching_rules:
   Q1:
     R-A: null
     R-B: Q2A
     R-C: Q2B
     R-D: Q2D
-amendments: []
+amendments:
+- amendment_id: A1
+  written_at: '2026-05-26T17:15:00-04:00'
+  git_sha: c6487ec78fd0253d597c78dfe4b3c694dedf23bb
+  prior_tree_hash: bea8f70cd904f98a8af5ca9d0be39fd807b30e524b2d89b8e00dd3045080ddcb
+  reason: 'The Q1 arbiter (SETTLED 2026-05-26) rendered mechanical verdict R-D but
+    substantive verdict R-C, flagging the R-D criterion as a phase_a design hole.
+    The arbiter''s follow_up.reasoning proposed: ''MLE pathological IFF the M1 (kernel)
+    fit shows nu at boundary OR fewer than 50% of M2 bins have a meaningful nu (<
+    200). Under this revised criterion, Q1''s verdict reads R-C (M2''s Gaussian-at-bin-level
+    saturation is no longer pathological). The branching_rules.Q1.R-D = Q2D remains
+    (in case M1 itself fails), but Q1''s effective routing becomes R-C -> Q2A.'' This
+    amendment implements that proposal: revises the R-D criterion text on Q1''s settled
+    skeleton, closes Q2D (the mechanical advancement target whose premise no longer
+    holds), and reopens Q2A as the active substantive next node. branching_rules.Q1
+    is deliberately left unchanged because Procedure §2 forbids rewriting branching_rules
+    for settled nodes (S1 fired R-D -> Q2D; rewriting that map would rewrite history).
+    The override is recorded structurally via Q2D.status=closed + closure_reason and
+    Q2A.status=active + reopened_by_amendment=A1, and audit-trail-wise via this amendment
+    block. A future R-D firing (M1 itself failing) would still mechanically point
+    at Q2D, which would then need a separate status change.'
+  changes:
+  - 'nodes.Q1.phase_a_skeleton.outcome_categories[R-D]: revised text per arbiter follow_up
+    (original text preserved inline as quote)'
+  - 'nodes.Q2D.status: active -> closed'
+  - 'nodes.Q2D.closure_reason: added (cites mechanical/substantive verdict gap; reroutes
+    to Q2A)'
+  - 'nodes.Q2A.status: closed -> active'
+  - 'nodes.Q2A.reopened_by_amendment: A1 (added)'
+  - 'current_node_id: Q2D -> Q2A'
+  - 'branching_rules.Q1: UNCHANGED (procedure §2 forbids rewriting branching_rules
+    for settled nodes; the override is recorded structurally via node status changes
+    and this amendment block)'
 state_history:
 - advancement_id: S1
   written_at: '2026-05-26T16:50:00-04:00'
@@ -168,7 +250,11 @@ state_history:
   siblings_closed:
   - Q2A
   - Q2B
-  notes: Mechanical R-D advancement per pre-registered branching_rules. The arbiter explicitly flagged this transition as requiring a thread amendment to revise the R-D criterion (Q2D is the planned MLE redesign, but the substantive picture says criterion redesign is needed instead). See arbiter.yaml.thread_state_update.notes_for_thread_coordinator and arbiter.yaml.follow_up.
+  notes: Mechanical R-D advancement per pre-registered branching_rules. The arbiter
+    explicitly flagged this transition as requiring a thread amendment to revise the
+    R-D criterion (Q2D is the planned MLE redesign, but the substantive picture says
+    criterion redesign is needed instead). See arbiter.yaml.thread_state_update.notes_for_thread_coordinator
+    and arbiter.yaml.follow_up.
 - advancement_id: S2
   written_at: '2026-05-26T16:51:00-04:00'
   git_sha: pending
@@ -178,7 +264,8 @@ state_history:
   branch_fired: null
   node_settled: null
   siblings_closed: []
-  notes: Path-string fix on Q1.phase_a_path (registry-root-relative form). No state change.
+  notes: Path-string fix on Q1.phase_a_path (registry-root-relative form). No state
+    change.
 resolution:
   resolved_at: null
   final_state: null
