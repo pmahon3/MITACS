@@ -1,0 +1,70 @@
+schema: arbiter
+written_at: '2026-05-26T10:15:00-04:00'
+git_sha: d25510978975b9b76134e60980a42a00bf54a707
+git_clean: true
+body_sha256: 72eb451853844ccb74f0a2f027a515e226025b5bfec45b8fbf30b2ede46328f1
+references:
+- file: phase_a.yaml
+  body_sha256: 4152688b1154860b2448e397eed7aea589f8639e8c3e269536d36e3faa5ea706
+- file: proponent.yaml
+  body_sha256: eda4c1d45a96b079061cea8890f3f5b67495ef8f9e6eaec629105e0ea0bd4600
+- file: devils_advocate.yaml
+  body_sha256: 149f116326a0774cef4299bcd90a1cf24db682d6fad54e9b3a9749f8750081bf
+- file: result.yaml
+  body_sha256: 628a0d708178a6ef06204e4100f272d787fc935234461096ca855c539e26716e
+preconditions:
+  code_path_passed: true
+  hash_chain_intact: true
+  result_from_clean_tree: true
+numerical_record:
+  result:
+    value: 28.9625
+    ci_low: 26.8163
+    ci_high: 31.4272
+  falsification_bar:
+    value: 2.0
+    expression: D_RATIO <= 2.0
+    cleared: false
+  corroboration_bar:
+    value: 5.0
+    expression: D_RATIO > 5.0
+    cleared: true
+  ambiguous_region:
+    range: D_RATIO in (2.0, 5.0]
+    result_inside: false
+  proponent_forecast:
+    value: 12.0
+    distance_from_result: 16.91
+    direction_correct: true
+    note: Direction (corroboration) correct; magnitude underestimated. Result is BEYOND proponent's upper CI (25.0).
+  devils_advocate_forecast:
+    value: 2.0
+    distance_from_result: 26.91
+    direction_correct: false
+  closer_forecast: proponent
+verdict: PROPONENT-CONFIRMED
+verdict_reasoning: "Pre-registered corroboration criterion D_RATIO > 5.0 fires cleanly. The\n95% CI [26.82, 31.43] is entirely above the corroboration bar; the\nfalsification bar (2.0) and ambiguous region (2.0, 5.0] are both far\nbelow the lower CI edge. The result lies closer to the proponent's\nforecast (12.0; distance 16.9) than to the devils-advocate (2.0;\ndistance 26.9). The proponent had the correct DIRECTION (D_RATIO > 5)\nbut underestimated MAGNITUDE: result sits at 28.96, beyond the\nproponent's upper CI of 25.0. The devils-advocate's main concern \u2014\nthat the gap would be small in absolute terms \u2014 was correct in\nabsolute units (kl_ontario(weekday, h=12) = 0.035 nats is small) but\nwrong in relative terms (29x the synthetic noise floor is large).\nThe synthetic VAR(1) precondition gate passed (kl_syn = 0.0012 nats,\nwell below the 0.20 threshold), so the metric is well-posed at this h.\n"
+finding_status: SETTLED
+if_provisional_what_to_reaudit: []
+follow_up:
+  required: true
+  reasoning: "The verdict establishes that the iterated 1-step factor's predictive\ndistribution diverges substantially from the directly-fit h-step\ndistribution at every (day_type, h) cell. The relaxed-factorization\npicture (C) is empirically supported on this dataset. Three natural\nfollow-ups, in order of decreasing closeness to the registered question:\n\n1. \xA76.3 of the seed (direct-factor backtest): does the directly-fit\n   C_h, Sigma_h family produce better point forecasts AND better\n   interval calibration than iterated \u03BA_1? The structural answer is\n   yes (D_RATIO=29); the practitioner answer needs the backtest.\n\n2. Characterize the coherence defect's structure (\xA76.5 of the seed):\n   the per-(dt, h) KL table shows non-uniform structure (saturday/\n   sunday > weekday at same h; KL grows with h within each day_type;\n   sunday h=24 the single largest cell). Project the defect onto\n   eigenmodes of C_1 to identify which dynamical modes the embedding\n   misses.\n\
+    \n3. Joint (L, Q) inference (\xA76.4 of the seed): now that the\n   relaxed-factorization picture is supported, fitting a single\n   (L, Q) under the strict semigroup constraint will fail to match\n   the per-h KL profile. The pattern of failure is the structural\n   informative signal.\n"
+  proposed_phase_a: "notes/preregistrations/2026-MM-DD_direct-factor-backtest/phase_a.yaml (follow-up \xA76.3 of seed)"
+calibration_record:
+  proponent_correct: true
+  devils_advocate_correct: false
+  topic_difficulty: medium
+  notes: 'Hard for v1 because the v1 metric was degenerate; medium for v2
+
+    because the question was well-posed once the metric was fixed.
+
+    Proponent''s confidence on v2 was 0.40 (down from 0.55 on v1 after
+
+    the v1 retraction); calibration improved by acknowledging
+
+    uncertainty even though the direction was correct.
+
+    '
+memory_update_required: true
+memory_update_target: "~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md\n(update mitacs-multiscale-direct-h-step-v1 \u2192 reference v2 as the\n superseding entry; add mitacs-multiscale-direct-h-step-v2 tagged\n SETTLED with the headline D_RATIO=29 [27, 31] and the structural\n follow-up plan).\n"

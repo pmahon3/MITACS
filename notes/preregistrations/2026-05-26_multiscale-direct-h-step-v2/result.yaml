@@ -1,0 +1,108 @@
+schema: result
+written_at: '2026-05-26T10:00:00-04:00'
+git_sha: d25510978975b9b76134e60980a42a00bf54a707
+git_clean: true
+body_sha256: 628a0d708178a6ef06204e4100f272d787fc935234461096ca855c539e26716e
+references:
+- file: phase_a.yaml
+  body_sha256: 4152688b1154860b2448e397eed7aea589f8639e8c3e269536d36e3faa5ea706
+artifact:
+  path: scratch/data/multiscale_factor/factors_v2_final.pkl
+  grade: INSPECTION
+  emitted_by: experiment.multiscale_factor_coherence.__main__ --n-bootstrap 1000
+  inputs_fingerprint: null
+  body_sha256_artifact: null
+  notes: 'Pickle, not a make_result() artifact. Grade INSPECTION because the
+
+    experiment script does not yet emit a make_result() envelope. The
+
+    structural finding lives in arbiter.yaml; this row points at the
+
+    binary. Promote to METHOD by adding --emit-result in v3 if needed.
+
+    '
+code_path_audit:
+  verdict: PRODUCTION-PATH
+  artifact: '/audit code-path on experiment/multiscale_factor_coherence/__main__.py
+
+    after v2 changes (HEAD d255109): 8 production calls
+
+    (load_pre_cutoff_actuals, zscore_params, zscore_transform,
+
+    freeze.load_verified, _build_pre_cutoff, _daytype, global_ols_fit
+
+    twice); 0 suspicious inline patterns.
+
+    '
+  blocking: false
+primary_result:
+  metric: D_RATIO
+  value: 28.9625
+  ci_low: 26.8163
+  ci_high: 31.4272
+  ci_method_actually_used: paired_day_bootstrap_n=1000
+secondary_results:
+- name: kl_ontario_per_dt_h
+  value:
+    weekday/h=2: 0.001433
+    weekday/h=6: 0.008066
+    weekday/h=12: 0.034841
+    weekday/h=24: 0.100545
+    saturday/h=2: 0.005628
+    saturday/h=6: 0.052484
+    saturday/h=12: 0.161589
+    saturday/h=24: 0.272331
+    sunday/h=2: 0.000421
+    sunday/h=6: 0.028924
+    sunday/h=12: 0.072205
+    sunday/h=24: 0.329975
+  ci_low: null
+  ci_high: null
+  notes: 'Mean KL divergence (nats) per (day_type, horizon). Structural
+
+    pattern: KL grows with h within each day_type; saturday/sunday
+
+    KL substantially larger than weekday at same h; sunday h=24 is
+
+    the largest single cell (0.330 nats). All cells are positive and
+
+    above the synthetic noise floor profile (max syn KL across h was
+
+    0.0012). The strict-semigroup picture is empirically inadequate
+
+    across the entire (day_type, h) grid, not just at the headline
+
+    (weekday, h=12) cell.
+
+    '
+- name: kl_synthetic_per_h
+  value:
+    h=2: 7.61e-05
+    h=6: 0.000953
+    h=12: 0.001203
+    h=24: 0.0011275
+  ci_low: null
+  ci_high: null
+  notes: "Synthetic VAR(1) consistency gate; strict semigroup holds by\nconstruction. KL saturates around 0.001 nats above h=6, well\nbelow the registered V2_SYNTHETIC_NOISE_FLOOR_MAX = 0.20 nats.\nPRECONDITION GATE PASSED before Ontario reporting. Cross-checked\nacross 7 RNG seeds: synthetic kl(h=12) ranges 0.0011-0.0016\n(factor-of-1.5 spread); even worst-case synthetic seed would\ngive D_RATIO \u2248 22, still well above corroboration bar 5.0.\n"
+- name: v1_M1_retained
+  value:
+    M1: 0.8471
+    M2: 0.7298
+  ci_low:
+    M1: 0.8261
+    M2: 0.7192
+  ci_high:
+    M1: 0.896
+    M2: 0.74
+  notes: "v1 metrics retained for cross-reference. Numerically identical\nto v1 result (the underlying fits did not change). M1 = 0.85\nreads as \"drift gap is large\" but is METHODOLOGICALLY\nDEGENERATE (synthetic VAR(1) also gives M1=1.83 on a\nstrict-semigroup system). v1's M1 \u2264 0.20 corroboration bar was\nbased on the wrong metric; the v2 KL metric replaces it.\n"
+execution_deviations:
+- field: synthetic_seed
+  change: seed=1 used (the default); cross-checked stability across seeds {1, 2, 3, 7, 42, 100, 1000} as a sanity check during interpretation
+  reasoning: 'The cross-seed stability check is a robustness annotation, NOT a
+
+    phase_a-promised analysis. The headline numbers use seed=1 per
+
+    the script default; the stability spread is informational.
+
+    '
+  advisor_consulted: false
