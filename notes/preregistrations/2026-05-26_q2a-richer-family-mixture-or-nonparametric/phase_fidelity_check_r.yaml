@@ -1,0 +1,130 @@
+schema: phase_fidelity
+written_at: '2026-05-26T22:15:00-04:00'
+references:
+- file: phase_a.yaml
+  body_sha256: c0a22c9e6cc708d3089a891a1eb7900e20e05e8816c673cad7bc77165bf138fe
+- file: result.yaml
+  body_sha256: 6ae6ce53f8dc6b104fe108fdf127e56bee7cf8d44972fb88506935287d40d147
+checked_by: phase-fidelity agent (.claude/agents/phase-fidelity.md), Check R
+purpose: 'Verify that result.yaml reports what phase_a registered. This is the
+
+  BLOCKING precondition (fidelity_coverage_passed) for the arbiter.
+
+  '
+primary_metric_match:
+  verdict: PASS
+  detail: "phase_a.metric (verdict metric definition): \"effective_chi2 = min(chi2_M3,\n\
+    chi2_M4, chi2_M5)\" where each chi2_Mk is the 10-bin chi-square of the\npost-cutoff\
+    \ marginal PIT under family Mk.\nresult.yaml.primary_result.metric: \"effective_chi2\
+    \ = min(chi2_M3, chi2_M4,\nchi2_M5) on post-cutoff marginal PIT\" \u2014 matches.\n"
+dependent_variables_coverage:
+  weekday_count: null
+  per_variable:
+    marginal_PIT_chi2_M3:
+      verdict: PASS
+      location: primary_result.value.marginal_PIT_chi2_M3 = 953.843
+    marginal_PIT_chi2_M4:
+      verdict: PASS
+      location: primary_result.value.marginal_PIT_chi2_M4 = 965.807
+    marginal_PIT_chi2_M5:
+      verdict: PASS
+      location: primary_result.value.marginal_PIT_chi2_M5 = 966.597
+    effective_chi2:
+      verdict: PASS
+      location: primary_result.value.effective_chi2 = 953.843
+    mixture_2_weights_and_scales_per_day_type:
+      verdict: PASS
+      location: 'secondary_results[0] = mixture_2_weights_and_scales_per_day_type
+
+        (full weights + scales reported per day-type: weekday, saturday, sunday)
+
+        '
+    mixture_3_weights_and_scales_per_day_type:
+      verdict: PASS
+      location: 'secondary_results[1] = mixture_3_weights_and_scales_per_day_type
+
+        (full weights + scales reported per day-type: weekday, saturday, sunday)
+
+        '
+    kde_bandwidth_per_day_type:
+      verdict: PASS
+      location: 'secondary_results[2] = kde_bandwidth_per_day_type
+
+        (bandwidth + n_kde_samples + n_library reported per day-type)
+
+        '
+ci_method_match:
+  verdict: PASS
+  detail: 'phase_a.ci_method: type = paired_day_bootstrap, details = "1000 paired-day
+
+    bootstraps of post-cutoff days. Per resample, recompute chi^2 per family
+
+    and effective_chi2 = min across families. Report 95% CI on each headline
+
+    number (per-family chi^2 and effective_chi2)."
+
+    result.yaml.primary_result.ci_method_actually_used = paired_day_bootstrap_n=1000
+
+    Per-family CIs reported under ci_low + ci_high; effective_chi2 CI is
+
+    explicitly recomputed inside each resample (matches phase_a wording; .txt
+
+    body line "min(chi^2) recomputed INSIDE each resample (per advisor /
+
+    fairness)").
+
+    '
+independent_variable_stratifications:
+  per_variable:
+    kernel_family:
+      verdict: PASS
+      detail: 'Three families (M3, M4, M5) each reported as separate chi^2 columns
+
+        with per-family bootstrap CIs.
+
+        '
+    day_type:
+      verdict: PASS-WITH-NOTE
+      detail: "day_type stratification IS covered for FITTED PARAMETERS (mixture-2\n\
+        weights/scales, mixture-3 weights/scales, KDE bandwidth all reported\nper\
+        \ (weekday, saturday, sunday)). Per phase_a.variables.dependent,\nthe per-day-type\
+        \ fitted parameters are registered; the pooled chi^2\nper family is the registered\
+        \ verdict metric. Phase_a's metric block\nSECONDARY bullet \"chi^2 per family\
+        \ stratified by day_type\" is a phase_a-\nregistered SECONDARY observation\
+        \ (sanity-check reporting; \"not part of\nthe verdict\"), not in variables.dependent.\n\
+        \nThese per-day-type chi^2 values are RECOVERABLE from the pickle\n(scratch/data/distributional_class_q2a/q2a.pkl,\
+        \ pit_tables[fam] has\nday_type column) but are NOT explicitly tabulated in\
+        \ result.yaml.\nRecomputed inline for arbiter convenience (NOT a Check R deficiency\n\
+        since they are not in variables.dependent):\n  M3: weekday=299.4   saturday=1184.7\
+        \   sunday=565.3\n  M4: weekday=271.8   saturday=1183.7   sunday=546.7\n \
+        \ M5: weekday=272.2   saturday=1164.3   sunday=571.8\nSaturday is consistently\
+        \ the worst-calibrated day-type (~4x weekday's\nchi^2); weekday best. The\
+        \ pooled ~950 figure averages these. The\narbiter may legitimately incorporate\
+        \ these inline-recomputed\nsecondaries since they are derivable from a reported\
+        \ pit_tables\nartifact and were phase_a-registered as a secondary observation.\n"
+shape_outcomes_evaluable:
+  verdict: PASS
+  detail: "phase_a.shape_outcomes:\n  R-A2: effective_chi2 <= 228.44\n  R-B2: effective_chi2\
+    \ in (228.44, 2284.44]\n  R-C2: effective_chi2 > 2284.44\nresult.yaml.primary_result.value.effective_chi2\
+    \ = 953.843\nThree mutually exclusive numeric criteria; reported numeric value\
+    \ is\nsufficient to fire exactly one: R-B2 (953.843 is in (228.44, 2284.44]).\n\
+    result.yaml even includes a pre-computed verdict label\n(primary_result.outcome_verdict\
+    \ = R-B2) for the arbiter's convenience,\nderivable from the numeric content alone.\n"
+aggregate_verdict: PASS
+fidelity_coverage_passed: true
+notes_for_arbiter: "Check R: PASS. All phase_a dependent variables present in result.yaml;\n\
+  ci_method matches; primary metric definition matches; shape_outcomes are\nevaluable\
+  \ from reported numerics; day_type stratification is covered for\nthe registered\
+  \ per-day-type fitted parameters.\n\nThe per-day-type pooled chi^2 (a phase_a-registered\
+  \ SECONDARY observation,\nnot a variables.dependent) is recoverable from the pickle\
+  \ PIT tables and\nhas been recomputed inline above for the arbiter's substantive\
+  \ reasoning.\nNotable substantive content: saturday is roughly 4x weekday's chi^2\
+  \ across\nall three families \u2014 the pooled marginal pathology has a heavy\n\
+  day-type-asymmetry component, consistent with the eigenmodes-v1 finding of\nstructural\
+  \ weekday/weekend asymmetry. The arbiter may note this in the\nverdict_reasoning\
+  \ but it does not affect the mechanical R-A2/R-B2/R-C2\ndetermination (which is\
+  \ on the pooled effective_chi2 alone).\n\nArbiter precondition fidelity_coverage_passed:\
+  \ true.\n"
+git_sha: 4a91b0792e8338e1620e9b25cb9db79ea40ec379
+git_clean: true
+body_sha256: 93401cb40cbeb702c7cf6737684b0e26f56ecf7a6b8df847e9b34a8beb307b95
