@@ -1,4 +1,4 @@
-"""Q2A synthetic gate — derive chi^2 cuts from sample-size-matched null.
+"""Q2A synthetic gate — chi^2 cuts under a three-variant weight sweep.
 
 Pre-experiment calibration for the distributional-class thread's Q2A
 node ("richer-family-mixture-or-nonparametric";
@@ -8,6 +8,25 @@ pre-registered chi^2 thresholds in Q2A's phase_a.yaml. The gate
 STOPS at producing these cuts — it does NOT touch any Ontario
 post-cutoff data, propose phase_a content, or render verdicts.
 
+Three-variant sweep (added in response to the
+weight-choice-sensitivity concern surfaced when the "w_min = 3/kurt"
+rule was found at the Pearson kurtosis ceiling):
+
+  V1 (fixed)        : prior gate's design (mix-2 w_r = 0.05; mix-3
+                      w = (0.8, 0.15, 0.05) at every kurt; scales
+                      solved per kurt).
+  V2 (alpha=0.5)    : w_min(kurt) = 0.5 * 3/kurt = 1.5/kurt. mix-3
+                      bulk weights split evenly: (w_b, w_b, w_r)
+                      with 2 w_b + w_r = 1. mix-3 scales keep V1's
+                      asymmetric-bulk pattern (s1=1, s2=2); s3
+                      solved per (kurt, weights).
+  V3 (rho=10)       : pin s_rare/s_bulk = 10. mix-3 is
+                      bulk-symmetric (s_b1 = s_b2 = 1, s_r = 10).
+                      Solve w_r(kurt) per family from the closed
+                      form, take the falling-branch root (rare
+                      heavy-tail interpretation matching the prior
+                      gate's design).
+
 Pre-registered gate parameters (user-confirmed 2026-05-26):
 
   KURT_SWEEP     = (12, 20, 28, 40)  Pearson kurtosis (Gaussian = 3).
@@ -15,49 +34,49 @@ Pre-registered gate parameters (user-confirmed 2026-05-26):
   M_PARTICLES    = 200               matches Q1 SMC.
   N_PIT_BINS     = 10                matches Q1.
   FAMILIES       = ("mixture_2", "mixture_3", "kde").
+  VARIANTS       = ("V1_fixed", "V2_alpha0.5", "V3_rho10").
 
-Two passes per (family, kurt):
+Two passes per (variant, family, kurt):
 
   Same-family : library drawn AND fit/scored with the same family.
                 95th percentile of the resulting chi^2 distribution is
                 the upper edge of "calibrated under correct family".
   Cross-family: library drawn from family X, fit/scored with family Y
-                (6 ordered pairs per kurt). 99th percentile of the
-                resulting chi^2 distribution is the lower edge of
-                "discriminably mis-specified".
+                (6 ordered pairs per kurt per variant). 99th percentile
+                of the resulting chi^2 distribution is the lower edge
+                of "discriminably mis-specified".
 
-Cuts:
+Final cuts (variant-max aggregation; conservative for phase_a):
 
-  R-A2 cut = max over (family, kurt) of: 95th-pct same-family chi^2
-  R-C2 cut = max(10 * R-A2_cut, 99th-pct cross-family chi^2)
-  R-B2 band = (R-A2_cut, R-C2_cut)
+  R-A2 cut = max over (variant, family, kurt)         of 95th-pct same-family chi^2
+  R-C2 cut = max(10 * R-A2_cut,
+                 max over (variant, lib, fit, kurt)   of 99th-pct cross-family chi^2)
+  R-B2 band = (R-A2_cut, R-C2_cut]
 
 Code-path discipline (CLAUDE.md §"Discipline rule"): production
-fitters are the three new estimator entry points
+fitters are the three estimator entry points
 (``mixture_2_gaussian_mle_fit``, ``mixture_3_gaussian_mle_fit``,
 ``kde_residual_fit``) — never reimplemented inline here. The library
 generator uses a hardcoded ``C_TRUE`` literal so it avoids the
 ``np.linalg.lstsq``/inline-covariance audit traps; all OLS happens
 inside the fitters.
 
-Generator parameterisations (deviation from task spec, justified by
-the kurtosis algebra ``Pearson kurt = 3 * sum(w_k s_k^4) / (sum(w_k
-s_k^2))^2``):
+Generator parameterisations:
 
-* mix-2 generator: ``w = (0.95, 0.05)``, ``s1 = 1``, ``s2`` solved per
-  kurt. The asymptotic ceiling ``3/w_min = 60`` covers the sweep
-  (max kurt 40). The task spec's ``w2 = 0.3`` caps kurt at ``3/0.3 =
-  10``, infeasible for the registered sweep; the smaller w2 carries
-  the same "heavy-tail-from-a-rare-component" shape.
-* mix-3 generator: ``w = (0.8, 0.15, 0.05)``, ``s1 = 1``, ``s2 = 2``,
-  ``s3`` solved per kurt. Same ceiling ``3/0.05 = 60``. Distinguishable
-  from mix-2 by the intermediate component.
-* KDE generator: 10,000 samples from the kurt-matched mix-2 above,
-  with KDE bandwidth = Silverman on those samples. Closest to the
-  spec's "non-parametric residual law".
+* mix-2 generator: scales (s1=1, s2) with weights (1-w_r, w_r).
+  Closed form for s2 given (kurt, w_r) in ``_solve_mix2_s2``.
+* mix-3 generator: scales (s1=1, s2, s3) with weights (w1, w2, w3).
+  Closed form for s3 given (kurt, weights, s1, s2) in
+  ``_solve_mix3_s3``.
+* mix-3 V3 special case: bulk-symmetric (s2 = s1 = 1, s3 = 10);
+  closed form for w_r given (kurt, rho) is the same quadratic as the
+  mix-2 V3 case (symmetric bulks collapse marginally to a single
+  bulk; the fitter still sees a 3-component model).
+* KDE generator: 10,000 samples from the kurt-matched mix-2 above
+  (the V1 mix-2, fixed across variants — the KDE family is variant-
+  independent at the generator level), with bandwidth = Silverman.
 
-Closed-form derivations are in ``_solve_mix2_s2`` and
-``_solve_mix3_s3`` docstrings.
+Closed-form derivations are in the helper docstrings below.
 
 Run standalone::
 
@@ -72,7 +91,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 
 import numpy as np
 import ray
@@ -93,6 +112,7 @@ K_REPS: int = 500
 M_PARTICLES: int = 200
 N_PIT_BINS: int = 10
 FAMILIES: tuple[str, ...] = ("mixture_2", "mixture_3", "kde")
+VARIANTS: tuple[str, ...] = ("V1_fixed", "V2_alpha0.5", "V3_rho10")
 N_LIBRARY: int = 5000
 
 # Synthetic trajectory length derived from the registered Ontario
@@ -112,36 +132,57 @@ RNG_SEED_BASE: int = 20260526
 D_EMBED: int = 2
 C_TRUE: np.ndarray = np.array([[0.7], [0.2]], dtype=float)
 
-# mix-2 generator weights / mix-3 generator weights / mix-3 fixed s2
-_MIX2_W2: float = 0.05      # rare heavy component
-_MIX3_W: tuple[float, float, float] = (0.80, 0.15, 0.05)
-_MIX3_S2: float = 2.0
+# V1 fixed weights / V1 fixed mix-3 inner scale (s2)
+_V1_MIX2_W2: float = 0.05
+_V1_MIX3_W: tuple[float, float, float] = (0.80, 0.15, 0.05)
+_V1_MIX3_S2: float = 2.0
+
+# V2 fraction-of-ceiling parameter (w_min = alpha * 3/kurt)
+_V2_ALPHA: float = 0.5
+
+# V3 scale ratio (s_rare / s_bulk)
+_V3_RHO: float = 10.0
 
 # Stable enumeration for deterministic per-cell seeds. Python's built-in
-# ``hash`` randomises per interpreter session (PYTHONHASHSEED), so
-# ``hash((library_kind, fit_kind, int(kurt), rep))`` is NON-reproducible
-# across runs and a provenanced artifact derived from it would not be
-# reproducible from its recorded ``git_sha``. We encode the cell tuple
-# into a deterministic 32-bit integer instead.
+# ``hash`` randomises per interpreter session (PYTHONHASHSEED), so a
+# tuple hash would be NON-reproducible across runs and a provenanced
+# artifact derived from it would not be reproducible from its recorded
+# ``git_sha``. We encode the cell tuple into a deterministic 32-bit
+# integer instead.
 _FAMILY_ORD: dict[str, int] = {"mixture_2": 0, "mixture_3": 1, "kde": 2}
+_VARIANT_ORD: dict[str, int] = {"V1_fixed": 0, "V2_alpha0.5": 1, "V3_rho10": 2}
 
 
-def _cell_seed(library_kind: str, fit_kind: str, kurt: float, rep: int) -> int:
-    """Deterministic seed for the ``(library, fit, kurt, rep)`` cell.
+def _cell_seed(variant: str, library_kind: str, fit_kind: str, kurt: float, rep: int) -> int:
+    """Deterministic seed for the ``(variant, library, fit, kurt, rep)`` cell.
 
-    Encoded so the four axes occupy disjoint bit ranges -- no aliasing
+    Encoded so the five axes occupy disjoint bit ranges -- no aliasing
     across cells, deterministic across interpreters.
+
+    Field widths in the 32-bit envelope:
+        variant : 2 bits  (positions 30..31)
+        library : 2 bits  (positions 28..29)
+        fit     : 2 bits  (positions 26..27)
+        kurt    : 8 bits  (positions 18..25, kurt mod 256)
+        rep     : 18 bits (positions  0..17, rep mod 2^18)
+    Then offset by RNG_SEED_BASE mod 2^32.
     """
+    var_i = _VARIANT_ORD[variant]
     lib_i = _FAMILY_ORD[library_kind]
     fit_i = _FAMILY_ORD[fit_kind]
     kurt_i = int(kurt)
-    # field widths: lib=2 bits, fit=2 bits, kurt=8 bits (0..255), rep=20 bits (0..1M)
-    code = (lib_i << 30) | (fit_i << 28) | ((kurt_i & 0xFF) << 20) | (rep & 0xFFFFF)
+    code = (
+        ((var_i & 0x3) << 30)
+        | ((lib_i & 0x3) << 28)
+        | ((fit_i & 0x3) << 26)
+        | ((kurt_i & 0xFF) << 18)
+        | (rep & 0x3FFFF)
+    )
     return (RNG_SEED_BASE + code) & 0xFFFFFFFF
 
 
-# ─── kurtosis-to-scale closed forms ─────────────────────────────────────────
-def _solve_mix2_s2(K: float, w2: float = _MIX2_W2, s1: float = 1.0) -> float:
+# ─── kurtosis-to-scale closed forms (for V1, V2: solve scales given weights) ─
+def _solve_mix2_s2(K: float, w2: float, s1: float = 1.0) -> float:
     """Closed-form ``s2`` for a centred mix-2 with target Pearson kurt ``K``.
 
     Pearson kurt of a centred mixture of zero-mean Gaussians
@@ -172,8 +213,8 @@ def _solve_mix2_s2(K: float, w2: float = _MIX2_W2, s1: float = 1.0) -> float:
 
 def _solve_mix3_s3(
     K: float,
-    w: tuple[float, float, float] = _MIX3_W,
-    s12: tuple[float, float] = (1.0, _MIX3_S2),
+    w: tuple[float, float, float],
+    s12: tuple[float, float],
 ) -> float:
     """Closed-form ``s3`` for a centred mix-3 with target Pearson kurt ``K``,
     pinning ``s1`` and ``s2``.
@@ -204,70 +245,235 @@ def _solve_mix3_s3(
     raise ValueError(f"no heavy-tail root for kurt={K}")
 
 
-# ─── true-family residual samplers ──────────────────────────────────────────
+# ─── V3 inverse closed form: solve w_r given scale ratio ────────────────────
+def _solve_v3_wr_from_rho(K: float, rho: float = _V3_RHO) -> float:
+    """For a mix-2 with scales ``(1, rho)`` and weights ``(1-w_r, w_r)``,
+    solve ``w_r`` so the Pearson kurt equals ``K``.
+
+    From ``K * (w_b + w_r rho^2)^2 = 3 (w_b + w_r rho^4)`` with
+    ``w_b = 1 - w_r``, let ``a = rho^2 - 1`` and ``b = rho^4 - 1``:
+
+        K * (1 + a w_r)^2 = 3 (1 + b w_r)
+
+    is quadratic in ``w_r`` (``K a^2 w_r^2 + (2 K a - 3 b) w_r + (K - 3) = 0``).
+    There are typically two valid roots in ``(0, 1)``:
+        * rising-branch (small ``w_r``): a very-rare extreme component
+          whose finite-sample sampling distribution is degenerate at
+          ``N_LIBRARY = 5000``.
+        * falling-branch (larger ``w_r``): the heavy-tail-rare-but-
+          observable interpretation matching V1's design (V1's ``w_r =
+          0.05`` lies on this branch).
+    We take the falling-branch (max-valid) root to match V1 in
+    interpretation; this is what makes V1 vs V3 a substantive
+    comparison rather than a pathological corner-case.
+
+    The same algebra applies to V3's bulk-symmetric mix-3 since the two
+    bulks collapse marginally to a single bulk -- the fitter still sees
+    a 3-component model.
+    """
+    a = rho * rho - 1.0
+    b = rho ** 4 - 1.0
+    A = K * a * a
+    B = 2.0 * K * a - 3.0 * b
+    C_ = K - 3.0
+    disc = B * B - 4.0 * A * C_
+    if disc < 0:
+        raise ValueError(f"V3 w_r infeasible for kurt={K}, rho={rho}: disc<0")
+    r_hi = (-B + np.sqrt(disc)) / (2.0 * A)
+    r_lo = (-B - np.sqrt(disc)) / (2.0 * A)
+    valid = [r for r in (r_hi, r_lo) if 0.0 < r < 1.0]
+    if not valid:
+        raise ValueError(
+            f"V3 w_r infeasible for kurt={K}, rho={rho}: roots {r_hi}, {r_lo} not in (0,1)"
+        )
+    return float(max(valid))   # falling-branch / observable-rare-tail root
+
+
+# ─── analytic kurt verifier (closed form, used by reachability gate) ────────
+def _closed_form_kurt(weights: Iterable[float], scales: Iterable[float]) -> float:
+    """Pearson kurt of a centred Gaussian mixture in closed form."""
+    w = np.asarray(weights, dtype=float)
+    s = np.asarray(scales, dtype=float)
+    num = (w * s ** 4).sum()
+    den = (w * s ** 2).sum() ** 2
+    return float(3.0 * num / den)
+
+
+# ─── per-variant generator specs ────────────────────────────────────────────
+@dataclass(frozen=True)
+class GeneratorSpec:
+    """Resolved generator parameters for one (variant, family, kurt) cell."""
+    variant: str
+    family: str
+    kurt_target: float
+    weights: tuple[float, ...]
+    scales: tuple[float, ...]
+
+    def closed_form_kurt(self) -> float:
+        return _closed_form_kurt(self.weights, self.scales)
+
+
+def _v1_spec(family: str, kurt: float) -> GeneratorSpec:
+    """V1 fixed-weight generator."""
+    if family == "mixture_2":
+        w_r = _V1_MIX2_W2
+        s2 = _solve_mix2_s2(kurt, w_r)
+        return GeneratorSpec("V1_fixed", family, kurt, (1.0 - w_r, w_r), (1.0, s2))
+    if family == "mixture_3":
+        s3 = _solve_mix3_s3(kurt, _V1_MIX3_W, (1.0, _V1_MIX3_S2))
+        return GeneratorSpec(
+            "V1_fixed", family, kurt, _V1_MIX3_W, (1.0, _V1_MIX3_S2, s3)
+        )
+    # KDE generator is variant-independent (samples from the V1 mix-2 reservoir).
+    if family == "kde":
+        w_r = _V1_MIX2_W2
+        s2 = _solve_mix2_s2(kurt, w_r)
+        return GeneratorSpec("V1_fixed", family, kurt, (1.0 - w_r, w_r), (1.0, s2))
+    raise ValueError(f"unknown family {family!r}")
+
+
+def _v2_spec(family: str, kurt: float) -> GeneratorSpec:
+    """V2 fraction-of-ceiling generator (w_min = alpha * 3/kurt)."""
+    w_r = _V2_ALPHA * 3.0 / kurt
+    if family == "mixture_2":
+        s2 = _solve_mix2_s2(kurt, w_r)
+        return GeneratorSpec("V2_alpha0.5", family, kurt, (1.0 - w_r, w_r), (1.0, s2))
+    if family == "mixture_3":
+        # Bulk split evenly: (w_b, w_b, w_r) with 2 w_b + w_r = 1.
+        # Keep V1's asymmetric-bulk SCALE structure (s1=1, s2=2) so the
+        # mix-3 marginal genuinely differs from mix-2 (advisor note:
+        # bulk-symmetric scales would collapse mix-3 to mix-2 marginally
+        # and destroy cross-family discriminability).
+        w_b = (1.0 - w_r) / 2.0
+        w_tuple = (w_b, w_b, w_r)
+        s3 = _solve_mix3_s3(kurt, w_tuple, (1.0, _V1_MIX3_S2))
+        return GeneratorSpec(
+            "V2_alpha0.5", family, kurt, w_tuple, (1.0, _V1_MIX3_S2, s3)
+        )
+    if family == "kde":
+        # KDE generator under V2: same convention as V1 (samples from
+        # the variant's mix-2 reservoir at the same w_r).
+        s2 = _solve_mix2_s2(kurt, w_r)
+        return GeneratorSpec("V2_alpha0.5", family, kurt, (1.0 - w_r, w_r), (1.0, s2))
+    raise ValueError(f"unknown family {family!r}")
+
+
+def _v3_spec(family: str, kurt: float) -> GeneratorSpec:
+    """V3 pin-scale-ratio generator (s_rare/s_bulk = rho)."""
+    w_r = _solve_v3_wr_from_rho(kurt, _V3_RHO)
+    if family == "mixture_2":
+        return GeneratorSpec("V3_rho10", family, kurt, (1.0 - w_r, w_r), (1.0, _V3_RHO))
+    if family == "mixture_3":
+        # Bulk-symmetric mix-3: s_b1 = s_b2 = 1, s_r = rho.
+        # Weights: (w_b, w_b, w_r) with 2 w_b + w_r = 1.
+        # Marginally collapses to V3 mix-2 by construction (two
+        # co-located bulks behave as one); the fitter still sees a
+        # 3-component model so cross-family mixture_2 vs mixture_3
+        # remains a model-complexity test.
+        w_b = (1.0 - w_r) / 2.0
+        return GeneratorSpec(
+            "V3_rho10", family, kurt, (w_b, w_b, w_r), (1.0, 1.0, _V3_RHO)
+        )
+    if family == "kde":
+        # KDE under V3: reservoir from the V3 mix-2 at this w_r.
+        return GeneratorSpec("V3_rho10", family, kurt, (1.0 - w_r, w_r), (1.0, _V3_RHO))
+    raise ValueError(f"unknown family {family!r}")
+
+
+_VARIANT_SPEC_BUILDERS: dict[str, Callable[[str, float], GeneratorSpec]] = {
+    "V1_fixed":    _v1_spec,
+    "V2_alpha0.5": _v2_spec,
+    "V3_rho10":    _v3_spec,
+}
+
+
+# ─── reachability gate ──────────────────────────────────────────────────────
+def _check_reachability(reltol: float = 0.01) -> dict[tuple[str, str, float], GeneratorSpec]:
+    """Resolve all (variant, family, kurt) GeneratorSpecs and verify the
+    closed-form kurt is within ``reltol`` of the target.
+
+    BLOCKING: raises if any cell exceeds tolerance, naming the cell.
+    Returns the dict of resolved specs keyed by ``(variant, family, kurt)``.
+    """
+    specs: dict[tuple[str, str, float], GeneratorSpec] = {}
+    failures: list[str] = []
+    for variant in VARIANTS:
+        builder = _VARIANT_SPEC_BUILDERS[variant]
+        for family in FAMILIES:
+            for kurt in KURT_SWEEP:
+                spec = builder(family, kurt)
+                k_v = spec.closed_form_kurt()
+                rel = abs(k_v - kurt) / kurt
+                if rel > reltol:
+                    failures.append(
+                        f"({variant}, {family}, kurt={kurt}): "
+                        f"target={kurt}, closed-form={k_v:.4f}, rel={rel:.4%}"
+                    )
+                specs[(variant, family, kurt)] = spec
+    if failures:
+        raise RuntimeError(
+            "Reachability check FAILED for "
+            f"{len(failures)} cell(s):\n  " + "\n  ".join(failures)
+        )
+    return specs
+
+
+# ─── true-family residual sampler (per resolved spec) ───────────────────────
 @dataclass(frozen=True)
 class TrueFamily:
-    """Generator parameters for one (family, kurt) combination.
-
-    ``draw`` returns ``n`` i.i.d. centred residual samples from the
-    population the gate calls the "true" law for that cell. The fitted
-    family is the same name for the same-family pass; a *different*
-    family name on the cross-family pass.
-    """
-    kind: str
-    kurt_target: float
-    # mix-2 params
-    mix2_s2: float
-    # mix-3 params
-    mix3_s3: float
-    # KDE bandwidth (set after sampling from mix-2 at the kurt target)
+    """Generator parameters for one (variant, family, kurt) combination,
+    plus the (kurt-matched) KDE reservoir."""
+    spec: GeneratorSpec
     kde_bandwidth: float
-    kde_samples: np.ndarray   # frozen 10k samples used as the KDE reservoir
+    kde_samples: np.ndarray
 
 
-def _build_true_family(kind: str, kurt: float, rng: np.random.Generator) -> TrueFamily:
-    s2 = _solve_mix2_s2(kurt)
-    s3 = _solve_mix3_s3(kurt)
-    # KDE reservoir: 10k samples from the kurt-matched mix-2; the
-    # KDE's bandwidth is Silverman on those samples (the KDE produces
-    # a smoothed version of the kurt-matched mix-2).
+def _build_true_family(spec: GeneratorSpec, rng: np.random.Generator) -> TrueFamily:
+    # The KDE reservoir is sampled from the variant-resolved mix-2
+    # (weights and scales for this variant at this kurt). This makes
+    # the KDE family's "true law" track the variant — KDE is the
+    # smoothed version of THIS variant's heavy-tailed mix-2.
     kde_n = 10_000
-    which = rng.choice(2, size=kde_n, p=[1.0 - _MIX2_W2, _MIX2_W2])
-    z = rng.standard_normal(kde_n)
-    kde_samples = np.where(which == 0, z * 1.0, z * s2)
+    if spec.family in ("mixture_2", "kde"):
+        w = np.asarray(spec.weights); s = np.asarray(spec.scales)
+        # spec for mixture_2 / kde is always 2-component, scale s = (s1, s2)
+        which = rng.choice(len(w), size=kde_n, p=w)
+        z = rng.standard_normal(kde_n)
+        kde_samples = z * s[which]
+    elif spec.family == "mixture_3":
+        # 3-component reservoir for the KDE -- but the KDE family only
+        # gets built for spec.family == "kde". This branch exists for
+        # symmetry; we resample the mix-3 if asked, but in practice the
+        # KDE bandwidth is only used when spec.family == "kde".
+        w = np.asarray(spec.weights); s = np.asarray(spec.scales)
+        which = rng.choice(len(w), size=kde_n, p=w)
+        z = rng.standard_normal(kde_n)
+        kde_samples = z * s[which]
+    else:
+        raise ValueError(f"unknown family {spec.family!r}")
+
     std = float(np.std(kde_samples, ddof=1))
     q25, q75 = np.quantile(kde_samples, [0.25, 0.75])
     iqr = float(q75 - q25)
     spread = min(std, iqr / 1.34) if iqr > 0 else std
     kde_bw = 0.9 * max(spread, 1e-9) * (kde_n ** (-1.0 / 5.0))
-    return TrueFamily(
-        kind=kind,
-        kurt_target=kurt,
-        mix2_s2=s2,
-        mix3_s3=s3,
-        kde_bandwidth=kde_bw,
-        kde_samples=kde_samples,
-    )
+    return TrueFamily(spec=spec, kde_bandwidth=kde_bw, kde_samples=kde_samples)
 
 
 def _draw_residuals(tf: TrueFamily, n: int, rng: np.random.Generator) -> np.ndarray:
-    """Draw n i.i.d. residuals from the named TRUE family."""
-    if tf.kind == "mixture_2":
-        which = rng.choice(2, size=n, p=[1.0 - _MIX2_W2, _MIX2_W2])
+    """Draw n i.i.d. residuals from the named TRUE family at this variant's spec."""
+    spec = tf.spec
+    if spec.family in ("mixture_2", "mixture_3"):
+        w = np.asarray(spec.weights); s = np.asarray(spec.scales)
+        which = rng.choice(len(w), size=n, p=w)
         z = rng.standard_normal(n)
-        return np.where(which == 0, z * 1.0, z * tf.mix2_s2)
-    if tf.kind == "mixture_3":
-        w1, w2, w3 = _MIX3_W
-        which = rng.choice(3, size=n, p=[w1, w2, w3])
-        z = rng.standard_normal(n)
-        scales = np.array([1.0, _MIX3_S2, tf.mix3_s3])
-        return z * scales[which]
-    if tf.kind == "kde":
+        return z * s[which]
+    if spec.family == "kde":
         # Convolution rule: pick a reservoir sample + bandwidth-scaled
         # Gaussian noise. This is exactly the density the KDE encodes.
         idx = rng.integers(0, len(tf.kde_samples), size=n)
         return tf.kde_samples[idx] + tf.kde_bandwidth * rng.standard_normal(n)
-    raise ValueError(f"unknown family kind {tf.kind!r}")
+    raise ValueError(f"unknown family {spec.family!r}")
 
 
 # ─── predictive sampler under the FITTED family ─────────────────────────────
@@ -327,6 +533,7 @@ def _fit_family(kind: str, X: np.ndarray, Y: np.ndarray) -> tuple[np.ndarray, di
 
 # ─── one replication: build library, fit, score PIT chi^2 ───────────────────
 def _one_rep(
+    variant: str,
     library_kind: str,
     fit_kind: str,
     kurt: float,
@@ -335,19 +542,21 @@ def _one_rep(
     """One synthetic replication.
 
     Build a library (X, Y) drawn from family ``library_kind`` at the
-    target kurt; fit family ``fit_kind`` to it via the production
-    fitter; for each of N_TRAJ test states, draw an actual next-step
-    from the TRUE library family (i.e. NOT from the fitted family)
-    and a sample of M predictive draws from the FITTED family; PIT =
-    randomized mid-rank. Aggregate to a 10-bin chi^2 vs uniform.
+    target kurt under the named variant's spec; fit family
+    ``fit_kind`` to it via the production fitter; for each of N_TRAJ
+    test states, draw an actual next-step from the TRUE library family
+    (i.e. NOT from the fitted family) and a sample of M predictive
+    draws from the FITTED family; PIT = randomized mid-rank. Aggregate
+    to a 10-bin chi^2 vs uniform.
 
     Returns a dict with the chi^2 and bin counts.
     """
-    seed = _cell_seed(library_kind, fit_kind, kurt, rep)
+    seed = _cell_seed(variant, library_kind, fit_kind, kurt, rep)
     rng = np.random.default_rng(seed)
 
-    # 1) Build library
-    true_lib = _build_true_family(library_kind, kurt, rng)
+    # 1) Build library under this variant's library-family spec
+    lib_spec = _VARIANT_SPEC_BUILDERS[variant](library_kind, kurt)
+    true_lib = _build_true_family(lib_spec, rng)
     X_lib = rng.standard_normal((N_LIBRARY, D_EMBED))
     r_lib = _draw_residuals(true_lib, N_LIBRARY, rng)
     Y_lib = (X_lib @ C_TRUE).ravel() + r_lib
@@ -377,6 +586,7 @@ def _one_rep(
     expected = SYNTHETIC_TRAJECTORY_LEN / N_PIT_BINS
     chi2 = float(((hist - expected) ** 2 / expected).sum())
     return {
+        "variant": variant,
         "library_kind": library_kind,
         "fit_kind": fit_kind,
         "kurt": float(kurt),
@@ -388,19 +598,20 @@ def _one_rep(
 
 # ─── Ray remote wrapper ─────────────────────────────────────────────────────
 @ray.remote
-def _one_rep_remote(library_kind: str, fit_kind: str, kurt: float, rep: int) -> dict:
-    return _one_rep(library_kind, fit_kind, kurt, rep)
+def _one_rep_remote(variant: str, library_kind: str, fit_kind: str, kurt: float, rep: int) -> dict:
+    return _one_rep(variant, library_kind, fit_kind, kurt, rep)
 
 
 # ─── cell enumeration ──────────────────────────────────────────────────────
-def _same_family_cells() -> list[tuple[str, str, float]]:
-    """All (library=fit, fit, kurt) cells for the same-family pass."""
-    return [(f, f, k) for f in FAMILIES for k in KURT_SWEEP]
+def _same_family_cells() -> list[tuple[str, str, str, float]]:
+    """All (variant, library=fit, fit, kurt) cells for the same-family pass."""
+    return [(v, f, f, k) for v in VARIANTS for f in FAMILIES for k in KURT_SWEEP]
 
 
-def _cross_family_cells() -> list[tuple[str, str, float]]:
-    """All ordered (library != fit) cells for the cross-family pass."""
-    return [(lib, fit, k)
+def _cross_family_cells() -> list[tuple[str, str, str, float]]:
+    """All ordered (variant, library != fit) cells for the cross-family pass."""
+    return [(v, lib, fit, k)
+            for v in VARIANTS
             for lib in FAMILIES for fit in FAMILIES for k in KURT_SWEEP
             if lib != fit]
 
@@ -420,44 +631,73 @@ def run_gate(
     out: list[str] = []
     p = lambda *a: out.append(" ".join(str(x) for x in a))
 
-    p("Q2A synthetic gate -- chi^2 cuts from sample-size-matched null")
+    p("Q2A synthetic gate -- chi^2 cuts under three-variant weight sweep")
     p("")
     p(f"  KURT_SWEEP             = {KURT_SWEEP}  (Pearson kurtosis; Gaussian=3)")
     p(f"  K_REPS                 = {k_reps}")
     p(f"  M_PARTICLES            = {M_PARTICLES}")
     p(f"  N_PIT_BINS             = {N_PIT_BINS}")
     p(f"  FAMILIES               = {FAMILIES}")
+    p(f"  VARIANTS               = {VARIANTS}")
     p(f"  N_LIBRARY              = {N_LIBRARY}")
     p(f"  SYNTHETIC_TRAJECTORY_LEN = {SYNTHETIC_TRAJECTORY_LEN}")
     p(f"  RNG_SEED_BASE          = {RNG_SEED_BASE}")
     p(f"  D_EMBED                = {D_EMBED}")
     p(f"  C_TRUE                 = {C_TRUE.flatten().tolist()}")
-    p(f"  mix-2 generator w2     = {_MIX2_W2}")
-    p(f"  mix-3 generator w      = {_MIX3_W}, s2 = {_MIX3_S2}")
+    p("")
+    p("  Variant rules:")
+    p(f"    V1_fixed     mix-2 w_r = {_V1_MIX2_W2}; mix-3 w = {_V1_MIX3_W}, fixed s2 = {_V1_MIX3_S2}; solve scales")
+    p(f"    V2_alpha0.5  w_min(K) = {_V2_ALPHA} * 3/K = {_V2_ALPHA*3}/K; mix-3 bulks split evenly, V1 s2={_V1_MIX3_S2}; solve s3")
+    p(f"    V3_rho10     s_rare/s_bulk = {_V3_RHO}; mix-3 bulk-symmetric (s_b={1.0}); solve w_r per K (falling-branch)")
+    p("")
+
+    # Reachability gate FIRST (blocking)
+    p("## Reachability check (closed-form kurt vs target, reltol=1%)")
+    p("")
+    specs = _check_reachability(reltol=0.01)
+    p(f"  {'variant':>14} {'family':>12} {'kurt':>6} "
+      f"{'weights':>32} {'scales':>26} {'k_v':>8}")
+    spec_payload = []
+    for variant in VARIANTS:
+        for family in FAMILIES:
+            for kurt in KURT_SWEEP:
+                spec = specs[(variant, family, kurt)]
+                wstr = "[" + ",".join(f"{w:.4f}" for w in spec.weights) + "]"
+                sstr = "[" + ",".join(f"{s:.4f}" for s in spec.scales) + "]"
+                k_v = spec.closed_form_kurt()
+                p(f"  {variant:>14} {family:>12} {kurt:>6.1f} "
+                  f"{wstr:>32} {sstr:>26} {k_v:>8.3f}")
+                spec_payload.append({
+                    "variant": variant, "family": family, "kurt": kurt,
+                    "weights": list(spec.weights), "scales": list(spec.scales),
+                    "closed_form_kurt": k_v,
+                })
+    p("")
+    p("  REACHABILITY OK (all cells within 1% of target).")
     p("")
 
     same = _same_family_cells()
     cross = _cross_family_cells()
     total = (len(same) + len(cross)) * k_reps
-    p(f"  same-family cells      = {len(same)} ({len(FAMILIES)} families x {len(KURT_SWEEP)} kurts)")
-    p(f"  cross-family cells     = {len(cross)} ({len(FAMILIES)*(len(FAMILIES)-1)} ordered pairs x {len(KURT_SWEEP)} kurts)")
+    p(f"  same-family cells      = {len(same)} ({len(VARIANTS)} variants x {len(FAMILIES)} families x {len(KURT_SWEEP)} kurts)")
+    p(f"  cross-family cells     = {len(cross)} ({len(VARIANTS)} variants x {len(FAMILIES)*(len(FAMILIES)-1)} ordered pairs x {len(KURT_SWEEP)} kurts)")
     p(f"  total runs             = {total}")
     p("")
 
     t0 = time.time()
     futures = []
-    for lib, fit, kurt in same:
+    for variant, lib, fit, kurt in same:
         for rep in range(k_reps):
             if use_ray:
-                futures.append(_one_rep_remote.remote(lib, fit, kurt, rep))
+                futures.append(_one_rep_remote.remote(variant, lib, fit, kurt, rep))
             else:
-                futures.append(_one_rep(lib, fit, kurt, rep))
-    for lib, fit, kurt in cross:
+                futures.append(_one_rep(variant, lib, fit, kurt, rep))
+    for variant, lib, fit, kurt in cross:
         for rep in range(k_reps):
             if use_ray:
-                futures.append(_one_rep_remote.remote(lib, fit, kurt, rep))
+                futures.append(_one_rep_remote.remote(variant, lib, fit, kurt, rep))
             else:
-                futures.append(_one_rep(lib, fit, kurt, rep))
+                futures.append(_one_rep(variant, lib, fit, kurt, rep))
 
     if use_ray:
         results = []
@@ -483,82 +723,118 @@ def run_gate(
     p(f"  wall-clock             = {t_run:.1f}s ({t_run/60:.1f}min)")
     p("")
 
-    # ─── Aggregate per cell ────────────────────────────────────────────────
-    p("## Same-family cells (library = fit)")
+    # ─── Aggregate per cell (per-variant) ─────────────────────────────────
+    p("## Per-variant same-family cells (library = fit), 95th-pct chi^2")
     p("")
-    p(f"  {'family':>12} {'kurt':>6} {'mean':>10} {'sd':>10} "
+    p(f"  {'variant':>14} {'family':>12} {'kurt':>6} {'mean':>10} {'sd':>10} "
       f"{'50pct':>10} {'95pct':>10}")
-    same_p95 = {}
-    same_means = []
-    for f in FAMILIES:
-        for k in KURT_SWEEP:
-            arr = np.array([r["chi2"] for r in results
-                            if r["library_kind"] == f and r["fit_kind"] == f
-                            and r["kurt"] == k])
-            pct = _percentiles(arr, (50.0, 95.0))
-            same_p95[(f, k)] = pct[95.0]
-            same_means.append((f, k, float(arr.mean()), float(arr.std())))
-            p(f"  {f:>12} {k:>6.1f} {arr.mean():>10.2f} {arr.std():>10.2f} "
-              f"{pct[50.0]:>10.2f} {pct[95.0]:>10.2f}")
-    p("")
-
-    p("## Cross-family cells (library != fit)")
-    p("")
-    p(f"  {'library':>12} {'fit':>12} {'kurt':>6} "
-      f"{'mean':>10} {'sd':>10} {'50pct':>10} {'99pct':>10}")
-    cross_p99 = {}
-    cross_means = []
-    for lib in FAMILIES:
-        for fit in FAMILIES:
-            if lib == fit:
-                continue
+    same_p95: dict[tuple[str, str, float], float] = {}
+    same_means: list[tuple[str, str, float, float, float]] = []
+    for variant in VARIANTS:
+        for f in FAMILIES:
             for k in KURT_SWEEP:
                 arr = np.array([r["chi2"] for r in results
-                                if r["library_kind"] == lib and r["fit_kind"] == fit
+                                if r["variant"] == variant
+                                and r["library_kind"] == f and r["fit_kind"] == f
                                 and r["kurt"] == k])
-                pct = _percentiles(arr, (50.0, 99.0))
-                cross_p99[(lib, fit, k)] = pct[99.0]
-                cross_means.append((lib, fit, k, float(arr.mean()), float(arr.std())))
-                p(f"  {lib:>12} {fit:>12} {k:>6.1f} "
-                  f"{arr.mean():>10.2f} {arr.std():>10.2f} "
-                  f"{pct[50.0]:>10.2f} {pct[99.0]:>10.2f}")
+                pct = _percentiles(arr, (50.0, 95.0))
+                same_p95[(variant, f, k)] = pct[95.0]
+                same_means.append((variant, f, k, float(arr.mean()), float(arr.std())))
+                p(f"  {variant:>14} {f:>12} {k:>6.1f} {arr.mean():>10.2f} {arr.std():>10.2f} "
+                  f"{pct[50.0]:>10.2f} {pct[95.0]:>10.2f}")
     p("")
 
-    # ─── Cuts ──────────────────────────────────────────────────────────────
+    p("## Per-variant cross-family cells (library != fit), 99th-pct chi^2")
+    p("")
+    p(f"  {'variant':>14} {'library':>12} {'fit':>12} {'kurt':>6} "
+      f"{'mean':>10} {'sd':>10} {'50pct':>10} {'99pct':>10}")
+    cross_p99: dict[tuple[str, str, str, float], float] = {}
+    cross_means: list[tuple[str, str, str, float, float, float]] = []
+    for variant in VARIANTS:
+        for lib in FAMILIES:
+            for fit in FAMILIES:
+                if lib == fit:
+                    continue
+                for k in KURT_SWEEP:
+                    arr = np.array([r["chi2"] for r in results
+                                    if r["variant"] == variant
+                                    and r["library_kind"] == lib and r["fit_kind"] == fit
+                                    and r["kurt"] == k])
+                    pct = _percentiles(arr, (50.0, 99.0))
+                    cross_p99[(variant, lib, fit, k)] = pct[99.0]
+                    cross_means.append((variant, lib, fit, k, float(arr.mean()), float(arr.std())))
+                    p(f"  {variant:>14} {lib:>12} {fit:>12} {k:>6.1f} "
+                      f"{arr.mean():>10.2f} {arr.std():>10.2f} "
+                      f"{pct[50.0]:>10.2f} {pct[99.0]:>10.2f}")
+    p("")
+
+    # ─── Per-variant cuts (intra-variant aggregation) ─────────────────────
+    p("## Per-variant cuts (intra-variant max of same/cross)")
+    p("")
+    p(f"  {'variant':>14} {'R-A2 (intra)':>14} {'cross-99 max (intra)':>22} "
+      f"{'R-C2 (intra)':>14} {'R-A2 cell':>32} {'cross cell':>40}")
+    per_variant_cuts: dict[str, dict] = {}
+    for variant in VARIANTS:
+        sf = {k: v for k, v in same_p95.items() if k[0] == variant}
+        cf = {k: v for k, v in cross_p99.items() if k[0] == variant}
+        a2_intra = max(sf.values())
+        a2_arg = max(sf.items(), key=lambda kv: kv[1])[0]   # (variant, family, kurt)
+        cf_max = max(cf.values())
+        cf_arg = max(cf.items(), key=lambda kv: kv[1])[0]   # (variant, lib, fit, kurt)
+        c2_intra = max(10.0 * a2_intra, cf_max)
+        per_variant_cuts[variant] = {
+            "r_a2_intra": float(a2_intra),
+            "r_a2_intra_cell": [a2_arg[1], a2_arg[2]],     # (family, kurt)
+            "cross_p99_max": float(cf_max),
+            "cross_p99_arg": [cf_arg[1], cf_arg[2], cf_arg[3]],   # (lib, fit, kurt)
+            "r_c2_intra": float(c2_intra),
+        }
+        p(f"  {variant:>14} {a2_intra:>14.2f} {cf_max:>22.2f} "
+          f"{c2_intra:>14.2f} {str((a2_arg[1], a2_arg[2])):>32} "
+          f"{str((cf_arg[1], cf_arg[2], cf_arg[3])):>40}")
+    p("")
+
+    # ─── Per-variant cross/same discriminability ──────────────────────────
+    p("## Per-variant discriminability (mean cross-family / mean same-family per kurt)")
+    p("")
+    p(f"  {'variant':>14} {'kurt':>6} {'mean_same':>12} {'mean_cross':>12} {'ratio':>10}")
+    discriminability_warnings: list[str] = []
+    discriminability_table: list[dict] = []
+    for variant in VARIANTS:
+        for k in KURT_SWEEP:
+            sa = [m for (v, f, kk, m, sd) in same_means if v == variant and kk == k]
+            cr = [m for (v, lib, fit, kk, m, sd) in cross_means if v == variant and kk == k]
+            msa = float(np.mean(sa))
+            mcr = float(np.mean(cr))
+            ratio = mcr / msa if msa > 0 else float("nan")
+            p(f"  {variant:>14} {k:>6.1f} {msa:>12.2f} {mcr:>12.2f} {ratio:>10.2f}")
+            discriminability_table.append({
+                "variant": variant, "kurt": float(k),
+                "mean_same": msa, "mean_cross": mcr, "ratio": ratio,
+            })
+            if ratio < 1.2:
+                discriminability_warnings.append(
+                    f"({variant}, kurt={k}): cross/same ratio {ratio:.2f} < 1.20 — families barely discriminable"
+                )
+    p("")
+
+    # ─── Final variant-max cuts ───────────────────────────────────────────
     r_a2_cut = float(max(same_p95.values()))
-    r_a2_arg = max(same_p95.items(), key=lambda kv: kv[1])[0]
+    r_a2_arg = max(same_p95.items(), key=lambda kv: kv[1])[0]   # (variant, family, kurt)
     r_c2_cross_p99 = float(max(cross_p99.values()))
-    r_c2_arg = max(cross_p99.items(), key=lambda kv: kv[1])[0]
+    r_c2_arg = max(cross_p99.items(), key=lambda kv: kv[1])[0]  # (variant, lib, fit, kurt)
     r_c2_cut = float(max(10.0 * r_a2_cut, r_c2_cross_p99))
     r_c2_basis = "10*R-A2_cut" if 10.0 * r_a2_cut >= r_c2_cross_p99 else "max cross-family 99pct"
 
-    p("## Derived cuts (pre-registered Q2A inputs)")
+    p("## Final variant-max cuts (pre-registered Q2A inputs)")
     p("")
-    p(f"  R-A2 cut = max over (family, kurt) of 95th-pct same-family chi^2")
-    p(f"           = {r_a2_cut:.2f}   at cell {r_a2_arg}")
-    p(f"  cross-family 99pct max = {r_c2_cross_p99:.2f}  at cell {r_c2_arg}")
+    p(f"  R-A2 cut = max over (variant, family, kurt) of 95th-pct same-family chi^2")
+    p(f"           = {r_a2_cut:.2f}   at cell {r_a2_arg}  (variant, family, kurt)")
+    p(f"  cross-family 99pct max = {r_c2_cross_p99:.2f}  at cell {r_c2_arg}  (variant, library, fit, kurt)")
     p(f"  R-C2 cut = max(10 * R-A2_cut, cross-family 99pct max)")
     p(f"           = max({10.0*r_a2_cut:.2f}, {r_c2_cross_p99:.2f})")
     p(f"           = {r_c2_cut:.2f}   (binding: {r_c2_basis})")
     p(f"  R-B2 band = ({r_a2_cut:.2f}, {r_c2_cut:.2f}]")
-    p("")
-
-    # ─── Discriminability sanity ────────────────────────────────────────────
-    p("## Discriminability sanity (mean same-family vs mean cross-family per kurt)")
-    p("")
-    p(f"  {'kurt':>6} {'mean_same':>12} {'mean_cross':>12} {'ratio':>10}")
-    discriminability_warnings = []
-    for k in KURT_SWEEP:
-        sa = [m for (f, kk, m, sd) in same_means if kk == k]
-        cr = [m for (lib, fit, kk, m, sd) in cross_means if kk == k]
-        msa = float(np.mean(sa))
-        mcr = float(np.mean(cr))
-        ratio = mcr / msa if msa > 0 else float("nan")
-        p(f"  {k:>6.1f} {msa:>12.2f} {mcr:>12.2f} {ratio:>10.2f}")
-        if ratio < 1.2:
-            discriminability_warnings.append(
-                f"kurt={k}: cross/same ratio {ratio:.2f} < 1.20 — families barely discriminable"
-            )
     p("")
 
     if discriminability_warnings:
@@ -575,24 +851,30 @@ def run_gate(
         "m_particles": M_PARTICLES,
         "n_pit_bins": N_PIT_BINS,
         "families": list(FAMILIES),
+        "variants": list(VARIANTS),
         "n_library": N_LIBRARY,
         "synthetic_trajectory_len": SYNTHETIC_TRAJECTORY_LEN,
         "rng_seed_base": RNG_SEED_BASE,
         "d_embed": D_EMBED,
         "c_true": C_TRUE.flatten().tolist(),
-        "mix2_w2": _MIX2_W2,
-        "mix3_w": list(_MIX3_W),
-        "mix3_s2_fixed": _MIX3_S2,
+        "v1_mix2_w2": _V1_MIX2_W2,
+        "v1_mix3_w": list(_V1_MIX3_W),
+        "v1_mix3_s2_fixed": _V1_MIX3_S2,
+        "v2_alpha": _V2_ALPHA,
+        "v3_rho": _V3_RHO,
         "wall_clock_s": float(t_run),
         "n_runs": int(total),
         "r_a2_cut": r_a2_cut,
-        "r_a2_cut_arg": list(r_a2_arg),
+        "r_a2_cut_arg": [r_a2_arg[0], r_a2_arg[1], r_a2_arg[2]],
         "r_c2_cut": r_c2_cut,
         "r_c2_cross_p99_max": r_c2_cross_p99,
-        "r_c2_cross_p99_arg": list(r_c2_arg),
+        "r_c2_cross_p99_arg": [r_c2_arg[0], r_c2_arg[1], r_c2_arg[2], r_c2_arg[3]],
         "r_c2_binding": r_c2_basis,
         "r_b2_band": [r_a2_cut, r_c2_cut],
+        "per_variant_cuts": per_variant_cuts,
         "discriminability_warnings": discriminability_warnings,
+        "discriminability_table": discriminability_table,
+        "generator_specs": spec_payload,
     }
     return "\n".join(out) + "\n", payload
 
@@ -607,14 +889,27 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument(
         "--k-reps", type=int, default=K_REPS,
-        help="number of synthetic reps per (library, fit, kurt) cell "
+        help="number of synthetic reps per (variant, library, fit, kurt) cell "
              f"(default: {K_REPS})",
     )
     ap.add_argument(
         "--no-ray", action="store_true",
         help="run serially (sanity check; bypasses ray)",
     )
+    ap.add_argument(
+        "--reachability-only", action="store_true",
+        help="run only the closed-form reachability check (no SMC)",
+    )
     args = ap.parse_args(argv)
+
+    if args.reachability_only:
+        specs = _check_reachability()
+        print(f"REACHABILITY OK for {len(specs)} (variant, family, kurt) cells")
+        for (variant, family, kurt), spec in specs.items():
+            print(f"  {variant} {family} kurt={kurt}: "
+                  f"weights={spec.weights}, scales={spec.scales}, "
+                  f"k_v={spec.closed_form_kurt():.4f}")
+        return 0
 
     use_ray = not args.no_ray
     if use_ray:
@@ -634,19 +929,19 @@ def main(argv: list[str] | None = None) -> int:
         hdr = make_result(
             path=out_path,
             grade=Grade.METHOD,
-            title="Q2A synthetic gate: chi^2 cuts from sample-size-matched "
-                  "null (production-fitter path)",
+            title="Q2A synthetic gate: chi^2 cuts under three-variant weight sweep "
+                  "(production-fitter path)",
             body=text,
             inputs=payload,
             seeds={"rng_seed_base": RNG_SEED_BASE,
-                   "rng_per_cell_rule": "_cell_seed(library_kind, fit_kind, kurt, rep): "
-                                          "(lib<<30)|(fit<<28)|((int(kurt)&0xFF)<<20)|(rep&0xFFFFF), "
+                   "rng_per_cell_rule": "_cell_seed(variant, library_kind, fit_kind, kurt, rep): "
+                                          "(var<<30)|(lib<<28)|(fit<<26)|((int(kurt)&0xFF)<<18)|(rep&0x3FFFF), "
                                           "offset by RNG_SEED_BASE, mod 2^32"},
             frozen_spec_required=False,   # synthetic; Ontario-data-free
         )
         print(f"\nwrote provenanced METHOD artifact -> {out_path}")
-        print(f"  R-A2 cut           = {payload['r_a2_cut']:.2f}")
-        print(f"  R-C2 cut           = {payload['r_c2_cut']:.2f}")
+        print(f"  R-A2 cut           = {payload['r_a2_cut']:.2f}  at {payload['r_a2_cut_arg']}")
+        print(f"  R-C2 cut           = {payload['r_c2_cut']:.2f}  (binding: {payload['r_c2_binding']})")
         print(f"  R-B2 band          = ({payload['r_a2_cut']:.2f}, {payload['r_c2_cut']:.2f}]")
         print(f"  inputs_fingerprint = {hdr['inputs_fingerprint'][:16]}...")
         print(f"  body_sha256        = {hdr['body_sha256'][:16]}...")
