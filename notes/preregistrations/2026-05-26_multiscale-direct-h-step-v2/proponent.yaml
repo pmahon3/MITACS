@@ -1,0 +1,30 @@
+schema: proponent
+written_at: '2026-05-26T17:05:00-04:00'
+git_sha: 44f09446e23c47668a111f5965ae9ba0015364d5
+git_clean: true
+body_sha256: eda4c1d45a96b079061cea8890f3f5b67495ef8f9e6eaec629105e0ea0bd4600
+references:
+- file: phase_a.yaml
+  body_sha256: 4152688b1154860b2448e397eed7aea589f8639e8c3e269536d36e3faa5ea706
+forecast:
+  value:
+    D_RATIO: 12.0
+  units: dimensionless ratio of KL divergences (Ontario / synthetic VAR(1) noise floor at h=12)
+  reasoning: "The seed's mechanism for diffusion divergence (\xA73) ties the iterated-vs-direct\nSigma gap to the seasonally-varying sigma_{m,h}-destandardize amplification,\nwhich on Ontario weekday data is concentrated at HE7-11 with a 2-3x peak.\nConvolved into the predictive distribution at h=12 (which lands near peak\nhours from typical issue-time anchors), the KL divergence should be on the\norder of 5-15 nats above the synthetic noise floor. Median forecast 12.0\n(well above the 5.0 corroboration bar).\n"
+forecast_ci:
+  width: 0.95
+  low:
+    D_RATIO: 6.0
+  high:
+    D_RATIO: 25.0
+  reasoning: 'Wide CI because the units (nats) are unfamiliar at this metric scale and
+
+    the lab has no prior empirical anchor for this specific quantity. I''m
+
+    confident D_RATIO > 5 (corroboration bar) but not on the precise magnitude.
+
+    '
+what_would_change_my_mind:
+- If D_RATIO < 2 (clears the falsification bar), the iterated-vs-direct distributions agree within synthetic noise and the strict-semigroup picture (A) is empirically adequate. I retract picture (C).
+- "If the synthetic gate fails (synthetic_kl(h=12) >= 0.20 nats), the metric itself is degenerate at large h and the v2 effort is also wasted; redesign metric or abandon the structural question for the practical \xA76.3 backtest path."
+confidence: 0.4

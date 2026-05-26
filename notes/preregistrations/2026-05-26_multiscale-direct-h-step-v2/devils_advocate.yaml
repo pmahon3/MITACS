@@ -1,0 +1,35 @@
+schema: devils_advocate
+written_at: '2026-05-26T17:05:00-04:00'
+git_sha: 44f09446e23c47668a111f5965ae9ba0015364d5
+git_clean: true
+body_sha256: 149f116326a0774cef4299bcd90a1cf24db682d6fad54e9b3a9749f8750081bf
+references:
+- file: phase_a.yaml
+  body_sha256: 4152688b1154860b2448e397eed7aea589f8639e8c3e269536d36e3faa5ea706
+strongest_argument: "v1's actual numerical content already told us the story: at h=12 (weekday),\nthe directly-fit and iterated diffusions sit at Sigma_h[0,0]=0.730 *\niter_Sigma_h[0,0] vs iter_Sigma_h[0,0] respectively \u2014 a ~30% gap. The drift\ndivergence at the same (h, dt) was a v1-metric artifact (the OLS collapses\ntoward zero so the relative norm exploded). On the new metric, the same\nfactor pair will translate to a Gaussian KL of approximately\n  0.5 * (0.73 + (1 - sqrt(0.73))^2 / 0.73 - 1 + log(1/0.73))\n  \u2248 0.5 * (0.73 + 0.03 - 1 + 0.31) \u2248 0.04 nats.\nThe synthetic noise floor for VAR(1) at h=12 with similar effective sample\nsize will be in the 0.01-0.05 nats range. So D_RATIO is somewhere around\n1-3 \u2014 almost certainly in the AMBIGUOUS region, possibly clearing\nfalsification at 2.0. The Ontario divergence is REAL but SMALL on the\nnatural scale, and consistent with what the strict-semigroup picture would\nalso predict within finite-sample noise.\n"
+specific_failure_modes:
+- rank: 1
+  mode: ontario-gap-within-finite-sample-noise
+  memory_ref: mitacs-multiscale-direct-h-step-v1
+  likelihood: 0.45
+- rank: 2
+  mode: drift-gap-vanishes-on-distributional-metric
+  memory_ref: mitacs-multiscale-direct-h-step-v1
+  likelihood: 0.25
+- rank: 3
+  mode: synthetic-gate-still-misbehaves
+  memory_ref: mitacs-theta-rail-pinning
+  likelihood: 0.1
+severity: serious
+counter_prediction:
+  value:
+    D_RATIO: 2.0
+  units: dimensionless
+  reasoning: "Based on the heuristic conversion above of v1's 0.73 diffusion-ratio plus\nthe expected small drift KL contribution. D_RATIO around 2 lands right at\nthe falsification boundary \u2014 the experiment will likely land in the\nAMBIGUOUS region, leaning toward falsification.\n"
+what_would_change_my_mind:
+- If D_RATIO > 5 (clears corroboration), the structural divergence is real and substantial; my finite-sample-noise concern is empirically wrong.
+- If the per-h KL profile shows a clean peak at moderate h (e.g. h=6 or h=8) that decays before the saturation regime, that's a positive signal for the relaxed-factorization picture even if D_RATIO at h=12 specifically is small.
+opportunity_cost:
+  alternative: "Skip directly to \xA76.3 (direct-factor backtest with the directly-fit C_h\nused in place of iterated \u03BA_1 in the forecast pipeline). The end-to-end\nbacktest answers the practitioner question (\"does picture (C) predict\nbetter?\") without depending on metric-design choices for the structural\nquestion.\n"
+  ranking: unclear
+  notes: "v2 is cheap (script reuses v1 infrastructure with a 30-line metric\nchange). Cost is small even if it lands AMBIGUOUS. But \xA76.3 will be\nthe actionable next step regardless of v2's outcome.\n"

@@ -1,0 +1,127 @@
+schema: phase_a
+written_at: '2026-05-26T17:00:00-04:00'
+git_sha: 44f09446e23c47668a111f5965ae9ba0015364d5
+git_clean: true
+body_sha256: 4152688b1154860b2448e397eed7aea589f8639e8c3e269536d36e3faa5ea706
+references:
+- file: ../2026-05-26_multiscale-direct-h-step/arbiter.yaml
+  body_sha256: 772809ca8c8977d1cd1a393033ac5eef501e4b4adb93c0be3ca3fade33111b9f
+  relation: supersedes
+  reason: "v1's M1 metric = ||C_h - C_1^h||_F / ||C_h||_F is degenerate at\nlarge h because ||C_h||_F collapses to noise floor as t and t+h\ndecorrelate. The synthetic VAR(1) consistency gate gave M1=1.83 on\na system where the strict semigroup holds by construction \u2014\nproving M1 cannot discriminate strict-semigroup from non-strict.\nv2 replaces the metric with distributional divergence on the\nscalar one-step innovation (consistent with Sigma_j rank-1 by\nconstruction, mitacs-rank1-structural). Same scientific question,\nwell-posed metric.\n"
+topic: multiscale-direct-h-step-v2
+research_question: 'Does the iterated 1-step factor''s predictive distribution at horizon h diverge from the directly-fit h-step factor''s predictive distribution, in a manner consistent with the relaxed-factorization picture (C) of the multiscale seed?
+
+  '
+hypothesis:
+  proponent: 'The Gaussian KL divergence between the directly-fit and iterated predictive distributions for the scalar one-step innovation coordinate, averaged over the empirical embedding-state distribution, is at least 5x the synthetic-baseline value at (h=12, weekday). Equivalently: D_ratio = D_ontario(h=12, weekday) / D_synthetic(h=12) > 5. The relaxed-factorization picture (C) is the right framing.
+
+    '
+  counter: 'See devils_advocate.yaml. Most plausibly: D_ratio is close to 1, i.e. the empirical KL is within sampling noise of the synthetic- semigroup baseline. The iterated and directly-fit distributions agree to within what the synthetic test says is unavoidable estimation noise. Strict-semigroup picture (A) survives.
+
+    '
+variables:
+  dependent:
+  - kl_ontario(h, day_type)
+  - kl_synthetic(h)
+  - kl_ratio(h, day_type)
+  independent:
+  - h
+  - day_type
+  excluded:
+  - variable: theta_bandwidth
+    reasoning: 'Same as v1: estimator-as-run is global OLS at d=2 z-lag embedding
+
+      (mitacs-theta-rail-pinning RESOLVED). theta=0 fixed.
+
+      '
+  - variable: climatology_window
+    reasoning: 'Frozen at registered spec''s full-history month-hour (matches v1).
+
+      '
+  - variable: embedding_dim
+    reasoning: 'Frozen at registered spec per-day-type dims (weekday=2,
+
+      saturday=2, sunday=4). Out of scope for this experiment.
+
+      '
+  - variable: rank_handling
+    reasoning: 'Sigma_j is rank-1 by construction at single-variable delay
+
+      embedding (mitacs-rank1-structural). We project onto the
+
+      scalar one-step innovation coordinate (coord-0 of the residual
+
+      vector, the only stochastic content) and compute the 1D
+
+      Gaussian KL on that. Avoids the rank-deficient matrix inverse
+
+      in v1''s formulation entirely.
+
+      '
+data:
+  source: experiment._actuals.load_pre_cutoff_actuals
+  partition:
+    train: pre-cutoff Ontario demand (full pre-cutoff library)
+    dev: not used (no hyperparameters; v2 also has no parameter selection)
+    test: "not used; \xA76.3 backtest remains the test-stage experiment"
+  cutoff_handling: "Strict pre-cutoff library. (X, Y_h) pairs with both t and t+h pre-cutoff.\nIdentical to v1 \u2014 only the metric definition changes.\n"
+metric: "Primary:  D_RATIO = kl_ratio(h=12, day_type=weekday)\n                  = kl_ontario(12, weekday) / kl_synthetic(12)\n\nWhere:\n  kl_ontario(h, dt) = E_x [ KL( N(c_direct, s_direct^2) || N(c_iter, s_iter^2) ) ]\n                      with c_direct = (X @ C_h)[:, 0],\n                           c_iter   = (X @ C_1^h)[:, 0],\n                           s_direct^2 = Sigma_h[0, 0],\n                           s_iter^2   = iter_Sigma_h[0, 0],\n                           iter_Sigma_h = sum_{j=0..h-1} C_1^j Sigma_1 (C_1^j)^T,\n                           expectation over the empirical h-step\n                           library (X rows) restricted to day_type dt\n  kl_synthetic(h)   = same formula on a VAR(1) consistency gate\n                      (n=50000, d=2, eigenvalues<1) where the strict\n                      semigroup holds by construction. Gives the\n                      noise-floor reference unit.\n\nPre-computation gate (synthetic gate must pass before Ontario\nnumbers are reported):\n\
+  \  SYNTHETIC_NOISE_FLOOR = kl_synthetic(h=12) < 0.20 nats\nIf synthetic exceeds this, the metric itself is degenerate and the\nexperiment cannot answer the question; abort and re-design.\n"
+falsification_criterion:
+  numeric: D_RATIO <= 2.0
+  reasoning: 'Within 2x of the synthetic noise floor is consistent with the
+
+    strict-semigroup picture (A): iterated and direct factors agree
+
+    to within unavoidable estimation noise. The strict-semigroup
+
+    picture survives.
+
+    '
+corroboration_criterion:
+  numeric: D_RATIO > 5.0
+  reasoning: "A 5x signal above the synthetic noise floor is a clear structural\ndivergence \u2014 picture (C) is the right framing. The factor (5) is\na conservative bar above the synthetic baseline accounting for\nfinite-sample noise plus mild model misspecification not captured\nby VAR(1).\n"
+ambiguous_region:
+  range: D_RATIO in (2.0, 5.0]
+  action: "Report results and characterise (which h, which day_type drives\nthe ratio); do not claim picture (C) is supported yet. Decide\nwhether to escalate to \xA76.3 (direct-factor backtest) or to a v3\nrefinement.\n"
+baselines:
+  primary: 'Iterated 1-step factor (C_1^h, iter_Sigma_h) computed from
+
+    production-fit C_1, Sigma_1 via processing.innovations.estimator.
+
+    global_ols_fit at h=1.
+
+    '
+  secondary: "Synthetic VAR(1) gate. This is NOT just informational in v2 \u2014 it\nsets the noise-floor unit AND is the precondition that must pass\nfor the Ontario verdict to be valid. The pre-computation gate\n\"SYNTHETIC_NOISE_FLOOR < 0.20 nats\" is enforced by the script\nbefore Ontario numbers are printed.\n"
+stopping_criterion:
+  rule: 'Run the 15 (C_h, Sigma_h) fits (5 horizons x 3 day_types) + the
+
+    synthetic gate + the bootstrap. Stop. No iteration; no parameter
+
+    tuning; no metric redefinition.
+
+    '
+  reasoning: 'v1 already shows the experiment is well-defined and cheap (~75s
+
+    end-to-end). The verdict is fully determined before data.
+
+    '
+ci_method:
+  type: paired_day_bootstrap
+  details: '1000 bootstrap resamples of the library at the (delivery_day, day_type)
+
+    level (paired across h to preserve cross-horizon correlation).
+
+    Identical method to v1.
+
+    '
+  width: 95 percent percentile interval
+affects_registered_spec: false
+related_memory:
+- mitacs-multiscale-direct-h-step-v1
+- mitacs-clim-gap-nonstationary
+- mitacs-rank1-structural
+- mitacs-theta-rail-pinning
+- mitacs-session-lessons-corpus
+related_seed:
+- notes/seeds/multiscale_factor_coherence.md
