@@ -1,0 +1,826 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% Common symbols
+\newcommand{\kQ}{\kappa_{Q}}
+\newcommand{\Ch}{C_{h}}
+\newcommand{\Sh}{\Sigma_{h}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Rb}{\mathbb{R}}
+\newcommand{\Nb}{\mathbb{N}}
+\newcommand{\Zb}{\mathbb{Z}}
+\newcommand{\Nrm}{\mathcal{N}}
+\newcommand{\Studt}{\mathrm{t}}
+\newcommand{\Hcal}{\mathcal{H}}
+\newcommand{\Pcal}{\mathcal{P}}
+\newcommand{\Mcal}{\mathcal{M}}
+\newcommand{\Lcal}{\mathcal{L}}
+\newcommand{\Bcal}{\mathcal{B}}
+\newcommand{\PIT}{\mathrm{PIT}}
+\newcommand{\KL}{\mathrm{KL}}
+\newcommand{\defect}{\Delta}
+\newcommand{\compose}{\star}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem*{hypothesis}{Working hypothesis}
+
+\title{\textbf{Relaxed Kernel Factorization:\\
+A Kernel-Family-Agnostic Account of the Missing-Content Programme}\\[4pt]
+\large A note: the structural framework, its Gaussian special case
+as worked example, and what is settled at each level of generality}
+\author{MITACS dynamics project --- internal memo, not a result artifact}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent
+The seed \emph{Multi-Scale Factor Coherence via the Residual
+Diffusion} originally proposed a relaxed-semigroup framework
+for the $\kQ$-estimator with the diffusion identity as the
+cross-scale coherence constraint. That formulation was implicitly
+Gaussian: the kernel family was Gaussian, the convolution had a
+closed-form, the test statistic was Gaussian--Gaussian Kullback--Leibler
+divergence. The empirical campaign succeeded in confirming the
+framework's central claim on Ontario data (the strict-semigroup
+picture fails by a factor of $\sim29\times$ the synthetic-VAR(1)
+noise floor) but also surfaced, in the line's terminal node, that
+the Gaussian forecast distribution is itself operationally wrong
+($\chi^{2}_{10\text{-bin}} = 22{,}329$). This note re-states the
+framework at the right level of generality --- kernel-family-agnostic,
+not Gaussian-specific --- so that the Gaussian case becomes a worked
+example and the non-Gaussian extensions become natural objects to
+study. The abstract framework, the Gaussian special case, and the
+non-Gaussian extension all share the same algebraic statement; only
+the test statistics change with the kernel family. The settled
+empirical content remains intact under the lift; the next experiment
+under Direction~II is a heavy-tailed extension whose pre-registration
+is sketched in \S\ref{sec:nextnode}.
+\end{abstract}
+
+\section{Setting: process, embedding, kernel family}
+\label{sec:setting}
+
+Let $(z_t)_{t\in\Zb}$ be a real-valued stochastic process observed
+at integer times, and let $x_t \in \Rb^d$ denote its $d$-dimensional
+delay-coordinate embedding $x_t = (z_{t-1}, z_{t-2}, \ldots, z_{t-d})^{\top}$.
+We make no parametric assumption about the law of $(z_t)$ a priori.
+
+Let $\Bcal(\Rb^d)$ denote the Borel sigma-algebra on $\Rb^d$ and
+$\Pcal(\Rb^d)$ the space of probability laws thereon. A
+\emph{conditional Markov kernel} from $\Rb^d$ to itself is a
+measurable map
+\[
+  \kappa : \Rb^d \to \Pcal(\Rb^d),
+  \qquad x \mapsto \kappa(x, \cdot).
+\]
+The \emph{true} one-step conditional law of the process under the
+embedding is the kernel $\kappa^{(1)}$ such that
+$x_{t+1} \mid x_t \sim \kappa^{(1)}(x_t, \cdot)$, and the
+$h$-step kernel is $\kappa^{(h)}$ for $h \in \Nb$.
+
+If the process is Markov in the embedding, the $h$-step kernel is
+determined by Chapman--Kolmogorov:
+\begin{equation}
+  \label{eq:CK}
+  \kappa^{(h_1 + h_2)}(x, A) \;=\;
+  \int_{\Rb^d} \kappa^{(h_2)}(y, A)\, \kappa^{(h_1)}(x, dy)
+  \qquad \forall x \in \Rb^d,\ A \in \Bcal(\Rb^d).
+\end{equation}
+Define the kernel convolution $\compose$ by
+$(\kappa_a \compose \kappa_b)(x, A) := \int \kappa_b(y, A)\,
+\kappa_a(x, dy)$. Then \eqref{eq:CK} reads
+$\kappa^{(h_1 + h_2)} = \kappa^{(h_1)} \compose \kappa^{(h_2)}$.
+\emph{This statement is measure-theoretic, not parametric}: it
+makes no commitment to a kernel family.
+
+\section{The relaxed-factorization framework}
+\label{sec:framework}
+
+In practice, the true kernel $\kappa^{(h)}$ is unknown; we
+estimate empirical kernels $\hat\kappa_h$ from finite data for
+$h \in \Hcal \subseteq \Nb$. We consider three a-priori pictures of
+how the family $\{\hat\kappa_h\}_{h \in \Hcal}$ might be structured.
+
+\begin{definition}[strict / trivial / relaxed factorization]
+\label{def:factorization}
+The family $\{\hat\kappa_h\}_{h \in \Hcal}$ is:
+\begin{description}[leftmargin=2em]
+\item[(A) Strictly factored] if Chapman--Kolmogorov holds
+exactly on the estimated kernels:
+$\hat\kappa_{h_1 + h_2} = \hat\kappa_{h_1} \compose \hat\kappa_{h_2}$
+for all $h_1, h_2 \in \Hcal$ with $h_1 + h_2 \in \Hcal$.
+
+\item[(B) Trivially factored] (or \emph{unfactored}) if the
+$\hat\kappa_h$ are unrelated --- each is estimated independently
+and there is no algebraic relation imposed across scales.
+
+\item[(C) Relaxedly factored] if there exists a family of
+signed-measure-valued \emph{defect maps}
+$\defect_{h_1, h_2} : \Rb^d \to \Mcal(\Rb^d)$, where $\Mcal(\Rb^d)$
+denotes signed measures on $\Bcal(\Rb^d)$, such that
+\begin{equation}
+  \label{eq:relax}
+  \hat\kappa_{h_1 + h_2}(x, \cdot) \;=\;
+  (\hat\kappa_{h_1} \compose \hat\kappa_{h_2})(x, \cdot)
+  \;+\; \defect_{h_1, h_2}(x, \cdot)
+\end{equation}
+for all $h_1, h_2 \in \Hcal$ with $h_1 + h_2 \in \Hcal$. The
+strict factorization is the special case $\defect_{h_1, h_2} \equiv 0$;
+the trivial factorization is the case where $\defect$ is
+unconstrained.
+\end{description}
+\end{definition}
+
+\begin{remark}[the role of the defect]
+The defect $\defect_{h_1, h_2}$ is a signed measure (not a
+probability) because $\hat\kappa_{h_1+h_2}$ and
+$\hat\kappa_{h_1} \compose \hat\kappa_{h_2}$ are both probability
+measures, and the difference is generally signed with total mass
+zero. The defect is the natural carrier of all information about
+how the family's empirical structure departs from the strict
+semigroup. The seed's central claim is that for a finite-dimensional
+embedding of a higher-dimensional process, the defect is non-trivial
+\emph{and} carries identifiable structure about the dimensions of
+variation the embedding does not span.
+\end{remark}
+
+\begin{definition}[coherence content]
+\label{def:coherence}
+The \emph{coherence content} of a relaxed factorization is the
+structural information in $\{\defect_{h_1, h_2}\}$. Specifically:
+any decomposition of the defect that is consistent across
+$(h_1, h_2)$ pairs --- by origin-state dependence, by eigenmode
+projection of an underlying drift, by horizon scale, by exogenous
+stratification --- constitutes a partial characterization of the
+embedding's missing degrees of freedom.
+\end{definition}
+
+\begin{hypothesis}[the seed's working claim]
+\label{hyp:working}
+For an empirical process whose true dynamics involve $k$ degrees
+of freedom and whose embedding spans $d \leq k$ of them, the
+relaxed factorization is the natural framework for inference: the
+defects $\defect_{h_1, h_2}$ encode information about the $k - d$
+unmodelled degrees of freedom, including their characteristic
+timescales and their coupling to the embedded state.
+\end{hypothesis}
+
+This hypothesis is the empirical-mechanics conjecture behind the
+seed; it can be supported or falsified by measuring the structure
+of $\defect$. It is itself agnostic to kernel family.
+
+\subsection{The structural role of the drift versus the rest of the kernel}
+\label{sec:drift-vs-rest}
+
+Even though $\hat\kappa_h$ is a full conditional law (not just a
+mean), it is useful to decompose the strict-semigroup constraint
+\eqref{eq:CK} into the \emph{drift identity} (constraint on
+conditional means) and the \emph{everything else} (constraint on
+the conditional law given the means).
+
+The drift identity. If we write $\bar\mu_h(x) := \E[X' \mid X = x]$
+under $\hat\kappa_h$, then strict factorization implies
+$\bar\mu_{h_1 + h_2}(x) = \bar\mu_{h_2}\!\bigl(\bar\mu_{h_1}(x)\bigr)$.
+For linear drifts $\bar\mu_h(x) = \hat C_h x$, this reduces to
+$\hat C_{h_1 + h_2} = \hat C_{h_1} \hat C_{h_2}$, i.e.\ the drifts
+form a semigroup under matrix multiplication. \emph{This is
+automatic for any drift family that is closed under composition.}
+A free-parameter linear drift is automatically closed; so are most
+parametric drift families of interest. The drift identity therefore
+imposes a weak constraint --- ``the estimated drifts compose as
+matrix powers of \emph{something}'' --- and is uninformative on its
+own about whether the strict factorization holds.
+
+The everything-else identity. The non-drift information in $\hat\kappa_h$
+--- its dispersion, its shape, its tail behaviour --- is where the
+strict semigroup actually has empirical content. For each kernel
+family this yields a different identity:
+
+\begin{itemize}[leftmargin=2em]
+\item For Gaussian kernels, the strict semigroup reduces to a
+second-moment identity \eqref{eq:gauss-sigma} below.
+\item For Student-$t$ kernels, the family is not closed under
+convolution; the strict semigroup imposes that
+$\hat\kappa_{h_1} \compose \hat\kappa_{h_2}$ (computed via numerical
+convolution or sampling) equals $\hat\kappa_{h_1+h_2}$ as
+distributions, not just as moments.
+\item For non-parametric kernels (sample-based predictives), the
+strict semigroup is a distributional equality between two
+sample-based laws, tested via sample-based divergences
+(Wasserstein, energy distance, MMD).
+\end{itemize}
+
+In all cases, \textbf{the structural role of the constraint is the
+same}: the everything-else identity is the non-trivial part of the
+strict factorization, and the defect $\defect_{h_1, h_2}$ is
+operationalised by comparing the empirical
+$\hat\kappa_{h_1 + h_2}$ to the convolved $\hat\kappa_{h_1} \compose
+\hat\kappa_{h_2}$ under whichever divergence is appropriate for the
+family.
+
+\subsection{The forward equation as the underlying structural picture}
+\label{sec:forward}
+
+A continuous-time perspective makes the relationship between strict
+factorization and an underlying generator transparent. For a
+continuous-time Markov process with infinitesimal generator
+$\Lcal$ (in the Markov-semigroup sense, acting on bounded measurable
+functions), the family of $h$-step kernels satisfies the
+\emph{Kolmogorov forward equation}
+\begin{equation}
+  \label{eq:forward}
+  \partial_h \kappa^{(h)}(x, \cdot) \;=\; \Lcal^{*} \kappa^{(h)}(x, \cdot)
+\end{equation}
+where $\Lcal^{*}$ is the formal adjoint of $\Lcal$ (the
+\emph{forward generator}, acting on measures). Strict factorization
+of a discrete-time family $\{\hat\kappa_h\}$ corresponds, at the
+ideal-infinite-data limit, to the existence of a single $\Lcal$
+such that $\hat\kappa^{(h)} = e^{h \Lcal}$ (under appropriate
+operator topology) consistently for all $h$.
+
+We do not need to estimate $\Lcal$ to test strict factorization;
+the test in discrete time is precisely the convolution test
+\eqref{eq:relax}. The forward-equation framing is the theoretical
+picture that explains \emph{why} the convolution test is the right
+test, and what kind of object the defect $\defect$ is when strict
+factorization fails (a non-generator-consistent residual in the
+$h$-flow of the family of empirical kernels).
+
+For the Gaussian case, $\Lcal^{*}$ has the form
+$\Lcal^{*} f = -\nabla \cdot (b\, f) + \tfrac{1}{2}
+\sum_{ij} \partial_i \partial_j(Q_{ij}\, f)$
+(diffusion with drift $b$ and infinitesimal covariance $Q$).
+For non-Gaussian Markov processes with jumps, $\Lcal^{*}$ includes
+non-local integral operators (the L\'evy kernel). The framework's
+structural content does not depend on which form $\Lcal^{*}$ takes;
+only the closed-form expression for $\hat\kappa^{(h)}$ does.
+
+\section{The Gaussian case as worked example}
+\label{sec:gaussian}
+
+We now specialize to the Gaussian kernel family. This is the case
+the current registered estimator uses; the experiments described
+in \S\ref{sec:settled} test the framework within this case.
+
+\subsection{Gaussian kernel family and the strict semigroup}
+\label{sec:gauss-strict}
+
+Suppose $\hat\kappa_h$ is in the Gaussian family with linear drift:
+\begin{equation}
+  \label{eq:gauss-kernel}
+  \hat\kappa_h(x, \cdot) \;=\; \Nrm\!\bigl(\hat C_h x,\; \hat\Sigma_h\bigr)
+\end{equation}
+for some $\hat C_h \in \Rb^{d \times d}$ and
+$\hat\Sigma_h \in \Rb^{d \times d}$ (positive semidefinite). The
+Gaussian family is closed under convolution: a linear-mean Gaussian
+convolved with a linear-mean Gaussian is a linear-mean Gaussian.
+Direct computation gives
+\begin{equation}
+  \label{eq:gauss-compose}
+  (\hat\kappa_a \compose \hat\kappa_b)(x, \cdot) \;=\;
+  \Nrm\!\bigl(\hat C_b \hat C_a x,\; \hat C_b \hat\Sigma_a \hat C_b^{\top} + \hat\Sigma_b\bigr).
+\end{equation}
+Iterating one-step kernels gives the closed-form parameters
+\begin{align}
+  \label{eq:gauss-Ch}
+  \hat C_h^{\mathrm{iter}} &= \hat C_1^{\,h}, \\
+  \label{eq:gauss-sigma}
+  \hat\Sigma_h^{\mathrm{iter}} &= \sum_{j=0}^{h-1}
+    \hat C_1^{\,j}\, \hat\Sigma_1\, (\hat C_1^{\,j})^{\top}.
+\end{align}
+Identity \eqref{eq:gauss-sigma} is the discrete-time analogue of
+the continuous Lyapunov-type integral
+\begin{equation}
+  \label{eq:lyapunov}
+  \Sigma_h \;=\; \int_0^h e^{sL}\, Q\, e^{sL^{\top}}\, ds
+\end{equation}
+that an Ornstein--Uhlenbeck SDE with drift $L$ and infinitesimal
+covariance $Q$ would induce. We call \eqref{eq:gauss-sigma} (or
+equivalently \eqref{eq:lyapunov}) the \emph{Gaussian diffusion
+identity}. In the Gaussian case it is the everything-else
+constraint of \S\ref{sec:drift-vs-rest}.
+
+\subsection{Gaussian-Gaussian KL as the test statistic}
+\label{sec:gauss-kl}
+
+For univariate Gaussian distributions with means $\mu_P, \mu_Q$
+and variances $\sigma_P^2, \sigma_Q^2$, the forward
+Kullback--Leibler divergence has the closed form
+\begin{equation}
+  \label{eq:gauss-kl}
+  \KL\!\bigl(\Nrm(\mu_P, \sigma_P^2)\,\|\,\Nrm(\mu_Q, \sigma_Q^2)\bigr)
+  \;=\;
+  \tfrac{1}{2}\log\!\frac{\sigma_Q^2}{\sigma_P^2}
+  + \frac{\sigma_P^2 + (\mu_P - \mu_Q)^2}{2 \sigma_Q^2}
+  - \tfrac{1}{2}.
+\end{equation}
+Restricting attention to the scalar one-step innovation
+(coordinate $0$ of the residual; the only stochastic component
+under the rank-one structure of $\hat\Sigma_1$), the directly-fit
+and iterated predictive distributions at scale $h$ are univariate
+Gaussian:
+\begin{align*}
+  P_h^{\mathrm{direct}}(x) &= \Nrm\!\bigl((\hat C_h x)_0,\; (\hat\Sigma_h)_{00}\bigr), \\
+  P_h^{\mathrm{iter}}(x) &= \Nrm\!\bigl((\hat C_1^{\,h} x)_0,\; (\hat\Sigma_h^{\mathrm{iter}})_{00}\bigr).
+\end{align*}
+Taking expectation of \eqref{eq:gauss-kl} over the empirical state
+distribution restricted to a day-type subgroup $g$, we obtain the
+\emph{Gaussian coherence divergence}
+\begin{equation}
+  \label{eq:gauss-cd}
+  \mathrm{kl}(h, g) \;=\;
+  \E_{x \sim p_g}\!\left[\,
+    \KL\!\bigl(P_h^{\mathrm{direct}}(x) \,\|\, P_h^{\mathrm{iter}}(x)\bigr)
+  \,\right].
+\end{equation}
+Strict-semigroup-consistent factors give $\hat C_h \equiv \hat C_1^{\,h}$
+and $\hat\Sigma_h \equiv \hat\Sigma_h^{\mathrm{iter}}$, making
+$\mathrm{kl}(h, g) = 0$. Finite-sample noise gives a positive
+baseline; the headline test statistic is the ratio against a
+synthetic calibration unit:
+\begin{equation}
+  \label{eq:dratio}
+  \mathrm{D\_RATIO}
+  \;=\;
+  \frac{\mathrm{kl}_{\text{empirical}}(h^{*}, g^{*})}
+       {\mathrm{kl}_{\text{synthetic}}(h^{*})},
+\end{equation}
+where the synthetic system has known Gaussian generator $(L, Q)$
+for which (A) holds by construction, $h^{*}$ is a pre-registered
+headline horizon, and $g^{*}$ a pre-registered headline subgroup.
+
+\subsection{Gaussian case: what is settled}
+\label{sec:settled}
+
+Four campaigns (v1, v2, eigenmodes-v1, P1) ran under the Gaussian
+case. Their settled findings are:
+
+\paragraph{(S1) Picture (C) holds for Ontario in the Gaussian case.}
+At $(h^{*}, g^{*}) = (12, \mathrm{weekday})$, the 1000-paired-day-bootstrap
+gives $\mathrm{D\_RATIO} = 28.96$, $95\%$ CI $[26.82, 31.43]$.
+Synthetic baseline $\mathrm{kl}_{\text{synthetic}}(12) \approx 0.0012$
+nats (range $0.0011$--$0.0016$ over seven RNG seeds; worst-case
+$\mathrm{D\_RATIO} \approx 22$, still above the pre-registered
+corroboration bar of $5$). The strict factorization (A) is
+empirically inadequate by a margin beyond finite-sample noise.
+
+\paragraph{(S2) The defect is diffuse across eigendirections of
+$\hat C_1$.}
+The dominant-eigenmode share of the defect
+$(\hat\Sigma_h - \hat\Sigma_h^{\mathrm{iter}})$ in the eigenbasis of
+$\hat C_1$ clusters at $0.50$--$0.58$ across all
+$(h, \text{day\_type})$ cells. The single-missing-mode picture
+is empirically falsified within the Gaussian setting.
+
+\paragraph{(S3) Genuine day-type asymmetry, not library-noise
+inflation.}
+$\hat R^{k}(h, \text{saturday}) / \hat R^{k}(h, \text{weekday}) \in
+[1.26, 2.44]$ across all $(h, k)$ cells, where the library-noise
+expectation under $1/n$ scaling is $\approx 5$. The asymmetry is
+structural.
+
+\paragraph{(S4) Secular drift is the strongest legitimate
+calendar signal in PIT residuals.}
+On $12{,}000$ post-cutoff PIT values, excluding tautologically-circular
+candidates, the year-since-cutoff covariate scores $1.11$ on a
+cell-weighted partial-correlation metric; all four seasonal candidates
+score in $[0.68, 0.93]$; per-day weekly indicators (except Monday,
+borderline) are insignificant.
+
+\paragraph{(S5) The Gaussian forecast distribution itself is wrong
+at the marginal level.}
+$\E[u] = 0.34$ (uniform: $0.5$); 10-bin $\chi^2 = 22{,}329$ (critical
+$16.92$); $67\%$ of PIT values in extreme bins. This is the
+empirical observation that prompts the kernel-family generalization
+of \S\ref{sec:nongaussian}.
+
+\paragraph{(S6) The Gaussian diffusion ratio runs opposite to seed
+prediction.}
+$M_2 = (\hat\Sigma_h)_{00} / (\hat\Sigma_h^{\mathrm{iter}})_{00} = 0.73$
+at $(h{=}12, \text{weekday})$, against the seed's anticipated
+$> 1.5$. At large $h$, the iterated $\hat\Sigma$ over-estimates
+because it accumulates beyond the stationary marginal that the
+direct $\hat\Sigma_h$ has saturated against.
+
+\paragraph{(S7) The workflow has functioned consistently across
+four cycles.}
+The arbiter pattern caught one of the three named retraction modes
+in each of v1 / eigenmodes-v1 / P1; v2 settled cleanly. The thread
+workflow ran end-to-end and surfaced a real workflow gap
+(state-advancement provenance) that was patched in the same session.
+
+\paragraph{Summary at the right level of generality.}
+Under the Gaussian special case of the framework, picture (C)
+holds (S1), the defect has diffuse structure (S2), the asymmetry
+is genuine (S3), and secular drift is a measurable component of
+the missing content (S4). But (S5) and (S6) suggest the Gaussian
+case may not be the right kernel family for the empirical process
+in the first place. (S5) is direct: the marginal predictive law
+is wrong. (S6) is indirect: the second-moment-only summary
+underestimates how iterative variance accumulation diverges from
+direct estimation at large $h$.
+
+The settled content of the campaign --- (S1)--(S4) --- is content
+\emph{about the Gaussian-projection of the process}, not content
+about the process itself in full generality. The framework is
+nevertheless validated as a programme of inference: the relaxed
+factorization is non-trivial in Ontario data, and its defect has
+identifiable structure. Whether the same conclusion holds when
+the kernel family is lifted is the next empirical question.
+
+\section{Non-Gaussian extensions}
+\label{sec:nongaussian}
+
+The framework of \S\ref{sec:framework} is kernel-family-agnostic.
+We here record the structural consequences of lifting the kernel
+family and identify what changes vs.\ what stays the same.
+
+\subsection{The decomposition of what depends on Gaussianness}
+
+Of the framework, the Gaussian case used four objects: a kernel
+family $\Nrm(\cdot, \cdot)$; a convolution rule \eqref{eq:gauss-compose}
+that gives closed-form iteration \eqref{eq:gauss-Ch}--\eqref{eq:gauss-sigma};
+a closed-form KL \eqref{eq:gauss-kl}; and a coordinate
+standardisation (the z-score transform). We disentangle.
+
+\begin{description}[leftmargin=2em]
+\item[(D1) Algebraic framework.] Definitions \ref{def:factorization}
+and \ref{def:coherence}, the forward-equation framing
+\eqref{eq:forward}, and the strict/relaxed/trivial trichotomy:
+\emph{independent} of kernel family.
+
+\item[(D2) Convolution closed form.] Gaussian-family closure
+under convolution gives \eqref{eq:gauss-Ch}--\eqref{eq:gauss-sigma}.
+Most other families are not closed. For Student-$t$, the
+convolution of two Student-$t$ laws is generically not Student-$t$.
+For non-parametric families, no closed form exists. In both
+non-Gaussian cases, $\hat\kappa_h^{\mathrm{iter}}$ must be computed
+\emph{numerically} (by quadrature or by sample-based propagation
+of $\hat\kappa_1$). The framework's structural content is unchanged;
+only the implementation of \eqref{eq:relax} changes.
+
+\item[(D3) Test statistic.] \eqref{eq:gauss-kl} is closed-form for
+Gaussian; for Student-$t$ vs.\ Student-$t$ with matched degrees of
+freedom there is a closed-form Student--Student KL; otherwise
+\eqref{eq:gauss-cd} is replaced by a sample-based divergence
+(Wasserstein-2, energy distance, MMD, or estimated KL via
+kernel-density estimation). The choice is one of estimator
+efficiency; the structural meaning of the test is preserved.
+
+\item[(D4) Coordinate standardisation.] The z-score transform
+$z = (\mathrm{raw} - \mu_{m,h}) / \sigma_{m,h}$ is a deterministic
+coordinate change. It removes low-frequency seasonal mean and
+scale; it does \emph{not} change the conditional law's shape. The
+Gaussian commitment lives not in the z-transform but in the
+\emph{predictive distribution} step (the iterated kernel is
+Gaussian by assumption). However, the climatology parameters
+$(\mu_{m,h}, \sigma_{m,h})$ are themselves estimated under an
+implicit Gaussian-second-moment model (the sample mean and
+standard deviation per bin). For heavy-tailed innovations, the
+standard deviation may not be the right scale parameter, and the
+sample mean may differ from the population centre.
+\end{description}
+
+\subsection{The general-family test}
+\label{sec:general-test}
+
+Generalising \eqref{eq:gauss-cd} to a general kernel family
+$\mathfrak{F}$:
+
+\begin{enumerate}[leftmargin=2em]
+\item Fit $\hat\kappa_1 \in \mathfrak{F}$ from one-step data
+under whichever fitting rule (MLE, OLS, regression with constraints)
+respects the family's structure.
+
+\item Compute the iterated kernel $\hat\kappa_h^{\mathrm{iter}}$
+either by closed-form convolution (if $\mathfrak{F}$ is closed) or
+by numerical propagation (typically: sample $M$ particles from
+$\hat\kappa_1(x, \cdot)$; resample; iterate $h$ times; record the
+empirical distribution of trajectories).
+
+\item Fit $\hat\kappa_h$ directly from $h$-step data, again under
+the family-respecting rule.
+
+\item Compute a divergence
+$d_{\mathfrak{F}}\!\bigl(\hat\kappa_h(x, \cdot),\;
+\hat\kappa_h^{\mathrm{iter}}(x, \cdot)\bigr)$ for each state $x$
+in the empirical distribution. Aggregate by the same subgroup
+$g$ stratification.
+
+\item Calibrate against a synthetic system with known generator
+in $\mathfrak{F}$ for which strict factorization holds; use the
+same divergence procedure to fix the noise floor.
+
+\item Pre-registered test: $\mathrm{D\_RATIO}_{\mathfrak{F}}$ as
+in \eqref{eq:dratio}, with thresholds calibrated by the synthetic
+noise floor specific to $\mathfrak{F}$.
+\end{enumerate}
+
+This is the same six-step procedure as the Gaussian case; only
+the family $\mathfrak{F}$ and the divergence $d_{\mathfrak{F}}$
+change.
+
+\subsection{The diffusion identity, generalized}
+\label{sec:gen-diffusion}
+
+The Gaussian diffusion identity \eqref{eq:lyapunov} has a
+generalisation that makes precise which strict-semigroup content
+is independent of family. For a general $h$-step kernel with finite
+second moments, write the (conditional) drift and the (conditional)
+\emph{dispersion} $V_h(x) := \mathrm{Cov}[X' \mid X = x]$ under
+$\hat\kappa_h$. Under strict factorization, taking second moments
+of the convolution gives the dispersion semigroup identity
+\begin{equation}
+  \label{eq:disp}
+  V_{h_1 + h_2}(x) \;=\; \hat C_{h_2}\, V_{h_1}(x)\, \hat C_{h_2}^{\top}
+    \;+\; \E_{y \sim \hat\kappa_{h_1}(x, \cdot)}\!\bigl[\, V_{h_2}(y)\,\bigr].
+\end{equation}
+For Gaussian kernels with $V_h \equiv \hat\Sigma_h$ constant in
+$x$, \eqref{eq:disp} reduces to the iteration rule
+$\hat\Sigma_{h_1 + h_2} = \hat C_{h_2} \hat\Sigma_{h_1}
+\hat C_{h_2}^{\top} + \hat\Sigma_{h_2}$, which unrolls to
+\eqref{eq:gauss-sigma}. For non-Gaussian kernels where $V_h$ may
+depend on $x$, the identity does not collapse to closed form, but
+it remains a meaningful constraint: the dispersion at scale
+$h_1+h_2$ must be the linear-drift-propagated dispersion at scale
+$h_1$ plus the average dispersion of the $h_2$-kernel at the
+$h_1$-propagated state.
+
+Identity \eqref{eq:disp} is the structural cross-scale
+\emph{second-moment} constraint regardless of kernel family.
+Higher moments and tail behaviour have analogous identities;
+together they exhaust the strict-semigroup content. The
+sample-based divergence $d_{\mathfrak{F}}$ implicitly tests all
+moments simultaneously; the closed-form Gaussian KL tests the
+first two moments specifically.
+
+\subsection{The Student-$t$ extension as a concrete case}
+\label{sec:student-t}
+
+The smallest non-Gaussian extension that admits a continuous limit
+to Gaussian is the Student-$t$ family. A Student-$t$ kernel is
+parameterized by location $\mu$, scale $s$, and degrees of freedom
+$\nu \in (0, \infty]$, with the Gaussian recovered in the limit
+$\nu \to \infty$. The conditional law
+\begin{equation}
+  \label{eq:t-kernel}
+  \hat\kappa_h(x, \cdot) \;=\;
+  \Studt_{\nu_h}\!\bigl(\hat C_h x,\; \hat s_h^{2}\bigr)
+\end{equation}
+is parametric, fittable by maximum likelihood (with iteratively
+reweighted least squares for the regression part and a
+one-dimensional optimisation for $\nu$), and gives a closed-form
+PIT (the Student-$t$ CDF, available in any scientific library).
+
+The Student-$t$ family is \emph{not} closed under convolution. If
+$\hat\kappa_1$ is Student-$t$, $\hat\kappa_1 \compose \hat\kappa_1$
+is a heavier-tailed distribution with a more complex form
+(asymptotically Student-$t$ with $\nu/2$ degrees of freedom or
+similar, depending on $\nu$). This makes the strict-semigroup
+picture (A) \emph{algebraically tighter} in Student-$t$ land than
+in Gaussian land: closure of the kernel family under convolution
+is no longer free.
+
+For the test \S\ref{sec:general-test}, we compute
+$\hat\kappa_h^{\mathrm{iter}}$ by SMC particle propagation
+($M = 200$ particles, as in the existing infrastructure), and we
+use either a closed-form Student-$t$-Student-$t$ approximation
+to KL or a sample-based divergence (Wasserstein-2). The synthetic
+calibration generator is a known Student-$t$-VAR system with
+matched dimension.
+
+The Student-$t$ extension addresses (S5) directly: a heavy-tailed
+predictive can absorb the marginal PIT pathology because the
+distributional class admits the kind of tail behaviour the
+empirical residuals carry. Whether it absorbs (S1)'s defect is
+the empirical question: if $\mathrm{D\_RATIO}_{\Studt}$ at the
+same $(h^{*}, g^{*})$ is much smaller than the Gaussian
+$\mathrm{D\_RATIO} = 29$, the relaxed-factorization conclusion was
+in part an artifact of the wrong kernel family. If it stays
+comparable, picture (C) survives the family lift, and the seed's
+working hypothesis (Hypothesis~\ref{hyp:working}) gains independent
+support.
+
+\subsection{Standardisation under a heavy-tailed kernel}
+\label{sec:nongauss-std}
+
+The z-score transform with Gaussian-moment-based
+$(\mu_{m,h}, \sigma_{m,h})$ is consistent with a Gaussian kernel
+family but not with a Student-$t$ kernel family. For the latter,
+the natural standardisation uses Student-$t$ MLE per $(m, h)$ bin:
+fit $(\mu_{m,h}, s_{m,h}, \nu_{m,h})$ by maximum likelihood, then
+standardise via $z' = (\mathrm{raw} - \mu_{m,h}) / s_{m,h}$ (or
+leave the $\nu_{m,h}$ explicit in the kernel). This is a strictly
+more general coordinate transform than the Gaussian z-score; in
+the limit $\nu_{m,h} \to \infty$ for all bins, the two transforms
+agree.
+
+The standardisation question is therefore a function of the kernel
+family commitment: choose the family, choose a standardisation
+consistent with it. The z-transform is not itself the Gaussian
+commitment; rather, the choice of $(\mu_{m,h}, \sigma_{m,h})$ as
+the standardisation parameters \emph{is} a partial Gaussian
+commitment that is implicit in the current registered estimator.
+
+\section{The next experiment under the kernel-family generalization}
+\label{sec:nextnode}
+
+A new thread \texttt{distributional-class-thread} will be rooted in
+the PIT-calendar-fingerprint arbiter (S5). Its root node Q1 tests
+the Student-$t$ extension against the Gaussian baseline.
+
+\paragraph{Q1: candidate set (three nested models).}
+\begin{itemize}[leftmargin=2em]
+\item M0: the registered Gaussian predictor, as null baseline.
+\item M1: Student-$t$ kernel with one global $\nu$ per day-type;
+location and scale fit as for M0 (the kernel-family commitment
+changes; the standardisation does not).
+\item M2: full Student-$t$ commitment --- climatology refit under
+Student-$t$ MLE per $(m, h)$ bin, plus M1's kernel.
+\end{itemize}
+
+\paragraph{Q1: pre-registered outcomes.}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{R-A:} the marginal PIT under the best of M1, M2 has
+$\chi^{2}_{10\text{-bin}} \leq 30$. The Gaussian was the marginal
+problem; the heavy-tailed kernel fixes it.
+\item \textbf{R-B:} marginal PIT $\chi^{2} \in (30, 500]$.
+Student-$t$ helps but does not fully calibrate. Either richer
+family needed (mixtures, non-parametric) or the marginal pathology
+is partly non-distributional (e.g., misspecified mean).
+\item \textbf{R-C:} marginal PIT $\chi^{2} > 500$ under both M1
+and M2. Student-$t$ does not absorb (S5); the missing content
+is not the distributional class.
+\item \textbf{R-D:} the MLE fit does not converge or $\nu$
+estimates are pathological (e.g., $\nu < 2$, infinite variance,
+or $\nu > 1000$ at the boundary). Phase~A design fault; redesign.
+\end{itemize}
+
+\paragraph{Q1: secondary tests (informational).}
+\begin{itemize}[leftmargin=2em]
+\item The empirical $\nu$ per day-type. Small $\nu$ ($< 10$) means
+heavy-tailed is empirically required and propagates to all future
+kernel-family decisions.
+\item The Student-$t$ analogue of $\mathrm{D\_RATIO}$ at
+$(h^{*}, g^{*}) = (12, \mathrm{weekday})$, computed by SMC
+propagation and Wasserstein-2 or similar. Tests whether the v2
+finding survives the kernel-family lift. If $\mathrm{D\_RATIO}_\Studt$
+shrinks substantially, part of v2's signal was a Gaussian-projection
+artifact. If it stays large, picture (C) survives the lift and
+the seed's working hypothesis is independently corroborated.
+\end{itemize}
+
+\paragraph{Synthetic gate.}
+A known Student-$t$-VAR system (generator $(L, Q, \nu_{\text{true}})$
+producing data with finite-variance heavy tails). M0 (Gaussian)
+should fail marginal PIT on this synthetic; M1 and M2 should pass.
+This calibrates the test's discriminating power before any Ontario
+result is examined.
+
+\paragraph{What the outcomes imply for the framework.}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{If Q1 fires R-A and the secondary $\mathrm{D\_RATIO}_\Studt$
+shrinks to $\sim 1$}: the Gaussian kernel family was the dominant
+source of the v2 conclusion. The relaxed-factorization picture (C)
+collapses to the strict (A) once the kernel family is corrected.
+The seed's working hypothesis is falsified at the post-cutoff
+horizon under the corrected kernel. (Unlikely a priori, given (S2)
+and (S3) showed structured defect that doesn't trivially collapse.)
+
+\item \textbf{If Q1 fires R-A and the secondary $\mathrm{D\_RATIO}_\Studt$
+stays $\gtrsim 5$}: the marginal pathology was kernel-family wrong
+but the cross-scale coherence defect is real independent of family.
+The seed's framework is corroborated at a higher level of generality.
+
+\item \textbf{If Q1 fires R-B or R-C}: the missing content is not
+just the kernel family. The Gaussian-vs-Student-$t$ axis is one
+component of the missing structure; other components (state
+dimensions, exogenous covariates, non-parametric tail shape) are
+also needed. The line of inquiry naturally extends to richer
+families.
+
+\item \textbf{If Q1 fires R-D}: the experiment must be redesigned.
+\end{itemize}
+
+\section{What is settled at each level of generality}
+\label{sec:settled-levels}
+
+To summarise the campaign's standing under the kernel-family-aware
+framework:
+
+\begin{center}
+\begin{tabular}{P{0.40\textwidth}P{0.55\textwidth}}
+\toprule
+\textbf{Level} & \textbf{Status} \\
+\midrule
+Algebraic framework
+(Defs.\ \ref{def:factorization}, \ref{def:coherence})
+& \textbf{Settled} as a coherent formal proposal. Not yet
+theory-side-audited for novelty against existing kernel-semigroup
+literature. \\
+\addlinespace
+Working hypothesis on relaxed factorization being natural for
+finite-dim embeddings of higher-dim processes
+& \textbf{Empirically corroborated} in the Gaussian special case
+on Ontario data (S1, S2, S3). Generalization to non-Gaussian
+families is the next test. \\
+\addlinespace
+Gaussian kernel family as the right family for this empirical
+process
+& \textbf{Empirically falsified at the marginal level} (S5). A
+heavier-tailed family is required to recover predictive
+calibration. \\
+\addlinespace
+Specific structural prediction: defect concentrates in one
+eigenmode with characteristic timescale $\tau$ (seed \S5.2)
+& \textbf{Empirically falsified} (S2 shows the defect is diffuse
+across eigenmodes). The framework permits structured defects;
+this particular structure was wrong. \\
+\addlinespace
+Specific directional prediction: iterated under-estimates direct
+diffusion at large $h$ (seed \S5.1)
+& \textbf{Empirically falsified} (S6: iteration over-estimates;
+saturation argument). Framework predicts a defect; the direction
+was wrong. \\
+\addlinespace
+Test methodology (synthetic-calibrated divergence test) as a
+generic discipline
+& \textbf{Settled} across four cycles. Generalizes to non-Gaussian
+families with no structural change to the discipline; only the
+divergence and family change. \\
+\addlinespace
+Workflow (pre-register, code-path-audit, arbiter, thread)
+& \textbf{Settled} across one full thread plus three earlier
+single-experiment cycles. Catches the named retraction modes
+reliably. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The framework's general formulation in \S\ref{sec:framework} is
+the right object to register with the theory-side audit pipeline
+(currently the Resolvent\_Framework programme's
+\verb|notes/unsorted/| inbox). Its novelty against the
+SDE-generator-inference, Koopman--EDMD, and renormalization-group
+literatures has not been audited; the seed flagged this gap and
+left it to the theory-side workflow.
+
+\appendix
+
+\section{Provenance and references}
+\label{app:provenance}
+
+Registry entries:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Source & Entry & Verdict \\
+\midrule
+S1, S6
+  & \texttt{2026-05-26\_multiscale-direct-h-step-v2}
+  & SETTLED \\
+S2, S3
+  & \texttt{2026-05-26\_multiscale-defect-eigenmodes}
+  & SETTLED MIXED \\
+S4, S5
+  & \texttt{2026-05-26\_pit-calendar-fingerprint}
+  & SETTLED AMBIGUOUS \\
+Thread (Gaussian case)
+  & \texttt{2026-05-26\_missing-content-thread}
+  & \texttt{state = exhausted} \\
+Q1 (next)
+  & \texttt{2026-MM-DD\_distributional-class-thread}
+  & to be created \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Supporting memories: \texttt{mitacs-rebaseline-facts},
+\texttt{mitacs-rank1-structural}, \texttt{mitacs-theta-rail-pinning},
+\texttt{mitacs-clim-gap-nonstationary},
+\texttt{mitacs-multiscale-direct-h-step-v2},
+\texttt{mitacs-multiscale-defect-eigenmodes-v1},
+\texttt{mitacs-pit-calendar-fingerprint-p1},
+\texttt{mitacs-session-lessons-corpus}.
+
+Seed: \texttt{notes/seeds/multiscale\_factor\_coherence.md} (to be
+updated to the kernel-family-agnostic version).
+Workflow: \texttt{notes/seeds/applied\_audit\_workflow.md}.
+
+\end{document}
