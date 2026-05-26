@@ -421,6 +421,279 @@ def student_t_mle_fit(
     return C, float(np.sqrt(s2)), float(nu), resid
 
 
+def mixture_2_gaussian_mle_fit(
+    X: np.ndarray, Y: np.ndarray,
+    *,
+    max_em_iters: int = 200,
+    tol: float = 1e-7,
+    seed: int = 0,
+) -> tuple[np.ndarray, dict, np.ndarray]:
+    """MLE fit of ``Y[:, 0] = X @ C + r`` with ``r`` distributed as a
+    symmetric centred mixture of two zero-mean Gaussians.
+
+    Production-grade fitter for the distributional-class line of
+    inquiry's Q2A node ("richer-family-mixture-or-nonparametric";
+    notes/preregistrations/2026-05-26_distributional-class-thread/).
+    Without it, the mixture MLE would be reimplemented inline in each
+    Q2A script and trigger /audit code-path REIMPLEMENTED.
+
+    Model: ``r ~ w1 * N(0, s1^2) + w2 * N(0, s2^2)`` with ``w1 + w2 = 1``.
+    Both components share location 0 (symmetric / centred) so the
+    mixture is identifiable from a single scalar residual stream with
+    the regression slope absorbing any non-zero mean.
+
+    Algorithm: OLS warm-start for the drift (the Gaussian limit of the
+    family); EM on residuals alternating posterior-responsibility E-step
+    and weighted-variance M-step (McLachlan & Peel 2000, "Finite Mixture
+    Models", §2.8 — the textbook two-component centred-Normal-mixture
+    EM). Plain numpy throughout — no sklearn — so the EM is fully under
+    audit control. Deterministic given the seed (the EM init is
+    deterministic from the OLS residuals; the seed is reserved for any
+    future random init that callers might enable).
+
+    Returns ``(C, params, resid)`` matching the ``(X, Y) -> (C, family_params,
+    resid)`` calling convention used by :func:`student_t_mle_fit`:
+
+    * ``C`` is the (d, 1) drift matrix (coord-0 only; OLS estimator
+      under the centred-mixture model — the symmetric components mean
+      OLS on coord-0 *is* the MLE for the location parameter).
+    * ``params`` = ``{"weights": (w1, w2), "scales": (s1, s2)}``.
+    * ``resid`` is the (n,) coord-0 residual after the converged fit.
+    """
+    del seed   # reserved for a future random-init variant; current init
+    #            is deterministic from the OLS residual quantiles.
+    n, d = X.shape
+    if Y.ndim == 1:
+        y = Y.astype(float)
+    else:
+        y = Y[:, 0].astype(float)
+    X = X.astype(float)
+
+    # OLS for the drift (centred mixture: OLS on coord-0 is MLE of the
+    # location since each component has mean 0).
+    C_col, *_ = np.linalg.lstsq(X, y, rcond=None)
+    C = C_col.reshape(d, 1)
+    resid = y - (X @ C).ravel()
+
+    # Initialize EM: split the residual variance between a "core" (s1)
+    # and a "tail" (s2) by quantile inspection of |r|. The bottom-50%
+    # |r| determines s1; the top-10% |r| determines s2 (sqrt of the
+    # corresponding 2nd moments).
+    r = resid - resid.mean()
+    abs_r = np.abs(r)
+    q50, q90 = np.quantile(abs_r, [0.50, 0.90])
+    s1 = max(q50 / 0.6745, 1e-6)   # 0.6745 = Phi^-1(0.75) so q50(|N|) = 0.6745 sigma
+    s2 = max(q90 / 1.6449, s1 * 1.5)  # 0.95-quantile factor for half-normal
+    w1, w2 = 0.7, 0.3
+    log2pi = float(np.log(2 * np.pi))
+
+    def _log_norm_pdf(x: np.ndarray, sigma: float) -> np.ndarray:
+        return -0.5 * (x * x) / (sigma * sigma) - np.log(sigma) - 0.5 * log2pi
+
+    prev_ll = -np.inf
+    for _ in range(max_em_iters):
+        # E-step: posterior responsibilities (log-sum-exp stabilized)
+        log_p1 = np.log(max(w1, 1e-300)) + _log_norm_pdf(r, s1)
+        log_p2 = np.log(max(w2, 1e-300)) + _log_norm_pdf(r, s2)
+        log_max = np.maximum(log_p1, log_p2)
+        log_denom = log_max + np.log(np.exp(log_p1 - log_max) + np.exp(log_p2 - log_max))
+        gamma1 = np.exp(log_p1 - log_denom)
+        gamma2 = 1.0 - gamma1
+        # M-step: closed-form for centred Normal mixture
+        n1 = gamma1.sum()
+        n2 = gamma2.sum()
+        if n1 < 1.0 or n2 < 1.0:
+            # one component collapsed; clamp to keep both alive
+            n1 = max(n1, 1.0)
+            n2 = max(n2, 1.0)
+        w1_new = n1 / n
+        w2_new = 1.0 - w1_new
+        s1_new = float(np.sqrt(max((gamma1 * r * r).sum() / n1, 1e-12)))
+        s2_new = float(np.sqrt(max((gamma2 * r * r).sum() / n2, 1e-12)))
+        # ordered: keep s1 <= s2 (identifiability)
+        if s1_new > s2_new:
+            s1_new, s2_new = s2_new, s1_new
+            w1_new, w2_new = w2_new, w1_new
+        # log-likelihood for convergence
+        ll = float(log_denom.sum())
+        if abs(ll - prev_ll) < tol * max(abs(prev_ll), 1.0):
+            w1, w2, s1, s2 = w1_new, w2_new, s1_new, s2_new
+            break
+        w1, w2, s1, s2 = w1_new, w2_new, s1_new, s2_new
+        prev_ll = ll
+
+    params = {
+        "weights": (float(w1), float(w2)),
+        "scales": (float(s1), float(s2)),
+    }
+    return C, params, resid
+
+
+def mixture_3_gaussian_mle_fit(
+    X: np.ndarray, Y: np.ndarray,
+    *,
+    max_em_iters: int = 200,
+    tol: float = 1e-7,
+    seed: int = 0,
+) -> tuple[np.ndarray, dict, np.ndarray]:
+    """MLE fit of ``Y[:, 0] = X @ C + r`` with ``r`` distributed as a
+    symmetric centred mixture of three zero-mean Gaussians.
+
+    Production-grade fitter for the distributional-class line of
+    inquiry's Q2A node (notes/preregistrations/2026-05-26_distributional-class-thread/).
+
+    Model: ``r ~ w1 * N(0, s1^2) + w2 * N(0, s2^2) + w3 * N(0, s3^2)``
+    with ``w1 + w2 + w3 = 1`` and all components centred at 0. The
+    three-component centred mixture buys finer tail control than mix-2
+    (a "core / shoulder / tail" decomposition) at the cost of a richer
+    EM landscape — initialisation by residual-quantile splits keeps the
+    EM in a well-posed basin in our regime.
+
+    Algorithm: OLS warm-start for the drift; EM on residuals (McLachlan &
+    Peel 2000, §2.8 generalised to K=3). Plain numpy. Deterministic.
+
+    Returns ``(C, params, resid)`` matching the
+    :func:`student_t_mle_fit` calling convention:
+
+    * ``params`` = ``{"weights": (w1, w2, w3), "scales": (s1, s2, s3)}``,
+      ordered ``s1 <= s2 <= s3``.
+    """
+    del seed
+    K = 3
+    n, d = X.shape
+    if Y.ndim == 1:
+        y = Y.astype(float)
+    else:
+        y = Y[:, 0].astype(float)
+    X = X.astype(float)
+
+    C_col, *_ = np.linalg.lstsq(X, y, rcond=None)
+    C = C_col.reshape(d, 1)
+    resid = y - (X @ C).ravel()
+    r = resid - resid.mean()
+    abs_r = np.abs(r)
+    q33, q66, q95 = np.quantile(abs_r, [0.33, 0.66, 0.95])
+    # half-normal quantile factors (scale = q/factor): Phi^-1((1+p)/2)
+    # for the |N| quantile. For p in (0.33, 0.66, 0.95):
+    # Phi^-1(0.665)=0.4263; Phi^-1(0.83)=0.9542; Phi^-1(0.975)=1.9600
+    s1 = max(q33 / 0.4263, 1e-6)
+    s2 = max(q66 / 0.9542, s1 * 1.2)
+    s3 = max(q95 / 1.9600, s2 * 1.5)
+    w = np.array([0.6, 0.3, 0.1])
+    scales = np.array([s1, s2, s3])
+    log2pi = float(np.log(2 * np.pi))
+
+    def _log_norm_pdf(x: np.ndarray, sigma: float) -> np.ndarray:
+        return -0.5 * (x * x) / (sigma * sigma) - np.log(sigma) - 0.5 * log2pi
+
+    prev_ll = -np.inf
+    for _ in range(max_em_iters):
+        # E-step: (n, K) log-responsibilities
+        log_p = np.empty((n, K))
+        for k in range(K):
+            log_p[:, k] = np.log(max(w[k], 1e-300)) + _log_norm_pdf(r, scales[k])
+        log_max = log_p.max(axis=1)
+        log_denom = log_max + np.log(np.exp(log_p - log_max[:, None]).sum(axis=1))
+        gamma = np.exp(log_p - log_denom[:, None])
+        # M-step
+        Nk = gamma.sum(axis=0)
+        Nk = np.maximum(Nk, 1.0)        # guard against component collapse
+        w_new = Nk / n
+        w_new = w_new / w_new.sum()
+        scales_new = np.sqrt(
+            np.maximum((gamma * (r ** 2)[:, None]).sum(axis=0) / Nk, 1e-12)
+        )
+        # order by scale (identifiability)
+        order = np.argsort(scales_new)
+        w_new = w_new[order]
+        scales_new = scales_new[order]
+        ll = float(log_denom.sum())
+        if abs(ll - prev_ll) < tol * max(abs(prev_ll), 1.0):
+            w, scales = w_new, scales_new
+            break
+        w, scales = w_new, scales_new
+        prev_ll = ll
+
+    params = {
+        "weights": tuple(float(x) for x in w),
+        "scales": tuple(float(x) for x in scales),
+    }
+    return C, params, resid
+
+
+def kde_residual_fit(
+    X: np.ndarray, Y: np.ndarray,
+    *,
+    bandwidth: str | float | np.ndarray = "silverman",
+) -> tuple[np.ndarray, dict, np.ndarray]:
+    """OLS drift + non-parametric Gaussian-kernel KDE on the residual.
+
+    Production-grade fitter for the distributional-class line of
+    inquiry's Q2A node (notes/preregistrations/2026-05-26_distributional-class-thread/),
+    representing the non-parametric end of the family ladder.
+
+    Model: ``Y[:, 0] = X @ C + r`` where ``r`` has unspecified density
+    estimated by Gaussian-kernel KDE on the OLS residual sample. The
+    KDE density is
+
+      f(t) = (1 / (n h)) sum_i K((t - r_i) / h),     K = standard Normal pdf
+
+    with ``h`` set by Silverman's rule of thumb (Silverman 1986,
+    *Density Estimation for Statistics and Data Analysis*, eq. 3.31)
+    ``h = 0.9 * min(std(r), IQR(r) / 1.34) * n^{-1/5}``. Sampling from
+    the estimated density uses the convolution rule: draw one of the
+    stored samples uniformly and add ``h * N(0, 1)`` noise (this is
+    exact: the KDE *is* the law of "uniform-pick + Gaussian-jitter
+    with scale h").
+
+    Plain numpy (no ``scipy.stats.gaussian_kde``) so the KDE
+    construction is fully under audit control.
+
+    Returns ``(C, params, resid)`` matching the
+    :func:`student_t_mle_fit` calling convention:
+
+    * ``params`` = ``{"bandwidth": float, "samples": np.ndarray,
+      "normalization": float}`` — the (h, r_samples, 1/(n*h)) triple
+      that downstream code needs to evaluate pdf, draw from the law,
+      or roundtrip to a downstream evaluator.
+    """
+    n, d = X.shape
+    if Y.ndim == 1:
+        y = Y.astype(float)
+    else:
+        y = Y[:, 0].astype(float)
+    X = X.astype(float)
+
+    C_col, *_ = np.linalg.lstsq(X, y, rcond=None)
+    C = C_col.reshape(d, 1)
+    resid = y - (X @ C).ravel()
+    r = resid - resid.mean()
+
+    if isinstance(bandwidth, str):
+        if bandwidth != "silverman":
+            raise ValueError(
+                f"unknown bandwidth rule {bandwidth!r}; use 'silverman' "
+                f"or a numeric value"
+            )
+        std = float(np.std(r, ddof=1)) if n > 1 else 1.0
+        q25, q75 = np.quantile(r, [0.25, 0.75])
+        iqr = float(q75 - q25)
+        spread = min(std, iqr / 1.34) if iqr > 0 else std
+        h = 0.9 * max(spread, 1e-9) * (n ** (-1.0 / 5.0))
+    elif isinstance(bandwidth, np.ndarray):
+        h = float(np.asarray(bandwidth).item())
+    else:
+        h = float(bandwidth)
+    h = max(h, 1e-9)
+
+    params = {
+        "bandwidth": float(h),
+        "samples": r.astype(float),
+        "normalization": float(1.0 / (n * h)),
+    }
+    return C, params, resid
+
+
 def innovation_diagnostics(
     *,
     embedding: Embedding,
