@@ -1,0 +1,145 @@
+schema: arbiter
+written_at: '2026-05-26T16:40:00-04:00'
+git_sha: 06eaefd853050f308d8c4dcc2f2954191fab1e31
+git_clean: false
+body_sha256: d8ddf5b2ead561005596e42e0aece55abd2d1c0f82851bdff88cc8529293219f
+references:
+- file: phase_a.yaml
+  body_sha256: 6bb2e6da7d7bad4c8c5ff6831c3a210b805eb73e543d355d62785e3db84f6fc5
+- file: proponent.yaml
+  body_sha256: 35a1ec5afbe75ccfed5f66a5f2358ad4bebf4a7ff54ce85bcfa2a25de75f69e1
+- file: devils_advocate.yaml
+  body_sha256: 3cc3cda74d54d39e06758a9b783e7c6f1cb348c1973226a0927e7a0f90a856b2
+- file: result.yaml
+  body_sha256: 1e29cf4710de3083f5bab62bc761dd58ff0ae3ed37aa8c6854d79db2d134015e
+preconditions:
+  code_path_passed: true
+  hash_chain_intact: true
+  result_from_clean_tree: true
+  fidelity_coverage_passed: true
+  fidelity_L2_resolved: true
+numerical_record:
+  outcome_mechanical: R-D
+  outcome_substantive: R-C
+  reason_mechanical: 'M2 climatology has 207 of 288 bins with fitted nu at the upper
+
+    boundary (nu = 300). phase_a R-D criterion: "MLE pathological
+
+    (nu > 200)" fires.
+
+    '
+  reason_substantive: 'Excluding R-D as a phase_a-criterion artifact (saturation at the
+
+    upper bound is the Student-t MLE''s correct response when bin-level
+
+    data is approximately Gaussian, not estimator failure), the
+
+    substantive verdict is R-C: min(chi^2_M1, chi^2_M2) = 1371 > 500.
+
+    Student-t kernel reduces marginal PIT chi^2 by 16x (22329 -> 1371)
+
+    but does not absorb the marginal pathology. Picture (C) survives
+
+    at far reduced magnitude than v2 implied.
+
+    '
+  chi2_M0:
+  - 22328.6
+  - 19028.1
+  - 25730.8
+  chi2_M1:
+  - 1371.6
+  - 1069.1
+  - 1817.2
+  chi2_M2:
+  - 1754.1
+  - 1382.9
+  - 2267.2
+  D_RATIO_t:
+  - 2.926
+  - 2.625
+  - 3.242
+  nu_M1_weekday: 4.194
+  nu_M1_saturday: 4.62
+  nu_M1_sunday: 4.609
+  proponent_forecast:
+    outcome: R-A
+    chi2_M1: 18
+    nu_weekday: 4.5
+    D_RATIO_t: 9
+    rationale_summary: kurt 24-33 -> nu ~4.5 via 6/(nu-4); heavy-tailed kernel absorbs the marginal pathology
+  proponent_distance_from_result:
+    outcome_match: false
+    chi2_M1_factor: 76.2
+    nu_match: true
+    D_RATIO_t_factor: 0.325
+  devils_advocate_forecast:
+    outcome: R-B
+    chi2_M1: 250
+    nu_weekday: 4.5
+    D_RATIO_t: 12
+    rationale_summary: iid violation in MLE + across-h aggregation prevent full calibration; Q2A territory
+  devils_advocate_distance_from_result:
+    outcome_match: false
+    chi2_M1_factor: 5.5
+    nu_match: true
+    D_RATIO_t_factor: 0.244
+  closer_forecast_chi2: devils_advocate
+  closer_forecast_D_RATIO_t: neither_close
+  both_correct_on_nu: true
+verdict: R-D
+verdict_reasoning: "Mechanical verdict per phase_a criteria: R-D fires. 207 of 288 M2\nclimatology bins fitted nu at the upper boundary (300), tripping\nthe \"MLE pathological: nu > 200\" rule. This is the third occurrence\nof \"pre-registered criterion fires on legitimate-but-unanticipated\ndata structure\" in the workflow's history (eigenmodes-v1: O2 fires\non near-tie; P1: tautology dominates candidate ranking; Q1: nu\nsaturation conflated with broken estimator).\n\nSubstantive interpretation: nu saturating at the upper bound is the\nStudent-t MLE's CORRECT response when the data is approximately\nGaussian. M2 fits Student-t to ~690 raw demand samples per (month,\nhour) bin; the CLT-like aggregation over weather variation within\nthe bin makes the empirical demand distribution at that month-and-\nhour approximately Gaussian. nu -> upper-bound IS the right answer\nfor ~70% of bins. The phase_a R-D criterion lumped this legitimate\nedge case with \"estimator broken\" \u2014 a phase_a design\
+  \ hole.\n\nSubstantively (treating R-D as a criterion artifact), the verdict\nis R-C: min(chi^2_M1, chi^2_M2) = 1371 > 500. The Student-t kernel\nreduces marginal PIT chi^2 by 16x but does not absorb the marginal\npathology. The missing content is not just the kernel family.\n\nThree findings of structural importance:\n\n  1. nu predictions essentially exact. Both forecasters predicted\n     nu ~ 4.5 from the kurtosis mapping; observed 4.19 (weekday),\n     4.62 (saturday), 4.61 (sunday). The mitacs-rebaseline-facts\n     in-sample kurtosis 24-33 mapping holds out-of-sample on the\n     forecast-grade residual.\n\n  2. chi^2 magnitudes both wrong, neither close. Proponent forecast\n     chi^2_M1 = 18 (observed 1371; 76x over); DA forecast 250\n     (observed 1371; 5.5x over). DA closer but neither close. The\n     substantive verdict R-C wasn't on either side's slate.\n\n  3. D_RATIO_t = 2.93 [2.62, 3.24] under Student-t at the v2\n     headline cell. v2's D_RATIO under Gaussian was 28.96.\
+  \ The 10x\n     SHRINKAGE means ~90% of v2's headline magnitude was absorbing\n     distributional-class misspecification, not measuring genuine\n     cross-scale coherence defect. Picture (C) is NOT refuted (the\n     defect exists; D_RATIO_t > 1 with CI clear of 1), but v2's\n     SETTLED interpretation requires an asterisk on magnitude:\n     the 29x figure was kernel-family-conditional. Under the\n     corrected kernel, the defect at (h=12, weekday) sits below\n     the v2 corroboration bar of 5.\n\n  4. M1 < M2 on marginal PIT chi^2. The bin-level seasonal\n     climatology IS approximately Gaussian; M2's extra parameters\n     add noise without capturing real signal. Heavy-tailedness lives\n     in the kappa_1 INNOVATION (the conditional residual given recent\n     state), not in the seasonal CLIMATOLOGY (the marginal demand\n     given month and hour-of-day). This refines the missing-content\n     programme: \"where is the heavy-tailedness\" is now answered.\n"
+finding_status: SETTLED
+if_provisional_what_to_reaudit: []
+thread_state_update:
+  thread_topic: distributional-class-thread
+  node_id: Q1
+  branch_fired: R-D
+  next_node_id: Q2D
+  sibling_branches_closed:
+  - Q2A
+  - Q2B
+  thread_state_transition: null
+  notes_for_thread_coordinator: 'BLOCKING FOLLOW-UP NOTE: the branching_rules send R-D to Q2D
+
+    (MLE redesign), but the substantive picture says the issue is
+
+    the R-D criterion, not the MLE. The thread-coordinator should
+
+    treat Q2D''s transition to active as PROVISIONAL pending an
+
+    amendment that revises the R-D criterion to distinguish
+
+    "estimator broken" from "data approximately Gaussian at this
+
+    aggregation level." Without amendment, Q2D would redesign a
+
+    working estimator (waste of effort). With amendment, the
+
+    branching_rules should be revised so that the substantive R-C
+
+    (which would have fired without the M2 R-D trigger) routes to
+
+    Q2A (richer family).
+
+    '
+follow_up:
+  required: true
+  reasoning: "Two-step:\n\n1. THREAD AMENDMENT: thread-coordinator should add an amendment\n   block to thread.yaml revising the R-D criterion. New criterion:\n   \"MLE pathological IFF the M1 (kernel) fit shows nu at boundary\n   OR fewer than 50% of M2 bins have a meaningful nu (< 200)\".\n   Under this revised criterion, Q1's verdict reads R-C (M2's\n   Gaussian-at-bin-level saturation is no longer pathological).\n   The branching_rules.Q1.R-D = Q2D remains (in case M1 itself\n   fails), but Q1's effective routing becomes R-C -> Q2A.\n\n2. AFTER AMENDMENT: Q2A (richer family) is the natural next\n   node. Q2A's phase_a_skeleton already names mixture and\n   non-parametric extensions. The substantive evidence motivating\n   Q2A:\n     - Student-t reduces chi^2 16x but not to <30\n     - the residual marginal is still U-shaped after the kernel\n       lift (M1 histogram still has substantial extreme-bin mass)\n     - a 2-component or 3-component Gaussian mixture, or a non-\n       parametric\
+    \ KDE residual law, is the natural test of\n       \"what predictive class WOULD make the marginal flat.\"\n\n3. SEPARATE WORKFLOW LESSON: this is the third instance of\n   \"pre-registered criterion fires on legitimate-but-unanticipated\n   data structure\" (after eigenmodes-v1, P1). Add to\n   mitacs-session-lessons-corpus as a 4th named failure mode\n   distinct from the original 8 retraction categories. The arbiter\n   pattern handles it cleanly each time; recognise as the\n   workflow's correct answer, not a gap to engineer around.\n"
+  proposed_phase_a: 'notes/preregistrations/2026-MM-DD_q2a-richer-family/phase_a.yaml
+
+    AFTER the thread amendment lands. Skeleton already exists in
+
+    thread.yaml node Q2A.
+
+    '
+calibration_record:
+  proponent_correct: partial
+  devils_advocate_correct: partial
+  topic_difficulty: hard
+  notes: "Hard because both forecasters got nu (the load-bearing parameter)\nexactly right but missed the chi^2 magnitude badly. The\nkurtosis -> nu mapping is mechanistic and tight; the chi^2\nprediction was heuristic on the wrong side of both forecasters'\nconfidence. Neither anticipated that even with a correctly\nspecified nu, the marginal pathology would remain at chi^2 ~ 1371.\nDA's mechanism (iid violation; across-h aggregation) is consistent\nwith the data \u2014 the heavy-tail-correct kernel STILL doesn't\ncalibrate because of correlations across hours within delivery\ndays that the marginal aggregation captures.\n"
+memory_update_required: true
+memory_update_target: "~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md\n+ add mitacs-q1-student-t-vs-gaussian SETTLED-R-D-substantive-R-C\n+ amend mitacs-session-lessons-corpus to add 4th failure mode\n  \"pre-registered criterion fires on legitimate-but-unanticipated\n   data structure\"\n+ cross-link to mitacs-multiscale-direct-h-step-v2 (D_RATIO_t\n  asterisk: magnitude was kernel-family-conditional; v2 SETTLED\n  finding is not retracted but interpretation requires the qualifier)\n"
