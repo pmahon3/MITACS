@@ -1,0 +1,167 @@
+schema: phase_a
+written_at: '2026-05-26T23:30:00-04:00'
+references:
+- file: ../2026-05-26_distributional-class-thread/thread.yaml
+  body_sha256: 05b732d41a26552121912412a8834a108175e811819916920c8b05c8b1d50d58
+  relation: thread
+topic: q2b-non-distributional-decomposition
+research_question: Of the ~954 chi^2 Q2A confirmed is non-distributional (post-cutoff marginal PIT under the best richer family M3, mixture-2-Gaussian), how does it decompose into three pre-registered mechanisms
+  (iterated mean trajectory bias, iterated variance divergence at large h, day-anchor seam artifact) when each is ablated in isolation?
+hypothesis:
+  proponent: R-A3 fires with mech_1 (iterated_mean_trajectory_bias) dominant at explained_share ~ 0.75. Per mitacs-clim-gap-nonstationary, the post-cutoff actual-mu gap is approximately +1000 MW hour-flat
+    and non-stationary, driving systematic iterated-mean drift on the registered predictor; this MW-space bias propagates to z-space (modulo standardization) as a first-moment offset in the iterated kappa_1
+    marginal that no symmetric-centred distributional family (Student-t, mixture, KDE) can absorb. Subtracting an empirical per-(h, day_type) mean bias prior to PIT eval should account for most of the residual
+    chi^2. mech_2 (iterated_variance_divergence) contributes secondarily (~0.15); mech_3 (seam) is a REGISTERED NULL with expected share ~ 0 because production estimator already excludes seam-crossing iterations
+    via _complete_delivery_days.
+  counter: See devils_advocate.yaml. Most plausibly R-B3 with mech_1 (~0.40) and mech_2 (~0.35) both contributing and neither dominant. The +1000 MW MW-space gap may translate substantially attenuated to
+    z-space (kappa_1 is fit in z-space against a fixed pre-cutoff climatology). Iterated heavy-tailed variance over h=24 in mixture-2-Gaussian is non-trivial and mech_2 may contribute more than the proponent
+    expects. Q2A's Saturday-4x-weekday family-invariant pattern suggests day-type-specific structure that mean-bias alone will not fully capture.
+variables:
+  dependent:
+  - chi2_baseline_M3
+  - chi2_after_mean_bias_fix
+  - chi2_after_variance_cap_fix
+  - chi2_after_seam_exclusion_fix
+  - explained_share_mean_bias
+  - explained_share_variance_div
+  - explained_share_seam
+  - ci95_chi2_baseline_M3
+  - ci95_chi2_after_mean_bias_fix
+  - ci95_chi2_after_variance_cap_fix
+  - ci95_chi2_after_seam_exclusion_fix
+  - ci95_explained_share_mean_bias
+  - ci95_explained_share_variance_div
+  - ci95_explained_share_seam
+  - per_h_day_type_empirical_mean_bias
+  - per_h_day_type_empirical_variance
+  - per_h_day_type_smc_ensemble_variance
+  independent:
+  - mechanism
+  - day_type
+  excluded:
+  - variable: cumulative_or_sequential_ablation
+    reasoning: Ablation is per-mechanism in isolation. Cumulative ablation (mech_1 then mech_2 etc.) would make the decomposition order-dependent and conflate interactions with main effects. Pre-registered
+      methodology is 3 isolated runs, one per mechanism.
+  - variable: cross_mechanism_interactions
+    reasoning: Interaction terms (e.g., mean-bias-fix-conditional-on-variance-cap) are outside the pre-registered candidate set. If sum of shares != 1 (overlap or under-cover), that is reported as a sanity
+      check but does not modify the verdict; interactions are a follow-up node, not Q2B.
+  - variable: deployable_corrections
+    reasoning: Mech 1 and mech 2 use post-cutoff actuals to define the fix specifically for attribution. This is NOT a deployable correction (the deployment context has no post-cutoff actuals at issue time);
+      it is an upper bound on what each mechanism could explain if perfectly corrected. The distinction is documented and the verdict is about attribution, not improvement.
+  - variable: kernel_family_lift
+    reasoning: Q2A established M3 (mixture-2-Gaussian) as the binding richer family. Q2B holds the kernel family fixed at M3 (and reuses Q2A's fits) so the decomposition is on the non-distributional axis
+      exclusively. Lifting kernel family inside Q2B would conflate Q2A's axis with Q2B's.
+data:
+  source: 'Pre-cutoff Ontario demand (load_actuals, cutoff = spec.data_cutoff) for kappa_1 + climatology + M3 mixture-2-Gaussian fits (reused from Q2A); post-cutoff for chi^2 evaluation. Same post-cutoff
+    population as Q1 / Q2A: all delivery days from 2025-01-01 through 2026-05-16.'
+  partition:
+    train: pre-cutoff library (<= 2024-12-31 23:00) for fits (reused from Q2A)
+    dev: not used (no hyperparameter tuning in Q2B)
+    test: post-cutoff 2025-01-01 .. 2026-05-16 (whole population; no subsetting)
+  cutoff_handling: 'ATTRIBUTION-ONLY USE OF POST-CUTOFF ACTUALS: empirical_mean_bias(h, day_type) and sigma2_empirical(h, day_type) are computed from post-cutoff actuals to define each mechanism''s fix.
+    This intentionally violates strict leakage-guarding because the verdict is about attribution (upper bound on what each mechanism could explain), not about deployment. Standard leakage-guarded pre-cutoff
+    library is used for kappa_1 + climatology + M3 fits. The attribution-vs-deployment distinction is explicit in stopping_criterion and in the verdict interpretation.'
+metric: "PRIMARY: explained_share per mechanism m, where\n  explained_share[m] = (chi2_baseline - chi2_after_fix[m]) / (chi2_baseline - R_A2_cut)\n  chi2_baseline      = chi2_M3 from Q2A baseline (= 953.84\
+  \ SETTLED point, recomputed in Q2B with same SMC seeds as a self-consistency sanity check)\n  R_A2_cut           = 228.44 (Q2A gate-validated R-A2 cut; binding cell V3_rho10 KDE kurt=12)\n  denominator\
+  \        = 953.84 - 228.44 = 725.40 (frozen constant in the formula)\n\nFor each mechanism m in {mean_bias, variance_div, seam}:\n  1. Reuse Q2A's M3 (mixture-2-Gaussian) fits (per-day-type C_1, mu, weights,\
+  \ scales).\n  2. Run SMC iteration over all post-cutoff issue-times, M=200 particles per state, iterating to the same horizon Q1/Q2A used.\n  3. Apply mechanism m's fix to the SMC particle ensemble:\n\
+  \     mech_1 (mean_bias):  for each (h, day_type), subtract empirical_mean_bias(h, day_type) = mean over post-cutoff issue-times of (actual_z(h) - iterated_mean_z(h)) from each particle's z value at horizon\
+  \ h.\n     mech_2 (variance_div): for each (h, day_type), compute sigma2_iter(h, day_type) = mean over post-cutoff of sample variance of M particles at h; compute sigma2_empirical(h, day_type) = mean\
+  \ over post-cutoff of (actual_z - empirical_mean_z)^2 grouped by day_type. If sigma2_iter > sigma2_empirical, rescale all particles toward the ensemble mean by factor sqrt(sigma2_empirical / sigma2_iter);\
+  \ else no change.\n     mech_3 (seam): restrict PIT aggregation domain to exclude issue-times whose horizon-h target lands on the day-anchor hour. Production estimator already excludes seam-crossing iteration\
+  \ via _complete_delivery_days; mech_3 layers an additional aggregation-domain exclusion for the REGISTERED NULL.\n  4. Recompute marginal PIT: u = empirical CDF of particle distribution at z_actual; aggregate\
+  \ u over all post-cutoff (day, hour-of-day) pairs.\n  5. chi2_after_fix[m] = sum over 10 bins of (observed - expected)^2 / expected, expected = N/10.\n  6. explained_share[m] computed per formula above.\n\
+  \nSECONDARY (sanity-check; not part of the verdict):\n  - chi2_after_fix[m] stratified by day_type.\n  - sum_m explained_share[m]: reported and discussed. Sum substantially exceeding 1 indicates overlap\
+  \ (mechanisms address the same chi^2); sum substantially below max[m] explained_share[m] indicates under-attribution.\n  - Self-consistency: chi2_baseline_M3 recomputed in Q2B should match Q2A's M3 chi^2\
+  \ = 953.84 within paired-day-bootstrap CI; mismatch indicates pipeline drift between Q2A and Q2B.\n  - Synthetic single-mechanism sanity (small N=500, M=50; ~10 sec): generate VAR(1) data with a known\
+  \ mean-bias offset, confirm mech_1 ablation attributes ~100% share to mean_bias.\n"
+models:
+  M3_baseline:
+    description: Q2A's M3 mixture-2-Gaussian SMC pipeline at its registered config (per-day-type C_1 + mu from pre-cutoff library; symmetric two-component centred Gaussian mixture residual law fit by mixture_2_gaussian_mle_fit;
+      M=200 particles; same per-step independence assumption; same day-anchor handling). chi2_baseline_M3 is recomputed in Q2B as a self-consistency sanity check against Q2A's settled chi^2_M3 = 953.84.
+    free_parameters: reused from Q2A; no refit
+    notes: M3 is the binding family from Q2A (best of M3/M4/M5 for the binding cell). Q2B holds kernel family fixed at M3 and varies only the non-distributional mechanism.
+  M3_mech1_mean_bias_fix:
+    description: 'M3 baseline with mean-bias fix applied to SMC particles: subtract per-(h, day_type) empirical_mean_bias from each particle''s z value at horizon h, where empirical_mean_bias is computed
+      from post-cutoff actuals (attribution-only use of post-cutoff data).'
+    free_parameters: 'per (h, day_type): 1 empirical_mean_bias = ~24 x 3 = 72 attribution-only parameters'
+    notes: Fix is non-deployable (uses post-cutoff actuals); pre-registered as an attribution upper bound on the mean-bias mechanism's contribution to chi^2.
+  M3_mech2_variance_cap_fix:
+    description: 'M3 baseline with variance-cap fix applied to SMC particles: if sigma2_iter(h, day_type) exceeds sigma2_empirical(h, day_type), rescale all particles toward the ensemble mean by factor
+      sqrt(sigma2_empirical / sigma2_iter); else no change. Both quantities are computed from post-cutoff data (attribution-only).'
+    free_parameters: 'per (h, day_type): 1 sigma2_empirical (target) = ~24 x 3 = 72 attribution-only parameters'
+    notes: One-sided cap (does not scale up if iterated variance is under-dispersed); pre-registered as an attribution upper bound on the variance-divergence mechanism's contribution.
+  M3_mech3_seam_exclusion_fix:
+    description: M3 baseline with PIT aggregation domain restricted to exclude issue-times whose horizon-h target lands on the day-anchor hour. Production estimator already excludes seam-crossing iteration
+      via _complete_delivery_days (day_anchor_hour mask kwarg was removed in current production); mech_3 adds a redundant aggregation-domain filter.
+    free_parameters: 0 (deterministic domain filter)
+    notes: 'REGISTERED NULL. Expected explained_share ~ 0 by construction. Included as a pre-registered null check: if mech_3 reads > 0.15 the production seam handling has a leak and the diagnostic is itself
+      informative.'
+shape_outcomes:
+  R-A3:
+    criterion: max_m explained_share[m] > 0.50 AND max_m explained_share[m] > 2 x second_m explained_share[m]
+    interpretation: 'One mechanism dominates the non-distributional chi^2 and is fixable independent of kernel family (modulo the attribution-vs-deployment caveat). Points to a concrete remediation in the
+      next thread node (e.g., deployable analogue of the dominant mechanism: state-dependent mean-bias correction without post-cutoff actuals).'
+  R-B3:
+    criterion: NOT R-A3 AND NOT R-C3 (i.e., either max share is below 0.50, or max share exceeds 0.50 but is within 2x of the second; in either case at least one share is >= 0.15)
+    interpretation: Multiple mechanisms contribute to the non-distributional chi^2; no single fix suffices. Triggers a thread amendment by thread-coordinator (NOT an automatic next-node fire) to design
+      a combined-mechanism or interaction-aware investigation.
+  R-C3:
+    criterion: max_m explained_share[m] < 0.15
+    interpretation: No pre-registered mechanism captures the chi^2. The marginal PIT pathology is irreducibly pathological under the Q2B candidate set; new candidates (weather, state-space dimension, day-type
+      partition refinement) are needed via amendment.
+falsification_criterion:
+  numeric: R-C3 fires (max_m explained_share[m] < 0.15)
+  reasoning: If none of the three pre-registered mechanisms (mean_bias, variance_div, seam) accounts for more than 15% of the gap between baseline and the R-A2 corroboration cut, the Q2B candidate set is
+    empirically inadequate to decompose the non-distributional chi^2. The 0.15 threshold is a generous noise floor above mech_3's REGISTERED NULL expected ~0 share; mech_1 and mech_2 falling below 0.15
+    means the substantive non-distributional content lives elsewhere (weather covariates, embedding dimension, day-type partition refinement). Routes to thread amendment for a new candidate set.
+corroboration_criterion:
+  numeric: R-A3 fires (max_m explained_share[m] > 0.50 AND max_m > 2 x second_m)
+  reasoning: If one mechanism dominates (> 50% of the gap AND > 2x the second), it identifies the leading non-distributional content and provides a concrete target for the next thread node. The 0.50 threshold
+    is the formal dominance bar (top share exceeds the sum of all others); the > 2x next clause enforces clear separation from a 50/50 tie. Under the proponent's forecast (mech_1 ~ 0.75, mech_2 ~ 0.15)
+    R-A3 fires; under the DA's forecast (mech_1 ~ 0.40, mech_2 ~ 0.35) R-A3 does not fire.
+ambiguous_region:
+  range: 'R-B3: max share between 0.15 and 0.50, OR max share above 0.50 but within 2x of second'
+  action: Report and characterize. R-B3 triggers a thread amendment via thread-coordinator (NOT an automatic next-node fire) to design a combined-mechanism or interaction-aware investigation. Same R-B-mandates-amendment
+    pattern as Q2A's R-B2.
+baselines:
+  primary: Q2A's chi2_M3 = 953.84 (point estimate; CI [685, 1357] from Q2A's paired-day bootstrap). Q2B's chi2_baseline_M3 must match within bootstrap CI overlap; mismatch indicates pipeline drift between
+    Q2A and Q2B and is BLOCKING for the Q2B verdict.
+  secondary: 'Per-mechanism synthetic sanity check (small N=500, M=50; ~10 sec wall-clock): generate a VAR(1)-class synthetic system with a known single-mechanism defect (e.g., constant mean-bias offset),
+    run the Q2B ablation pipeline with all three mechanism fixes, confirm that the corresponding mechanism''s explained_share is ~ 1.0 (within Monte Carlo noise) and the other two are ~ 0. Validates the
+    ablation attribution logic against ground truth.'
+stopping_criterion:
+  rule: 'Run: M3 baseline SMC propagation (reusing Q2A fits); empirical_mean_bias and sigma2_empirical computation from post-cutoff actuals; mech_1 / mech_2 / mech_3 ablation PIT chi^2; 1000-resample paired-day
+    bootstrap CI on each chi^2 and each explained_share; evaluate R-A3 / R-B3 / R-C3 against pre-registered cuts; arbiter. STOP. No iteration; no parameter tuning; no post-hoc mechanism redefinition.'
+  reasoning: Pre-registration is complete; verdict is determined by data once the experiment runs. The attribution-only use of post-cutoff actuals is intentional and scoped to upper-bounding each mechanism's
+    contribution; converting any mechanism to a deployable correction is a separate next-node design question, not a Q2B step.
+ci_method:
+  type: paired_day_bootstrap
+  details: 1000 paired-day bootstrap resamples of post-cutoff delivery days. Per resample, recompute chi^2_baseline and chi^2_after_fix[m] for m in {mean_bias, variance_div, seam} from the resampled day
+    population, and compute explained_share[m] per resample using the same denominator constant 725.40 (953.84 - 228.44). Report 95% percentile CI on every chi^2 and every explained_share.
+  width: 95 percent percentile interval
+affects_registered_spec: false
+thread:
+  thread_topic: distributional-class-thread
+  thread_body_sha256: 05b732d41a26552121912412a8834a108175e811819916920c8b05c8b1d50d58
+  node_id: Q2B
+  parent_branch: R-C
+  threshold_derivations: "Numeric thresholds (X=0.50 dominance, Y=0.15 null) are NOT derived from a synthetic gate (unlike Q2A's gate-derived 228.44 and 2284.44). They are set on non-data principled bases:\n\
+    \  X=0.50: formal threshold for dominance (top mechanism > sum of all others); the > 2x next clause enforces clear separation from 50/50.\n  Y=0.15: generous noise floor above the seam mechanism's REGISTERED\
+    \ NULL expected ~0 share. If mech_3 reads > 0.15 the production seam handling has a leak; the 0.15 floor is the same bar applied to mech_1 / mech_2 so R-C3 fires iff none of the three captures > 15%\
+    \ of the gap.\nchi2_baseline = 953.84 from Q2A SETTLED finding (mitacs-q2a-richer-family, M3 point estimate).\nR-A2 corroboration cut = 228.44 from Q2A pre-registered gate (gate body_sha256 2bab514e...,\
+    \ binding cell V3_rho10 KDE kurt=12, gate-validated under variant-max conservative rule).\nDenominator 725.40 = 953.84 - 228.44 is frozen for all explained_share computations including per-bootstrap-resample\
+    \ evaluations."
+related_memory:
+- mitacs-q2a-richer-family
+- mitacs-q1-student-t-vs-gaussian
+- mitacs-clim-gap-nonstationary
+- mitacs-dayanchor-seam
+- mitacs-multiscale-defect-eigenmodes-v1
+- mitacs-rebaseline-facts
+related_seed:
+- notes/seeds/multiscale_factor_coherence.md
+- writeup/tex/missing_content_memo.tex
+git_sha: 419e7063964c378f31483862bf861e00344d9b69
+git_clean: true
+body_sha256: 8354a70bc4361fa3e874b98c764e8c0f41cd06c908b8614a4f4bb1cd913907fb
