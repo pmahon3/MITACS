@@ -112,12 +112,28 @@ def compute_body_hash(data: dict[str, Any]) -> str:
     return sha256_hex(canonical(data, exclude=_HASH_FIELD))
 
 
-def stamp(data: dict[str, Any]) -> dict[str, Any]:
+def stamp(
+    data: dict[str, Any],
+    *,
+    self_path: Path | str | None = None,
+) -> dict[str, Any]:
     """Return a copy of ``data`` with ``git_sha``, ``git_clean``, and
-    ``body_sha256`` filled in (current values)."""
+    ``body_sha256`` filled in (current values).
+
+    ``self_path``: when the YAML being stamped is itself a registry
+    file (the usual case — phase_a.yaml, result.yaml, etc.), pass its
+    path here so that file's own untracked existence does NOT count
+    toward ``git_clean = False``. The artifact's own existence in the
+    working tree is not a source change of the state that produced it;
+    this is the same self-reference issue ``freeze.py`` avoids by
+    capturing clean-status BEFORE writing the spec. Here we capture
+    it AFTER but exclude the artifact path explicitly — equivalent.
+    """
     out = dict(data)
     out["git_sha"] = git_sha()
-    out["git_clean"] = git_clean()
+    out["git_clean"] = git_clean(
+        exclude_paths=[self_path] if self_path is not None else None,
+    )
     # body_sha256 is computed last, over the rest:
     out["body_sha256"] = compute_body_hash(out)
     return out

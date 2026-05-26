@@ -15,7 +15,8 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
-from typing import Any
+from pathlib import Path
+from typing import Any, Iterable
 
 from config import PROJECT_ROOT
 
@@ -31,7 +32,32 @@ def git_sha() -> str:
     ).strip()
 
 
-def git_clean() -> bool:
+def _normalize_exclude(
+    exclude_paths: Iterable[str | Path] | None,
+) -> set[str]:
+    """Resolve excluded paths to repo-relative POSIX strings, the form
+    that ``git status --porcelain`` reports.
+    """
+    if not exclude_paths:
+        return set()
+    out: set[str] = set()
+    root = Path(PROJECT_ROOT).resolve()
+    for p in exclude_paths:
+        path = Path(p)
+        if not path.is_absolute():
+            path = (Path.cwd() / path).resolve()
+        try:
+            rel = path.resolve().relative_to(root)
+        except ValueError:
+            # outside the repo — skip silently; not our concern
+            continue
+        out.add(rel.as_posix())
+    return out
+
+
+def git_clean(
+    *, exclude_paths: Iterable[str | Path] | None = None
+) -> bool:
     """True iff no uncommitted changes to files that affect what code
     produced the artifact.
 
@@ -40,7 +66,14 @@ def git_clean() -> bool:
     block every artifact forever); untracked *directories* (e.g.
     ``.idea/``) are not source. Any modified/added/deleted source path
     -- including an untracked source *file* -- makes it dirty.
+
+    ``exclude_paths``: paths (repo-relative or absolute) that should NOT
+    count as dirty even if ``git status`` reports them. Used by
+    self-referential stampers: the artifact's own existence is not a
+    source change of the state that produced it. ``registry.stamp``
+    passes its target path here.
     """
+    excludes = _normalize_exclude(exclude_paths)
     out = subprocess.check_output(
         ["git", "status", "--porcelain"], cwd=PROJECT_ROOT, text=True
     )
@@ -52,6 +85,8 @@ def git_clean() -> bool:
             continue
         if path.endswith("/") or path.startswith(".idea/"):
             continue  # untracked dir -- not a source file
+        if path in excludes:
+            continue
         return False
     return True
 
