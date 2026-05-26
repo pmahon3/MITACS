@@ -1,30 +1,650 @@
 <<<PROVENANCE
 {
-  "body_sha256": "7696370326df8b9be392513c456cf4faafc534c97f3f352af31251ec26137a06",
-  "generated_utc": "2026-05-26T19:23:32+00:00",
+  "body_sha256": "2bab514e1049a89643ab69f45568400969c78c37939c3b188166e1a89c775c42",
+  "generated_utc": "2026-05-26T21:05:06+00:00",
   "git_clean": true,
-  "git_sha": "6c3e74785b1f4a7144bd26bc5140a4abec29c539",
+  "git_sha": "5e9cebebf5e4c3dadfe58a6d3e227183af4fcf2d",
   "grade": "METHOD/DESIGN",
-  "inputs_fingerprint": "4592614a5db7adad7cd2cc4bc677a60551af31e9d6413cab51591202efbf7faa",
+  "inputs_fingerprint": "8bdc643e533f00f0d8d7ae790b7218f7ea3e5d005cf6de6c2658262a3777714a",
   "reproducibility": {
     "frozen_spec_hash": "f0dd9c8795fda781fa8cab80ddd9ec9fb844af284cdb3077c0d1116b13e0536d",
-    "git_sha": "6c3e74785b1f4a7144bd26bc5140a4abec29c539",
+    "git_sha": "5e9cebebf5e4c3dadfe58a6d3e227183af4fcf2d",
     "inputs": {
       "c_true": [
         0.7,
         0.2
       ],
       "d_embed": 2,
+      "discriminability_table": [
+        {
+          "kurt": 12.0,
+          "mean_cross": 16.086860566448802,
+          "mean_same": 14.851436819172113,
+          "ratio": 1.0831854696834349,
+          "variant": "V1_fixed"
+        },
+        {
+          "kurt": 20.0,
+          "mean_cross": 16.654022875816995,
+          "mean_same": 15.313503267973857,
+          "ratio": 1.0875384021791183,
+          "variant": "V1_fixed"
+        },
+        {
+          "kurt": 28.0,
+          "mean_cross": 17.796101851851855,
+          "mean_same": 16.148860566448803,
+          "ratio": 1.1020035610949166,
+          "variant": "V1_fixed"
+        },
+        {
+          "kurt": 40.0,
+          "mean_cross": 20.196798474945535,
+          "mean_same": 18.213778867102395,
+          "ratio": 1.1088746943900178,
+          "variant": "V1_fixed"
+        },
+        {
+          "kurt": 12.0,
+          "mean_cross": 23.801468409586054,
+          "mean_same": 16.051220043572986,
+          "ratio": 1.4828448145981474,
+          "variant": "V2_alpha0.5"
+        },
+        {
+          "kurt": 20.0,
+          "mean_cross": 27.90704901960784,
+          "mean_same": 16.31343355119826,
+          "ratio": 1.710679050613352,
+          "variant": "V2_alpha0.5"
+        },
+        {
+          "kurt": 28.0,
+          "mean_cross": 31.42217047930283,
+          "mean_same": 16.80774291938998,
+          "ratio": 1.8695056576010067,
+          "variant": "V2_alpha0.5"
+        },
+        {
+          "kurt": 40.0,
+          "mean_cross": 33.912944989106755,
+          "mean_same": 16.303290849673203,
+          "ratio": 2.080128809686698,
+          "variant": "V2_alpha0.5"
+        },
+        {
+          "kurt": 12.0,
+          "mean_cross": 26.194702614379086,
+          "mean_same": 31.321665577342046,
+          "ratio": 0.8363125693203307,
+          "variant": "V3_rho10"
+        },
+        {
+          "kurt": 20.0,
+          "mean_cross": 20.917445533769065,
+          "mean_same": 22.940584967320262,
+          "ratio": 0.9118095969900839,
+          "variant": "V3_rho10"
+        },
+        {
+          "kurt": 28.0,
+          "mean_cross": 19.575800108932466,
+          "mean_same": 19.955540305010892,
+          "ratio": 0.9809706883264357,
+          "variant": "V3_rho10"
+        },
+        {
+          "kurt": 40.0,
+          "mean_cross": 17.790126361655773,
+          "mean_same": 18.540161220043572,
+          "ratio": 0.9595453971793436,
+          "variant": "V3_rho10"
+        }
+      ],
       "discriminability_warnings": [
-        "kurt=12.0: cross/same ratio 1.09 < 1.20 \u2014 families barely discriminable",
-        "kurt=20.0: cross/same ratio 1.11 < 1.20 \u2014 families barely discriminable",
-        "kurt=28.0: cross/same ratio 1.13 < 1.20 \u2014 families barely discriminable",
-        "kurt=40.0: cross/same ratio 1.14 < 1.20 \u2014 families barely discriminable"
+        "(V1_fixed, kurt=12.0): cross/same ratio 1.08 < 1.20 \u2014 families barely discriminable",
+        "(V1_fixed, kurt=20.0): cross/same ratio 1.09 < 1.20 \u2014 families barely discriminable",
+        "(V1_fixed, kurt=28.0): cross/same ratio 1.10 < 1.20 \u2014 families barely discriminable",
+        "(V1_fixed, kurt=40.0): cross/same ratio 1.11 < 1.20 \u2014 families barely discriminable",
+        "(V3_rho10, kurt=12.0): cross/same ratio 0.84 < 1.20 \u2014 families barely discriminable",
+        "(V3_rho10, kurt=20.0): cross/same ratio 0.91 < 1.20 \u2014 families barely discriminable",
+        "(V3_rho10, kurt=28.0): cross/same ratio 0.98 < 1.20 \u2014 families barely discriminable",
+        "(V3_rho10, kurt=40.0): cross/same ratio 0.96 < 1.20 \u2014 families barely discriminable"
       ],
       "families": [
         "mixture_2",
         "mixture_3",
         "kde"
+      ],
+      "generator_specs": [
+        {
+          "closed_form_kurt": 11.999999999999996,
+          "family": "mixture_2",
+          "kurt": 12.0,
+          "scales": [
+            1.0,
+            3.7666023209370585
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.95,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 20.0,
+          "family": "mixture_2",
+          "kurt": 20.0,
+          "scales": [
+            1.0,
+            5.006434101860663
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.95,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 27.999999999999996,
+          "family": "mixture_2",
+          "kurt": 28.0,
+          "scales": [
+            1.0,
+            6.341784654986409
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.95,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 39.99999999999999,
+          "family": "mixture_2",
+          "kurt": 40.0,
+          "scales": [
+            1.0,
+            9.160996125576089
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.95,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 12.000000000000004,
+          "family": "mixture_3",
+          "kurt": 12.0,
+          "scales": [
+            1.0,
+            2.0,
+            4.454798825835475
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.8,
+            0.15,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 20.0,
+          "family": "mixture_3",
+          "kurt": 20.0,
+          "scales": [
+            1.0,
+            2.0,
+            6.015070491093087
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.8,
+            0.15,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 27.999999999999993,
+          "family": "mixture_3",
+          "kurt": 28.0,
+          "scales": [
+            1.0,
+            2.0,
+            7.658355086639581
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.8,
+            0.15,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 40.0,
+          "family": "mixture_3",
+          "kurt": 40.0,
+          "scales": [
+            1.0,
+            2.0,
+            11.098262138505588
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.8,
+            0.15,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 11.999999999999996,
+          "family": "kde",
+          "kurt": 12.0,
+          "scales": [
+            1.0,
+            3.7666023209370585
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.95,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 20.0,
+          "family": "kde",
+          "kurt": 20.0,
+          "scales": [
+            1.0,
+            5.006434101860663
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.95,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 27.999999999999996,
+          "family": "kde",
+          "kurt": 28.0,
+          "scales": [
+            1.0,
+            6.341784654986409
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.95,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 39.99999999999999,
+          "family": "kde",
+          "kurt": 40.0,
+          "scales": [
+            1.0,
+            9.160996125576089
+          ],
+          "variant": "V1_fixed",
+          "weights": [
+            0.95,
+            0.05
+          ]
+        },
+        {
+          "closed_form_kurt": 12.000000000000002,
+          "family": "mixture_2",
+          "kurt": 12.0,
+          "scales": [
+            1.0,
+            4.0205909254625345
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.875,
+            0.125
+          ]
+        },
+        {
+          "closed_form_kurt": 20.000000000000004,
+          "family": "mixture_2",
+          "kurt": 20.0,
+          "scales": [
+            1.0,
+            5.390106517683975
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.925,
+            0.075
+          ]
+        },
+        {
+          "closed_form_kurt": 28.0,
+          "family": "mixture_2",
+          "kurt": 28.0,
+          "scales": [
+            1.0,
+            6.475623493605466
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.9464285714285714,
+            0.05357142857142857
+          ]
+        },
+        {
+          "closed_form_kurt": 40.0,
+          "family": "mixture_2",
+          "kurt": 40.0,
+          "scales": [
+            1.0,
+            7.826281559818391
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.9625,
+            0.0375
+          ]
+        },
+        {
+          "closed_form_kurt": 12.000000000000002,
+          "family": "mixture_3",
+          "kurt": 12.0,
+          "scales": [
+            1.0,
+            2.0,
+            6.301972698411432
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.4375,
+            0.4375,
+            0.125
+          ]
+        },
+        {
+          "closed_form_kurt": 19.999999999999996,
+          "family": "mixture_3",
+          "kurt": 20.0,
+          "scales": [
+            1.0,
+            2.0,
+            8.48315296883854
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.4625,
+            0.4625,
+            0.075
+          ]
+        },
+        {
+          "closed_form_kurt": 28.000000000000004,
+          "family": "mixture_3",
+          "kurt": 28.0,
+          "scales": [
+            1.0,
+            2.0,
+            10.206638149668441
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.4732142857142857,
+            0.4732142857142857,
+            0.05357142857142857
+          ]
+        },
+        {
+          "closed_form_kurt": 39.999999999999986,
+          "family": "mixture_3",
+          "kurt": 40.0,
+          "scales": [
+            1.0,
+            2.0,
+            12.348082998520281
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.48125,
+            0.48125,
+            0.0375
+          ]
+        },
+        {
+          "closed_form_kurt": 12.000000000000002,
+          "family": "kde",
+          "kurt": 12.0,
+          "scales": [
+            1.0,
+            4.0205909254625345
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.875,
+            0.125
+          ]
+        },
+        {
+          "closed_form_kurt": 20.000000000000004,
+          "family": "kde",
+          "kurt": 20.0,
+          "scales": [
+            1.0,
+            5.390106517683975
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.925,
+            0.075
+          ]
+        },
+        {
+          "closed_form_kurt": 28.0,
+          "family": "kde",
+          "kurt": 28.0,
+          "scales": [
+            1.0,
+            6.475623493605466
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.9464285714285714,
+            0.05357142857142857
+          ]
+        },
+        {
+          "closed_form_kurt": 40.0,
+          "family": "kde",
+          "kurt": 40.0,
+          "scales": [
+            1.0,
+            7.826281559818391
+          ],
+          "variant": "V2_alpha0.5",
+          "weights": [
+            0.9625,
+            0.0375
+          ]
+        },
+        {
+          "closed_form_kurt": 12.0,
+          "family": "mixture_2",
+          "kurt": 12.0,
+          "scales": [
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.7654778075291759,
+            0.23452219247082404
+          ]
+        },
+        {
+          "closed_form_kurt": 20.000000000000004,
+          "family": "mixture_2",
+          "kurt": 20.0,
+          "scales": [
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.8678278755307498,
+            0.13217212446925017
+          ]
+        },
+        {
+          "closed_form_kurt": 28.000000000000004,
+          "family": "mixture_2",
+          "kurt": 28.0,
+          "scales": [
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.9119290378760184,
+            0.08807096212398154
+          ]
+        },
+        {
+          "closed_form_kurt": 40.0,
+          "family": "mixture_2",
+          "kurt": 40.0,
+          "scales": [
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.9454159095843628,
+            0.05458409041563716
+          ]
+        },
+        {
+          "closed_form_kurt": 12.0,
+          "family": "mixture_3",
+          "kurt": 12.0,
+          "scales": [
+            1.0,
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.38273890376458797,
+            0.38273890376458797,
+            0.23452219247082404
+          ]
+        },
+        {
+          "closed_form_kurt": 20.000000000000004,
+          "family": "mixture_3",
+          "kurt": 20.0,
+          "scales": [
+            1.0,
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.4339139377653749,
+            0.4339139377653749,
+            0.13217212446925017
+          ]
+        },
+        {
+          "closed_form_kurt": 28.000000000000004,
+          "family": "mixture_3",
+          "kurt": 28.0,
+          "scales": [
+            1.0,
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.4559645189380092,
+            0.4559645189380092,
+            0.08807096212398154
+          ]
+        },
+        {
+          "closed_form_kurt": 40.0,
+          "family": "mixture_3",
+          "kurt": 40.0,
+          "scales": [
+            1.0,
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.4727079547921814,
+            0.4727079547921814,
+            0.05458409041563716
+          ]
+        },
+        {
+          "closed_form_kurt": 12.0,
+          "family": "kde",
+          "kurt": 12.0,
+          "scales": [
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.7654778075291759,
+            0.23452219247082404
+          ]
+        },
+        {
+          "closed_form_kurt": 20.000000000000004,
+          "family": "kde",
+          "kurt": 20.0,
+          "scales": [
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.8678278755307498,
+            0.13217212446925017
+          ]
+        },
+        {
+          "closed_form_kurt": 28.000000000000004,
+          "family": "kde",
+          "kurt": 28.0,
+          "scales": [
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.9119290378760184,
+            0.08807096212398154
+          ]
+        },
+        {
+          "closed_form_kurt": 40.0,
+          "family": "kde",
+          "kurt": 40.0,
+          "scales": [
+            1.0,
+            10.0
+          ],
+          "variant": "V3_rho10",
+          "weights": [
+            0.9454159095843628,
+            0.05458409041563716
+          ]
+        }
       ],
       "k_reps": 500,
       "kurt_sweep": [
@@ -34,36 +654,89 @@
         40.0
       ],
       "m_particles": 200,
-      "mix2_w2": 0.05,
-      "mix3_s2_fixed": 2.0,
-      "mix3_w": [
+      "n_library": 5000,
+      "n_pit_bins": 10,
+      "n_runs": 54000,
+      "per_variant_cuts": {
+        "V1_fixed": {
+          "cross_p99_arg": [
+            "mixture_3",
+            "kde",
+            40.0
+          ],
+          "cross_p99_max": 76.77862745098038,
+          "r_a2_intra": 66.59787581699341,
+          "r_a2_intra_cell": [
+            "kde",
+            40.0
+          ],
+          "r_c2_intra": 665.978758169934
+        },
+        "V2_alpha0.5": {
+          "cross_p99_arg": [
+            "mixture_3",
+            "mixture_2",
+            40.0
+          ],
+          "cross_p99_max": 204.05454248366013,
+          "r_a2_intra": 56.57614379084968,
+          "r_a2_intra_cell": [
+            "kde",
+            40.0
+          ],
+          "r_c2_intra": 565.7614379084968
+        },
+        "V3_rho10": {
+          "cross_p99_arg": [
+            "mixture_3",
+            "kde",
+            12.0
+          ],
+          "cross_p99_max": 208.45374183006535,
+          "r_a2_intra": 228.44395424836597,
+          "r_a2_intra_cell": [
+            "kde",
+            12.0
+          ],
+          "r_c2_intra": 2284.43954248366
+        }
+      },
+      "r_a2_cut": 228.44395424836597,
+      "r_a2_cut_arg": [
+        "V3_rho10",
+        "kde",
+        12.0
+      ],
+      "r_b2_band": [
+        228.44395424836597,
+        2284.43954248366
+      ],
+      "r_c2_binding": "10*R-A2_cut",
+      "r_c2_cross_p99_arg": [
+        "V3_rho10",
+        "mixture_3",
+        "kde",
+        12.0
+      ],
+      "r_c2_cross_p99_max": 208.45374183006535,
+      "r_c2_cut": 2284.43954248366,
+      "rng_seed_base": 20260526,
+      "synthetic_trajectory_len": 12240,
+      "v1_mix2_w2": 0.05,
+      "v1_mix3_s2_fixed": 2.0,
+      "v1_mix3_w": [
         0.8,
         0.15,
         0.05
       ],
-      "n_library": 5000,
-      "n_pit_bins": 10,
-      "n_runs": 18000,
-      "r_a2_cut": 66.96903594771236,
-      "r_a2_cut_arg": [
-        "kde",
-        40.0
+      "v2_alpha": 0.5,
+      "v3_rho": 10.0,
+      "variants": [
+        "V1_fixed",
+        "V2_alpha0.5",
+        "V3_rho10"
       ],
-      "r_b2_band": [
-        66.96903594771236,
-        669.6903594771236
-      ],
-      "r_c2_binding": "10*R-A2_cut",
-      "r_c2_cross_p99_arg": [
-        "mixture_3",
-        "kde",
-        40.0
-      ],
-      "r_c2_cross_p99_max": 78.59084967320258,
-      "r_c2_cut": 669.6903594771236,
-      "rng_seed_base": 20260526,
-      "synthetic_trajectory_len": 12240,
-      "wall_clock_s": 477.68094396591187
+      "wall_clock_s": 1354.2872660160065
     },
     "lib_versions": {
       "edynamics": "0.3.14",
@@ -72,102 +745,239 @@
       "scipy": "1.15.2"
     },
     "seeds": {
-      "rng_per_cell_rule": "_cell_seed(library_kind, fit_kind, kurt, rep): (lib<<30)|(fit<<28)|((int(kurt)&0xFF)<<20)|(rep&0xFFFFF), offset by RNG_SEED_BASE, mod 2^32",
+      "rng_per_cell_rule": "_cell_seed(variant, library_kind, fit_kind, kurt, rep): (var<<30)|(lib<<28)|(fit<<26)|((int(kurt)&0xFF)<<18)|(rep&0x3FFFF), offset by RNG_SEED_BASE, mod 2^32",
       "rng_seed_base": 20260526
     }
   },
   "schema": "mitacs.experiment.result_provenance/1",
-  "title": "Q2A synthetic gate: chi^2 cuts from sample-size-matched null (production-fitter path)"
+  "title": "Q2A synthetic gate: chi^2 cuts under three-variant weight sweep (production-fitter path)"
 }
 PROVENANCE>>>
 
-Q2A synthetic gate -- chi^2 cuts from sample-size-matched null
+Q2A synthetic gate -- chi^2 cuts under three-variant weight sweep
 
   KURT_SWEEP             = (12.0, 20.0, 28.0, 40.0)  (Pearson kurtosis; Gaussian=3)
   K_REPS                 = 500
   M_PARTICLES            = 200
   N_PIT_BINS             = 10
   FAMILIES               = ('mixture_2', 'mixture_3', 'kde')
+  VARIANTS               = ('V1_fixed', 'V2_alpha0.5', 'V3_rho10')
   N_LIBRARY              = 5000
   SYNTHETIC_TRAJECTORY_LEN = 12240
   RNG_SEED_BASE          = 20260526
   D_EMBED                = 2
   C_TRUE                 = [0.7, 0.2]
-  mix-2 generator w2     = 0.05
-  mix-3 generator w      = (0.8, 0.15, 0.05), s2 = 2.0
 
-  same-family cells      = 12 (3 families x 4 kurts)
-  cross-family cells     = 24 (6 ordered pairs x 4 kurts)
-  total runs             = 18000
+  Variant rules:
+    V1_fixed     mix-2 w_r = 0.05; mix-3 w = (0.8, 0.15, 0.05), fixed s2 = 2.0; solve scales
+    V2_alpha0.5  w_min(K) = 0.5 * 3/K = 1.5/K; mix-3 bulks split evenly, V1 s2=2.0; solve s3
+    V3_rho10     s_rare/s_bulk = 10.0; mix-3 bulk-symmetric (s_b=1.0); solve w_r per K (falling-branch)
 
-  wall-clock             = 477.7s (8.0min)
+## Reachability check (closed-form kurt vs target, reltol=1%)
 
-## Same-family cells (library = fit)
+         variant       family   kurt                          weights                     scales      k_v
+        V1_fixed    mixture_2   12.0                  [0.9500,0.0500]            [1.0000,3.7666]   12.000
+        V1_fixed    mixture_2   20.0                  [0.9500,0.0500]            [1.0000,5.0064]   20.000
+        V1_fixed    mixture_2   28.0                  [0.9500,0.0500]            [1.0000,6.3418]   28.000
+        V1_fixed    mixture_2   40.0                  [0.9500,0.0500]            [1.0000,9.1610]   40.000
+        V1_fixed    mixture_3   12.0           [0.8000,0.1500,0.0500]     [1.0000,2.0000,4.4548]   12.000
+        V1_fixed    mixture_3   20.0           [0.8000,0.1500,0.0500]     [1.0000,2.0000,6.0151]   20.000
+        V1_fixed    mixture_3   28.0           [0.8000,0.1500,0.0500]     [1.0000,2.0000,7.6584]   28.000
+        V1_fixed    mixture_3   40.0           [0.8000,0.1500,0.0500]    [1.0000,2.0000,11.0983]   40.000
+        V1_fixed          kde   12.0                  [0.9500,0.0500]            [1.0000,3.7666]   12.000
+        V1_fixed          kde   20.0                  [0.9500,0.0500]            [1.0000,5.0064]   20.000
+        V1_fixed          kde   28.0                  [0.9500,0.0500]            [1.0000,6.3418]   28.000
+        V1_fixed          kde   40.0                  [0.9500,0.0500]            [1.0000,9.1610]   40.000
+     V2_alpha0.5    mixture_2   12.0                  [0.8750,0.1250]            [1.0000,4.0206]   12.000
+     V2_alpha0.5    mixture_2   20.0                  [0.9250,0.0750]            [1.0000,5.3901]   20.000
+     V2_alpha0.5    mixture_2   28.0                  [0.9464,0.0536]            [1.0000,6.4756]   28.000
+     V2_alpha0.5    mixture_2   40.0                  [0.9625,0.0375]            [1.0000,7.8263]   40.000
+     V2_alpha0.5    mixture_3   12.0           [0.4375,0.4375,0.1250]     [1.0000,2.0000,6.3020]   12.000
+     V2_alpha0.5    mixture_3   20.0           [0.4625,0.4625,0.0750]     [1.0000,2.0000,8.4832]   20.000
+     V2_alpha0.5    mixture_3   28.0           [0.4732,0.4732,0.0536]    [1.0000,2.0000,10.2066]   28.000
+     V2_alpha0.5    mixture_3   40.0           [0.4813,0.4813,0.0375]    [1.0000,2.0000,12.3481]   40.000
+     V2_alpha0.5          kde   12.0                  [0.8750,0.1250]            [1.0000,4.0206]   12.000
+     V2_alpha0.5          kde   20.0                  [0.9250,0.0750]            [1.0000,5.3901]   20.000
+     V2_alpha0.5          kde   28.0                  [0.9464,0.0536]            [1.0000,6.4756]   28.000
+     V2_alpha0.5          kde   40.0                  [0.9625,0.0375]            [1.0000,7.8263]   40.000
+        V3_rho10    mixture_2   12.0                  [0.7655,0.2345]           [1.0000,10.0000]   12.000
+        V3_rho10    mixture_2   20.0                  [0.8678,0.1322]           [1.0000,10.0000]   20.000
+        V3_rho10    mixture_2   28.0                  [0.9119,0.0881]           [1.0000,10.0000]   28.000
+        V3_rho10    mixture_2   40.0                  [0.9454,0.0546]           [1.0000,10.0000]   40.000
+        V3_rho10    mixture_3   12.0           [0.3827,0.3827,0.2345]    [1.0000,1.0000,10.0000]   12.000
+        V3_rho10    mixture_3   20.0           [0.4339,0.4339,0.1322]    [1.0000,1.0000,10.0000]   20.000
+        V3_rho10    mixture_3   28.0           [0.4560,0.4560,0.0881]    [1.0000,1.0000,10.0000]   28.000
+        V3_rho10    mixture_3   40.0           [0.4727,0.4727,0.0546]    [1.0000,1.0000,10.0000]   40.000
+        V3_rho10          kde   12.0                  [0.7655,0.2345]           [1.0000,10.0000]   12.000
+        V3_rho10          kde   20.0                  [0.8678,0.1322]           [1.0000,10.0000]   20.000
+        V3_rho10          kde   28.0                  [0.9119,0.0881]           [1.0000,10.0000]   28.000
+        V3_rho10          kde   40.0                  [0.9454,0.0546]           [1.0000,10.0000]   40.000
 
-        family   kurt       mean         sd      50pct      95pct
-     mixture_2   12.0      10.79       5.82       9.51      21.63
-     mixture_2   20.0      11.07       6.02       9.94      21.54
-     mixture_2   28.0      10.90       5.63       9.82      21.09
-     mixture_2   40.0      11.59       6.26      10.41      22.79
-     mixture_3   12.0      12.61       6.93      11.31      25.21
-     mixture_3   20.0      11.85       6.15      10.85      23.09
-     mixture_3   28.0      11.59       5.97      10.38      23.06
-     mixture_3   40.0      11.77       5.95      10.79      22.72
-           kde   12.0      21.65      10.84      19.99      43.68
-           kde   20.0      22.70      11.74      20.38      44.32
-           kde   28.0      25.00      13.25      22.39      50.20
-           kde   40.0      30.23      19.62      25.47      66.97
+  REACHABILITY OK (all cells within 1% of target).
 
-## Cross-family cells (library != fit)
+  same-family cells      = 36 (3 variants x 3 families x 4 kurts)
+  cross-family cells     = 72 (3 variants x 6 ordered pairs x 4 kurts)
+  total runs             = 54000
 
-       library          fit   kurt       mean         sd      50pct      99pct
-     mixture_2    mixture_3   12.0      11.61       5.99      10.19      28.97
-     mixture_2    mixture_3   20.0      11.09       6.11      10.01      31.37
-     mixture_2    mixture_3   28.0      11.39       5.83      10.07      30.64
-     mixture_2    mixture_3   40.0      11.34       5.87      10.33      30.85
-     mixture_2          kde   12.0      20.32      10.92      18.20      55.69
-     mixture_2          kde   20.0      20.97      11.49      18.52      57.48
-     mixture_2          kde   28.0      21.73       9.91      20.00      51.30
-     mixture_2          kde   40.0      26.33      15.61      23.27      78.45
-     mixture_3    mixture_2   12.0      13.98       7.54      12.98      36.90
-     mixture_3    mixture_2   20.0      17.05       9.19      15.40      44.88
-     mixture_3    mixture_2   28.0      19.81      10.68      17.61      60.68
-     mixture_3    mixture_2   40.0      26.03      14.38      22.60      71.28
-     mixture_3          kde   12.0      20.42      10.40      18.70      49.87
-     mixture_3          kde   20.0      21.39      10.98      19.45      55.99
-     mixture_3          kde   28.0      23.64      12.37      21.16      59.28
-     mixture_3          kde   40.0      27.60      16.76      23.81      78.59
-           kde    mixture_2   12.0      15.54       7.83      13.90      39.75
-           kde    mixture_2   20.0      15.41       8.02      14.01      39.76
-           kde    mixture_2   28.0      15.41       7.43      13.68      39.07
-           kde    mixture_2   40.0      14.94       7.26      13.36      35.36
-           kde    mixture_3   12.0      16.19       8.17      15.09      41.28
-           kde    mixture_3   20.0      15.01       7.48      13.63      36.98
-           kde    mixture_3   28.0      15.70       8.02      14.11      38.68
-           kde    mixture_3   40.0      15.71       7.92      14.19      36.94
+  wall-clock             = 1354.3s (22.6min)
 
-## Derived cuts (pre-registered Q2A inputs)
+## Per-variant same-family cells (library = fit), 95th-pct chi^2
 
-  R-A2 cut = max over (family, kurt) of 95th-pct same-family chi^2
-           = 66.97   at cell ('kde', 40.0)
-  cross-family 99pct max = 78.59  at cell ('mixture_3', 'kde', 40.0)
+         variant       family   kurt       mean         sd      50pct      95pct
+        V1_fixed    mixture_2   12.0      10.93       6.09       9.71      23.00
+        V1_fixed    mixture_2   20.0      10.69       4.99       9.85      20.09
+        V1_fixed    mixture_2   28.0      10.97       5.94       9.78      22.83
+        V1_fixed    mixture_2   40.0      11.61       6.11      10.30      24.11
+        V1_fixed    mixture_3   12.0      11.68       5.97      10.52      22.20
+        V1_fixed    mixture_3   20.0      11.63       6.07      10.43      23.97
+        V1_fixed    mixture_3   28.0      12.49       6.92      10.76      25.29
+        V1_fixed    mixture_3   40.0      12.11       6.23      10.48      24.22
+        V1_fixed          kde   12.0      21.94      11.35      20.68      41.88
+        V1_fixed          kde   20.0      23.62      11.61      21.36      44.79
+        V1_fixed          kde   28.0      24.99      13.79      22.16      54.03
+        V1_fixed          kde   40.0      30.92      19.51      26.87      66.60
+     V2_alpha0.5    mixture_2   12.0      11.37       5.82      10.56      22.22
+     V2_alpha0.5    mixture_2   20.0      11.15       5.53      10.15      21.79
+     V2_alpha0.5    mixture_2   28.0      11.46       6.08      10.44      23.13
+     V2_alpha0.5    mixture_2   40.0      10.75       5.71       9.54      21.05
+     V2_alpha0.5    mixture_3   12.0      13.31       7.30      11.92      26.76
+     V2_alpha0.5    mixture_3   20.0      13.21       6.89      11.87      26.25
+     V2_alpha0.5    mixture_3   28.0      13.15       7.00      11.85      26.24
+     V2_alpha0.5    mixture_3   40.0      12.69       6.82      11.70      25.44
+     V2_alpha0.5          kde   12.0      23.47      11.20      21.59      44.10
+     V2_alpha0.5          kde   20.0      24.58      13.46      21.30      49.20
+     V2_alpha0.5          kde   28.0      25.82      14.22      22.91      53.53
+     V2_alpha0.5          kde   40.0      25.47      14.88      22.57      56.58
+        V3_rho10    mixture_2   12.0      12.49       6.83      11.42      24.12
+        V3_rho10    mixture_2   20.0      11.59       6.46      10.28      23.49
+        V3_rho10    mixture_2   28.0      11.13       5.81       9.74      22.65
+        V3_rho10    mixture_2   40.0      10.65       5.42       9.88      21.47
+        V3_rho10    mixture_3   12.0      12.76       6.82      11.53      24.57
+        V3_rho10    mixture_3   20.0      11.87       6.29      10.55      23.61
+        V3_rho10    mixture_3   28.0      11.64       6.15      10.41      22.92
+        V3_rho10    mixture_3   40.0      11.31       5.95      10.00      22.40
+        V3_rho10          kde   12.0      68.71      74.49      42.33     228.44
+        V3_rho10          kde   20.0      45.36      36.61      33.26     126.35
+        V3_rho10          kde   28.0      37.10      27.01      30.33      91.91
+        V3_rho10          kde   40.0      33.66      24.39      27.79      77.38
+
+## Per-variant cross-family cells (library != fit), 99th-pct chi^2
+
+         variant      library          fit   kurt       mean         sd      50pct      99pct
+        V1_fixed    mixture_2    mixture_3   12.0      11.82       6.24      10.43      31.97
+        V1_fixed    mixture_2    mixture_3   20.0      10.90       5.46       9.96      27.21
+        V1_fixed    mixture_2    mixture_3   28.0      11.12       5.77      10.13      29.53
+        V1_fixed    mixture_2    mixture_3   40.0      11.53       6.41      10.09      33.11
+        V1_fixed    mixture_2          kde   12.0      19.76      10.81      17.86      54.80
+        V1_fixed    mixture_2          kde   20.0      20.63      11.05      18.06      57.61
+        V1_fixed    mixture_2          kde   28.0      22.02      10.88      19.99      55.51
+        V1_fixed    mixture_2          kde   40.0      25.43      14.09      22.55      69.03
+        V1_fixed    mixture_3    mixture_2   12.0      13.23       7.28      11.31      35.16
+        V1_fixed    mixture_3    mixture_2   20.0      17.56       9.70      15.70      48.85
+        V1_fixed    mixture_3    mixture_2   28.0      20.31      11.54      17.67      60.42
+        V1_fixed    mixture_3    mixture_2   40.0      25.17      13.31      22.58      62.32
+        V1_fixed    mixture_3          kde   12.0      20.98      10.70      19.15      54.83
+        V1_fixed    mixture_3          kde   20.0      20.32      10.55      18.85      58.15
+        V1_fixed    mixture_3          kde   28.0      22.94      12.99      20.43      62.20
+        V1_fixed    mixture_3          kde   40.0      27.75      15.80      23.45      76.78
+        V1_fixed          kde    mixture_2   12.0      15.73       7.23      14.62      35.64
+        V1_fixed          kde    mixture_2   20.0      15.42       7.54      14.12      39.33
+        V1_fixed          kde    mixture_2   28.0      15.04       7.34      14.28      36.67
+        V1_fixed          kde    mixture_2   40.0      15.65       8.20      14.06      41.93
+        V1_fixed          kde    mixture_3   12.0      15.00       7.58      13.38      37.38
+        V1_fixed          kde    mixture_3   20.0      15.09       7.29      13.79      35.77
+        V1_fixed          kde    mixture_3   28.0      15.35       7.67      13.82      40.01
+        V1_fixed          kde    mixture_3   40.0      15.66       7.98      14.32      43.00
+     V2_alpha0.5    mixture_2    mixture_3   12.0      11.88       6.24      10.93      30.80
+     V2_alpha0.5    mixture_2    mixture_3   20.0      11.53       6.55      10.28      31.36
+     V2_alpha0.5    mixture_2    mixture_3   28.0      11.19       5.83      10.15      29.62
+     V2_alpha0.5    mixture_2    mixture_3   40.0      11.16       5.78      10.29      27.63
+     V2_alpha0.5    mixture_2          kde   12.0      21.06      11.19      18.85      51.13
+     V2_alpha0.5    mixture_2          kde   20.0      22.66      11.79      21.01      60.50
+     V2_alpha0.5    mixture_2          kde   28.0      22.73      11.81      20.55      57.91
+     V2_alpha0.5    mixture_2          kde   40.0      22.29      12.20      19.60      61.84
+     V2_alpha0.5    mixture_3    mixture_2   12.0      54.25      20.41      52.22     111.90
+     V2_alpha0.5    mixture_3    mixture_2   20.0      80.00      22.87      78.57     138.62
+     V2_alpha0.5    mixture_3    mixture_2   28.0      99.28      29.14      95.23     179.11
+     V2_alpha0.5    mixture_3    mixture_2   40.0     114.38      31.00     110.24     204.05
+     V2_alpha0.5    mixture_3          kde   12.0      24.15      13.57      20.83      71.46
+     V2_alpha0.5    mixture_3          kde   20.0      22.91      12.40      20.12      66.72
+     V2_alpha0.5    mixture_3          kde   28.0      25.02      13.34      22.24      73.16
+     V2_alpha0.5    mixture_3          kde   40.0      24.70      13.40      22.36      68.55
+     V2_alpha0.5          kde    mixture_2   12.0      15.46       7.64      14.16      40.49
+     V2_alpha0.5          kde    mixture_2   20.0      15.11       7.15      13.97      37.01
+     V2_alpha0.5          kde    mixture_2   28.0      15.53       7.74      14.12      35.32
+     V2_alpha0.5          kde    mixture_2   40.0      15.50       7.36      14.35      37.46
+     V2_alpha0.5          kde    mixture_3   12.0      16.00       8.08      14.78      38.86
+     V2_alpha0.5          kde    mixture_3   20.0      15.24       7.96      13.78      41.61
+     V2_alpha0.5          kde    mixture_3   28.0      14.77       7.52      13.41      40.39
+     V2_alpha0.5          kde    mixture_3   40.0      15.46       7.83      14.41      39.65
+        V3_rho10    mixture_2    mixture_3   12.0      12.83       7.19      11.10      36.05
+        V3_rho10    mixture_2    mixture_3   20.0      11.87       5.95      10.76      29.37
+        V3_rho10    mixture_2    mixture_3   28.0      11.61       6.20      10.53      30.49
+        V3_rho10    mixture_2    mixture_3   40.0      10.87       5.93       9.51      29.79
+        V3_rho10    mixture_2          kde   12.0      47.90      41.48      33.92     205.52
+        V3_rho10    mixture_2          kde   20.0      35.51      29.91      27.64     129.48
+        V3_rho10    mixture_2          kde   28.0      32.12      21.27      26.99      98.38
+        V3_rho10    mixture_2          kde   40.0      27.42      16.07      24.28      87.62
+        V3_rho10    mixture_3    mixture_2   12.0      12.89       7.16      11.39      35.09
+        V3_rho10    mixture_3    mixture_2   20.0      11.47       5.92      10.20      31.04
+        V3_rho10    mixture_3    mixture_2   28.0      11.38       5.97      10.24      29.82
+        V3_rho10    mixture_3    mixture_2   40.0      11.35       5.79      10.21      29.63
+        V3_rho10    mixture_3          kde   12.0      50.84      43.82      36.37     208.45
+        V3_rho10    mixture_3          kde   20.0      35.35      26.08      27.65     141.63
+        V3_rho10    mixture_3          kde   28.0      31.10      20.83      25.59      94.98
+        V3_rho10    mixture_3          kde   40.0      26.80      15.90      23.46      77.25
+        V3_rho10          kde    mixture_2   12.0      16.82       8.05      15.63      40.05
+        V3_rho10          kde    mixture_2   20.0      15.66       8.07      14.06      39.25
+        V3_rho10          kde    mixture_2   28.0      15.76       8.20      14.40      42.57
+        V3_rho10          kde    mixture_2   40.0      14.60       7.10      13.44      35.03
+        V3_rho10          kde    mixture_3   12.0      15.89       7.96      14.97      39.57
+        V3_rho10          kde    mixture_3   20.0      15.65       8.01      13.98      40.58
+        V3_rho10          kde    mixture_3   28.0      15.49       7.41      14.55      39.11
+        V3_rho10          kde    mixture_3   40.0      15.70       8.05      14.25      40.15
+
+## Per-variant cuts (intra-variant max of same/cross)
+
+         variant   R-A2 (intra)   cross-99 max (intra)   R-C2 (intra)                        R-A2 cell                               cross cell
+        V1_fixed          66.60                  76.78         665.98                    ('kde', 40.0)               ('mixture_3', 'kde', 40.0)
+     V2_alpha0.5          56.58                 204.05         565.76                    ('kde', 40.0)         ('mixture_3', 'mixture_2', 40.0)
+        V3_rho10         228.44                 208.45        2284.44                    ('kde', 12.0)               ('mixture_3', 'kde', 12.0)
+
+## Per-variant discriminability (mean cross-family / mean same-family per kurt)
+
+         variant   kurt    mean_same   mean_cross      ratio
+        V1_fixed   12.0        14.85        16.09       1.08
+        V1_fixed   20.0        15.31        16.65       1.09
+        V1_fixed   28.0        16.15        17.80       1.10
+        V1_fixed   40.0        18.21        20.20       1.11
+     V2_alpha0.5   12.0        16.05        23.80       1.48
+     V2_alpha0.5   20.0        16.31        27.91       1.71
+     V2_alpha0.5   28.0        16.81        31.42       1.87
+     V2_alpha0.5   40.0        16.30        33.91       2.08
+        V3_rho10   12.0        31.32        26.19       0.84
+        V3_rho10   20.0        22.94        20.92       0.91
+        V3_rho10   28.0        19.96        19.58       0.98
+        V3_rho10   40.0        18.54        17.79       0.96
+
+## Final variant-max cuts (pre-registered Q2A inputs)
+
+  R-A2 cut = max over (variant, family, kurt) of 95th-pct same-family chi^2
+           = 228.44   at cell ('V3_rho10', 'kde', 12.0)  (variant, family, kurt)
+  cross-family 99pct max = 208.45  at cell ('V3_rho10', 'mixture_3', 'kde', 12.0)  (variant, library, fit, kurt)
   R-C2 cut = max(10 * R-A2_cut, cross-family 99pct max)
-           = max(669.69, 78.59)
-           = 669.69   (binding: 10*R-A2_cut)
-  R-B2 band = (66.97, 669.69]
-
-## Discriminability sanity (mean same-family vs mean cross-family per kurt)
-
-    kurt    mean_same   mean_cross      ratio
-    12.0        15.02        16.34       1.09
-    20.0        15.21        16.82       1.11
-    28.0        15.83        17.94       1.13
-    40.0        17.86        20.33       1.14
+           = max(2284.44, 208.45)
+           = 2284.44   (binding: 10*R-A2_cut)
+  R-B2 band = (228.44, 2284.44]
 
 ## Discriminability WARNINGS
 
-  - kurt=12.0: cross/same ratio 1.09 < 1.20 — families barely discriminable
-  - kurt=20.0: cross/same ratio 1.11 < 1.20 — families barely discriminable
-  - kurt=28.0: cross/same ratio 1.13 < 1.20 — families barely discriminable
-  - kurt=40.0: cross/same ratio 1.14 < 1.20 — families barely discriminable
+  - (V1_fixed, kurt=12.0): cross/same ratio 1.08 < 1.20 — families barely discriminable
+  - (V1_fixed, kurt=20.0): cross/same ratio 1.09 < 1.20 — families barely discriminable
+  - (V1_fixed, kurt=28.0): cross/same ratio 1.10 < 1.20 — families barely discriminable
+  - (V1_fixed, kurt=40.0): cross/same ratio 1.11 < 1.20 — families barely discriminable
+  - (V3_rho10, kurt=12.0): cross/same ratio 0.84 < 1.20 — families barely discriminable
+  - (V3_rho10, kurt=20.0): cross/same ratio 0.91 < 1.20 — families barely discriminable
+  - (V3_rho10, kurt=28.0): cross/same ratio 0.98 < 1.20 — families barely discriminable
+  - (V3_rho10, kurt=40.0): cross/same ratio 0.96 < 1.20 — families barely discriminable
 
