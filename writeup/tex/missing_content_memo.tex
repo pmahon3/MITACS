@@ -8,6 +8,10 @@
 \usepackage{xcolor}
 \usepackage{array}
 \newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\IfFileExists{microtype.sty}{\usepackage[protrusion=true,expansion=true]{microtype}}{}
+\setlength{\emergencystretch}{3em}
+\hbadness=10000
+\hfuzz=2pt
 
 % Common symbols
 \newcommand{\kQ}{\kappa_{Q}}
@@ -408,8 +412,8 @@ is empirically falsified within the Gaussian setting.
 
 \paragraph{(S3) Genuine day-type asymmetry, not library-noise
 inflation.}
-$\hat R^{k}(h, \text{saturday}) / \hat R^{k}(h, \text{weekday}) \in
-[1.26, 2.44]$ across all $(h, k)$ cells, where the library-noise
+The saturday/weekday ratio of $\hat R^{k}(h, \cdot)$ lies in
+$[1.26, 2.44]$ across all $(h, k)$ cells; the library-noise
 expectation under $1/n$ scaling is $\approx 5$. The asymmetry is
 structural.
 
@@ -1102,45 +1106,113 @@ left it to the theory-side workflow.
 \section{Provenance and references}
 \label{app:provenance}
 
-Registry entries:
+\paragraph{Registry entries.}
+Per-experiment artifacts under
+\verb|notes/preregistrations/<date>_<topic>/|. All entries
+hash-stamped via \verb|experiment.audit.registry.stamp(...,| \verb|self_path=...)|;
+chains verifiable via \verb|registry verify|.
 
-\begin{center}
-\begin{tabular}{lll}
+\noindent
+\begin{tabular}{P{0.10\textwidth}P{0.50\textwidth}P{0.32\textwidth}}
 \toprule
-Source & Entry & Verdict \\
+\textbf{Source} & \textbf{Entry} & \textbf{Verdict} \\
 \midrule
 S1, S6
-  & \texttt{2026-05-26\_multiscale-direct-h-step-v2}
+  & \path{2026-05-26_multiscale-direct-h-step-v2}
   & SETTLED \\
+\addlinespace
 S2, S3
-  & \texttt{2026-05-26\_multiscale-defect-eigenmodes}
+  & \path{2026-05-26_multiscale-defect-eigenmodes}
   & SETTLED MIXED \\
+\addlinespace
 S4, S5
-  & \texttt{2026-05-26\_pit-calendar-fingerprint}
+  & \path{2026-05-26_pit-calendar-fingerprint}
   & SETTLED AMBIGUOUS \\
-Thread (Gaussian case)
-  & \texttt{2026-05-26\_missing-content-thread}
-  & \texttt{state = exhausted} \\
-Thread (kernel-family case)
-  & \texttt{2026-05-26\_distributional-class-thread}
-  & \texttt{state = active}, \texttt{current = Q2D} (pending amendment) \\
-S8 (Q1 settled)
-  & \texttt{2026-05-26\_q1-student-t-vs-gaussian}
+\addlinespace
+S8 (Q1)
+  & \path{2026-05-26_q1-student-t-vs-gaussian}
   & SETTLED (R-D mechanical / R-C substantive) \\
+\midrule
+Thread \newline (Gaussian)
+  & \path{2026-05-26_missing-content-thread}
+  & \texttt{exhausted} \\
+\addlinespace
+Thread \newline (kernel-family)
+  & \path{2026-05-26_distributional-class-thread}
+  & \texttt{active}; current Q2D; pending amendment to revise R-D criterion (see (S8) and Q1 arbiter) \\
 \bottomrule
 \end{tabular}
-\end{center}
 
-Supporting memories: \texttt{mitacs-rebaseline-facts},
-\texttt{mitacs-rank1-structural}, \texttt{mitacs-theta-rail-pinning},
-\texttt{mitacs-clim-gap-nonstationary},
-\texttt{mitacs-multiscale-direct-h-step-v2},
-\texttt{mitacs-multiscale-defect-eigenmodes-v1},
-\texttt{mitacs-pit-calendar-fingerprint-p1},
-\texttt{mitacs-session-lessons-corpus}.
+\paragraph{Supporting memories.}
+The lab memory store lives under
+\path{~/.claude/projects/}; the project-specific subdirectory holds
+each named memory as a markdown file. Memories referenced above:
 
-Seed: \texttt{notes/seeds/multiscale\_factor\_coherence.md} (to be
-updated to the kernel-family-agnostic version).
-Workflow: \texttt{notes/seeds/applied\_audit\_workflow.md}.
+\begin{itemize}[leftmargin=2em]
+\item \texttt{mitacs-rebaseline-facts} --- production-validated
+in-sample non-Gaussianity (excess kurtosis $\sim 24$--$33$); the
+empirical basis for the $\nu \approx 4.5$ forecast in S8a.
+\item \texttt{mitacs-rank1-structural} --- $\Sigma_1$ is rank-one
+by construction of the single-variable delay embedding; the only
+stochastic content is the coord-$0$ innovation.
+\item \texttt{mitacs-theta-rail-pinning} --- the estimator-as-run
+reduces to global OLS at $\theta = 0$; bandwidth localisation is
+empirically non-discriminating.
+\item \texttt{mitacs-clim-gap-nonstationary} --- the post-cutoff
+demand drift that S4's secular-drift candidate corroborates.
+\item \texttt{mitacs-multiscale-direct-h-step-v2} --- the SETTLED
+v2 finding; its magnitude now qualified by S8c.
+\item \texttt{mitacs-multiscale-defect-eigenmodes-v1} --- S2, S3.
+\item \texttt{mitacs-pit-calendar-fingerprint-p1} --- S4, S5.
+\item \texttt{mitacs-q1-student-t-vs-gaussian} --- S8.
+\item \texttt{mitacs-session-lessons-corpus} --- the named
+retraction modes; the fourth mode (criterion-vs-legitimate-data-
+structure) added with Q1 as the third instance.
+\end{itemize}
+
+\paragraph{Seed and workflow.}
+\begin{itemize}[leftmargin=2em]
+\item This memo
+(\path{writeup/tex/missing_content_memo.tex}) is itself the
+kernel-family-agnostic statement of the framework that the
+original Gaussian-implicit seed
+(\path{notes/seeds/multiscale_factor_coherence.md}) prompted. The
+seed remains in the registry for lineage; this document supersedes
+its formal content.
+\item Workflow design:
+\path{notes/seeds/applied_audit_workflow.md}.
+Agents (\path{.claude/agents/}):
+\texttt{code-path-auditor},
+\texttt{phase-fidelity},
+\texttt{preregister},
+\texttt{devils-advocate},
+\texttt{arbiter},
+\texttt{thread-coordinator},
+plus
+\texttt{multiverse},
+\texttt{framework-escalator},
+\texttt{pre-experiment-checklist},
+\texttt{editorial-pass},
+\texttt{literature-scout}.
+Dispatcher: \path{.claude/skills/audit/SKILL.md}.
+Registry implementation: \path{experiment/audit/registry.py}
+(CLI \texttt{registry list}, \texttt{registry verify},
+\texttt{registry thread status}, etc.).
+\item Q1's experiment script:
+\path{experiment/distributional_class_q1/__main__.py}.
+Student-$t$ MLE in the production whitelist:
+\path{processing.innovations.estimator.student_t_mle_fit}.
+Output artifact:
+\path{scratch/data/distributional_class_q1/q1.pkl}.
+\end{itemize}
+
+\paragraph{Next concrete step.}
+A thread amendment via \verb|thread-coordinator| revising the
+\texttt{distributional-class-thread} R-D criterion to distinguish
+``estimator broken'' from ``data approximately Gaussian at this
+aggregation level.'' After amendment, Q1's effective routing is
+R-C $\to$ Q2A; Q2A (richer family --- mixtures or non-parametric
+predictive law) is the natural next experiment, motivated by
+(S8b)'s ``Student-$t$ not enough'' finding.
 
 \end{document}
