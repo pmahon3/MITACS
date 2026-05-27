@@ -1,0 +1,300 @@
+affects_registered_spec: true
+ambiguous_region:
+  action: 'R-B1A fires: the better candidate''s chi^2 falls in (228, 2284]. The Z conditioning
+    helps but does not close the marginal gap. Per branching_rules.Q1A.R-B1A the thread advances
+    to Q1B (second-strongest axis from P1; per the P1 arbiter''s ranking, that is time_of_day
+    at range 0.485, with binding overnight-vs-rest contrast). No claim that the head-to-head
+    winner''s Z is the "right" Z; only that it is the one we can detect with the candidate
+    axes we have.'
+  range: better_chi2 in (228, 2284] (R-B1A, per thread skeleton)
+baselines:
+  primary: 'M3 unconditioned-on-Z baseline = Q2A''s settled M3 chi^2 = 953.84 (effective_chi2
+    point estimate, paired-day bootstrap 95%% CI [685, 1357]). This is the cut anchor: the
+    R-A1A bar at 228 corresponds to the > 80% explained-share floor relative to the M0->M3
+    reduction (M0 chi^2 = 22329, M3 chi^2 = 953.84; gap to close = 953.84 - 228 = 725.84).
+    The head-to-head candidates must reduce M3''s chi^2 from 953.84 toward 228 by adding Z
+    to the conditioning sigma-algebra. M0 (raw, no kernel) = 22329 and M1 (Student-t kernel,
+    no Z) = 1371 are inspection-only context, not the primary baselines for the verdict; the
+    M3 -> M3+Z reduction is what is being measured.'
+  secondary: 'Synthetic recovery gate (METHOD/DESIGN). Generate synthetic data with a known
+    Z-conditional mixture DGP: pre-specified Z_true distribution with mixture parameters (w1,
+    s1, s2) varying by Z stratum (e.g., Z=0 cell mixes 0.9 N(0,1) + 0.1 N(0,3); Z=1 cell mixes
+    0.6 N(0,1) + 0.4 N(0,4)). Run the production stratified mixture_2_gaussian_mle_fit per
+    (day_type, Z) cell. Two recovery checks: (i) per-cell fitted (w, s1, s2) within tolerance
+    of ground truth; (ii) PIT u_PIT under the Z-conditional model is approximately Uniform[0,1]
+    (chi^2 << R-A1A cut at 228). Confirm BOTH before the Ontario diagnostic runs. ~30 sec
+    wall-clock; runs every invocation as in-script self-test. The gate validates that adding
+    Z as a stratification variable closes a known gap; if it cannot, any null result on Ontario
+    data is consistent with implementation defect rather than a true substantive null. Companion
+    gate: under FALSE Z (random labels orthogonal to mixture parameters), the per-stratum
+    fits collapse back to the marginal mixture and chi^2 ~ baseline; this confirms the per-stratum
+    fit is not artificially shrinking chi^2 by overfitting.'
+body_sha256: a2b13f6d8bcd6d2e4206322fc056c9b4388e761c5b5d651282e0f34d634e6d63
+ci_method:
+  details: '1000 paired-day bootstrap resamples of post-cutoff days (pair = (delivery_day,
+    day_type) preserving within-day correlation; same scheme as Q1, Q2A, P1). Per resample:
+    refit M3 per (day_type, Z) cell on the resampled rows for EACH of the two head-to-head
+    candidates (M3-Z_b and M3-Z_c) sharing one resample for paired comparison; recompute the
+    marginal post-cutoff PIT chi^2 per candidate. Report 95% percentile CI on chi2_Z_b, chi2_Z_c,
+    and the difference (chi2_Z_b - chi2_Z_c).'
+  type: paired_day_bootstrap
+  width: 95 percent percentile interval
+corroboration_criterion:
+  numeric: 'R-A1A fires AT LANDSLIDE STRENGTH on at least one candidate: better candidate''s
+    chi^2 point estimate <= 228 AND lower bootstrap 95% CI bound <= 228 (both clearing the
+    cut simultaneously, analogous to P1 R-A landslide reading where point 0.5750 and lower
+    CI 0.4475 both cleared 0.20).'
+  reasoning: 'A single point estimate <= 228 with a CI straddling the cut is mechanical R-A1A
+    but substantively borderline. Requiring the lower CI bound also clearing 228 is the landslide
+    reading: hour_of_week-derived Z conditioning is the dominant Z driving the residual non-Gaussianity,
+    and the M3+Z conditioning sigma-algebra is sufficient for marginal calibration. If only
+    the point estimate clears (CI straddles), arbiter records mechanical R-A1A with the "landslide-not-met"
+    qualifier and the resolution rule (closure_rule in the thread artifact: "share > 0.80")
+    is evaluated on the point estimate. The substantive bar is the landslide.'
+data:
+  cutoff_handling: "Q1A re-fits M3 with the conditioning sigma-algebra enriched from sigma(day_type)\
+    \ to sigma(day_type, Z). Pre-cutoff library is used to fit per-cell mixture parameters\
+    \ (w, s1, s2) \u2014 same library Q2A's M3 used, identical SMC propagation seed (_TAG_SEED_OFFSET_M3\
+    \ = 31) so the unconditioned baseline reproduces Q2A's 953.84. Post-cutoff is used only\
+    \ for PIT chi^2 evaluation. No leakage: post-cutoff rows do not enter the per-cell mixture\
+    \ fits. The Z derivation is purely from the time index (delivery_day -> weekday, h ->\
+    \ hour) so no exogenous data is introduced; Q1A is on the same data footprint as Q1/Q2A/Q2B/P1."
+  partition:
+    dev: not used
+    test: post-cutoff 2025-01-01 .. 2026-05-16 (same population as Q1, Q2A, Q2B, P1)
+    train: pre-cutoff library for per-(day_type, Z) M3 mixture refits; same library Q2A used
+  source: 'Ontario IESO demand (cfg.paths.historical_csvs) + Q1''s post-cutoff PIT population.
+    Specifically: (a) pre-cutoff library rebuilt via the same loaders Q2A used to fit M3 per
+    day_type (`load_actuals`, day_anchor 07:00, all rows up to spec.data_cutoff); (b) post-cutoff
+    actuals for SMC particle propagation and PIT evaluation. The Z column is derived inline
+    from the timestamp index. P1''s pickle (`pit_M1`) is loaded only for sanity confirmation
+    that the Z stratification derived from `delivery_day` + `h` matches the bin labels P1
+    used in its hot-zone ranking (cross-check; not an input to the fit).'
+falsification_criterion:
+  numeric: 'R-C1A fires on BOTH candidates: chi^2_Z_b > 2284 AND chi^2_Z_c > 2284.'
+  reasoning: 'R-C1A is the localization-hypothesis falsification: hour_of_week-derived Z conditioning
+    does NOT close the gap (either point estimate falls beyond the R-C cut 10x the R-A bar).
+    Per branching_rules.Q1A.R-C1A this routes to P2 (synthetic Gaussian-DGP calibration),
+    which interprets the persistent chi^2 as either a legitimate identifiability obstruction
+    (no Z within reach closes the gap) or a P1 false-positive (the localization signal was
+    an artifact of the marginal PIT pathology rather than a real Z-conditional structure).
+    Both candidates must fall in R-C1A; if only one does, the verdict is the better candidate''s
+    outcome (head-to-head verdict rule, see shape_outcomes).'
+git_clean: true
+git_sha: 7f8cb288de642ff47ab9ec450099c51115d6f4b0
+hypothesis:
+  counter: 'See devils_advocate.yaml. R-C1A or R-B1A: hour_of_week-derived Z conditioning
+    is a coarse proxy for an underlying continuous structure (temperature, demand regime,
+    weekly social rhythm) and per-(day_type, bin) cell mixture fits will not close the marginal
+    gap because they cannot capture within-bin tail heterogeneity; expected chi^2 either lands
+    in the R-B1A band (Z helps but doesn''t close) or R-C1A (Z is the wrong axis after all
+    and S9+S10 identifiability obstruction is binding).'
+  proponent: See proponent.yaml. R-A1A fires (better-candidate chi^2 <= 228) at landslide
+    strength. M3-Z_c (the 8-bin categorical) wins over M3-Z_b (binary) because the within-weekend
+    tail heterogeneity (Saturday vs Sunday vs Sun-late-evening) is itself non-trivial in the
+    P1 hot-zone strata ranking; the 8-bin granularity captures it where the binary collapses
+    it. P1's landslide reading at hour_of_week range 0.5750 directly maps to a chi^2 reduction
+    sufficient to clear the 228 bar.
+metric: "PRIMARY: head-to-head between two M3-with-Z candidates against a SINGLE verdict cut.\
+  \ Both candidates re-fit M3 (production fitter mixture_2_gaussian_mle_fit in processing/innovations/estimator.py:424)\
+  \ with the conditioning sigma-algebra enriched from sigma(day_type) to sigma(day_type, Z),\
+  \ where Z is derived from hour_of_week per P1 R-A's binding axis. The verdict metric is\
+  \ the marginal post-cutoff PIT chi^2 (10-bin equiprobable Pearson, same convention as Q1,\
+  \ Q2A, Q2B):\n\n  chi^2_Z_b = marginal PIT chi^2 under M3 with Z = Z_b (binary)\n  chi^2_Z_c\
+  \ = marginal PIT chi^2 under M3 with Z = Z_c (8-level categorical)\n\nTHE TWO Z CONSTRUCTIONS\
+  \ (PRE-LOCKED, per user direction; the third option (iii) continuous phase variable from\
+  \ the P1 arbiter notes is NOT in scope for Q1A):\n\n  Z_b (BINARY, weekend indicator): Z_b\
+  \ = 1 if hour_of_week bin >= 5 else 0. With bin = (weekday*24 + (h-1)) // 21 and weekday\
+  \ in {0=Mon..6=Sun}, h in {1..24}, Z_b = 1 maps to the Fri 10:00 - Sun 23:00 weekend window\
+  \ (P1 hot zone, bins 5/6/7). Z_b = 0 maps to Mon 01:00 - Fri 09:00 (P1 cold zone start).\
+  \ Empirical post-cutoff distribution: Z_b = 0 has 7488 rows (entirely weekday day_type);\
+  \ Z_b = 1 has 4512 rows (1080 weekday late-Fri + 1728 saturday + 1704 sunday).\n\n  Z_c\
+  \ (8-LEVEL CATEGORICAL): Z_c = bin (0..7) directly. Preserves the full P1 stratification\
+  \ granularity. Empirical post-cutoff distribution per (day_type, bin) shows only 10 of 24\
+  \ nominal cells non-empty: weekday spans bins 0-5; saturday spans bins 5-6; sunday spans\
+  \ bins 6-7. Per-cell row counts range from 213 (sunday bin 6) to 1506 (weekday bin 2).\n\
+  \nFIT PROCEDURE (BOTH CANDIDATES):\n  1. Per (day_type, Z) cell with n >= MIN_CELL_SIZE\
+  \ = 200 in the pre-cutoff library, run mixture_2_gaussian_mle_fit(X_cell, Y_cell) to obtain\
+  \ per-cell (C_cell, params_cell, resid_cell). C_cell is the local OLS drift, params_cell\
+  \ = {weights: (w1, w2), scales: (s1, s2)}.\n  2. For (day_type, Z) cells with n < MIN_CELL_SIZE\
+  \ in the pre-cutoff library, POOL to the parent day_type (use Q2A's existing day_type-only\
+  \ M3 fit) for that cell's post-cutoff propagation. The pooling fallback is recorded per-cell\
+  \ in the result artifact; no silent re-stratification.\n  3. SMC propagation: M = 200 particles\
+  \ per state (same as Q2A), seed = Q2A's _TAG_SEED_OFFSET_M3 = 31 for paired comparison.\
+  \ Residual sampler uses the per-(day_type, Z) cell mixture parameters of the cell the propagated\
+  \ state belongs to.\n  4. Marginal PIT: aggregate u over all post-cutoff (day, hour) pairs;\
+  \ 10-bin equiprobable Pearson chi^2.\n\nHEAD-TO-HEAD VERDICT RULE (PRE-LOCKED):\n\n  The\
+  \ verdict fires on the BETTER (lower) of the two candidates' point estimate chi^2:\n  -\
+  \ better_chi2 = min(chi2_Z_b, chi2_Z_c)\n  - if better_chi2 <= 228:                    \
+  \ R-A1A (Z conditioning closes the gap; routes to thread RESOLVED per branching_rules.Q1A.R-A1A\
+  \ = null)\n  - if better_chi2 in (228, 2284]:                R-B1A (Z helps but doesn't\
+  \ close; routes to Q1B per branching_rules.Q1A.R-B1A)\n  - if better_chi2 > 2284:      \
+  \                 R-C1A (Z doesn't help; routes to P2 per branching_rules.Q1A.R-C1A)\n\n\
+  TIE / NEAR-TIE HANDLING: candidates are NEAR-TIE if |chi2_Z_b - chi2_Z_c| < 1.0 * paired-bootstrap\
+  \ SE of the difference (1 sigma of the paired difference distribution). On NEAR-TIE: the\
+  \ verdict uses min(chi2_Z_b, chi2_Z_c) as above (mechanical), AND the head-to-head sub-finding\
+  \ records 'no ranking' between Z_b and Z_c, AND the lower CI bound landslide check uses\
+  \ the candidate with the lower point estimate. On NOT-NEAR-TIE: the head-to-head sub-finding\
+  \ records which candidate won and by how much (chi^2 difference and its CI).\n\nVERDICT-CUT\
+  \ TRACEABILITY: the integer cuts 228 and 2284 are inherited from the thread skeleton (resolution-paths-thread\
+  \ Q1A node). They are the rounded versions of Q2A's gate-validated cuts R-A2_cut = 228.44\
+  \ and R-C2_cut = 2284.44 (see Q2A phase_a's threshold_derivations). Q1A uses the thread\
+  \ skeleton's rounded integer values to honor phase-fidelity Check P L1 exact-skeleton-match;\
+  \ a chi^2 falling in (228, 228.44] is treated as R-B1A per the thread, even though under\
+  \ Q2A's gate it would be R-A2 \u2014 this is a deliberate conservative tightening of the\
+  \ R-A1A cut by 0.44.\n\nSECONDARY / informational:\n  - Per-(day_type, Z) cell mixture parameters\
+  \ (w1, w2, s1, s2) reported for each candidate, with paired-bootstrap CIs.\n  - Per-cell\
+  \ chi^2 contribution decomposition.\n  - Pooling-fallback log: which cells dropped below\
+  \ MIN_CELL_SIZE = 200 and pooled to parent day_type.\n  - chi^2 difference (chi2_Z_b - chi2_Z_c)\
+  \ and its 95% paired-bootstrap CI (for the head-to-head sub-finding).\n  - Reproduction\
+  \ check: re-running M3 with no Z conditioning (same fitter, same seed) on the pre-cutoff\
+  \ library reproduces Q2A's chi^2 = 953.84 within paired-bootstrap noise \u2014 this is the\
+  \ unconditioned baseline, verified within the same script.\n"
+references:
+- body_sha256: 9a5647a5f7ea6b3ee44d53e95c23e165e9d706d105db9afbf2c4f0cc25a3c6ba
+  file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  relation: thread
+- body_sha256: 5eb024b72dbeb0148000fe3f5e44da316b00685a0d5b15dde8df2b66d0218067
+  file: ../2026-05-27_p1-patra-sen-per-stratum-localization/arbiter.yaml
+  relation: parent_node_arbiter
+related_memory:
+- mitacs-p1-patra-sen-localization
+- mitacs-q2a-richer-family
+- mitacs-q2b-non-distributional
+- mitacs-q1-student-t-vs-gaussian
+- mitacs-clim-gap-nonstationary
+- mitacs-multiscale-defect-eigenmodes-v1
+- mitacs-rebaseline-facts
+related_seed:
+- notes/seeds/multiscale_factor_coherence.md
+- writeup/tex/missing_content_memo.tex
+- ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md
+- ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic_audit_correction.md
+- notes/literature/2026-05-26_stratified-patra-sen-scout.md
+research_question: Does enriching the M3 conditioning sigma-algebra from sigma(day_type) to
+  sigma(day_type, Z), with Z derived from hour_of_week per P1 R-A's binding axis, reduce the
+  post-cutoff marginal PIT chi^2 from Q2A's settled M3 baseline of 953.84 to <= 228 (Q2A R-A2
+  cut, integer-rounded per thread skeleton)? The head-to-head between Z_b (binary weekend
+  indicator) and Z_c (8-level categorical) ranks the two pre-locked operationalizations of
+  hour_of_week under one verdict cut.
+schema: phase_a
+shape_outcomes:
+  R-A1A:
+    criterion: min(chi2_Z_b, chi2_Z_c) <= 228 (better candidate's point estimate clears the
+      Q2A R-A2 cut at integer-rounded 228)
+    interpretation: 'hour_of_week-derived Z closes the marginal chi^2 gap. The head-to-head
+      sub-finding records which candidate won (with paired-bootstrap CI on the difference).
+      Per thread branching_rules.Q1A.R-A1A = null, the resolution-paths-thread is RESOLVED
+      (with the sub-finding documenting which Z construction is preferred). LANDSLIDE qualifier:
+      if BOTH the better candidate''s point AND lower-bound 95% CI clear 228, the substantive
+      reading is "the better Z is a sufficient conditioning sigma-algebra"; if only the point
+      clears (CI straddles), mechanical R-A1A fires with "landslide-not-met" recorded.'
+  R-B1A:
+    criterion: min(chi2_Z_b, chi2_Z_c) in (228, 2284] (better candidate's point estimate is
+      between cuts)
+    interpretation: Z helps but does not close. Per thread branching_rules.Q1A.R-B1A, routes
+      to Q1B with Z2 = second-strongest axis from P1 (time_of_day at range 0.485 per P1 arbiter,
+      with overnight 0.1125 / morning_ramp 0.5825 / afternoon 0.5975 / evening 0.4750 strata).
+      The head-to-head sub-finding still records which candidate won; the better Z is carried
+      forward as Z1 in Q1B's cumulative computation per thread Q1B.skeleton_thresholds_depend_on.
+  R-C1A:
+    criterion: min(chi2_Z_b, chi2_Z_c) > 2284 (BOTH candidates fall beyond the Q2A R-C2 cut)
+    interpretation: 'Z doesn''t help. Per thread branching_rules.Q1A.R-C1A, routes to P2 (synthetic
+      Gaussian-DGP calibration). The head-to-head sub-finding records which candidate was
+      less-bad (still informative for P2''s framing) but neither cleared. Substantive reading:
+      P1''s landslide reading at hour_of_week range 0.575 IS a real localization signal, but
+      the chi^2 metric is sensitive to mass assignment that the per-(day_type, Z) cell mixture
+      fit cannot capture (e.g., within-cell tail heterogeneity that requires a finer or different
+      axis).'
+stopping_criterion:
+  reasoning: Pre-registration complete; verdict determined by realized chi^2 values against
+    pre-locked cuts. No iteration, no parameter tuning, no Z construction revision after seeing
+    data. The head-to-head structure is locked at two candidates; adding a third (e.g., continuous
+    phase variable) after seeing the results would require a new dated entry per the append-only
+    rule.
+  rule: Run synthetic recovery gate (per baselines.secondary); load pre-cutoff library + post-cutoff
+    actuals; derive Z_b and Z_c from (delivery_day, h); fit M3 per (day_type, Z_b) and per
+    (day_type, Z_c) with MIN_CELL_SIZE = 200 pool-to-parent fallback; SMC-propagate post-cutoff
+    under each candidate; compute marginal PIT chi^2 per candidate; paired-bootstrap CIs and
+    difference CI; verdict R-A1A / R-B1A / R-C1A per better_chi2 = min(chi2_Z_b, chi2_Z_c);
+    emit result. STOP.
+thread:
+  node_id: Q1A
+  parent_branch: R-A
+  thread_body_sha256: 9a5647a5f7ea6b3ee44d53e95c23e165e9d706d105db9afbf2c4f0cc25a3c6ba
+  thread_topic: resolution-paths-thread
+  threshold_derivations: 'Numeric thresholds (R-A1A: better_chi^2 <= 228; R-B1A: in (228,
+    2284]; R-C1A: > 2284) are inherited verbatim from the thread skeleton''s Q1A.phase_a_skeleton.outcome_categories.
+    The skeleton''s integers are rounded versions of Q2A''s gate-validated thresholds R-A2_cut
+    = 228.44 and R-C2_cut = 2284.44 (see notes/preregistrations/2026-05-26_q2a-richer-family-mixture-or-nonparametric/phase_a.yaml
+    threshold_derivations). The rounding is conservative on R-A1A (228 < 228.44 tightens the
+    cut by 0.44) and trivially conservative on R-C1A (2284 < 2284.44 tightens by 0.44). Q1A
+    uses the integer values to match the skeleton exactly for phase-fidelity Check P L1.
+
+
+    Q1A''s Z construction (the binding axis identification and the two operationalizations)
+    is DERIVED FROM P1.result per the thread''s Q1A.skeleton_thresholds_depend_on.binding_axis_and_Z_construction
+    rule, source = P1.result. P1 SETTLED R-A at landslide strength with binding_axis = hour_of_week,
+    hot zone = bins 5/6/7 (Fri 10:00 - Sun 23:00). The arbiter''s notes_for_thread_coordinator
+    pre-flagged three Z constructions (i) binary indicator of bin >= 5, (ii) 8-level categorical
+    (bins 0..7), (iii) continuous hour-of-week-mod-168 phase. Per user direction, Q1A registers
+    a head-to-head between (i) and (ii); (iii) is NOT in scope for Q1A.
+
+
+    MIN_CELL_SIZE = 200 (the pool-to-parent fallback threshold) is NOT a verdict-bearing threshold;
+    it is a procedural decision pre-registered before data to prevent degenerate mixture fits
+    in sparse cells. 200 is chosen to give EM at least ~30 effective draws per mixture component
+    at the typical w1 = 0.85 / w2 = 0.15 from Q2A''s settled M3, with sufficient margin for
+    the tail component to be identifiable. The empirical post-cutoff row counts per (day_type,
+    bin) cell range 213-1506; the only cell at risk of pooling is sunday bin 6 (n=213); all
+    others comfortably exceed 200. The pooling fallback log is in the result artifact for
+    arbiter inspection.'
+topic: q1a-z-conditioning-strongest-axis
+variables:
+  dependent:
+  - chi2_Z_b
+  - chi2_Z_c
+  - better_chi2
+  - chi2_diff
+  - chi2_Z_b_ci95
+  - chi2_Z_c_ci95
+  - chi2_diff_ci95
+  - per_cell_mixture_params_Z_b
+  - per_cell_mixture_params_Z_c
+  - per_cell_chi2_contribution_Z_b
+  - per_cell_chi2_contribution_Z_c
+  - pooling_fallback_log_Z_b
+  - pooling_fallback_log_Z_c
+  - winner
+  - near_tie_flag
+  excluded:
+  - reasoning: Per user direction, only Z_b (binary) and Z_c (8-level categorical) are in
+      scope for Q1A. The continuous phase variable was pre-flagged by P1's arbiter but not
+      selected for the head-to-head. Adding it after seeing Q1A's result would violate the
+      append-only rule. If both Z_b and Z_c fail (R-C1A), P2 calibration is the next step
+      per branching_rules; if (iii) is desired as a follow-up, a new dated entry would amend
+      the thread.
+    variable: Z_iii_continuous_hour_of_week_mod_168_phase
+  - reasoning: "Temperature requires exogenous data (ECCC hourly weather). Per the thread\
+      \ structure, temperature enters via Q1C (a sibling branch closed by P1 R-A firing; would\
+      \ have activated under P1 R-C). If Q1A fires R-B1A or R-C1A, the natural follow-up is\
+      \ Q1B (second axis from P1, time_of_day) NOT temperature \u2014 temperature would re-enter\
+      \ only via a new thread post-Q1B or via Q1C-reopening amendment."
+    variable: temperature_or_exogenous_Z
+  - reasoning: Q1A re-fits M3 (mixture-2-Gaussian, Q2A's best family per S9 = M3/M4/M5 chi^2-indistinguishable).
+      Re-fitting M1 (Student-t kernel) or M4 (mixture-3-Gaussian) with Z is not in scope;
+      the thread skeleton pins metric_class to "Re-fit M3". M4 with Z is a natural Q1B/Q1C
+      sub-experiment if needed; M1 with Z is precluded because Q1's settled finding established
+      M1 < M2 (heavy-tailedness lives in the kappa_1 innovation not the seasonal climatology)
+      and the distributional-class thread closed on M3/M4/M5 equivalence.
+    variable: refit_M1_or_M4_with_Z
+  - reasoning: Cross-axis joint stratification (e.g., (day_type, hour_of_week, demand_quantile))
+      would multiply cell counts and require larger sample sizes than 12000 post-cutoff rows
+      comfortably support. Q1B in the registered branching is single-axis Z2; cross-axis is
+      reserved for thread amendment if both Q1A and Q1B fire R-B1A/R-C1A.
+    variable: cross_axis_joint_Z_stratification
+  independent:
+  - Z_construction
+  - day_type
+  - Z_stratum
+written_at: '2026-05-27T15:50:00-07:00'

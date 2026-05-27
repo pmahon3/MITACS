@@ -1,0 +1,99 @@
+schema: proponent
+written_at: '2026-05-27T22:47:10-07:00'
+references:
+- file: phase_a.yaml
+  body_sha256: a2b13f6d8bcd6d2e4206322fc056c9b4388e761c5b5d651282e0f34d634e6d63
+  relation: registered_phase_a
+outcome: R-A1A
+confidence: 0.55
+forecast:
+  chi2_Z_b_point: 420.0
+  chi2_Z_b_ci95:
+  - 300.0
+  - 600.0
+  chi2_Z_c_point: 200.0
+  chi2_Z_c_ci95:
+  - 130.0
+  - 320.0
+  chi2_min_point: 200.0
+  chi2_min_ci95:
+  - 130.0
+  - 320.0
+  head_to_head_winner: Z_c
+  head_to_head_margin_point: 220.0
+  landslide_qualifier_predicted: false
+rationale_summary: "P1 (S11) identified hour_of_week as the binding axis at landslide\n\
+  strength: range 0.575 [0.4475, 0.6475] with hot-zone strata (bins\n5/6/7, Fri 10:00\
+  \ - Sun 23:00) carrying \u03B1\u0302_L 0.55/0.61/0.55 and the\ncold-zone bin 0 at\
+  \ \u03B1\u0302_L = 0.035. This is structural per-stratum\ncontamination mass that\
+  \ the day_type-only \u03C3-algebra in Q2A's M3\ncannot absorb; enriching to \u03C3\
+  (day_type, Z_c) lets each hot-zone\ncell fit its own mixture tail and the cold-zone\
+  \ cells fit nearly\nGaussian cores, which is exactly the \u03C3-algebra-enrichment\
+  \ lever\nQ2B (S10) failed to test (Q2B was \u03C3-algebra-preserving). Q2A's\nper-day-type\
+  \ decomposition (saturday \u03C7\xB2 = 1184 dominating the\npooled 954) confirms\
+  \ the \u03C7\xB2 mass is concentrated where P1's \u03B1\u0302_L\nis largest, so\
+  \ the per-cell M3 refits should cut saturday's\ncontribution by ~3\xD7 and drop\
+  \ the pooled chi\xB2 near or below\nthe 228 cut. Z_c (8-level) preferred over Z_b\
+  \ (binary) because\nthe binary collapses the bin-5/6/7 gradient (sat at \u03B1\u0302\
+  _L 0.61 vs\nFri-late at 0.55 vs sun at 0.55) that drives the saturday-specific\n\
+  dominance.\n"
+evidence_chain:
+- claim: "hour_of_week is the binding localization axis at range 0.575 [0.4475, 0.6475],\
+    \ clearing the 0.20 R-A cut by >2\xD7 at the lower CI bound."
+  source: memory/mitacs-p1-patra-sen-localization.md
+- claim: "hot-zone \u03B1\u0302_L (Fri 10:00 - Sun 23:00, bins 5/6/7) = 0.5475/0.6100/0.5450;\
+    \ cold-zone bin 0 = 0.035 \u2014 a 17\xD7 span across hour_of_week strata."
+  source: memory/mitacs-p1-patra-sen-localization.md
+- claim: "Q2A's settled M3 baseline (mixture-2-Gaussian under day_type-only conditioning)\
+    \ has pooled chi\xB2 = 953.84 [685, 1357]; per-day-type contributions: weekday\
+    \ 299.4, saturday 1184.7, sunday 565.3."
+  source: memory/mitacs-q2a-richer-family.md
+- claim: "Saturday chi\xB2 ~4\xD7 weekday is family-invariant across M3/M4/M5 \u2014\
+    \ confirms the day-type structural asymmetry is in cell-level mass, not distributional\
+    \ family."
+  source: memory/mitacs-q2a-richer-family.md
+- claim: "Q2B (S10) tested three same-\u03C3-algebra non-distributional candidates\
+    \ (mean_bias, variance_div, seam); all shares below the 15% null floor and two\
+    \ sign-determined NEGATIVE. The framework reads this as: \u03C3-algebra enrichment\
+    \ with exogenous Z is the untested lever."
+  source: memory/mitacs-q2b-non-distributional.md
+- claim: "Empirical post-cutoff (day_type, bin) cells have n ranging 213-1506 \u2014\
+    \ all above MIN_CELL_SIZE = 200 except sunday bin 6 at exactly 213 (the only pooling-fallback\
+    \ candidate)."
+  source: phase_a.yaml threshold_derivations
+- claim: "M1\u2192Q2A's-best chi\xB2 reduction (single-shape-parameter to nonparametric\
+    \ distributional class) was only 1.44\xD7; the comparable \u03C3-algebra-enrichment\
+    \ transition has no precedent in this project to anchor magnitude, so the 4.2\xD7\
+    \ M3\u2192R-A1A-target reduction is genuinely uncertain."
+  source: memory/mitacs-q2a-richer-family.md (reduction curve)
+what_would_change_my_mind:
+- condition: "Q2A's pre-cutoff M3 fit reproduction (the in-script reproduction check\
+    \ at metric.SECONDARY) reads chi\xB2_unconditioned \u2260 953.84 \xB1 paired-bootstrap\
+    \ noise."
+  interpretation: Baseline-unconditioned reproduction has drifted; the M3 fit under
+    per-cell stratification is not directly comparable to Q2A's settled baseline and
+    the R-A1A bar would be re-interpreted under the new baseline. If reproduction
+    is ~10% high (say 1050), my chi2_Z_c point shifts to ~250 and the R-A1A landslide
+    becomes implausible.
+- condition: "chi\xB2_Z_b - chi\xB2_Z_c < 50 (near-tie at the head-to-head)."
+  interpretation: The bin-5/6/7 internal gradient I'm betting on (sat 0.61 vs Fri-late
+    0.55 vs sun 0.55) is small enough that Z_b's collapse doesn't meaningfully degrade
+    the fit. Z_c's extra parameters would be paying for noise, not signal. I'd update
+    toward R-B1A on the better candidate and accept the binary as the parsimony-preferred
+    winner.
+- condition: Per-cell M3 fits in the hot-zone cells (saturday bin 6, sunday bin 6/7)
+    produce weights w1 < 0.5 (i.e. the 'tail' component is the majority).
+  interpretation: "If the hot-zone is dominated by the tail component rather than\
+    \ having a small heavy tail, the 2-component centred-Gaussian mixture is itself\
+    \ misspecified at the cell level \u2014 flexibility is being used to absorb structure\
+    \ the mixture family can't capture. \u03C7\xB2_Z_c would be expected in R-B1A\
+    \ and the head-to-head would still favor Z_c but not at landslide strength."
+- condition: "Pooling-fallback fires on \u22652 cells (not just sunday bin 6)."
+  interpretation: "Per phase_a.threshold_derivations only sunday bin 6 at n=213 is\
+    \ at risk. If a second cell falls under 200 in the bootstrap resamples (paired-day\
+    \ resampling can drop cells below threshold) the per-stratum fits collapse back\
+    \ toward the day_type-pooled M3 baseline, and chi\xB2_Z_c shifts toward Q2A's\
+    \ 954 rather than below 228."
+git_sha: 7f8cb288de642ff47ab9ec450099c51115d6f4b0
+git_clean: true
+body_sha256: 5a6dc421b798b7ba55eb1c4e7a41926e29e052015b72f060c5c87701d4713040

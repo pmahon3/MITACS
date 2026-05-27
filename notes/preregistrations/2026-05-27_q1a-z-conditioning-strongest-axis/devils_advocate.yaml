@@ -1,0 +1,144 @@
+body_sha256: 8d8d4b38fa2e4b9ad12c01d662be05de2436f2429b2b5c26ed84492bf626014c
+confidence: 0.55
+counter_prediction:
+  reasoning: min(chi2_Z_b, chi2_Z_c) lands in R-B1A around 800, with Z_b winning the
+    head-to-head via robustness (small Fri-late carve-out on top of day_type sigma-algebra)
+    and Z_c wasting granularity on small-cell EM variance; the clim-gap component
+    holds the residual chi^2 above the 228 R-A1A cut.
+  units: marginal PIT chi^2 (10-bin Pearson)
+  value: 800.0
+evidence_chain:
+- claim: Ensemble UNDER-disperses at virtually every (h, day_type) cell (s^2_iter
+    < s^2_emp); the residual ~954 chi^2 lives in missing exogenous content, not in
+    within-data sigma-algebra structure
+  source: memory/mitacs-q2b-non-distributional.md
+- claim: 'Reduction curve asymptotes: M0->M1 = 16x, M1->Q2A-best (M3) = 1.44x; the
+    4.18x further reduction needed to clear 228 from 954 is structurally larger than
+    the most recent step in the reduction sequence'
+  source: memory/mitacs-q2a-richer-family.md
+- claim: Post-cutoff actual-mu gap is approximately +1000 MW hour-flat and growing;
+    no recency window fixes it; this gap is roughly orthogonal to hour_of_week, so
+    a hour_of_week-derived Z does not absorb the clim-gap component of the marginal
+    chi^2
+  source: memory/mitacs-clim-gap-nonstationary.md
+- claim: P1 measured alpha_L (Patra-Sen lower bound on non-Gaussian mixture fraction)
+    per stratum on u_PIT; the alpha_L range 0.575 establishes localization (necessary)
+    but is a DIFFERENT functional of the residual law from the marginal PIT chi^2
+    metric; localization in alpha_L space need not translate to chi^2 closure (sufficient)
+  source: memory/mitacs-p1-patra-sen-localization.md
+- claim: Sunday bin 6 has n=213 in the pre-cutoff library; Z_c stratifies further
+    into per-(day_type, bin) cells where the 3-parameter centred-mixture EM has high
+    small-sample variance, which the paired-bootstrap CI on chi^2 will reflect; Z_b
+    avoids this by not stratifying the smallest cells
+  source: phase_a.yaml metric block + processing/innovations/estimator.py:424 mixture_2_gaussian_mle_fit
+- claim: sigma(day_type, Z_b) is approximately sigma(day_type) plus a Fri 10:00-23:00
+    carve-out from weekday (Z_b=1 has 1080 weekday + 1728 saturday + 1704 sunday rows;
+    saturday-x-Z_b=1 = saturday, sunday-x-Z_b=1 = sunday). Z_b's substantive sigma-algebra
+    addition over day_type is small, bounding the achievable chi^2 reduction
+  source: phase_a.yaml metric block (Z_b empirical distribution)
+forecast:
+  chi2_Z_b_ci95:
+  - 550.0
+  - 1100.0
+  chi2_Z_b_point: 800.0
+  chi2_Z_c_ci95:
+  - 650.0
+  - 1350.0
+  chi2_Z_c_point: 950.0
+  chi2_min_ci95:
+  - 540.0
+  - 1080.0
+  chi2_min_point: 800.0
+  head_to_head_margin_point: -150.0
+  head_to_head_winner: Z_b
+  landslide_qualifier_predicted: false
+git_clean: true
+git_sha: 7f8cb288de642ff47ab9ec450099c51115d6f4b0
+opportunity_cost: If Q1A fires R-B1A (as forecast), one week of analyst time advances
+  the thread to Q1B (Z2 = time_of_day per thread branching_rules) but does not exit
+  the resolution-paths thread. The faster alternative would be a parallel-track Q1C-style
+  temperature-Z probe (would require ECCC ingest scaffolding, ~3-5 analyst-days new)
+  which is currently closed-sibling-not-fired by the thread but is the most-cited
+  exogenous candidate per clim-gap-nonstationary and postcovid-probe. If R-C1A fires
+  (low DA probability), the thread exits cleanly via P2 (synthetic calibration); if
+  R-A1A fires (high proponent probability), thread RESOLVED with sub-finding on Z_b
+  vs Z_c.
+outcome: R-B1A
+rationale_summary: The Q2B (S10) ensemble UNDER-disperses everywhere and routes the
+  residual ~954 chi^2 to missing exogenous content (weather, state-space coverage)
+  rather than to within-data sigma-algebra enrichment; hour_of_week partitions the
+  existing data but does not inject exogenous information, so the clim-gap component
+  of the marginal pathology (which is hour-flat and weeks-flat per clim-gap-nonstationary)
+  is not absorbed by Z. The reduction curve (M0->M1 = 16x, M1->M3 = 1.44x) is asymptoting;
+  a 4.18x further reduction from M3=953.84 to 228 within a single sigma-algebra enrichment
+  step would invert the curve's shape. P1's alpha_L range 0.575 is a necessary condition
+  (localized non-Gaussian mass exists) but not sufficient (the marginal chi^2 metric
+  requires the per-cell mixture fit to capture the heterogeneity, which the 3-parameter
+  centred-mixture EM cannot do in cells like sunday bin 6 at n=213 without bleeding
+  variance back into the bootstrap CI).
+references:
+- body_sha256: a2b13f6d8bcd6d2e4206322fc056c9b4388e761c5b5d651282e0f34d634e6d63
+  file: phase_a.yaml
+schema: devils_advocate
+severity: manageable
+specific_failure_modes:
+- memory_cite: phase_a.yaml metric block
+  mode: Z_b is approximately a relabeling of day_type (only the Fri 10:00-23:00 weekday
+    carve-out is new sigma-algebra content); modest chi^2 reduction, lands in R-B1A
+  rank: 1
+- memory_cite: processing/innovations/estimator.py:424 + phase_a.yaml pooling fallback
+    log
+  mode: Z_c's small cells (sunday bin 6 at n=213; saturday narrow bins) overfit the
+    3-parameter centred-mixture EM, bleeding variance through the paired-bootstrap
+    CI; net chi^2 wash or slightly worse than the M3 baseline
+  rank: 2
+- memory_cite: memory/mitacs-clim-gap-nonstationary.md
+  mode: The clim-gap ~+1000 MW non-stationary component of the marginal pathology
+    is hour-flat and weeks-flat, so orthogonal to hour_of_week Z; cannot be absorbed
+    by Q1A regardless of which candidate wins the head-to-head
+  rank: 3
+- memory_cite: memory/mitacs-q2b-non-distributional.md + Resolvent_Framework/.../disintegration_diagnostic.md
+  mode: 'S9 + S10 identifiability obstruction binds: structured noise (Z-conditional)
+    vs noisy structure (missing exogenous Z) are observationally indistinguishable
+    from kappa_Q alone; Q1A is the first applied attempt to break the tie and may
+    not succeed'
+  rank: 4
+strongest_argument: The localize-first-identify-next workflow has succeeded at localization
+  (P1 R-A at landslide) but the identification leg requires PARAMETER CAPTURE on the
+  marginal PIT chi^2 metric, not just localization on the alpha_L metric. A 4.18x
+  further chi^2 reduction from M3's 953.84 to 228 within a single sigma-algebra enrichment
+  step is structurally larger than the most recent step in the reduction sequence
+  (M1->M3 = 1.44x) and would require the within-cell mixture-2-Gaussian to capture
+  heterogeneity that the same family at M3 baseline could not (the M3=M4=M5 chi^2-indistinguishability
+  result says distributional flexibility within a stratum is bounded). The hour_of_week-flat
+  clim-gap (~+1000 MW, growing, hour-independent) is orthogonal to Z = hour_of_week,
+  so the clim-gap component of the marginal chi^2 - which Q2B identified as the under-dispersion
+  signature pointing at exogenous content - is not absorbed by Z, putting a hard floor
+  on what Q1A can clear.
+what_would_change_my_mind:
+- condition: chi2_Z_c lower 95%% CI bound <= 228 (landslide R-A1A on Z_c)
+  interpretation: Granularity pays off cleanly; small-cell overfit was overstated;
+    the 8-level partition captures within-bin heterogeneity the centred mixture can
+    fit even at n=213. The proponent's R-A1A on Z_c is correct.
+- condition: chi2_Z_b >= 900 (within paired-bootstrap noise of the M3 baseline 953.84)
+  interpretation: Fri-late carve-out adds essentially nothing on top of the day_type
+    sigma-algebra; my Z_b-as-modest-improvement picture is wrong. R-B1A may still
+    fire (via Z_c if it cleared the gap or via no-improvement) but the head-to-head
+    winner story flips and my rationale needs a re-read.
+- condition: chi2_diff = chi2_Z_b - chi2_Z_c 95%% CI excludes zero on the positive
+    side (Z_c strictly lower than Z_b at 95%%)
+  interpretation: The granularity-vs-robustness tradeoff resolves toward granularity;
+    small-cell overfit was overstated. My head-to-head call (Z_b wins) is falsified
+    at the head-to-head sub-finding level even if the outcome category (R-B1A) still
+    matches.
+- condition: min(chi2_Z_b, chi2_Z_c) > 2284 (R-C1A fires on both)
+  interpretation: My modest-help picture overshot in the opposite direction; Z = hour_of_week
+    does not help at all and the persistent ~954 chi^2 is structurally outside the
+    hour_of_week sigma-algebra. The framework's identifiability obstruction is binding;
+    routes to P2 synthetic Gaussian-DGP calibration.
+- condition: Per-cell chi^2 contribution decomposition shows the saturday + sunday
+    cells dropped >= 50%% from Q2A's saturday=1184, sunday=565 under Z_b
+  interpretation: Z_b's modest sigma-algebra addition was sufficient to capture the
+    saturday/sunday-distinct heterogeneity that day_type alone was averaging over;
+    my 'Z_b is mostly a relabeling of day_type' premise was wrong.
+written_at: '2026-05-27T16:25:00-07:00'
