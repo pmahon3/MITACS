@@ -694,6 +694,242 @@ def kde_residual_fit(
     return C, params, resid
 
 
+# Cramér–von Mises 95% asymptotic quantile (Patra & Sen 2016, line above
+# their Theorem 6: "the asymptotic 95% quantile of G_n is 0.6792, and is
+# used in our data analysis"). This is THE paper's recommended value for
+# β = 0.05, distribution-free under the F-continuous assumption, exact
+# when α_0 = 0. Hardcoded with the paper page reference so the constant
+# can't silently drift.
+_PATRA_SEN_CVM_Q95 = 0.6792
+
+
+def patra_sen_fit(
+    residuals: np.ndarray,
+    *,
+    F_b: str = "gaussian",
+    confidence: float = 0.95,
+    n_grid: int = 401,
+) -> dict:
+    """Patra–Sen (2016) two-component mixture-fraction diagnostic.
+
+    Estimates ``α_0`` and the honest lower confidence bound ``α̂_L`` for
+    the mixture ``F = α F_s + (1 − α) F_b``, where ``F_b`` is known
+    (standard normal here) and ``F_s`` is an unknown "signal" / "non-null"
+    distribution. The identifiability convention is the paper's eq. (4):
+    ``α_0`` is the SMALLEST ``α`` for which ``(F − (1−α)F_b)/α`` is a
+    valid CDF — so ``α_0 = 0`` exactly when ``F = F_b`` (no non-Gaussian
+    contamination).
+
+    Production-grade fitter for the resolution-paths line of inquiry's
+    P1 node ("patra-sen-per-stratum-localization";
+    notes/preregistrations/2026-05-27_p1-patra-sen-per-stratum-localization/).
+    Without it, the per-stratum α̂_L would be reimplemented inline in
+    the P1 script and trigger /audit code-path REIMPLEMENTED.
+
+    Reference: Patra, R. K. & Sen, B. (2016), "Estimation of a
+    Two-Component Mixture Model with Applications to Multiple Testing",
+    *JRSS-B* **78**(4); arXiv:1204.5488.
+
+    Algorithm
+    ---------
+    For each ``γ`` on a uniform grid of ``[0, 1]``:
+
+    1. Compute the naive "signal" CDF at the sample points (eq. 2)::
+
+         F̂_s^γ(X_i) = (F_n(X_i) − (1 − γ) F_b(X_i)) / γ
+
+    2. Project onto the cone of non-decreasing functions clipped to
+       [0, 1] via PAVA — this is ``F̌_s^γ`` from eq. (3) / Lemma 1.
+
+    3. Compute the criterion (eq. 7, eq. 8)::
+
+         T(γ) = √n · γ · d_n(F̂_s^γ, F̌_s^γ)
+              = √n · d_n(F_n, γ F̌_s^γ + (1 − γ) F_b)
+
+       where ``d_n`` is the ``L^2(F_n)`` distance, i.e. the root-mean-
+       square deviation evaluated at the n sample points.
+
+    Then by Theorem 5 (with ``c_n`` taken as the (1−β) Cramér–von Mises
+    quantile, asymptotically equivalent to the exact ``H_n^{-1}(1−β)``
+    per Theorem 6 for n ≳ 500):
+
+      α̂_L^{1-β} = inf {γ ∈ (0, 1] : T(γ) ≤ c_n}.
+
+    For 95% (β = 0.05), the paper's recommended ``c_n = 0.6792`` is
+    used (line preceding Theorem 6). For arbitrary β, the asymptotic
+    Cramér–von Mises quantile is looked up via scipy.stats.cramervonmises.
+
+    Identifiability and boundary behaviour
+    --------------------------------------
+    By Lemma 7 the set ``{γ : T(γ) ≤ c_n}`` is convex and contains 1,
+    so this inf is well-defined; if T(1) > c_n (extremely rare; F_n
+    farther from any one-component law than the CvM 95% bound), we
+    return ``α̂_L = 1.0`` as a degenerate upper-pin. If the inf is
+    not found because T(γ) > c_n on the whole grid, that's the same
+    "α_0 = 1" case.
+
+    Theorem 5 guarantees ``P(α̂_L = 0) = 1 − β`` when α_0 = 0, so on
+    pure-F_b data the diagnostic returns exactly 0 with probability
+    95%, not a positive-biased "near-zero" — this is THE property
+    that distinguishes Patra–Sen from naive plug-in estimators.
+
+    Parameters
+    ----------
+    residuals
+        1-D array of i.i.d. samples from the mixture F. For our use
+        case these are STANDARDIZED residuals ``u_i = (z − z_iter) /
+        s_iter`` from a fitted Student-t kernel predictor (M1 from Q1),
+        so ``F_b = N(0, 1)`` is the right background under the null of
+        "M1 is correctly calibrated."
+    F_b
+        Background CDF. Currently only ``"gaussian"`` (standard normal)
+        is implemented; a user-supplied callable could be plugged in
+        if a different known background is needed.
+    confidence
+        Lower-bound confidence level (1 − β). Default 0.95.
+    n_grid
+        Number of γ values to sweep on [0, 1]. The grid is uniform.
+        401 gives a 0.0025 resolution on α̂_L — finer than the
+        ranges (R-A: 0.20 / R-C: 0.10) we evaluate against.
+
+    Returns
+    -------
+    dict with keys:
+        alpha_L : float
+            Honest lower confidence bound on α_0 (Theorem 5).
+        alpha_hat_heuristic : float
+            The tuning-parameter-free "elbow" estimator (§5, α̃_0) —
+            the γ at which the second numerical derivative of T(γ)/√n
+            is maximised. Reported for diagnostic plotting; α̂_L is
+            the load-bearing quantity.
+        n : int
+            Sample size.
+        confidence : float
+            Confidence level used.
+        c_n : float
+            The Cramér–von Mises quantile used as the threshold.
+    """
+    if F_b != "gaussian":
+        raise NotImplementedError(
+            f"F_b={F_b!r}: only 'gaussian' (standard normal) is "
+            "implemented. Plug-in for a different known background "
+            "would replace the F_b_at_sorted call below."
+        )
+
+    r = np.asarray(residuals, dtype=float).ravel()
+    r = r[np.isfinite(r)]
+    n = r.size
+    if n < 20:
+        raise ValueError(
+            f"patra_sen_fit needs at least 20 finite samples; got {n}. "
+            "Stratum is too small for a meaningful α̂_L."
+        )
+
+    # Threshold c_n for the confidence level. 95% is the paper's
+    # explicit recommendation (line preceding Theorem 6: 0.6792). For
+    # arbitrary β, defer to scipy's asymptotic CvM CDF.
+    beta = 1.0 - confidence
+    if abs(beta - 0.05) < 1e-12:
+        c_n = _PATRA_SEN_CVM_Q95
+    else:
+        # Asymptotic Cramér–von Mises CDF: scipy doesn't expose the
+        # one-sample-CvM-statistic-distribution quantile function
+        # directly, so we invert via a Brent root-find on the survival
+        # function of the cramervonmises statistic over a large
+        # synthetic-uniform sample (Theorem 6 says this is the right
+        # limit; n_ref = 5000 is comfortably "moderately large").
+        from scipy.stats import cramervonmises  # noqa: PLC0415
+        from scipy.optimize import brentq       # noqa: PLC0415
+
+        rng_ref = np.random.default_rng(0)
+        n_ref = 5000
+        n_mc = 2000
+        Ts = np.empty(n_mc)
+        for k in range(n_mc):
+            u = rng_ref.uniform(size=n_ref)
+            # statistic n * omega^2; we want n * omega^2's quantile
+            # at (1-β), so this gives c_n directly.
+            Ts[k] = cramervonmises(u, "uniform").statistic
+        # n * omega^2 -> sqrt of that approximates √n * d(F_n, F)
+        # (eq. before Theorem 6); √(T) gives the c_n on the right scale.
+        c_n = float(np.quantile(np.sqrt(Ts), 1.0 - beta))
+
+    # Step 1: empirical CDF at the (sorted) sample points, and F_b at
+    # the same points. F_n(X_(i)) = i/n for i = 1..n (right-continuous).
+    r_sorted = np.sort(r)
+    Fn_sorted = np.arange(1, n + 1, dtype=float) / n
+    # Standard normal CDF at the sorted sample points.
+    from scipy.stats import norm as _norm  # noqa: PLC0415
+    Fb_sorted = _norm.cdf(r_sorted)
+
+    # Grid of γ on [0, 1]. We include γ = 0 explicitly because the
+    # paper's eq. (9) gives the well-defined limit
+    #     lim_{γ→0+} γ · d_n(F̂_s^γ, F̌_s^γ) = d_n(F_n, F_b),
+    # and Theorem 5's "P(α̂_L = 0) = 1 − β when α_0 = 0" property
+    # requires the inf to be ACHIEVABLE at γ = 0 when the data are
+    # pure F_b — otherwise the smallest grid value (e.g. 1/n_grid)
+    # becomes a hard lower floor. We ALSO include γ = 1 because there
+    # F̂_s^1 = F_n is already a CDF, so T(1) ≈ 0 — guaranteeing the
+    # inf set is non-empty (Lemma 7 then says the set is convex and
+    # equals [α̂_L, 1]).
+    gamma_grid = np.linspace(0.0, 1.0, n_grid)
+
+    # scipy.optimize.isotonic_regression is the O(n) PAVA (scipy ≥ 1.12);
+    # used here for the L^2 monotone-increasing projection of eq. (3).
+    # Equivalent to sklearn's IsotonicRegression but keeps us inside the
+    # "plain scipy/numpy, no sklearn" discipline that the Q2A fitters
+    # (mixture_2/3_gaussian_mle_fit, kde_residual_fit) all follow.
+    from scipy.optimize import isotonic_regression  # noqa: PLC0415
+
+    T = np.empty(n_grid)
+    # T(0) = √n · d_n(F_n, F_b) per eq. (9). At γ = 0 the naive
+    # F̂_s^γ is undefined (divide-by-zero), so we use the paper's
+    # explicit limit instead of running the PAVA branch with γ = 0.
+    T[0] = np.sqrt(n) * float(np.sqrt(np.mean((Fn_sorted - Fb_sorted) ** 2)))
+    for i in range(1, n_grid):
+        gamma = gamma_grid[i]
+        # Naive F̂_s^γ at sample points (eq. 2).
+        F_hat_s = (Fn_sorted - (1.0 - gamma) * Fb_sorted) / gamma
+        # PAVA: monotone non-decreasing projection. Then clip to [0, 1]
+        # per Lemma 1 (F̌_s^γ = min(max(F̃_s^γ, 0), 1)).
+        F_check_s = isotonic_regression(F_hat_s, increasing=True).x
+        F_check_s = np.clip(F_check_s, 0.0, 1.0)
+        # L^2(F_n) distance = sqrt(mean of squared diffs at sample pts).
+        # d_n(F̂_s^γ, F̌_s^γ).
+        d_n = float(np.sqrt(np.mean((F_hat_s - F_check_s) ** 2)))
+        T[i] = np.sqrt(n) * gamma * d_n
+
+    # α̂_L = inf{γ : T(γ) ≤ c_n}. By Lemma 7 the set {γ : T(γ) ≤ c_n}
+    # is convex = [α̂_L, 1], so the inf is the FIRST grid point at
+    # which T drops below c_n. T is non-increasing in γ for γ ≥ α_0
+    # (Lemma 6 / 9) — strictly decreasing as γ decreases past α_0.
+    below = T <= c_n
+    if not np.any(below):
+        # T(1) > c_n: the whole grid is above the threshold. By Lemma 7
+        # this means α̂_L = 1 (degenerate one-component fit at the
+        # signal end). Return 1.0 with a small grid-resolution caveat.
+        alpha_L = 1.0
+    else:
+        alpha_L = float(gamma_grid[np.argmax(below)])
+
+    # §5 heuristic estimator α̃_0: γ at which the second numerical
+    # derivative of γ·d_n(F̂_s^γ, F̌_s^γ) = T(γ)/√n is maximised. Reported
+    # for completeness; α̂_L is the load-bearing quantity for our verdict
+    # architecture, and the paper itself warns (page 9, end of §5) that
+    # α̃_0 can fail to estimate the elbow consistently in some settings.
+    d2T = np.diff(T, n=2)
+    # The second-difference index i corresponds to gamma_grid[i + 1].
+    alpha_hat_heuristic = float(gamma_grid[int(np.argmax(d2T)) + 1])
+
+    return {
+        "alpha_L": alpha_L,
+        "alpha_hat_heuristic": alpha_hat_heuristic,
+        "n": int(n),
+        "confidence": float(confidence),
+        "c_n": float(c_n),
+    }
+
+
 def innovation_diagnostics(
     *,
     embedding: Embedding,
