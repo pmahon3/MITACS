@@ -9,27 +9,27 @@ amendments:
   - 'nodes.Q2A.status: closed -> active'
   - 'nodes.Q2A.reopened_by_amendment: A1 (added)'
   - 'current_node_id: Q2D -> Q2A'
-  - 'branching_rules.Q1: UNCHANGED (procedure §2 forbids rewriting branching_rules
-    for settled nodes; the override is recorded structurally via node status changes
-    and this amendment block)'
+  - "branching_rules.Q1: UNCHANGED (procedure \xA72 forbids rewriting branching_rules\
+    \ for settled nodes; the override is recorded structurally via node status changes\
+    \ and this amendment block)"
   git_sha: c6487ec78fd0253d597c78dfe4b3c694dedf23bb
   prior_tree_hash: bea8f70cd904f98a8af5ca9d0be39fd807b30e524b2d89b8e00dd3045080ddcb
-  reason: 'The Q1 arbiter (SETTLED 2026-05-26) rendered mechanical verdict R-D but
-    substantive verdict R-C, flagging the R-D criterion as a phase_a design hole.
-    The arbiter''s follow_up.reasoning proposed: ''MLE pathological IFF the M1 (kernel)
-    fit shows nu at boundary OR fewer than 50% of M2 bins have a meaningful nu (<
-    200). Under this revised criterion, Q1''s verdict reads R-C (M2''s Gaussian-at-bin-level
-    saturation is no longer pathological). The branching_rules.Q1.R-D = Q2D remains
-    (in case M1 itself fails), but Q1''s effective routing becomes R-C -> Q2A.'' This
-    amendment implements that proposal: revises the R-D criterion text on Q1''s settled
-    skeleton, closes Q2D (the mechanical advancement target whose premise no longer
-    holds), and reopens Q2A as the active substantive next node. branching_rules.Q1
-    is deliberately left unchanged because Procedure §2 forbids rewriting branching_rules
-    for settled nodes (S1 fired R-D -> Q2D; rewriting that map would rewrite history).
-    The override is recorded structurally via Q2D.status=closed + closure_reason and
-    Q2A.status=active + reopened_by_amendment=A1, and audit-trail-wise via this amendment
-    block. A future R-D firing (M1 itself failing) would still mechanically point
-    at Q2D, which would then need a separate status change.'
+  reason: "The Q1 arbiter (SETTLED 2026-05-26) rendered mechanical verdict R-D but\
+    \ substantive verdict R-C, flagging the R-D criterion as a phase_a design hole.\
+    \ The arbiter's follow_up.reasoning proposed: 'MLE pathological IFF the M1 (kernel)\
+    \ fit shows nu at boundary OR fewer than 50% of M2 bins have a meaningful nu (<\
+    \ 200). Under this revised criterion, Q1's verdict reads R-C (M2's Gaussian-at-bin-level\
+    \ saturation is no longer pathological). The branching_rules.Q1.R-D = Q2D remains\
+    \ (in case M1 itself fails), but Q1's effective routing becomes R-C -> Q2A.' This\
+    \ amendment implements that proposal: revises the R-D criterion text on Q1's settled\
+    \ skeleton, closes Q2D (the mechanical advancement target whose premise no longer\
+    \ holds), and reopens Q2A as the active substantive next node. branching_rules.Q1\
+    \ is deliberately left unchanged because Procedure \xA72 forbids rewriting branching_rules\
+    \ for settled nodes (S1 fired R-D -> Q2D; rewriting that map would rewrite history).\
+    \ The override is recorded structurally via Q2D.status=closed + closure_reason\
+    \ and Q2A.status=active + reopened_by_amendment=A1, and audit-trail-wise via this\
+    \ amendment block. A future R-D firing (M1 itself failing) would still mechanically\
+    \ point at Q2D, which would then need a separate status change."
   written_at: '2026-05-26T17:15:00-04:00'
 - amendment_id: A2
   changes:
@@ -42,25 +42,26 @@ amendments:
     to revise)'
   git_sha: 530888b089dc73e29f82f5055ac5a0a8deedb973
   prior_tree_hash: 042f997c3e46ad04bda5761eddf6800b76835132531bc24c7dcef92ccee8adc8
-  reason: 'Q2A (richer-family-mixture-or-nonparametric) SETTLED 2026-05-26 with mechanical
-    and substantive verdict R-B2 (the first arbiter in the workflow without mechanical/substantive
-    gap; the registered ambiguous band absorbed the realization cleanly). Q2A''s phase_a
-    explicitly registered that R-B2 fires a mandatory thread amendment (NOT an automatic
-    next-node fire), and branching_rules has no Q2A entry by design (Q2A was a leaf
-    in the planned tree). Per the arbiter''s Finding #1 (verdict_reasoning): chi^2_M3
-    = 953.84, chi^2_M4 = 965.81, chi^2_M5 = 966.60 — all three richer families chi^2-indistinguishable,
-    with KDE the worst by 0.8 chi^2 units and the simplest family (M3, mixture-2-Gaussian)
-    binding as preferred; the reduction curve M0->M1 = 16x then M1->Q2A best = 1.44x
-    is asymptoting. This realizes the proponent''s what_would_change_my_mind #4 condition
-    verbatim: distributional flexibility beyond a 2-component symmetric mixture buys
-    negligibly little on this empirical process, so the remaining ~954 chi^2 is non-distributional.
-    The right next tests are Q2B''s pre-existing candidate set (iterated_mean_trajectory_bias,
-    iterated_variance_divergence, day_anchor_seam_artifact). The user has authorized
-    amendment A2 to reopen Q2B as the active node. References: arbiter at notes/preregistrations/2026-05-26_q2a-richer-family-mixture-or-nonparametric/arbiter.yaml
-    (body_sha256 61493dbaa6430408332cb44056f728c358eecea466b8ad8fab7dbe8cf6321666);
-    memory file ~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/mitacs-q2a-richer-family.md.'
+  reason: "Q2A (richer-family-mixture-or-nonparametric) SETTLED 2026-05-26 with mechanical\
+    \ and substantive verdict R-B2 (the first arbiter in the workflow without mechanical/substantive\
+    \ gap; the registered ambiguous band absorbed the realization cleanly). Q2A's\
+    \ phase_a explicitly registered that R-B2 fires a mandatory thread amendment (NOT\
+    \ an automatic next-node fire), and branching_rules has no Q2A entry by design\
+    \ (Q2A was a leaf in the planned tree). Per the arbiter's Finding #1 (verdict_reasoning):\
+    \ chi^2_M3 = 953.84, chi^2_M4 = 965.81, chi^2_M5 = 966.60 \u2014 all three richer\
+    \ families chi^2-indistinguishable, with KDE the worst by 0.8 chi^2 units and\
+    \ the simplest family (M3, mixture-2-Gaussian) binding as preferred; the reduction\
+    \ curve M0->M1 = 16x then M1->Q2A best = 1.44x is asymptoting. This realizes the\
+    \ proponent's what_would_change_my_mind #4 condition verbatim: distributional\
+    \ flexibility beyond a 2-component symmetric mixture buys negligibly little on\
+    \ this empirical process, so the remaining ~954 chi^2 is non-distributional. The\
+    \ right next tests are Q2B's pre-existing candidate set (iterated_mean_trajectory_bias,\
+    \ iterated_variance_divergence, day_anchor_seam_artifact). The user has authorized\
+    \ amendment A2 to reopen Q2B as the active node. References: arbiter at notes/preregistrations/2026-05-26_q2a-richer-family-mixture-or-nonparametric/arbiter.yaml\
+    \ (body_sha256 61493dbaa6430408332cb44056f728c358eecea466b8ad8fab7dbe8cf6321666);\
+    \ memory file ~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/mitacs-q2a-richer-family.md."
   written_at: '2026-05-26T15:28:37-07:00'
-body_sha256: 05b732d41a26552121912412a8834a108175e811819916920c8b05c8b1d50d58
+body_sha256: c89e2f7604f7dbe756e7598a1b8c796da503112dac3664db42de70c873e3a4bd
 branching_rules:
   Q1:
     R-A: null
@@ -69,7 +70,7 @@ branching_rules:
     R-D: Q2D
 current_node_id: Q2B
 git_clean: true
-git_sha: 530888b089dc73e29f82f5055ac5a0a8deedb973
+git_sha: 1dda7f990faefc80b914c364968b3d7b2a4bda41
 nodes:
   Q1:
     id: Q1
@@ -168,7 +169,7 @@ nodes:
     name: non-distributional-marginal-pathology-investigation
     parent_branch: R-C
     parent_id: Q1
-    phase_a_path: null
+    phase_a_path: 2026-05-26_q2b-non-distributional-decomposition/phase_a.yaml
     phase_a_skeleton:
       candidate_set:
       - iterated_mean_trajectory_bias
@@ -200,14 +201,14 @@ nodes:
       - R-B3: multiple mechanisms contribute; no single fix suffices
       - R-C3: marginal PIT is irreducibly pathological; question reframes
     reopened_by_amendment: A2
-    status: active
+    status: settled
   Q2D:
-    closure_reason: 'Closed under amendment A1. Mechanical advancement S1 routed Q1.R-D
-      -> Q2D (MLE redesign), but the substantive arbiter verdict was R-C: the M2 ν-saturation
-      that tripped the R-D criterion was the Student-t MLE''s correct response to
-      approximately-Gaussian bin-level data, not estimator failure. Q2D (MLE redesign)
-      would have rebuilt a working estimator. The substantive routing per the revised
-      R-D criterion is R-C -> Q2A (richer family).'
+    closure_reason: "Closed under amendment A1. Mechanical advancement S1 routed Q1.R-D\
+      \ -> Q2D (MLE redesign), but the substantive arbiter verdict was R-C: the M2\
+      \ \u03BD-saturation that tripped the R-D criterion was the Student-t MLE's correct\
+      \ response to approximately-Gaussian bin-level data, not estimator failure.\
+      \ Q2D (MLE redesign) would have rebuilt a working estimator. The substantive\
+      \ routing per the revised R-D criterion is R-C -> Q2A (richer family)."
     id: Q2D
     name: redesign-Q1
     parent_branch: R-D
@@ -242,10 +243,33 @@ references:
   file: ../2026-05-26_pit-calendar-fingerprint/arbiter.yaml
   relation: root
 resolution:
-  final_state: null
-  resolved_at: null
-  spawned_threads: []
-  summary: null
+  final_state: exhausted
+  resolved_at: '2026-05-26T20:15:00-07:00'
+  spawned_threads:
+  - 2026-05-26_resolution-paths-thread
+  summary: "Thread EXHAUSTED on its pre-registered scope_limits (\"tests the PREDICTIVE-DISTRIBUTION\
+    \ CLASS axis only\"). Both directions tested under that scope are bounded: (S9)\
+    \ Q2A (richer-family-mixture-or-nonparametric) SETTLED R-B2 with M1 -> Q2A best\
+    \ = 1.44x chi^2 return and M3=M4=M5 plateau (kernel-refinement lever is bounded;\
+    \ chi^2_M3=953.84, chi^2_M4=965.81, chi^2_M5=966.60 \u2014 three richer families\
+    \ chi^2-indistinguishable); (S10) Q2B (non-distributional-marginal-pathology-investigation)\
+    \ SETTLED R-C3 with all three pre-registered same-Q non-distributional mechanism\
+    \ shares below the 0.15 null floor, two sign-determined NEGATIVE (mech_2 variance-cap\
+    \ and mech_3 day-anchor-seam mis-specified at construction; mech_1 mean-bias positive\
+    \ but bounded at ~0.11 share). Joint S9+S10 is applied evidence for the identifiability\
+    \ obstruction (the predictive distribution under the current sigma-algebra cannot\
+    \ be made marginally PIT-calibrated by any refinement that stays inside the (kernel-family\
+    \ x same-Q-mechanism) plane): see the published theorems cited in the parked diagnostic\
+    \ note at ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md\
+    \ (Bergna et al. 2026 Prop 1; Heckman-Singer 1984; Allahverdyan 2020). Further\
+    \ progress requires sigma-algebra enrichment with auxiliary Z (weather, latent\
+    \ state, secular-drift conditioning, etc.) \u2014 OUTSIDE the thread's pre-registered\
+    \ scope_limits. The natural next move is a NEW thread (placeholder slug: 2026-05-26_resolution-paths-thread)\
+    \ targeting the three framework-prescribed resolution paths (candidate Z testing,\
+    \ stratified Patra-Sen, synthetic Gaussian-DGP calibration), not an amendment\
+    \ of this one. Per-experiment record: memory files mitacs-q1-student-t-vs-gaussian\
+    \ (Q1, S8), mitacs-q2a-richer-family (Q2A, S9), mitacs-q2b-non-distributional\
+    \ (Q2B, S10)."
 root:
   artifacts:
   - body_sha256: 376ebac7915643d6e75740ae94521e1175a37a2a6317d66cad0974311f7cf90d
@@ -269,7 +293,7 @@ root:
 
     '
 schema: thread
-state: active
+state: exhausted
 state_history:
 - advancement_id: S1
   branch_fired: R-D
@@ -298,5 +322,29 @@ state_history:
   transition: null
   triggered_by_arbiter: null
   written_at: '2026-05-26T16:51:00-04:00'
+- advancement_id: S3
+  branch_fired: null
+  git_sha: pending
+  node_settled: Q2B
+  notes: "State advancement S3 closes the thread per Procedure \xA73 + \xA74. Q2B\
+    \ SETTLED R-C3 (arbiter at 2026-05-26_q2b-non-distributional-decomposition/arbiter.yaml,\
+    \ body_sha256 5a237eb6f43257c31650f1205d7335e250042b6286a5a4f3d6ead6af56cc8013).\
+    \ Q2B was a leaf in the planned tree (branching_rules has no Q2B entry; same situation\
+    \ as Q2A's R-B2 under A2), so mechanical next_node_id is null and the thread transitions\
+    \ to exhausted. R-C3 (per phase_a.shape_outcomes) mandates amendment OR closure;\
+    \ the user authorized closure as EXHAUSTED rather than amendment, justified by\
+    \ the framework reframe in the resolution block (joint S9+S10 = applied evidence\
+    \ for the identifiability obstruction; further progress requires sigma-algebra\
+    \ enrichment with auxiliary Z, which is OUTSIDE the thread's pre-registered scope_limits).\
+    \ branch_fired is null because Q2B has no branching_rules entry; the arbiter's\
+    \ semantic branch_fired (R-C3) is recorded in the arbiter.yaml's thread_state_update\
+    \ block and in node Q2B's settled status. siblings_closed is empty (no Q2B branching_rules\
+    \ siblings exist). The resolution block records the spawned-thread intent (the\
+    \ new thread itself will be created in a separate dispatch)."
+  prior_hash: 05b732d41a26552121912412a8834a108175e811819916920c8b05c8b1d50d58
+  siblings_closed: []
+  transition: active_to_exhausted
+  triggered_by_arbiter: 2026-05-26_q2b-non-distributional-decomposition/arbiter.yaml
+  written_at: '2026-05-26T20:15:00-07:00'
 topic: distributional-class-thread
 written_at: '2026-05-26T10:30:00-04:00'
