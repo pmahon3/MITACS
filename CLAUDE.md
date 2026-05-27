@@ -203,7 +203,7 @@ gold-standard template the rest was raised to. Inspection-only scratch carries a
 greppable `PROVENANCE-GRADE: INSPECTION-ONLY` docstring banner — never cite it as a
 result.
 
-## Status (as of 2026-05-26)
+## Status (as of 2026-05-27)
 
 ### Pipeline and infrastructure
 - ✅ Config-driven pipeline (`config/`, `run_pipeline.py` with stage registry,
@@ -215,7 +215,7 @@ result.
   claims are superseded). Intra-day conditioning required (full-process Σ singular);
   scalar one-step innovation strongly non-Gaussian (excess kurtosis ≈24–33).
 - ✅ Applied-audit workflow operational (see "Applied-audit workflow" section
-  above). Seven registered entries (two threads, five experiments). Run
+  above). Eleven registered entries (three threads, eight experiments). Run
   `python -m experiment.audit.registry list` for current state.
 
 ### Two writeups under active development (do not conflate)
@@ -230,9 +230,10 @@ result.
   internal memo that documents the framework + Q1/Q2A/Q2B results.
 
 ### Settled findings since 2026-05-21 (chronological)
-The applied-audit workflow has produced seven settled / arbitered findings.
+The applied-audit workflow has produced eight settled / arbitered findings.
 Authoritative source is the memo's (S1)–(S10) numbering + the per-experiment
-memory files.
+memory files; (S11) is registered and memo'd but not yet folded into the
+kernel-family-agnostic theory memo (the memo predates it).
 
 - (S1, S6) **v2 multiscale-direct-h-step SETTLED**:
   D_RATIO = 28.96 [26.82, 31.43] at headline cell; strict-semigroup
@@ -288,22 +289,65 @@ memory files.
   contribution per the framework's Phase-2 audit), or synthetic
   Gaussian-DGP calibration. Thread should be declared EXHAUSTED;
   new thread targets the three framework-prescribed resolution paths.
+- (S11) **P1 Patra-Sen per-stratum localization SETTLED R-A**
+  (PROPONENT-CONFIRMED on outcome category; within-bucket
+  forecasts falsified — fourth named-failure-mode instance,
+  orthogonal shape): First applied response to the joint S9+S10
+  identifiability obstruction. Per-stratum α̂_L (Patra-Sen 2016
+  Theorem 1, F_b = Uniform on u_PIT per pre-run methodology
+  carve-out) over 5 axes × strata on Q1's M1 PIT residuals.
+  **max_axis_range = 0.5750 [0.4475, 0.6475]** at landslide R-A
+  (lower CI bound clears the R-A cut at 0.20 by more than 2×).
+  Per-axis range (ordered): hour_of_week 0.575 [0.448, 0.648]
+  (**binding**); time_of_day 0.485 [0.385, 0.578]; day_type 0.345
+  [0.250, 0.430]; season 0.135 [0.055, 0.240]; demand_quantile
+  0.075 [0.023, 0.173]. **The missing-Z structure is
+  cyclical/social-weekly, NOT seasonal/climatological** — hot
+  zone bins 5/6/7 span Fri 10:00 – Sun 23:00 (α̂_L 0.55–0.61);
+  cold zone bin 0 = Mon 01:00–21:00 at α̂_L 0.035 (essentially
+  Gaussian). day_type ordering saturday 0.6475 > sunday 0.485 >
+  weekday 0.3025 independently corroborates Q2A Finding 2
+  (saturday 4× weekday) and eigenmodes-v1 (S2/S3) asymmetry from
+  a distinct estimator. Proponent's temperature-via-season prior
+  translation is 95%-CI falsified (season range CI upper bound
+  0.240 barely clears R-A, not the predicted 0.30); DA's R-C
+  pure-orthogonality position decisively refuted on 4 of 5 axis
+  CIs. day_type range 0.345 (> 0.15) triggers proponent's
+  `what_would_change_my_mind` condition #4 — Q1's per-day-type ν
+  + per-(month, hour) climatology does not absorb day-type
+  α̂_L asymmetry (non-blocking flag; Q1A's hour_of_week Z
+  subsumes day_type at finer resolution). **Routing:** R-A
+  routes to Q1A with binding axis = hour_of_week as Q1A's
+  conditioning variable; Q1C (temperature fallback) closed as
+  sibling-not-fired (temperature prior survives as candidate for
+  marginal pathology but is no longer the prior-supported
+  localizing axis).
 
 ### Lines of inquiry
 - `2026-05-26_missing-content-thread`: **exhausted** under registered
   branching (P1 settled AMBIGUOUS → null per branching_rules; continuing
   requires amendment).
-- `2026-05-26_distributional-class-thread`: **awaiting closure**
-  (active until thread-coordinator dispatch). Q1 SETTLED (S8) →
-  amendment A1 closed Q2D / rerouted to Q2A → Q2A SETTLED R-B2 (S9)
-  → amendment A2 reopened Q2B → Q2B SETTLED R-C3 (S10). The thread's
-  scope_limits ("tests the PREDICTIVE-DISTRIBUTION CLASS axis only")
-  are exhausted: S9 bounded the kernel-refinement lever and S10
-  bounded the naive σ-algebra-preserving manipulations. Q2B arbiter
-  recommends declaring EXHAUSTED rather than amending; a new thread
-  on the three framework-prescribed resolution paths (candidate Z,
-  stratified Patra-Sen, synthetic calibration) is the natural next
-  move per the disintegration diagnostic note.
+- `2026-05-26_distributional-class-thread`: **exhausted** under
+  registered branching. Q1 SETTLED (S8) → A1 closed Q2D / rerouted
+  to Q2A → Q2A SETTLED R-B2 (S9) → A2 reopened Q2B → Q2B SETTLED
+  R-C3 (S10) → thread-coordinator closed the thread per Q2B
+  arbiter recommendation; scope ("predictive-distribution class
+  axis only") is empirically bounded in both directions.
+- `2026-05-27_resolution-paths-thread`: **active, current_node = Q1A**.
+  Successor to the distributional-class thread, targets the three
+  framework-prescribed resolution paths for the joint S9+S10
+  identifiability obstruction (candidate Z testing, stratified
+  Patra-Sen, synthetic Gaussian-DGP calibration). State so far:
+  P1 SETTLED R-A (S11; landslide on `hour_of_week`) → Q1A.status
+  planning → active per S2 thread advancement (commit 1775873).
+  Q1C closed as sibling-not-fired. Q1A's phase_a (not yet filled)
+  must construct Z from `hour_of_week` stratification per the P1
+  arbiter's binding-axis pin; the three pre-flagged Z candidates
+  are (i) binary indicator of bin ≥ 5 (weekend window),
+  (ii) 8-level categorical (preserving hour_of_week granularity),
+  (iii) continuous hour-of-week-mod-168 phase variable. R-A1A
+  fires if marginal PIT χ² ≤ 228 (Q2A's R-A2 gate-derived cut)
+  and would RESOLVE the thread.
 
 ### Frozen forward experiment (separate from the above)
 - ✅ **IESO retrospective head-to-head shown infeasible** from public archives.
@@ -322,14 +366,19 @@ memory files.
 ### Open
 - Web dashboard.
 - Forward-experiment results accrue with calendar time.
-- New non-distributional thread (post-distributional-class-closure):
-  candidate Z testing + stratified Patra-Sen + synthetic Gaussian-DGP
-  calibration, per the disintegration diagnostic note's resolution
-  paths for the identifiability obstruction.
-- The Goal-4 paper's abstract (written last).
+- `resolution-paths-thread` at Q1A: fill phase_a (Z from
+  `hour_of_week` per P1 arbiter pin), run, audit, arbiter. R-A1A
+  RESOLVES the thread; R-B1A branches into Q1B (temperature
+  fallback), R-C1A branches into P2 (synthetic Gaussian-DGP
+  calibration).
+- The Goal-4 paper's abstract (written last). With S11 in hand,
+  the resolution-paths arc is citable as a fourth substantial
+  thread; consider whether the writeup needs a new section or if
+  (S11) just joins the appendix table.
 - The kernel-family-agnostic theory memo's `/audit pure` audit in the
   theory-side `Resolvent_Framework` programme (not yet run; the memo
-  is currently lab-only).
+  is currently lab-only). The memo also predates (S11) — if the audit
+  triggers a refresh, fold S11 in then rather than mid-stream now.
 
 ## Data files
 
