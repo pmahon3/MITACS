@@ -1056,6 +1056,43 @@ def registry_detail(
         )
     ]
 
+    # Exposition note (``note.md``). Rendered first, above the thread
+    # graph / artifact YAMLs, because this is what the user is asking
+    # the dashboard to "see" — the idea and the math attached to this
+    # entry. Unpinned (no body_sha256); the YAML artifacts remain the
+    # registered claims. Written by the arbiter (experiments) or
+    # thread-coordinator (threads).
+    if entry.note_md:
+        children.append(
+            html.Div(
+                style={
+                    "background": "#ffffff",
+                    "padding": "10px 14px 16px 14px",
+                    "borderRadius": "4px",
+                    "border": "1px solid #e0e0e0",
+                    "marginBottom": "12px",
+                },
+                children=[
+                    html.Div(
+                        "note",
+                        style={
+                            "fontFamily": "ui-monospace, monospace",
+                            "fontSize": "12px",
+                            "fontWeight": "600",
+                            "color": "#4a5568",
+                            "marginBottom": "6px",
+                        },
+                    ),
+                    dcc.Markdown(
+                        entry.note_md,
+                        mathjax=True,
+                        dangerously_allow_html=False,
+                        style={"fontSize": "14px", "lineHeight": "1.6"},
+                    ),
+                ],
+            )
+        )
+
     # Thread-as-graph: Sankey above the node table for thread entries.
     if entry.is_thread and "thread.yaml" in entry.artifact_data:
         thread_yaml = entry.artifact_data["thread.yaml"]

@@ -57,6 +57,29 @@ prompted by a SETTLED MIXED arbiter that names follow-ups).
    (the `self_path` fix from 2ce42c7).
 5. Validate via `python -m experiment.audit.registry thread status
    <slug>-thread`; refuse to commit until schema_errors is empty.
+6. **Write `note.md`** in the thread directory, alongside
+   `thread.yaml`. Exposition surface for the dashboard's
+   lab-notebook view (see arbiter.md §"Procedure" step 7 for the
+   shared rationale). UNPINNED; not a registered claim. Three
+   paragraphs (~300–500 words, MathJax notation):
+
+      1. **The question and scope.** What this thread is asking
+         and what it isn't. Refer to the thread's `question` and
+         `scope_limits`. Any framework or theorem refs.
+
+      2. **The tree and the rules.** Why the planned nodes
+         (P1, P2, Q1A, …) are the right next experiments and
+         not others. State the closure rule explicitly with
+         numerical thresholds (e.g., `> 80%` cumulative share).
+         Cite scout reports / framework notes the tree shape
+         depends on.
+
+      3. **Current position.** Where we are right now — current
+         node, what was settled, what's planned, what would
+         exhaust the thread. Update this paragraph at each
+         state advancement (overwrite the file each time; the
+         state_history block in thread.yaml is the tamper-
+         evident record of transitions).
 
 ### 2. Thread amendment
 
@@ -87,6 +110,10 @@ new amendment block. Procedure:
    etc.) AND append the amendment block to `amendments`.
 4. Re-stamp the file with `registry.stamp(data, self_path=p)`.
 5. Verify via `thread status` — schema_errors must be empty.
+6. **Rewrite `note.md`** so the prose reflects the amended tree
+   (per-procedure §1 step 6 for the three-paragraph template;
+   the amendment narrative goes in paragraph 3 — what's now
+   planned, what was closed). The note is unpinned; overwrite.
 
 Rules:
 - Amendments cannot remove `settled` nodes (the experiments those
@@ -143,6 +170,12 @@ back-references.
    the descendant phase_a's reference to the thread must now be
    verifiable against either the new hash or the state_history's
    prior_hash.
+6. **Rewrite `note.md`** so paragraph 3 (current position) reflects
+   the new state: which node just settled, the verdict that
+   triggered the transition, what the new current node will
+   investigate, what siblings were closed. Paragraphs 1 and 2
+   typically don't change — the question and the tree shape are
+   stable across advancements. Overwrite the file.
 
 ### 4. Thread closure
 
@@ -162,6 +195,12 @@ Procedure: fill the `resolution` block:
   thread slugs go here.
 
 Re-stamp. After closure, no further amendments.
+
+**Rewrite `note.md` one last time** — paragraph 3 becomes the
+post-mortem: what was resolved or exhausted, the final state,
+spawned threads if any. This is the version that will be cited
+as the thread's narrative entry when assembling a draft from a
+sequence of registry notes.
 
 ## Output
 
@@ -208,3 +247,7 @@ one-block summary:
 - Hash chain integrity (the `prior_tree_hash` in each amendment) is
   load-bearing. Never write an amendment without recording the prior
   tree's hash.
+- `note.md` is rewritten alongside thread.yaml at every procedure
+  (creation, amendment, state advancement, closure). The note is
+  exposition (unpinned, overwritable); thread.yaml + state_history
+  remain the tamper-evident record of transitions.

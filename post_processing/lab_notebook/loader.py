@@ -93,6 +93,12 @@ class RegistryEntry:
     thread_state: dict[str, Any] | None
     artifact_data: dict[str, dict[str, Any]]
     verdict_summary: str | None  # short string for arbiter outcome if SETTLED
+    # Optional ``note.md`` — exposition prose with MathJax math attached
+    # to this entry. Written by the arbiter (for experiments) or the
+    # thread-coordinator (for threads); unpinned (no body_sha256), so
+    # may be re-edited without re-stamping the load-bearing YAMLs. The
+    # YAML artifacts are the registered claims; the note is exposition.
+    note_md: str | None = None
 
 
 @dataclass(frozen=True)
@@ -312,6 +318,16 @@ def load_registry_entries(prereg_dir: Path) -> list[RegistryEntry]:
         if arb and "__parse_error__" not in arb:
             verdict = _verdict_summary(arb)
 
+        # Optional exposition note (``note.md``). Read raw; no parsing.
+        # Unpinned by design — see RegistryEntry.note_md docstring.
+        note_md: str | None = None
+        note_path = d / "note.md"
+        if note_path.exists():
+            try:
+                note_md = note_path.read_text(encoding="utf-8")
+            except OSError:
+                note_md = None
+
         out.append(
             RegistryEntry(
                 path=d,
@@ -322,6 +338,7 @@ def load_registry_entries(prereg_dir: Path) -> list[RegistryEntry]:
                 thread_state=thread_state,
                 artifact_data=artifact_data,
                 verdict_summary=verdict,
+                note_md=note_md,
             )
         )
     return out
@@ -567,6 +584,8 @@ def search_content(query: str, corpus: LoadedCorpus) -> list[SearchHit]:
                 merged_parts.append(yaml.safe_dump(data, sort_keys=False))
             except Exception:  # noqa: BLE001
                 pass
+        if r.note_md:
+            merged_parts.append(r.note_md)
         _scan("registry", r.name, r.path, "\n".join(merged_parts))
     for n in corpus.notes:
         _scan(f"note:{n.category}", n.path.stem, n.path, n.body)
