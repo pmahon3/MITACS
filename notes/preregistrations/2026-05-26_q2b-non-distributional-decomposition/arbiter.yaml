@@ -1,0 +1,360 @@
+schema: arbiter
+written_at: '2026-05-26T19:30:00-07:00'
+references:
+- file: phase_a.yaml
+  body_sha256: 91f69aeb13783bfa54adc45fa3b4da7fe81f9ea3ed984e5381dd281b10d7dd8e
+- file: proponent.yaml
+  body_sha256: a2a0893e0bc40ef5da0752d1c4a93514ab4235841f49a248de6580dc40887cfd
+- file: devils_advocate.yaml
+  body_sha256: f4565c502a83fff3e167a9ace18b135347aa6a3f9853231182e77e19e8178fbe
+- file: result.yaml
+  body_sha256: 68d156a8b74b55d3a049a9b6f02d050c57189116ad4d05b0493df4707b95339e
+- file: phase_fidelity_check_r.yaml
+  body_sha256: e2c3b82900959bb8f77c992c4667626192a723cd62255741f61c864b49619e88
+- file: ../2026-05-26_distributional-class-thread/thread.yaml
+  body_sha256: 05b732d41a26552121912412a8834a108175e811819916920c8b05c8b1d50d58
+preconditions:
+  code_path_passed: true
+  hash_chain_intact: true
+  result_from_clean_tree: true
+  result_from_clean_tree_caveat: 'result.yaml carries git_clean: false from the inline registry.stamp() pattern (the script
+    stamped while the sibling CLAIM-GRADE .txt was freshly-written-and-untracked). The canonical cleanliness witness for the
+    underlying run is the .txt''s make_result() header which records git_clean: true at git_sha 194468a (parent of the re-run
+    commit eb34beb). The .txt''s inputs_fingerprint 986abee0aaaad1bf... references the same post-sign-fix phase_a hash 91f69aeb
+    that result.yaml references; registry verify reports chain verified post-eb34beb. result_from_clean_tree is true in substance.
+    Same inline-stamp pattern Check R adjudicated; not a tree-state defect. (Q2A used a separate post-write stamping commit
+    and so its result.yaml has git_clean: true; the pattern divergence is cosmetic and will be unified in a follow-up if either
+    proves preferable.)'
+  fidelity_coverage_passed: true
+  fidelity_L2_resolved: true
+  fidelity_L2_note: No pre-run Check P L2 advisories outstanding; the execution_deviations block on result.yaml is empty.
+    The day_type-stratified-chi^2 PASS-WITH-NOTE in Check R is a registered-secondary observation (not in variables.dependent)
+    and explicitly NOT a Check R deficiency per the agent contract; no L2 resolution required.
+numerical_record:
+  outcome_mechanical: R-C3
+  outcome_substantive: R-C3
+  reason_mechanical: 'phase_a.shape_outcomes.R-C3 criterion: max_m explained_share[m] < 0.15. Realized explained_share values
+    (point estimates): mean_bias = +0.1086, variance_div = -0.1135, seam = -0.1389. max_m explained_share = +0.1086 (mean_bias)
+    < 0.15 fires R-C3. R-A3 (max > 0.50 AND > 2x second) NOT cleared by a wide margin (top share is 0.11, well below 0.50).
+    R-B3 (NOT R-A3 AND NOT R-C3, i.e., at least one share >= 0.15) NOT cleared because no share reaches 0.15. The R-C3 reading
+    is the strictest possible: every pre-registered mechanism falls below the noise-floor threshold the phase_a author set
+    to be generous above mech_3''s REGISTERED-NULL expected ~0.'
+  reason_substantive: 'Mechanical and substantive verdicts AGREE on R-C3 firing, but the substantive picture is materially
+    stronger than the mechanical reading alone: two of the three explained_shares are NEGATIVE (variance_div = -0.114, seam
+    = -0.139), meaning the corresponding ablation fix MADE THE PIT CHI^2 WORSE rather than failing to improve it. The pre-registered
+    mechanism candidates are not just inadequate to capture the chi^2 -- two of three actively degrade calibration when ablated
+    as defined. This sharpens the verdict from ''Q2B candidate set inadequate'' to ''Q2B mechanism candidates were mis-specified
+    at the construction level''; the appropriate next-step amendment is therefore to re-design the mechanism set (e.g., two-sided
+    variance rescaling instead of one-sided cap; state-dependent rather than aggregate-h*daytype mean-bias subtraction), not
+    merely to expand the candidate pool. See verdict_reasoning findings #2 and #3 for the per-mechanism mechanism.'
+  chi2_baseline_M3:
+  - 961.96
+  - 698.61
+  - 1375.68
+  chi2_after_mean_bias_fix:
+  - 875.04
+  - 627.65
+  - 1213.67
+  chi2_after_variance_cap_fix:
+  - 1036.15
+  - 750.79
+  - 1512.26
+  chi2_after_seam_exclusion_fix:
+  - 1054.59
+  - 790.12
+  - 1464.07
+  explained_share_mean_bias:
+  - 0.1086
+  - -0.3927
+  - 0.735
+  explained_share_variance_div:
+  - -0.1135
+  - -0.2169
+  - -0.0129
+  explained_share_seam:
+  - -0.1389
+  - -0.1685
+  - -0.0884
+  share_denominator_frozen: 725.4
+  self_consistency:
+    Q2A_M3_chi2: 953.84
+    Q2B_recomputed: 961.96
+    abs_delta: 8.12
+    tolerance: 50.0
+    passed: true
+    note: Pipeline-drift sanity gate passed (delta 8.12 vs 50.0 tolerance). Q2B's M3 baseline reproduces Q2A's settled M3
+      chi^2 to within 0.85% on point estimate, well inside Q2A's bootstrap CI [685.23, 1356.92] and well below the phase_a
+      baselines.primary tolerance. Q2A-Q2B pipeline integrity confirmed.
+  sm_ensemble_vs_empirical_variance_summary:
+    note: 'Per secondary_results arrays per_h_day_type_smc_ensemble_variance vs per_h_day_type_empirical_variance, the SMC
+      ensemble variance is LESS than the empirical variance at virtually every (day_type, h) cell. Examples: weekday h=12:
+      SMC 0.402 vs emp 0.538; saturday h=12: SMC 0.559 vs emp 0.447 (one of the few cells where SMC > emp); sunday h=12: SMC
+      0.508 vs emp 0.707. Overall the iterated kappa_1 ensemble UNDER-DISPERSES relative to actuals at the marginal aggregation
+      level. The mech_2 one-sided variance cap is designed to fire only when SMC > emp; in this regime it almost never fires
+      correctly, and when it does fire (a minority of cells) it shrinks toward the ensemble mean further compressing a distribution
+      that already under-covers empirical spread -- degrading marginal PIT calibration. This is the mechanistic explanation
+      for explained_share_variance_div = -0.114.'
+  proponent_forecast:
+    outcome: R-A3
+    dominant_mechanism: mean_bias
+    explained_share_mean_bias: 0.75
+    explained_share_variance_div: 0.15
+    explained_share_seam: 0.0
+    chi2_after_mean_bias_fix: 409
+    chi2_after_variance_cap_fix: 845
+    chi2_after_seam_exclusion_fix: 954
+    confidence: 0.55
+    forecast_ci_mean_bias_share:
+    - 0.5
+    - 0.95
+    forecast_ci_variance_div_share:
+    - 0.05
+    - 0.3
+    forecast_ci_seam_share:
+    - 0.0
+    - 0.05
+    rationale_summary: 'Three lines: (a) +1000 MW MW-space gap from clim-gap-nonstationary maps to z-space first-moment offset
+      that mech_1''s per-(h, day_type) empirical bias subtraction should absorb majority of; (b) heavy-tailedness in kappa_1
+      INNOVATION not climatology means iterated variance non-trivial but well-behaved (mech_2 ~ 0.15); (c) production already
+      excludes seam-crossing iteration so mech_3 expected ~0.'
+  devils_advocate_forecast:
+    outcome: R-B3
+    dominant_mechanism: null
+    explained_share_mean_bias: 0.4
+    explained_share_variance_div: 0.35
+    explained_share_seam: 0.02
+    chi2_after_mean_bias_fix: 664
+    chi2_after_variance_cap_fix: 700
+    chi2_after_seam_exclusion_fix: 939
+    forecast_ci_mean_bias_share:
+    - 0.25
+    - 0.6
+    forecast_ci_variance_div_share:
+    - 0.2
+    - 0.55
+    forecast_ci_seam_share:
+    - 0.0
+    - 0.05
+    rationale_summary: MW-space-to-z-space translation attenuates the +1000 MW gap (kappa_1 fit in z-space against fixed pre-cutoff
+      climatology) so mech_1 does real but not dominant work (~0.40); iterated heavy-tailed variance under M3 mixture compounds
+      non-trivially over h=24 so mech_2 captures comparable share (~0.35); day-type asymmetry (Saturday 4x weekday chi^2,
+      family-invariant) not fully captured by mech_1 alone. R-B3 fires with neither mechanism dominant.
+  proponent_distance_from_result:
+    outcome_match: false
+    mean_bias_share_realized: 0.1086
+    mean_bias_share_forecast: 0.75
+    mean_bias_share_residual: 0.6414
+    inside_forecast_ci_mean_bias: false
+    forecast_ci_lower_bound: 0.5
+    overshot_by: 0.39
+    notes: 'Proponent wrong on outcome category (R-A3 vs realized R-C3); wrong on dominance (forecast mech_1 dominance at
+      0.75, observed mech_1 share 0.11 below the R-C3 threshold). Proponent''s explicit what_would_change_my_mind condition
+      #2 (R-C3 fires) materialized: ''If R-C3 fires (all shares < 0.15), none of the three pre-registered mechanisms is the
+      right level of decomposition. The substantive non-distributional content lives in covariates outside the Q2B candidate
+      set.'' That concession is now triggered. Proponent also wrong on mech_2 ordering (forecast +0.15, observed -0.11) and
+      on the ratio mech_1 vs mech_2 (forecast mech_1 dominant, observed mech_1 is the only positive share). On magnitude:
+      realized mean_bias share (0.11) is 0.64 below the proponent''s point forecast (0.75) and 0.39 below the proponent''s
+      CI lower bound (0.50). Decisively refuted.'
+  devils_advocate_distance_from_result:
+    outcome_match: false
+    mean_bias_share_realized: 0.1086
+    mean_bias_share_forecast: 0.4
+    mean_bias_share_residual: 0.2914
+    inside_forecast_ci_mean_bias: false
+    forecast_ci_lower_bound: 0.25
+    overshot_by: 0.14
+    notes: DA wrong on outcome category (R-B3 vs realized R-C3) but closer in magnitude than proponent on the mean_bias share
+      (0.11 vs forecast 0.40, a 0.29 residual; closer than proponent's 0.64 residual against 0.75). DA's explicit what_would_change_my_mind
+      condition that 'chi2_baseline_M3 self-consistency check fails' did NOT trigger (delta 8.1 well within tolerance). DA
+      was wrong on mech_2 share magnitude (forecast +0.35, observed -0.11) and on the joint mech_1+mech_2 picture (forecast
+      both contributing, observed mech_1 marginally positive and mech_2 negative). DA's registered-null forecast for mech_3
+      (~0.02) is closest to reality among the three forecasters' mech_3 numbers; realized mech_3 = -0.14 confirms the seam-exclusion
+      domain-restriction non-trivially degrades calibration (consistent with production already handling the seam correctly,
+      and the additional layer adding aggregation noise).
+  closer_forecast: devils_advocate
+  closer_forecast_notes: Neither forecaster predicted R-C3 as a central call; both decisively wrong on outcome category and
+    on mech_1 dominance. On the single continuous metric where the gap is meaningful (mech_1 explained_share), devils-advocate
+    at 0.40 is closer to realized 0.11 than proponent at 0.75 (residuals 0.29 vs 0.64). The phase_a-registered explained_share
+    CI on mean_bias is [-0.39, +0.74]; this CI spans ALL THREE outcome categories (R-C3 below 0.15, R-B3 in [0.15, 0.50],
+    R-A3 above 0.50). Under that measurement uncertainty the verdict cannot mechanically distinguish 'the pre-registered mechanism
+    set is wrong' from 'the pre-registered mechanism set is right and underpowered'; the negative shares for mech_2 and mech_3
+    (variance_div CI [-0.22, -0.01], seam CI [-0.17, -0.09]) are by contrast sign-determined at 95% with realized values strictly
+    NEGATIVE, which is a stronger signal than the mean_bias borderline-positive reading. The substantive finding rests primarily
+    on the two sign-determined negative shares plus the mech_1 point estimate sitting just below the R-C3 threshold; the mean_bias
+    CI alone would be underpowered.
+  outcome_category_winner: neither
+  outcome_category_winner_notes: 'Both forecasters wrong on the outcome category. Proponent forecast R-A3 (mech_1 dominant);
+    DA forecast R-B3 (no single dominant mechanism, shares mixed); realized is R-C3 (no mechanism captures > 15% of the gap).
+    This is the ''both forecasters in agreement that at least one mechanism does real work'' structural blind spot; neither
+    named R-C3 as central or as a what_would_change_my_mind contingency for direct ablation failure. The proponent listed
+    R-C3 as a what_would_change_my_mind condition; DA''s what_would_change_my_mind named the baseline self-consistency check
+    (which passed cleanly). Topic-difficulty calibration update: this is the fourth named-failure-mode instance in the workflow
+    (Q1 R-D vs R-C, eigenmodes-v1 O2 vs O3, P1 mechanical-AMBIGUOUS vs tautology, and now Q2B substantive negative-shares
+    beyond the R-C3 ''candidate set inadequate'' reading) where the registered criterion fires on a structure neither forecaster
+    anticipated. Q2B differs in that the mechanical and substantive verdicts AGREE on R-C3 firing; the substantive content
+    is ''stronger than mechanical'' (negative shares; mechanism mis-specification) rather than ''different from mechanical.''
+    This is a calibration data point for the workflow: the mechanical-vs-substantive gap pattern can run in EITHER direction
+    (substantive weaker, equal, or stronger than mechanical).'
+verdict: R-C3
+verdict_reasoning: "Mechanical verdict per phase_a.shape_outcomes.R-C3: R-C3 fires. max_m explained_share[m] = 0.109 (mean_bias)\
+  \ < 0.15. None of the three pre-registered mechanisms (iterated mean trajectory bias subtraction, iterated variance one-sided\
+  \ cap, day-anchor-seam aggregation-domain restriction) captures more than 15% of the gap between Q2A's settled chi^2_M3\
+  \ baseline (953.84) and the R-A2 corroboration cut (228.44).\n\nSubstantive findings the verdict carries (the verdict is\
+  \ R-C3 + the below; the negative-share content makes the substantive reading stronger than the mechanical reading rather\
+  \ than weaker as in Q1 and P1):\n\n1. R-C3 FIRES ON POINT ESTIMATE BUT UNDERPOWERED ON THE LEADING MECH.\n   The 95% paired-day-bootstrap\
+  \ CI on explained_share_mean_bias is\n   [-0.39, +0.74]. This CI spans all three outcome categories: it\n   includes R-C3\
+  \ (below 0.15), R-B3 (in [0.15, 0.50]), AND R-A3\n   (above 0.50). The point-estimate verdict R-C3 is what the\n   pre-registered\
+  \ criterion specifies, but a CI-based interpretation\n   alone cannot discriminate 'the pre-registered mechanism set is\n\
+  \   wrong' from 'the pre-registered mechanism set is right and\n   underpowered.' The verdict rests on the conjunction of\
+  \ (a) the\n   mean_bias point estimate sitting just below the 0.15 threshold,\n   AND (b) the two sign-determined negative\
+  \ shares (variance_div CI\n   [-0.22, -0.01], seam CI [-0.17, -0.09]) which DO discriminate.\n   Per arbiter.md ('If the\
+  \ proponent's forecast was within the\n   ambiguous region from the start, the experiment was underpowered'):\n   the proponent's\
+  \ forecast (R-A3 at mech_1 share 0.75) was outside\n   the ambiguous region but the realized CI on mech_1 is broad. Future\n\
+  \   ablation designs should either (i) tighten the CI (more days, more\n   particles, less noisy attribution definitions)\
+  \ or (ii) define\n   mechanisms whose share is naturally sign-determined.\n\n2. NEGATIVE SHARES ON MECH_2 AND MECH_3 ARE\
+  \ STRONGER THAN MERE\n   INADEQUACY. The mechanical R-C3 criterion ('no mechanism captures\n   > 15% of the gap') would\
+  \ be satisfied by small-positive shares; the\n   realized variance_div share -0.114 and seam share -0.139 (both\n   sign-determined\
+  \ at 95%) mean the corresponding ablation fixes\n   actively MADE CHI^2 WORSE. The mechanism candidates are not just\n \
+  \  the wrong size, they are mis-specified at the construction level.\n   The mechanistic reasons:\n\n   (2a) variance_div:\
+  \ per_h_day_type_smc_ensemble_variance <\n        per_h_day_type_empirical_variance at virtually every (day_type,\n    \
+  \    h) cell. The SMC ensemble UNDER-disperses relative to actuals.\n        The mech_2 fix is a ONE-SIDED CAP (rescale\
+  \ toward ensemble\n        mean only when sigma2_iter > sigma2_empirical). In a regime\n        where sigma2_iter < sigma2_empirical\
+  \ at almost all cells, the\n        cap almost never fires correctly, and at the minority of cells\n        where it does\
+  \ fire the data is in the tail where shrinking\n        an already-under-dispersed ensemble further degrades coverage.\n\
+  \        The correct mechanism is a TWO-SIDED variance rescaling that\n        ALSO scales up when sigma2_iter < sigma2_empirical,\
+  \ addressing\n        the dominant under-dispersion direction. The Q2B-as-specified\n        cap mechanism asks the wrong\
+  \ question.\n\n   (2b) seam: REGISTERED NULL confirmed with sign. Production already\n        excludes seam-crossing iteration\
+  \ via _complete_delivery_days;\n        layering an additional aggregation-domain row exclusion on the\n        already-clean\
+  \ output removes valid PIT samples and adds\n        aggregation noise. Realized -0.139 confirms the production\n      \
+  \  seam handling is correct and the layered diagnostic is\n        redundant. The seam result is not a finding about the\n\
+  \        marginal pathology, it is a finding about diagnostic\n        construction (and ratifies the proponent's expectation\
+  \ that\n        mech_3 ~ 0; the negative direction is a feature, not a bug).\n\n3. MECH_1 IS DIRECTIONALLY CORRECT BUT WEAKER\
+  \ THAN EITHER FORECASTER\n   ANTICIPATED. The mean_bias share is the only positive of the three\n   and the only one above\
+  \ zero in point estimate. The proponent's\n   clim-gap-nonstationary translation (MW-space +1000 MW gap maps to\n   z-space\
+  \ first-moment offset absorbed by mech_1 subtraction) is\n   not refuted in DIRECTION, only in MAGNITUDE: mech_1 does real\
+  \ work\n   (positive share) but the work is much smaller than the proponent's\n   0.75 dominance forecast. The DA's z-space\
+  \ attenuation concern\n   (failure mode #1, likelihood 0.45) is the closer of the two\n   priors to truth: the MW-space\
+  \ gap does not translate 1-to-1 to\n   z-space chi^2 dominance. The clim-gap-nonstationary signal\n   contributes < 15%\
+  \ of the gap as bounded by aggregate per-(h, day_type)\n   subtraction; richer subtraction designs (state-dependent, smoothed,\n\
+  \   weather-conditioned) may capture more but the aggregate ceiling at\n   ~0.11 share is a substantive upper bound on what\
+  \ aggregate mean-bias\n   ablation alone can do.\n\n4. PIPELINE INTEGRITY CONFIRMED. The self-consistency baseline check\n\
+  \   (Q2B M3 chi^2 = 961.96 vs Q2A settled M3 = 953.84) lands at\n   delta 8.12 well inside the 50.0 tolerance and inside\
+  \ the Q2A\n   bootstrap CI [685, 1357]. The Q2B re-fit of Q2A's M3 baseline\n   reproduces the upstream settled number to\
+  \ better than 1%. Q2A-Q2B\n   pipeline drift is not a concern; the Q2B verdict is not blocked\n   by upstream pipeline integrity.\n\
+  \nCalibration: BOTH forecasters wrong on the outcome category (proponent\nR-A3, DA R-B3, realized R-C3). On mech_1 share\
+  \ magnitude DA closer\n(residual 0.29 vs proponent 0.64); on outcome category neither was\nright but the proponent's what_would_change_my_mind\
+  \ condition #2\n('If R-C3 fires...') explicitly named R-C3 as a possible reading and\nthat concession is now triggered.\
+  \ The negative-share content is the\nsubstantive surprise: neither forecaster predicted that any mechanism\nablation would\
+  \ actively degrade calibration, even though both could have\nanticipated the under-dispersion direction from the same SMC\
+  \ ensemble\nvariance arrays that result.yaml reports as secondaries. This is a\ndecomposition-design lesson, not a forecasting\
+  \ failure."
+finding_status: SETTLED
+if_provisional_what_to_reaudit: []
+thread_state_update:
+  thread_topic: distributional-class-thread
+  node_id: Q2B
+  branch_fired: R-C3
+  next_node_id: null
+  sibling_branches_closed: []
+  thread_state_transition: pending_amendment
+  notes_for_thread_coordinator: "BLOCKING FOLLOW-UP per phase_a.shape_outcomes.R-C3: 'No pre-registered mechanism captures\
+    \ the chi^2. The marginal PIT pathology is irreducibly pathological under the Q2B candidate set; new candidates (weather,\
+    \ state-space dimension, day-type partition refinement) are needed via amendment.'\n\nQ2B was a leaf in the planned thread\
+    \ tree (branching_rules has no Q2B entry; same situation as Q2A's R-B2 which fired amendment A2 to reopen Q2B). Mechanical\
+    \ next_node_id is null; thread_state_transition is pending_amendment. The thread-coordinator MUST NOT silently advance\
+    \ to a sibling; doing so would be silent post-hoc routing (no Q2B entry to look up in branching_rules).\n\nSubstantive\
+    \ arbiter guidance for the amendment decision (the analyst decides, not the thread-coordinator):\n\n(a) THE NEGATIVE-SHARES\
+    \ SIGNATURE POINTS AT MECHANISM RE-DESIGN, NOT JUST CANDIDATE EXPANSION. The substantive finding (negative shares on mech_2\
+    \ and mech_3 with sign determined at 95%) is that the variance and seam mechanism candidates were mis-specified at the\
+    \ construction level. The amendment should consider:\n  (i) two-sided variance rescaling instead of the one-sided cap\
+    \ (addressing the under-dispersion direction which dominates the (day_type, h) array);\n  (ii) the seam mechanism is closed\
+    \ (REGISTERED NULL confirmed sign-determined negative, production handling correct, no further action needed);\n  (iii)\
+    \ mean-bias is directionally right but bounded at ~0.11 share under aggregate per-(h, day_type) subtraction; richer subtraction\
+    \ designs (state-dependent, weather-conditioned, secular-drift-conditioned) may extract more.\n\n(b) NEW CANDIDATE AXES\
+    \ THE Q2B CANDIDATE SET DID NOT INCLUDE. Per phase_a R-C3 interpretation: weather, state-space dimension, day-type partition\
+    \ refinement. The pit-calendar-fingerprint-p1 SETTLED-AMBIGUOUS finding (S5) identified year_since_cutoff (secular drift)\
+    \ as the strongest legitimate calendar signal in PIT residuals; secular-drift conditioning is a natural candidate axis.\
+    \ The eigenmodes-v1 SETTLED MIXED finding (S2/S3) shows structural weekday/weekend asymmetry; day-type partition refinement\
+    \ (e.g., saturday split from sunday, or business-day vs holiday) is another candidate.\n\n(c) THE Q2A FAMILY-INVARIANCE\
+    \ FINDING (#1 in Q2A arbiter verdict_reasoning) + Q2B's negative-share-on-variance-cap signature together suggest the\
+    \ remaining chi^2 has a non-distributional cause whose nature is UNDER-DISPERSION (the iterated kappa_1 ensemble does\
+    \ not span the empirical residual scale) not OVER-DISPERSION (which the mech_2 one-sided cap was designed to address).\
+    \ Under-dispersion is consistent with: (i) missing exogenous content (weather being the canonical Ontario candidate; cited\
+    \ as the most plausible exogenous driver in mitacs-postcovid-probe and consistently flagged as the lever in eigenmodes-v1);\
+    \ (ii) state-space dimension under-coverage (the kappa_1 operator is fit at d_max but iterated marginally without re-conditioning\
+    \ on state).\n\n(d) THE THREAD MAY ALSO BE DECLARED EXHAUSTED. The distributional-class thread's scope_limits explicitly\
+    \ state: 'This thread tests the PREDICTIVE-DISTRIBUTION CLASS axis only. It does NOT re-test missing-content (state-space\
+    \ dimension) questions under the corrected kernel; that is a separate follow-up thread if Q1 corroborates the kernel-family\
+    \ lift AND the v2 defect survives.' Q2B's R-C3 verdict empirically corroborates that the remaining chi^2 is OUTSIDE the\
+    \ distributional-class axis. The analyst may legitimately declare the thread exhausted and spawn a fresh thread on non-distributional\
+    \ content (weather, state-space dimension, secular drift) rather than amending the distributional-class thread to absorb\
+    \ a different research axis.\n\nEither reopen-with-amendment (e.g., new Q2E node with two-sided variance +weather-conditioned\
+    \ mean-bias mechanisms) OR declare exhausted-and-spawn are valid moves under the workflow; both require explicit user\
+    \ authorization and an amendment block in thread.yaml (or a new thread.yaml with a root reference to this arbiter)."
+follow_up:
+  required: true
+  reasoning: "Two parallel follow-up items:\n\n1. THREAD AMENDMENT OR EXHAUSTION (required for state advancement): per phase_a.shape_outcomes.R-C3\
+    \ and per the substantive findings #1-4 in verdict_reasoning. The thread is currently at current_node_id = Q2B, state\
+    \ = active. After this arbiter, Q2B.status -> settled; the thread state cannot mechanically advance because branching_rules\
+    \ has no Q2B entry (Q2B was leaf-of-leaf). The user must decide on the amendment direction (mechanism re-design via new\
+    \ node Q2E, non-distributional axis pivot via new node Q2F, or declare distributional-class thread exhausted and spawn\
+    \ a new thread on non-distributional content) before thread-coordinator can advance.\n\n2. MEMORY UPDATE (no blocker,\
+    \ recommended): SETTLED finding warrants a new memory file mitacs-q2b-non-distributional.md capturing:\n   - The numeric\
+    \ record (chi^2 baseline/after_fix, CIs, shares with sign-determined CIs for mech_2 and mech_3)\n   - Finding #2 (negative\
+    \ shares are stronger than mechanical R-C3: mechanism candidates mis-specified at construction level) -- this is the structurally\
+    \ important update\n   - Finding #1 (mean_bias CI [-0.39, +0.74] spans all 3 outcome categories; the verdict rests on\
+    \ the sign-determined negatives plus the borderline-positive point estimate, not the mean_bias CI alone) -- calibration\
+    \ note for ablation design\n   - Finding #3 (mech_1 is directionally correct but bounded at ~0.11 under aggregate per-(h,\
+    \ day_type) subtraction; richer designs may capture more) -- maps to amendment guidance (a)(iii)\n   - The under-dispersion\
+    \ signature (SMC ensemble variance < empirical variance at virtually every cell) -- substantive corroboration of 'non-distributional\
+    \ residual is under-dispersion' amendment guidance (c)\n   - Cross-link to mitacs-q1-student-t-vs-gaussian, mitacs-q2a-richer-family\
+    \ (the upstream settled findings) and mitacs-pit-calendar-fingerprint-p1 (the secular-drift hint).\n  NOTE: per workflow\
+    \ rules, memory update is performed by the user after settled findings; the arbiter declares memory_update_required =\
+    \ true and identifies the target file but does not write it."
+  proposed_phase_a: null
+calibration_record:
+  proponent_correct: false
+  devils_advocate_correct: false
+  topic_difficulty: hard
+  notes: 'Both forecasters wrong on the outcome category (proponent R-A3, DA R-B3, realized R-C3). On mech_1 share magnitude
+    DA is meaningfully closer (residual 0.29 vs proponent 0.64); on mech_2 share both wrong on sign (both predicted positive,
+    observed negative); on mech_3 both predicted near zero, observed sign-determined negative. The 95% CI on mech_1 share
+    spans all three outcome categories, so on a CI-based comparison the verdict is statistically borderline; the substantive
+    verdict rests on the sign-determined negative shares plus the borderline-positive mean_bias point estimate, not on the
+    mean_bias CI alone.
+
+
+    Fourth named-failure-mode instance (after Q1 R-D-vs-R-C, eigenmodes-v1 O2-vs-O3, P1 mechanical-AMBIGUOUS-vs-tautology):
+    the registered criterion fires on a structure neither forecaster anticipated. Q2B differs in DIRECTION: substantive verdict
+    is STRONGER than mechanical (mechanism candidates not just inadequate but mis-specified, with two shares actively negative
+    at 95%), rather than DIFFERENT from mechanical as in the prior three. The mechanical-vs-substantive gap pattern can run
+    in either direction; the workflow''s arbiter shape (mechanical-verdict-plus-substantive-content) accommodates both.
+
+
+    Forecaster blind spot worth noting: neither forecaster predicted that any mechanism ablation would actively DEGRADE calibration.
+    The proponent implicitly assumed all mechanism fixes are non-negative-share by construction (the implicit model is ''each
+    mechanism explains some fraction in [0, 1] of the chi^2''); the DA challenged the magnitudes but shared the non-negative
+    assumption. The realized negative shares on mech_2 (one-sided cap mis-specified given under-dispersion) and mech_3 (redundant
+    aggregation-domain restriction) are mechanism-design defects that both could have anticipated from the same SMC ensemble
+    variance arrays that the result.yaml reports as secondaries. Decomposition-design lesson: ablation share is not constrained
+    to [0, 1] in general; pre-registration should either (i) constrain mechanism definitions so share is sign-determined by
+    construction, or (ii) explicitly register the [-1, +1] range and treat negative shares as informative outcomes.'
+memory_update_required: true
+memory_update_target: '~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md
+
+  + add mitacs-q2b-non-distributional SETTLED R-C3 with the four substantive findings (R-C3 fires on point estimate but mean_bias
+  CI spans all three outcome categories -- verdict rests on sign-determined negatives; negative shares are stronger than mechanical
+  R-C3 -- mechanism candidates mis-specified at construction level; mech_1 directionally correct but bounded ~0.11 under aggregate
+  subtraction; under-dispersion signature corroborates non-distributional residual)
+
+  + cross-link from mitacs-q2a-richer-family and mitacs-q1-student-t-vs-gaussian
+
+  + flag for CLAUDE.md ''Settled findings since 2026-05-21'' section: add (S10) Q2B R-C3 with summary; flag distributional-class-thread
+  as pending-amendment-or-exhaustion-decision
+
+  + decomposition-design lesson for the workflow notes: ablation share is not constrained to [0, 1]; mechanism candidates
+  can be sign-determined negative when mis-specified; pre-registration should either constrain by construction or explicitly
+  register the [-1, +1] range'
+git_sha: 8479ea93f1fdee58b2733c01f8d567439cb16405
+git_clean: true
+body_sha256: 5a237eb6f43257c31650f1205d7335e250042b6286a5a4f3d6ead6af56cc8013
