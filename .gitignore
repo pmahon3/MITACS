@@ -51,6 +51,12 @@ scratch/data/postcovid/*.csv
 scratch/data/distributional_class_q2a/
 experiment/distributional_class_q2a/*.log
 
+# Q2B run scratch + log: same convention as Q2A above. Pickle is
+# regenerable; log content is recorded inside the .txt provenance
+# header. Both would otherwise dirty the tree during --emit-result.
+scratch/data/distributional_class_q2b/
+experiment/distributional_class_q2b/*.log
+
 # Experiment ledger: gitignored UNTIL a live collect run produces genuine
 # accrued forecasts/actuals. Current/offline-test contents are regenerable
 # placeholder rows, NOT the experiment record. Track it (remove this rule)
