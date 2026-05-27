@@ -1,0 +1,241 @@
+schema: phase_fidelity
+written_at: '2026-05-26T19:00:00-07:00'
+references:
+- file: phase_a.yaml
+  body_sha256: 91f69aeb13783bfa54adc45fa3b4da7fe81f9ea3ed984e5381dd281b10d7dd8e
+- file: result.yaml
+  body_sha256: 68d156a8b74b55d3a049a9b6f02d050c57189116ad4d05b0493df4707b95339e
+checked_by: phase-fidelity agent (.claude/agents/phase-fidelity.md), Check R
+purpose: 'Verify that result.yaml reports what phase_a registered for Q2B
+
+  (non-distributional-decomposition). BLOCKING precondition
+
+  (fidelity_coverage_passed) for the arbiter. Same Check R schema
+
+  the workflow added for Q2A (commit 4a91b07).
+
+  '
+primary_metric_match:
+  verdict: PASS
+  detail: 'phase_a.metric (verdict-metric definition): explained_share[m]
+
+    per mechanism m in {mean_bias, variance_div, seam} where
+
+    explained_share[m] = (chi2_baseline - chi2_after_fix[m]) /
+
+    (chi2_baseline - R_A2_cut), denominator 725.40 frozen.
+
+    result.yaml.primary_result.metric reports verbatim:
+
+    "explained_share[m] = (chi2_baseline - chi2_after_fix[m]) /
+
+    (chi2_baseline - R_A2_cut) for m in {mean_bias, variance_div,
+
+    seam}, denominator = 725.40 frozen" - matches.
+
+    '
+dependent_variables_coverage:
+  registered_count: 17
+  located_count: 17
+  per_variable:
+    chi2_baseline_M3:
+      verdict: PASS
+      location: primary_result.value.chi2_baseline_M3 = 961.957
+    chi2_after_mean_bias_fix:
+      verdict: PASS
+      location: primary_result.value.chi2_after_mean_bias_fix = 875.037
+    chi2_after_variance_cap_fix:
+      verdict: PASS
+      location: primary_result.value.chi2_after_variance_cap_fix = 1036.147
+    chi2_after_seam_exclusion_fix:
+      verdict: PASS
+      location: primary_result.value.chi2_after_seam_exclusion_fix = 1054.588
+    explained_share_mean_bias:
+      verdict: PASS
+      location: primary_result.value.explained_share_mean_bias = +0.1086
+    explained_share_variance_div:
+      verdict: PASS
+      location: primary_result.value.explained_share_variance_div = -0.1135
+    explained_share_seam:
+      verdict: PASS
+      location: primary_result.value.explained_share_seam = -0.1389
+    ci95_chi2_baseline_M3:
+      verdict: PASS
+      location: primary_result.ci_low/ci_high.chi2_baseline_M3 = [698.61, 1375.68]
+    ci95_chi2_after_mean_bias_fix:
+      verdict: PASS
+      location: primary_result.ci_low/ci_high.chi2_after_mean_bias_fix = [627.65,
+        1213.67]
+    ci95_chi2_after_variance_cap_fix:
+      verdict: PASS
+      location: primary_result.ci_low/ci_high.chi2_after_variance_cap_fix = [750.79,
+        1512.26]
+    ci95_chi2_after_seam_exclusion_fix:
+      verdict: PASS
+      location: primary_result.ci_low/ci_high.chi2_after_seam_exclusion_fix = [790.12,
+        1464.07]
+    ci95_explained_share_mean_bias:
+      verdict: PASS
+      location: primary_result.ci_low/ci_high.explained_share_mean_bias = [-0.3927,
+        +0.7350]
+    ci95_explained_share_variance_div:
+      verdict: PASS
+      location: primary_result.ci_low/ci_high.explained_share_variance_div = [-0.2169,
+        -0.0129]
+    ci95_explained_share_seam:
+      verdict: PASS
+      location: primary_result.ci_low/ci_high.explained_share_seam = [-0.1685, -0.0884]
+    per_h_day_type_empirical_mean_bias:
+      verdict: PASS
+      location: 'secondary_results[0] = per_h_day_type_empirical_mean_bias; per-day-type
+
+        arrays {weekday, saturday, sunday}, length 24 each (h=1..24); z-units;
+
+        computed from post-cutoff actuals (attribution-only).
+
+        '
+    per_h_day_type_empirical_variance:
+      verdict: PASS
+      location: 'secondary_results[1] = per_h_day_type_empirical_variance; per-day-type
+
+        arrays {weekday, saturday, sunday}, length 24 each; z^2-units; sample
+
+        variance of post-cutoff actuals.
+
+        '
+    per_h_day_type_smc_ensemble_variance:
+      verdict: PASS
+      location: 'secondary_results[2] = per_h_day_type_smc_ensemble_variance; per-day-type
+
+        arrays {weekday, saturday, sunday}, length 24 each; z^2-units; mean over
+
+        post-cutoff days of per-issue ensemble variance at h.
+
+        '
+ci_method_match:
+  verdict: PASS
+  detail: 'phase_a.ci_method: type = paired_day_bootstrap, details = "1000 paired-day
+
+    bootstrap resamples of post-cutoff delivery days. Per resample, recompute
+
+    chi^2_baseline and chi^2_after_fix[m] for m in {mean_bias, variance_div, seam}
+
+    from the resampled day population, and compute explained_share[m] per resample
+
+    using the same denominator constant 725.40 (953.84 - 228.44). Report 95%
+
+    percentile CI on every chi^2 and every explained_share."
+
+    result.yaml.primary_result.ci_method_actually_used = paired_day_bootstrap_n=1000
+
+    matches. Per-resample explained_share denominator held at frozen constant
+
+    (script + .txt confirm denominator 725.4000000000001 in pre_registered_constants).
+
+    '
+independent_variable_stratifications:
+  per_variable:
+    mechanism:
+      verdict: PASS
+      detail: 'Three mechanisms (mean_bias, variance_div, seam) each reported as a
+
+        separate chi^2_after_fix column and a separate explained_share column,
+
+        each with paired-day bootstrap CIs.
+
+        '
+    day_type:
+      verdict: PASS-WITH-NOTE
+      detail: 'day_type stratification IS covered for the three pre-registered
+
+        per-cell array secondaries (per_h_day_type_empirical_mean_bias,
+
+        per_h_day_type_empirical_variance, per_h_day_type_smc_ensemble_variance),
+
+        each broken out as {weekday, saturday, sunday}.
+
+
+        phase_a''s metric block SECONDARY bullet "chi^2_after_fix[m] stratified
+
+        by day_type" is a phase_a-registered SECONDARY observation
+
+        ("sanity-check; not part of the verdict"), NOT listed in
+
+        variables.dependent. Per the Check R contract this is therefore NOT
+
+        a blocker; same posture as Q2A''s per-day-type chi^2 (Q2A''s Check R
+
+        artifact noted the parallel structure: PASS-WITH-NOTE).
+
+
+        Per-day-type chi^2_after_fix values are recoverable from
+
+        scratch/data/distributional_class_q2b/q2b.pkl (per-cell PIT tables)
+
+        and could be inline-recomputed by the arbiter for substantive
+
+        reasoning if useful. Day-type asymmetry is the dominant signal at
+
+        Q2A (saturday ~4x weekday chi^2; eigenmodes-v1 corroborated) so the
+
+        arbiter is encouraged to reach into the pickle for substantive
+
+        content; this is not a Check R deficiency.
+
+        '
+shape_outcomes_evaluable:
+  verdict: PASS
+  detail: "phase_a.shape_outcomes:\n  R-A3: max_m explained_share[m] > 0.50 AND max_m\
+    \ > 2x second_m\n  R-B3: NOT R-A3 AND NOT R-C3\n  R-C3: max_m explained_share[m]\
+    \ < 0.15\nReported explained_share values: mean_bias = +0.1086, variance_div =\n\
+    -0.1135, seam = -0.1389. max share = 0.1086 (mean_bias) < 0.15 fires\nR-C3. result.yaml's\
+    \ primary_result.outcome_verdict = R-C3 derivable\nfrom the numeric content alone;\
+    \ pre-computed verdict label included\nfor arbiter convenience.\n"
+aggregate_verdict: PASS
+fidelity_coverage_passed: true
+notes_for_arbiter: "Check R: PASS. All 17 phase_a dependent variables present in result.yaml\n\
+  (14 in primary_result, 3 per-cell arrays in secondary_results). Primary\nmetric\
+  \ definition matches phase_a verbatim. ci_method matches\n(paired_day_bootstrap\
+  \ n=1000). Shape outcomes evaluable from numerics\nalone; primary_result.outcome_verdict\
+  \ = R-C3 derivable independently.\n\nday_type stratification: per phase_a, the three\
+  \ per_h_day_type_* arrays\nARE in variables.dependent and ARE reported (PASS). The\
+  \ \"chi^2_after_fix[m]\nstratified by day_type\" phrase in phase_a's metric prose\
+  \ is a registered\nSECONDARY observation, not in variables.dependent; recoverable\
+  \ from the\npickle but not tabulated in result.yaml. Same posture as Q2A's per-day-type\n\
+  chi^2 (Q2A Check R: PASS-WITH-NOTE). NOT a Check R deficiency.\n\nSubstantively\
+  \ notable content the arbiter should surface (derivable from\nreported numerics\
+  \ alone):\n  1. ALL three explained_shares well below the R-A3 dominance bar (0.50)\n\
+  \     and the R-A3-or-R-B3 threshold (0.15). R-C3 fires by the strictest\n     interpretation:\
+  \ no pre-registered mechanism captures even 15% of\n     the gap.\n  2. TWO of three\
+  \ shares are NEGATIVE (variance_div = -0.114, seam =\n     -0.139). Negative share\
+  \ = the mechanism's \"fix\" made chi^2 WORSE.\n     This is informative beyond mere\
+  \ R-C3 firing: the pre-registered\n     mechanism candidates are not just inadequate,\
+  \ two of them actively\n     degrade calibration when ablated as defined.\n  3.\
+  \ The variance_cap (one-sided: only scales DOWN when iter > emp)\n     has a negative\
+  \ share because the SMC ensemble variance is typically\n     LESS than the empirical\
+  \ variance (visible in the two secondary_results\n     arrays - compare per_h_day_type_smc_ensemble_variance\
+  \ to\n     per_h_day_type_empirical_variance, almost entirely SMC < empirical).\n\
+  \     The mechanism as defined is dominated by under-dispersion. A\n     two-sided\
+  \ variance rescale would be a different test.\n  4. The seam mechanism (REGISTERED\
+  \ NULL per phase_a) confirms\n     non-trivially: the seam-domain row exclusion\
+  \ makes the marginal\n     MORE pathological. Consistent with \"production already\
+  \ handles\n     the seam properly; restricting aggregation on top adds noise.\"\n\
+  \  5. Day-type pattern in per_h_day_type_empirical_mean_bias arrays:\n     saturday\
+  \ has the deepest empirical bias trough (-0.997 at h=8)\n     and the longest sustained\
+  \ negative-bias period; weekday and sunday\n     have shallower troughs. Strong\
+  \ saturday signal, consistent with\n     Q2A Finding #2 (saturday 4x weekday chi^2).\n\
+  \nProvenance note: result.yaml carries git_clean: false because the\ninline registry.stamp()\
+  \ at script run time fired when the sibling\nCLAIM-GRADE .txt was freshly written\
+  \ and untracked. Q2A used a\nseparate post-write stamping commit which is why Q2A's\
+  \ result.yaml\nhas git_clean: true. The canonical cleanliness witness for the\n\
+  artifact is the .txt's own make_result() header which records\ngit_clean: true at\
+  \ git_sha 194468a (the script-fix commit, parent\nof the re-run commit eb34beb).\
+  \ The .txt's inputs_fingerprint\n986abee0aaaad1bf... references the correct post-sign-fix\
+  \ phase_a\nhash 91f69aeb (which result.yaml also references). Registry verify\n\
+  reports chain verified post-eb34beb. result_from_clean_tree is true\nin substance;\
+  \ the git_clean: false in result.yaml is the inline-stamp\npattern, not a tree-state\
+  \ defect. Arbiter records\nresult_from_clean_tree: true with this caveat.\n\nArbiter\
+  \ precondition fidelity_coverage_passed: true.\n"
+git_sha: eb34beb148ff04b149ad3a70f17b04fe9382b543
+git_clean: true
+body_sha256: e2c3b82900959bb8f77c992c4667626192a723cd62255741f61c864b49619e88
