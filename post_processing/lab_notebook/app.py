@@ -55,10 +55,13 @@ DEFAULT_MEMORY = Path(
 ).expanduser()
 
 
+TAB_HOME = "home"
 TAB_LAB = "lab"
 TAB_REGISTRY = "registry"
 TAB_NOTES = "notes"
 TAB_WRITEUPS = "writeups"
+
+DEFAULT_ACTIVE_TAB = TAB_HOME
 
 
 # ---------------------------------------------------------------------------
@@ -91,6 +94,12 @@ def build_app(
     memory_by_name = {m.name: m for m in corpus.memory}
     writeups_by_name = {w.name: w for w in corpus.writeups}
 
+    # Key sets passed to detail components so they can render
+    # cross-tab nav-links and resolve / mute slugs accordingly.
+    registry_keys: set[str] = set(registry_by_name.keys())
+    memory_keys: set[str] = set(memory_by_name.keys())
+    writeup_keys: set[str] = set(writeups_by_name.keys())
+
     app = Dash(__name__, title="MITACS Lab Notebook", suppress_callback_exceptions=True)
 
     # ---- PDF route on the underlying Flask server.
@@ -113,14 +122,15 @@ def build_app(
     app.layout = html.Div(
         style=ui.PAGE_STYLE,
         children=[
-            ui.header_bar(active_tab=TAB_LAB),
+            ui.header_bar(active_tab=DEFAULT_ACTIVE_TAB),
             html.Div(
                 style=ui.CONTAINER_STYLE,
                 children=[
                     dcc.Tabs(
                         id="tabs",
-                        value=TAB_LAB,
+                        value=DEFAULT_ACTIVE_TAB,
                         children=[
+                            dcc.Tab(label="Home", value=TAB_HOME),
                             dcc.Tab(label="Lab", value=TAB_LAB),
                             dcc.Tab(label="Registry", value=TAB_REGISTRY),
                             dcc.Tab(label="Notes", value=TAB_NOTES),
@@ -193,11 +203,24 @@ def build_app(
         sel_notes: str | None,
         sel_writeups: str | None,
     ):  # noqa: ANN202
+        if tab == TAB_HOME:
+            return ui.home_panel(
+                corpus,
+                registry_keys=registry_keys,
+                memory_keys=memory_keys,
+                writeup_keys=writeup_keys,
+            )
+
         if tab == TAB_LAB:
             sidebar = ui.sessions_sidebar(corpus, sel_lab)
             entry = sessions_by_id.get(sel_lab) if sel_lab else None
             main = (
-                ui.session_detail(entry)
+                ui.session_detail(
+                    entry,
+                    registry_keys=registry_keys,
+                    memory_keys=memory_keys,
+                    writeup_keys=writeup_keys,
+                )
                 if entry is not None
                 else _placeholder("Select a session entry from the left.")
             )
@@ -207,7 +230,7 @@ def build_app(
             sidebar = ui.registry_sidebar(corpus, sel_registry)
             entry = registry_by_name.get(sel_registry) if sel_registry else None
             main = (
-                ui.registry_detail(entry)
+                ui.registry_detail(entry, registry_keys=registry_keys)
                 if entry is not None
                 else _placeholder("Select a registry entry from the left.")
             )
@@ -248,9 +271,10 @@ def build_app(
 
 
 def _wire_selection_callbacks(app: Dash, corpus: LoadedCorpus) -> Dash:
-    """Pattern-matching callbacks for sidebar clicks. One callback per
-    tab's selection store; no duplicate outputs needed."""
-    from dash import ALL, ctx
+    """Pattern-matching callbacks for sidebar clicks + cross-tab
+    navigation. One callback per tab's selection store, plus a single
+    nav-link dispatcher that may write to any sel-* + the active tab."""
+    from dash import ALL, ctx, no_update
 
     @app.callback(
         Output("sel-lab", "data"),
@@ -294,6 +318,55 @@ def _wire_selection_callbacks(app: Dash, corpus: LoadedCorpus) -> Dash:
         if not ctx.triggered_id or not any(_clicks or []):
             raise PreventUpdate
         return ctx.triggered_id["id"]
+
+    # ---- Cross-tab navigation dispatcher.
+    # A single ``nav-link`` button carries a structured pattern id
+    # ``{"type":"nav-link","target_tab":...,"target_id":...}``. Clicking
+    # it switches the active tab and writes the target into that tab's
+    # selection store. All four sel-* outputs are duplicates of outputs
+    # set by the per-tab click handlers above; Dash requires
+    # ``allow_duplicate=True`` + ``prevent_initial_call=True`` for this.
+    @app.callback(
+        Output("tabs", "value", allow_duplicate=True),
+        Output("sel-lab", "data", allow_duplicate=True),
+        Output("sel-registry", "data", allow_duplicate=True),
+        Output("sel-notes", "data", allow_duplicate=True),
+        Output("sel-writeups", "data", allow_duplicate=True),
+        Input(
+            {"type": "nav-link", "target_tab": ALL, "target_id": ALL},
+            "n_clicks",
+        ),
+        prevent_initial_call=True,
+    )
+    def _on_nav_link(_clicks):  # noqa: ANN202
+        if not ctx.triggered_id:
+            raise PreventUpdate
+        clicks_list = _clicks if isinstance(_clicks, list) else [_clicks]
+        if not any(c or 0 for c in clicks_list):
+            raise PreventUpdate
+        tid = ctx.triggered_id
+        target_tab = tid.get("target_tab")
+        target_id = tid.get("target_id")
+        if not target_tab:
+            raise PreventUpdate
+
+        # Default: don't touch any sel-* store unless this click
+        # targets it. The clicked tab's sel store gets the target id.
+        sel_lab = no_update
+        sel_registry = no_update
+        sel_notes = no_update
+        sel_writeups = no_update
+
+        if target_tab == TAB_LAB:
+            sel_lab = target_id
+        elif target_tab == TAB_REGISTRY:
+            sel_registry = target_id
+        elif target_tab == TAB_NOTES:
+            sel_notes = target_id
+        elif target_tab == TAB_WRITEUPS:
+            sel_writeups = target_id
+
+        return target_tab, sel_lab, sel_registry, sel_notes, sel_writeups
 
     return app
 
