@@ -1,0 +1,92 @@
+schema: phase_fidelity
+written_at: '2026-05-27T21:30:00-07:00'
+references:
+- file: phase_a.yaml
+  body_sha256: f427552392b0699aa761ed43d74c20cd4f938c9b949abd4c6e38de10ae6c9327
+checked_by: phase-fidelity agent (.claude/agents/phase-fidelity.md), Check R
+purpose: 'Verify that the P1 result artifact (experiment/results/p1_patra_sen.txt; CLAIM-GRADE provenance envelope; .txt suffix per make_result convention) reports what phase_a registered for P1 (patra-sen-per-stratum-localization). BLOCKING precondition (fidelity_coverage_passed) for the arbiter. Same Check R schema established for Q2A/Q2B.
+
+  '
+artifact_format_note: 'The result artifact lives at experiment/results/p1_patra_sen.txt rather than result.yaml inside the entry directory. Reason: P1 used the provenance.make_result() emitter (same as C1/C2/C3/C4/C5 CLAIM-GRADE artifacts) which writes a provenance-wrapped text document with a JSON header carrying the inputs dict, then a human-readable body. The header''s "inputs" dict is the structured numeric content of the registered dependent variables; the body is the human-readable rendering. Both are surfaces this Check R can inspect for coverage. phase_a does not pin the artifact suffix; the .txt is consistent with the CLAIM-GRADE convention.
+
+  '
+primary_metric_match:
+  verdict: PASS
+  detail: 'phase_a.metric (verdict-metric definition): for each of 5 stratification axes, range_axis = max(alpha_L_point) - min(alpha_L_point) across that axis''s strata; the verdict metric is max_axis(range_axis); verdict outcome R-A/B/C determined against thresholds 0.20 / 0.10.
+
+    Result inputs.max_axis_range = 0.575 and body line "verdict statistic: max_axis range = 0.5750  (binding axis: stratum_hour_of_week)" report this metric directly. The five per-axis ranges in inputs.per_axis_range_point are the inputs to the max; ranges 0.0750, 0.4850, 0.1350, 0.3450, 0.5750 confirm max selection over the registered 5-axis set.
+
+    '
+dependent_variables_coverage:
+  registered_count: 7
+  located_count: 7
+  per_variable:
+    alpha_L_per_stratum_per_axis:
+      verdict: PASS
+      location: 'inputs.per_axis_point (dict, 5 axes -> stratum -> alpha_L_point); body section "per-axis range and per-stratum alpha_L" prints all 21 per-stratum point estimates. Stratum counts match phase_a: demand_quantile=3, time_of_day=4, season=3, day_type=3, hour_of_week=8 (total 21).
+
+        '
+    range_alpha_L_per_axis:
+      verdict: PASS
+      location: 'inputs.per_axis_range_point (dict, 5 axes -> range scalar): demand_quantile=0.0750, time_of_day=0.4850, season=0.1350, day_type=0.3450, hour_of_week=0.5750. Body section prints "range = ..." per axis.
+
+        '
+    ci95_alpha_L_per_stratum:
+      verdict: PASS
+      location: 'inputs.per_stratum_ci (nested dict, 5 axes -> stratum -> [lo, hi]); all 21 strata have percentile CIs from 1000-resample paired-day bootstrap.
+
+        '
+    ci95_range_alpha_L_per_axis:
+      verdict: PASS
+      location: 'inputs.per_axis_range_ci (dict, 5 axes -> [lo, hi]): demand_quantile=[0.0225, 0.1726], time_of_day=[0.3850, 0.5775], season=[0.0550, 0.2400], day_type=[0.2500, 0.4301], hour_of_week=[0.4475, 0.6475]. Body section prints "range = ... [lo, hi]" per axis.
+
+        '
+    alpha_L_marginal:
+      verdict: PASS
+      location: 'inputs.alpha_L_marginal = 0.4125 (scalar). Body section "marginal alpha_L (full pool, INSPECTION-ONLY per phase_a baselines):" reports the same value. Per phase_a baselines.primary this is INSPECTION-ONLY context, not part of the verdict.
+
+        '
+    binding_axis:
+      verdict: PASS
+      location: 'inputs.binding_axis = "stratum_hour_of_week"; body line "binding axis: stratum_hour_of_week" and the inline marker "<- binding" on the hour_of_week block confirm. Matches argmax_axis range_axis (0.5750 over the other four ranges 0.4850, 0.3450, 0.1350, 0.0750).
+
+        '
+    binding_axis_strata_ranking:
+      verdict: PASS
+      location: 'Recoverable from inputs.per_axis_point["stratum_hour_of_week"] sorted by alpha_L value, and EXPLICITLY printed in the body section in descending order: hour-of-week strata 6 (alpha_L=0.6100), 5 (0.5475), 7 (0.5450), 2 (0.2700), 4 (0.2075), 3 (0.1775), 1 (0.1250), 0 (0.0350). Phase_a''s metric note "Per-axis full strata ranking table for use by Q1A''s Z construction" is satisfied: the binding-axis ranking is unambiguously read off the result, and per-axis full rankings for the other four axes are recoverable from per_axis_point (each axis''s strata are sortable by alpha_L_point).
+
+        '
+ci_method_match:
+  verdict: PASS
+  detail: 'phase_a.ci_method: type = paired_day_bootstrap, details = "1000 paired-day bootstraps of post-cutoff days. Per resample: recompute alpha_L per stratum per axis, recompute range_axis. Report 95% percentile CI on each alpha_L and each range." Width = 95 percent percentile interval.
+
+    Result inputs.n_bootstrap = 1000; reproducibility.seeds carries paired_day_bootstrap = 20260527; body header line "bootstrap: n_bootstrap = 1000"; per-stratum CIs and per-axis-range CIs are present as percentile intervals. The "95% percentile" width is implicit in the CI numerics (per_stratum_ci values consistent with percentile bounds, not parametric). MATCH.
+
+    '
+independent_variable_stratifications:
+  per_variable:
+    stratification_axis:
+      verdict: PASS
+      detail: 'Phase_a declares 5 axes (demand_quantile, time_of_day, season, day_type, hour_of_week). All 5 appear as top-level keys in inputs.per_axis_point, inputs.per_axis_range_point, inputs.per_axis_range_ci, and inputs.per_stratum_ci. Body section prints all 5 axes verbatim.
+
+        '
+    stratum:
+      verdict: PASS
+      detail: 'Phase_a declares per-axis strata: demand_quantile=3 (low/medium/ high), time_of_day=4 (overnight/morning_ramp/afternoon/evening), season=3 (winter/summer/shoulder), day_type=3 (weekday/saturday/ sunday), hour_of_week=8 (168/21=8 bins).
+
+        Result reports all 21 strata in inputs.per_axis_point and inputs.per_stratum_ci. Stratum labels match phase_a exactly for the four named axes; hour_of_week strata are integer-indexed 0-7 (np.int64 in body) matching the 8-bin specification.
+
+        '
+shape_outcomes_evaluable:
+  verdict: PASS
+  detail: "phase_a.shape_outcomes:\n  R-A: max over 5 axes of range(alpha_L) > 0.20\n  R-B: max range in (0.10, 0.20]\n  R-C: max range < 0.10 (all 5 axes approximately constant)\nReported: max_axis_range = 0.5750 (point); per_axis_range_ci for the\nbinding axis hour_of_week = [0.4475, 0.6475]. Both the point estimate\n(0.5750) and the lower CI bound (0.4475) clear the R-A cut (0.20) by\n>2x, and the upper CI bound of the second-largest axis (time_of_day:\n[0.3850, 0.5775]) also exceeds 0.20. R-A is fired unambiguously; the\nresult body records the precomputed verdict label \"R-A\" for arbiter\nconvenience. Shape outcomes evaluable from inputs.per_axis_range_point\n+ inputs.per_axis_range_ci alone.\n"
+aggregate_verdict: PASS
+fidelity_coverage_passed: true
+notes_for_arbiter: "Check R: PASS. All 7 phase_a dependent variables present in the result artifact (experiment/results/p1_patra_sen.txt). Primary\nmetric (max_axis(range_axis)) matches phase_a verbatim. ci_method\nmatches (paired_day_bootstrap n=1000, 95% percentile). Shape outcomes\nevaluable from numerics alone; verdict label R-A is derivable\nindependently (max = 0.575 > 0.20; lower CI bound 0.4475 also > 0.20).\n\nSubstantively notable content the arbiter should surface (all derivable\nfrom reported numerics alone):\n\n  1. R-A fires by a wide margin. max_axis_range = 0.5750 with lower CI\n     0.4475 is >2x the R-A cut (0.20). hour_of_week is the binding\n     axis but time_of_day is a close second (range = 0.4850, CI\n     [0.3850, 0.5775]) - both clear R-A even at the lower CI bound.\n     Demand_quantile (range 0.0750, CI [0.0225, 0.1726]) is the only\n     axis whose point estimate falls below the R-A threshold; its upper\n     CI bound (0.1726) is below 0.20. Three axes (time_of_day,\n     day_type, hour_of_week) clear R-A at LOWER CI bound; season\n     (point 0.1350, CI [0.0550, 0.2400]) straddles R-B/R-A.\n\n  2. binding axis is hour_of_week, not season. Proponent's pre-registered\n     pick was season (\"R-A fires with the season axis binding at range\n     ~0.30, driven by temperature being the most plausible missing Z\").\n     Devil's-advocate predicted R-C (all axes range < 0.10). Observed:\n     hour_of_week range = 0.5750, season range = 0.1350. Proponent gets\n     R-A directionally right but the wrong axis (season is in fact one\n     of the WEAKER axes by range, ranked 4th of 5); devil's-advocate is\n     falsified across the board (4/5 axes have range >= 0.13, well above\n     the 0.10 R-C ceiling). Per phase_a.corroboration_criterion this is\n     R-A: \"binding axis becomes Q1A's conditioning variable.\"\n\n  3. Binding-axis strata ranking on hour_of_week (the Z-construction\n     pointer for Q1A): strata 6/5/7 (alpha_L = 0.61/0.55/0.55) carry the\n     non-Gaussian mass; strata 0/1 (alpha_L = 0.04/0.13) are essentially\n     Gaussian. With 8 bins of 21 hours each, stratum 0 = hours 0-20\n     (Mon 00:00 through Mon 20:00), stratum 6 = hours 126-146 (Sat\n     06:00 through Sun 02:00), stratum 7 = hours 147-167 (Sun 03:00\n     through Sun 23:00). The heaviest-tail strata cluster on\n     weekend/late-week hours - independently corroborating\n     eigenmodes-v1 (S2/S3) weekday/weekend asymmetry and Q2A Finding #2\n     (saturday 4x weekday chi^2). day_type axis point estimates also\n     show the saturday > sunday > weekday ordering (0.6475 / 0.4850 /\n     0.3025) at the day-type aggregation.\n\n  4. time_of_day axis shows a clean overnight-vs-rest contrast:\n     overnight=0.1125 vs afternoon=0.5975/morning_ramp=0.5825/\n     evening=0.4750. The signature is consistent with hour-of-week:\n     the lightest-tail hours within the day correspond to the\n     lightest-tail bins of the week (overnight ~ Mon-Fri 0-5).\n\n  5. alpha_L_marginal = 0.4125 is in the qualifier-exhaustion-memo's\n     0.49-0.74 range only at the low end and below it. Per phase_a\n     baselines this is INSPECTION-ONLY (different null than the prior\n     0.49-0.74 was stamped under) and does NOT carry verdict weight. The\n     interesting fact is the gap between marginal (0.4125) and binding\n     stratum (alpha_L_point up to 0.6475 for saturday on the day_type\n     axis, up to 0.6100 on the binding axis at hour_of_week stratum 6):\n     stratification reveals contamination concentrated where the marginal\n     averages it down.\n\n  6. Verdict R-A routes per phase_a.shape_outcomes to Q1A (Z-conditioning\n     experiment using the strongest axis). Phase_a names hour_of_week\n     as the Q1A axis-of-record only if it binds; it does. The thread\n     resolution-paths (3fe357..) carries the branching_rules; arbiter\n     should confirm Q1A invocation against thread skeleton.\n\nArbiter precondition fidelity_coverage_passed: true.\n\n\nProvenance note: this phase_fidelity_check_r.yaml carries git_clean: false\nbecause the result artifact experiment/results/p1_patra_sen.txt was freshly\nwritten (untracked) at the time this file was stamped. Same inline-stamp\npattern documented in Q2B's Check R artifact. The canonical cleanliness\nwitness for the artifact is the .txt's own make_result() header which\nrecords git_clean: true at git_sha 3c3e2e0c947ab77a3bcaea14f36df841a22af632.\nThe result artifact's inputs_fingerprint b7d6466321e2f4a5... and\nfrozen_spec_hash f0dd9c8795fda781... pin the run state. Registry verify\nmust report chain verified once both files are tracked. The\ngit_clean: false in this Check R yaml is the inline-stamp pattern, not a\ntree-state defect. Arbiter records result_from_clean_tree: true with\nthis caveat.\n\nreferences[] structure note: this Check R yaml's references[] block\ncontains only phase_a.yaml (the YAML artifact the registry verifier\ncan follow). The result artifact (experiment/results/p1_patra_sen.txt)\nis a make_result() CLAIM-GRADE provenance envelope, not a YAML file;\nits body_sha256 (103396f5...) is pinned in the sibling\nresult_artifact_pin field, which is body-hashed into this file and\ntherefore equally tamper-evident. Q2A and Q2B's Check R yamls\nreferenced an entry-local result.yaml sidecar; P1 emits the .txt\ndirectly via make_result() with no sidecar, so the pin lives in a\ntop-level field rather than references[]. Substance is identical\n(both hashes pinned in a tamper-evident location); only the chain-\nverifiability surface differs.\n"
+git_sha: 3c3e2e0c947ab77a3bcaea14f36df841a22af632
+git_clean: false
+result_artifact_pin:
+  file: ../../experiment/results/p1_patra_sen.txt
+  body_sha256: 103396f50ebfbe05868b7b27eb69277b16cb761cc9d93ff298ebff1e6f36ac96
+  note: 'The P1 result artifact is the CLAIM-GRADE provenance envelope experiment/results/p1_patra_sen.txt (make_result() output, not a YAML file). Its body_sha256 lives inside the <<<PROVENANCE...>>> JSON header. The registry verifier (registry.py:212-261) only walks references[] for YAML files with top-level body_sha256, so the .txt cannot be a references[] entry. Pinned here instead: this field is body-hashed into THIS file''s body_sha256 and therefore tamper-evident. To re-verify the .txt independently, use experiment.provenance.load_verified_result() which recomputes the body hash against the in-header value.'
+body_sha256: cee50b4524b243cfa15c22e65d4222c0af40b7448e827b9455343a8fe9bf32a1

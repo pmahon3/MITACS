@@ -1,0 +1,232 @@
+<<<PROVENANCE
+{
+  "body_sha256": "103396f50ebfbe05868b7b27eb69277b16cb761cc9d93ff298ebff1e6f36ac96",
+  "generated_utc": "2026-05-27T21:17:19+00:00",
+  "git_clean": true,
+  "git_sha": "3c3e2e0c947ab77a3bcaea14f36df841a22af632",
+  "grade": "CLAIM-GRADE",
+  "inputs_fingerprint": "b7d6466321e2f4a5d5a6703dedd5044329e591606447db8c14e92dec5b58e26c",
+  "reproducibility": {
+    "frozen_spec_hash": "f0dd9c8795fda781fa8cab80ddd9ec9fb844af284cdb3077c0d1116b13e0536d",
+    "git_sha": "3c3e2e0c947ab77a3bcaea14f36df841a22af632",
+    "inputs": {
+      "alpha_L_marginal": 0.41250000000000003,
+      "binding_axis": "stratum_hour_of_week",
+      "max_axis_range": 0.575,
+      "n_bootstrap": 1000,
+      "n_days": 500,
+      "n_rows": 12000,
+      "per_axis_point": {
+        "stratum_day_type": {
+          "saturday": 0.6475,
+          "sunday": 0.485,
+          "weekday": 0.3025
+        },
+        "stratum_demand_quantile": {
+          "high": 0.41000000000000003,
+          "low": 0.335,
+          "medium": 0.385
+        },
+        "stratum_hour_of_week": {
+          "0": 0.035,
+          "1": 0.125,
+          "2": 0.27,
+          "3": 0.1775,
+          "4": 0.20750000000000002,
+          "5": 0.5475,
+          "6": 0.61,
+          "7": 0.545
+        },
+        "stratum_season": {
+          "shoulder": 0.4525,
+          "summer": 0.36,
+          "winter": 0.3175
+        },
+        "stratum_time_of_day": {
+          "afternoon": 0.5975,
+          "evening": 0.47500000000000003,
+          "morning_ramp": 0.5825,
+          "overnight": 0.1125
+        }
+      },
+      "per_axis_range_ci": {
+        "stratum_day_type": [
+          0.25,
+          0.43006249999999996
+        ],
+        "stratum_demand_quantile": [
+          0.02250000000000002,
+          0.17256249999999998
+        ],
+        "stratum_hour_of_week": [
+          0.44750000000000006,
+          0.6475
+        ],
+        "stratum_season": [
+          0.05499999999999999,
+          0.24000000000000005
+        ],
+        "stratum_time_of_day": [
+          0.385,
+          0.5775
+        ]
+      },
+      "per_axis_range_point": {
+        "stratum_day_type": 0.345,
+        "stratum_demand_quantile": 0.07500000000000001,
+        "stratum_hour_of_week": 0.575,
+        "stratum_season": 0.135,
+        "stratum_time_of_day": 0.48500000000000004
+      },
+      "per_stratum_ci": {
+        "stratum_day_type": {
+          "saturday": [
+            0.5700000000000001,
+            0.705
+          ],
+          "sunday": [
+            0.38,
+            0.5800624999999999
+          ],
+          "weekday": [
+            0.23500000000000001,
+            0.3675
+          ]
+        },
+        "stratum_demand_quantile": {
+          "high": [
+            0.33,
+            0.48256249999999995
+          ],
+          "low": [
+            0.2649375,
+            0.4025625
+          ],
+          "medium": [
+            0.3175,
+            0.45
+          ]
+        },
+        "stratum_hour_of_week": {
+          "0": [
+            0.0,
+            0.195
+          ],
+          "1": [
+            0.045,
+            0.255
+          ],
+          "2": [
+            0.1475,
+            0.3875
+          ],
+          "3": [
+            0.06243750000000001,
+            0.31256249999999997
+          ],
+          "4": [
+            0.085,
+            0.3400625
+          ],
+          "5": [
+            0.4625,
+            0.62
+          ],
+          "6": [
+            0.525,
+            0.6825625
+          ],
+          "7": [
+            0.4475,
+            0.6325000000000001
+          ]
+        },
+        "stratum_season": {
+          "shoulder": [
+            0.3724375,
+            0.5225
+          ],
+          "summer": [
+            0.2524375,
+            0.47000000000000003
+          ],
+          "winter": [
+            0.2475,
+            0.3900625
+          ]
+        },
+        "stratum_time_of_day": {
+          "afternoon": [
+            0.5474375,
+            0.645
+          ],
+          "evening": [
+            0.4,
+            0.5425
+          ],
+          "morning_ramp": [
+            0.5374375,
+            0.6275000000000001
+          ],
+          "overnight": [
+            0.04993750000000001,
+            0.19256249999999994
+          ]
+        }
+      },
+      "verdict": "R-A"
+    },
+    "lib_versions": {
+      "edynamics": "0.3.14",
+      "numpy": "2.2.4",
+      "pandas": "2.2.3",
+      "scipy": "1.15.2"
+    },
+    "seeds": {
+      "paired_day_bootstrap": 20260527
+    }
+  },
+  "schema": "mitacs.experiment.result_provenance/1",
+  "title": "P1 \u2014 Patra\u2013Sen per-stratum localization (resolution-paths thread / production-path)"
+}
+PROVENANCE>>>
+
+P1 — Patra–Sen per-stratum localization
+============================================================
+data:        Q1's pit_M1.u_PIT  (n=12000 rows, 500 delivery days)
+F_b:         Uniform[0,1]  (P1 methodology amendment; Theorem 1)
+bootstrap:   n_bootstrap = 1000
+
+marginal α̂_L (full pool, INSPECTION-ONLY per phase_a §baselines):
+  α̂_L = 0.4125
+
+per-axis range and per-stratum α̂_L:
+  stratum_demand_quantile: range = 0.0750  [0.0225, 0.1726]
+      α̂_L[      'high'] = 0.4100
+      α̂_L[    'medium'] = 0.3850
+      α̂_L[       'low'] = 0.3350
+  stratum_time_of_day: range = 0.4850  [0.3850, 0.5775]
+      α̂_L[ 'afternoon'] = 0.5975
+      α̂_L['morning_ramp'] = 0.5825
+      α̂_L[   'evening'] = 0.4750
+      α̂_L[ 'overnight'] = 0.1125
+  stratum_season: range = 0.1350  [0.0550, 0.2400]
+      α̂_L[  'shoulder'] = 0.4525
+      α̂_L[    'summer'] = 0.3600
+      α̂_L[    'winter'] = 0.3175
+  stratum_day_type: range = 0.3450  [0.2500, 0.4301]
+      α̂_L[  'saturday'] = 0.6475
+      α̂_L[    'sunday'] = 0.4850
+      α̂_L[   'weekday'] = 0.3025
+  stratum_hour_of_week: range = 0.5750  [0.4475, 0.6475]  ← binding
+      α̂_L[ np.int64(6)] = 0.6100
+      α̂_L[ np.int64(5)] = 0.5475
+      α̂_L[ np.int64(7)] = 0.5450
+      α̂_L[ np.int64(2)] = 0.2700
+      α̂_L[ np.int64(4)] = 0.2075
+      α̂_L[ np.int64(3)] = 0.1775
+      α̂_L[ np.int64(1)] = 0.1250
+      α̂_L[ np.int64(0)] = 0.0350
+
+verdict statistic: max_axis range = 0.5750  (binding axis: stratum_hour_of_week)
+verdict: R-A  (R-A cut > 0.2; R-B in (0.1, 0.2]; R-C < 0.1)

@@ -1,0 +1,335 @@
+schema: arbiter
+written_at: '2026-05-27T22:00:00-07:00'
+references:
+- file: phase_a.yaml
+  body_sha256: f427552392b0699aa761ed43d74c20cd4f938c9b949abd4c6e38de10ae6c9327
+- file: proponent.yaml
+  body_sha256: ab9558e3a5629229b15d686e74251c568559372f4e2f49b6af089f1e93ffe3f9
+- file: devils_advocate.yaml
+  body_sha256: b9ed0fae09789119487cd6959e0fe0036cbe4c76bfb401a3123900d686d110e8
+- file: phase_fidelity_check_r.yaml
+  body_sha256: cee50b4524b243cfa15c22e65d4222c0af40b7448e827b9455343a8fe9bf32a1
+- file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  body_sha256: c97c3ad5906c21f3c19bb59dc9da7707a75d0f6ebfe9ede6aed489baa4711f71
+result_artifact_pin:
+  file: ../../experiment/results/p1_patra_sen.txt
+  body_sha256: 103396f50ebfbe05868b7b27eb69277b16cb761cc9d93ff298ebff1e6f36ac96
+  note: 'The P1 result artifact is the CLAIM-GRADE provenance envelope experiment/results/p1_patra_sen.txt (make_result() output, not a YAML file). Its body_sha256 lives inside the <<<PROVENANCE...>>> JSON header. The registry verifier (registry.py:212-261) walks only references[] for YAML files with top-level body_sha256, so the .txt cannot be a references[] entry. Pinned here instead: this field is body-hashed into THIS file''s body_sha256 and therefore tamper-evident. To re-verify the .txt independently, use experiment.provenance.load_verified_result() which recomputes the body hash against the in-header value. Same pin-pattern documented in phase_fidelity_check_r.yaml.'
+preconditions:
+  code_path_passed: true
+  hash_chain_intact: true
+  result_from_clean_tree: true
+  result_from_clean_tree_caveat: 'phase_fidelity_check_r.yaml carries git_clean: false from the inline registry.stamp() pattern (the agent stamped while the sibling CLAIM-GRADE .txt was freshly-written-and-untracked). The canonical cleanliness witness for the underlying run is the .txt''s make_result() header which records git_clean: true at git_sha 3c3e2e0c947ab77a3bcaea14f36df841a22af632. The .txt''s inputs_fingerprint b7d6466321e2f4a5... and frozen_spec_hash f0dd9c8795fda781... pin the run state. Same inline-stamp pattern documented in Q2B''s arbiter.yaml; not a tree-state defect. THIS arbiter.yaml is itself written under the same inline-stamp pattern (arbiter.yaml + Check R both untracked at write time) and will likewise show git_clean: false until the user''s batch-commit lands.'
+  fidelity_coverage_passed: true
+  fidelity_L2_resolved: true
+  fidelity_L2_note: No pre-run Check P L2 advisories outstanding. The result artifact carries no execution_deviations because the production-path script executed the registered methodology end-to-end (Patra-Sen 2016 per-stratum on u_PIT against F_b = Uniform[0,1] per the Theorem 1 reparameterization in phase_a.metric).
+numerical_record:
+  outcome_mechanical: R-A
+  outcome_substantive: R-A_unforecast
+  reason_mechanical: 'phase_a.shape_outcomes.R-A criterion: max over 5 axes of range(alpha_L) > 0.20. Realized max_axis_range = 0.5750 with paired-day bootstrap 95% CI [0.4475, 0.6475]; binding_axis = stratum_hour_of_week. Both the point estimate (0.5750) and the lower CI bound (0.4475) clear the R-A cut by more than 2x. Three of five axes clear R-A at their LOWER CI bound (hour_of_week, time_of_day, day_type); one straddles R-B/R-A (season); only demand_quantile has its upper CI bound (0.1726) below 0.20. R-A fires unambiguously.'
+  reason_substantive: 'Mechanical and substantive verdicts AGREE on R-A firing. The substantive picture is NOT identical to mechanical (hence the `_unforecast` suffix): the verdict category matches proponent (R-A) but proponent''s specific point forecasts inside the R-A category are decisively wrong on three of four sub-quantities. Binding axis: proponent predicted `season`, realized `hour_of_week` (one of the WEAKER axes by range, ranked 4th of 5; season range 0.1350 with CI [0.0550, 0.2400] straddling R-B/R-A). Magnitude: proponent predicted max_range 0.30 with 95% CI [0.18, 0.45]; realized 0.5750 is more than 2x the proponent''s central call and falls OUTSIDE the proponent''s CI upper bound (0.45). The temperature-via-season prior translation that drove the proponent''s R-A is wrong on the proxy choice; the actual signal is cyclical/weekly (hour_of_week, time_of_day, day_type all fire), not seasonal. devil''s-advocate R-C is decisively falsified on 4 of 5 per-axis CIs (only demand_quantile''s
+    CI [0.023, 0.173] overlaps the R-C cut at 0.10).'
+  verdict_cuts:
+    R-A: max over 5 axes of range(alpha_L) > 0.20
+    R-B: max range in (0.10, 0.20]
+    R-C: max range < 0.10
+  max_axis_range_point: 0.575
+  max_axis_range_ci95:
+  - 0.4475
+  - 0.6475
+  binding_axis: stratum_hour_of_week
+  per_axis_range_point:
+    stratum_demand_quantile: 0.075
+    stratum_time_of_day: 0.485
+    stratum_season: 0.135
+    stratum_day_type: 0.345
+    stratum_hour_of_week: 0.575
+  per_axis_range_ci95:
+    stratum_demand_quantile:
+    - 0.0225
+    - 0.1726
+    stratum_time_of_day:
+    - 0.385
+    - 0.5775
+    stratum_season:
+    - 0.055
+    - 0.24
+    stratum_day_type:
+    - 0.25
+    - 0.4301
+    stratum_hour_of_week:
+    - 0.4475
+    - 0.6475
+  alpha_L_marginal: 0.4125
+  alpha_L_marginal_provenance: INSPECTION-ONLY per phase_a.baselines.primary; not part of the verdict. The qualifier-exhaustion-memo prior [0.49, 0.74] was stamped under a different null and does NOT transfer via Theorem 1 to a numerical anchor here.
+  binding_axis_strata_ranking:
+    ranking_by_alpha_L:
+    - bin: 6
+      alpha_L: 0.61
+      ci95:
+      - 0.525
+      - 0.6826
+    - bin: 5
+      alpha_L: 0.5475
+      ci95:
+      - 0.4625
+      - 0.62
+    - bin: 7
+      alpha_L: 0.545
+      ci95:
+      - 0.4475
+      - 0.6325
+    - bin: 2
+      alpha_L: 0.27
+      ci95:
+      - 0.1475
+      - 0.3875
+    - bin: 4
+      alpha_L: 0.2075
+      ci95:
+      - 0.085
+      - 0.3401
+    - bin: 3
+      alpha_L: 0.1775
+      ci95:
+      - 0.0624
+      - 0.3126
+    - bin: 1
+      alpha_L: 0.125
+      ci95:
+      - 0.045
+      - 0.255
+    - bin: 0
+      alpha_L: 0.035
+      ci95:
+      - 0.0
+      - 0.195
+    binding_hot_zone: 'Bins 6/5/7 (alpha_L = 0.6100/0.5475/0.5450) carry the heaviest non-Gaussian mass. With bin = (weekday*24 + (h-1)) // 21 and weekday 0=Mon..6=Sun, h in 1..24, the bins map to weekly hour ranges: bin 5 = Fri 10:00 - Sat 06:00; bin 6 = Sat 07:00 - Sun 03:00; bin 7 = Sun 04:00 - Sun 23:00. The hot zone is the weekend window (Fri evening through Sunday). Bin 0 = Mon 01:00 - Mon 21:00 (the coldest stratum, essentially Gaussian).'
+  day_type_axis_ranking:
+    saturday:
+      alpha_L: 0.6475
+      ci95:
+      - 0.57
+      - 0.705
+    sunday:
+      alpha_L: 0.485
+      ci95:
+      - 0.38
+      - 0.5801
+    weekday:
+      alpha_L: 0.3025
+      ci95:
+      - 0.235
+      - 0.3675
+    note: 'Saturday > Sunday > weekday ordering on alpha_L, independently corroborating the saturday-4x-weekday chi^2 signal from Q2A Finding #2 (S9) and the weekday/weekend structural asymmetry from eigenmodes-v1 (S2/S3). The hour_of_week binding axis''s hot zone (bins 5/6/7 = Fri evening through Sunday) is consistent with the day_type ordering at finer temporal resolution.'
+  time_of_day_axis_ranking:
+    afternoon:
+      alpha_L: 0.5975
+      ci95:
+      - 0.5474
+      - 0.645
+    morning_ramp:
+      alpha_L: 0.5825
+      ci95:
+      - 0.5374
+      - 0.6275
+    evening:
+      alpha_L: 0.475
+      ci95:
+      - 0.4
+      - 0.5425
+    overnight:
+      alpha_L: 0.1125
+      ci95:
+      - 0.0499
+      - 0.1926
+    note: 'Clean overnight-vs-rest contrast: overnight (0.1125) is roughly Gaussian; the three daytime/evening bins span 0.475-0.598. Consistent with the hour_of_week reading at the within-day granularity (overnight is to the day what bin 0 is to the week).'
+  proponent_forecast:
+    outcome: R-A
+    max_range_point: 0.3
+    max_range_ci95:
+    - 0.18
+    - 0.45
+    binding_axis: season
+    alpha_L_marginal_point: 0.6
+    alpha_L_marginal_ci95:
+    - 0.45
+    - 0.78
+    season_range_point: 0.3
+    season_range_ci95:
+    - 0.18
+    - 0.45
+    hour_of_week_range_point: 0.25
+    hour_of_week_range_ci95:
+    - 0.12
+    - 0.4
+    range_per_axis:
+      stratum_day_type: 0.05
+      stratum_demand_quantile: 0.1
+      stratum_hour_of_week: 0.25
+      stratum_season: 0.3
+      stratum_time_of_day: 0.15
+    confidence: 0.5
+    rationale_summary: 'Three lines: (a) temperature is the most-cited candidate Z per clim-gap-nonstationary; season acts as a temperature proxy concentrating heavy-tailed contamination at winter/summer extremes; predicted season range ~0.30. (b) Q2A Finding #2 saturday 4x weekday hints at day-type / hour-of-week structure; predicted hour_of_week range ~0.25, second-strongest. (c) alpha_L_marginal ~0.60 mid-range of qualifier-exhaustion prior. Outcome forecast R-A correct; binding-axis and magnitude forecasts decisively wrong (see proponent_distance_from_result below).'
+  devils_advocate_forecast:
+    outcome: R-C
+    max_range_point: 0.07
+    max_range_ci95:
+    - 0.03
+    - 0.18
+    binding_axis: null
+    alpha_L_marginal_point: 0.65
+    alpha_L_marginal_ci95:
+    - 0.55
+    - 0.78
+    range_per_axis:
+      stratum_day_type: 0.03
+      stratum_demand_quantile: 0.07
+      stratum_hour_of_week: 0.05
+      stratum_season: 0.05
+      stratum_time_of_day: 0.04
+    rationale_summary: qualifier-exhaustion-memo's alpha_L-orthogonal-to-z-state finding extends to all natural axes; season/hour-of-week/time-of-day/day-type are all functions of the time index already encoded in M1's per-(month, hour) standardization. The most-cited candidate Z (temperature) is not in any natural axis. R-C fires; Q1C (temperature fallback) is the only viable detection branch. Outcome forecast R-C decisively falsified.
+  proponent_distance_from_result:
+    outcome_match: true
+    outcome_residual: R-A category matches
+    binding_axis_match: false
+    binding_axis_realized: stratum_hour_of_week
+    binding_axis_forecast: season
+    binding_axis_note: Proponent forecast season as the binding axis (range ~0.30); realized season range is 0.1350 with CI [0.055, 0.240], straddling R-B/R-A and 4th of 5 by range. The binding axis is hour_of_week at range 0.575.
+    max_range_realized_point: 0.575
+    max_range_forecast_point: 0.3
+    max_range_residual: 0.275
+    max_range_forecast_ci95:
+    - 0.18
+    - 0.45
+    max_range_inside_forecast_ci: false
+    max_range_overshoot: 0.125
+    max_range_note: Realized 0.575 OVERSHOOTS the proponent's 95% CI upper bound (0.45) by 0.125. Proponent under-predicted the signal strength.
+    season_range_realized_point: 0.135
+    season_range_forecast_point: 0.3
+    season_range_inside_forecast_ci: false
+    season_range_undershoot: 0.045
+    season_range_note: Realized 0.135 UNDERSHOOTS the proponent's 95% CI lower bound (0.18) by 0.045. The temperature-via-season translation is empirically rejected at 95%.
+    hour_of_week_range_realized_point: 0.575
+    hour_of_week_range_forecast_point: 0.25
+    hour_of_week_range_inside_forecast_ci: false
+    hour_of_week_range_overshoot: 0.175
+    hour_of_week_range_note: Realized 0.575 OVERSHOOTS the proponent's 95% CI upper bound (0.40) by 0.175. Proponent named hour_of_week as second-strongest but anticipated less than half the realized magnitude.
+    time_of_day_range_realized: 0.485
+    time_of_day_range_forecast: 0.15
+    time_of_day_range_residual: 0.335
+    day_type_range_realized: 0.345
+    day_type_range_forecast: 0.05
+    day_type_range_residual: 0.295
+    day_type_note: 'Proponent''s day_type forecast (0.05) reflected the assumption that M1''s per-day-type conditioning had absorbed day-type asymmetry. Realized 0.345 indicates substantial residual day-type alpha_L variation, with saturday significantly heavier-tailed than weekday. Proponent''s what_would_change_my_mind condition #4 (''If day_type range > 0.15...flag as Q1/Q2A pipeline issue'') is triggered; arbiter notes it does NOT block the verdict but flags it for follow-up: Q1''s M1 conditioning is per-day-type on nu (the Student-t shape) and on the per-(month, hour) climatology, but the mixture-fraction asymmetry across day-types is not absorbed; this is consistent with eigenmodes-v1 (S2/S3) showing weekday/weekend structural asymmetry.'
+    demand_quantile_range_realized: 0.075
+    demand_quantile_range_forecast: 0.1
+    demand_quantile_range_residual: 0.025
+    demand_quantile_range_inside_forecast_ci: true
+    demand_quantile_note: The only axis where proponent's range forecast (0.10) is inside the realized 95% CI [0.023, 0.173]. The least-informative axis (range CI upper bound below R-A threshold).
+    alpha_L_marginal_realized: 0.4125
+    alpha_L_marginal_forecast_point: 0.6
+    alpha_L_marginal_inside_forecast_ci: false
+    alpha_L_marginal_undershoot: 0.0375
+    alpha_L_marginal_note: 'Realized 0.4125 falls BELOW the proponent''s 95% CI lower bound (0.45) by 0.0375. Per phase_a baselines this is INSPECTION-ONLY (Theorem 1 invariance is per-row, not per-marginal-aggregate, and the qualifier-exhaustion-memo anchor was under a different null). The fact is interesting but not verdict-bearing: the marginal alpha_L is lower than either forecaster anticipated, even as the per-stratum signal is stronger; stratification reveals contamination concentrated where the marginal averages it down (per-stratum max alpha_L is 0.6475 on saturday, 0.61 on hour_of_week bin 6 - both well above the marginal 0.4125).'
+  devils_advocate_distance_from_result:
+    outcome_match: false
+    outcome_residual: R-C forecast vs R-A realized
+    binding_axis_match: false
+    binding_axis_realized: stratum_hour_of_week
+    binding_axis_forecast: null
+    binding_axis_note: DA explicitly forecast 'no binding axis' (R-C central call). Realized is hour_of_week binding at range 0.575. DA's central call decisively falsified.
+    max_range_realized_point: 0.575
+    max_range_forecast_point: 0.07
+    max_range_residual: 0.505
+    max_range_forecast_ci95:
+    - 0.03
+    - 0.18
+    max_range_inside_forecast_ci: false
+    max_range_overshoot: 0.395
+    max_range_note: Realized 0.575 OVERSHOOTS DA's 95% CI upper bound (0.18) by 0.395 - more than 3x. DA's R-A-not-in-95%-CI commitment is decisively refuted.
+    per_axis_falsification: 'DA''s range_per_axis predicted all 5 axes below 0.10. Realized: demand_quantile 0.075 (CI [0.023, 0.173]; only axis whose CI overlaps R-C), season 0.135 (CI [0.055, 0.240]; straddles R-A cut), day_type 0.345 (CI [0.250, 0.430]; entirely above R-A), time_of_day 0.485 (CI [0.385, 0.578]; entirely above R-A), hour_of_week 0.575 (CI [0.448, 0.648]; entirely above R-A). 4 of 5 axis CIs entirely above 0.10; DA''s range_per_axis table off by factors of 5-15x for the four non-demand-quantile axes.'
+    alpha_L_marginal_realized: 0.4125
+    alpha_L_marginal_forecast_point: 0.65
+    alpha_L_marginal_inside_forecast_ci: false
+    alpha_L_marginal_undershoot: 0.1375
+    alpha_L_marginal_note: DA's marginal forecast (0.65) is OVERSHOT relative to realized 0.4125 by even more than the proponent's (forecast 0.60, overshoot 0.1875). Both forecasters anchored to the qualifier-exhaustion-memo's 0.49-0.74 prior; realized marginal lands BELOW the prior. Per phase_a baselines INSPECTION-ONLY; the prior anchor does not transfer via Theorem 1 to a per-stratum-aggregate target.
+    what_would_change_my_mind_triggered: 'DA''s what_would_change_my_mind condition #2 explicitly named: ''If R-A fires for hour_of_week OR demand_quantile with binding range > 0.25 (not season)... my pure-orthogonality position is refuted.'' Realized: hour_of_week binds at 0.575 (>0.25); season range 0.135 is not the binding signal. DA''s pure-orthogonality position is empirically refuted by their own pre-registered criterion.'
+  closer_forecast: proponent
+  closer_forecast_notes: 'Proponent wins on outcome category (R-A vs R-A, matched; DA R-C falsified). On the single max_range metric, proponent''s residual is 0.2750 vs DA''s 0.5050; proponent meaningfully closer. On the binding-axis nomination both are wrong (proponent: season; DA: null; realized: hour_of_week) but proponent named hour_of_week as the second-strongest axis in range_per_axis (0.25 forecast), so proponent at least had hour_of_week in the prior set even though its rank was wrong. Across the per-axis range vector, proponent is closer on 4 of 5 axes (proponent under-predicts the four informative axes; DA assumes near-zero on all 5 and is further from truth on those four). DA''s demand_quantile forecast (0.07) is essentially the realized value (0.075); proponent forecast 0.10. demand_quantile is the only axis where DA is closer. The phase_a-registered outcome category (R-A/B/C) is the verdict''s primary surface; proponent matches there. closer_forecast = proponent stands.'
+  outcome_category_winner: proponent
+  outcome_category_winner_notes: 'phase_a.shape_outcomes mechanical mapping: max_axis_range = 0.5750 > 0.20 fires R-A. proponent forecast R-A; DA forecast R-C. proponent wins on the registered outcome category. Substantive within-bucket forecasts (binding axis, magnitude) are largely wrong on both sides; see outcome_substantive = R-A_unforecast for the substantive qualifier. This is the fourth instance in the workflow''s history (after eigenmodes-v1, pit-calendar, Q2B) where the registered criterion fires on a structure neither forecaster anticipated; the mechanical-vs-substantive gap pattern is the ''fourth named failure mode'' per CLAUDE.md applied-audit workflow section. Pattern shape: mechanical verdict matches one forecaster''s outcome category; substantive within-bucket detail matches neither. The shape is handled by mechanical-verdict-plus-substantive-content rather than preventing the situation; no engineering fix needed.'
+verdict: PROPONENT-CONFIRMED
+verdict_reasoning: 'Mechanical verdict per phase_a.shape_outcomes: R-A fires unambiguously (max_axis_range = 0.5750, CI [0.4475, 0.6475]; both point and lower CI bound clear the R-A cut at 0.20 by more than 2x). proponent forecast R-A; DA forecast R-C. R-A wins on the registered outcome category. Per arbiter.md taxonomy, this is PROPONENT-CONFIRMED.
+
+
+  Substantive findings (the verdict is PROPONENT-CONFIRMED + the below; the within-bucket detail is what makes outcome_substantive = R-A_unforecast):
+
+
+  1. R-A FIRES AT LANDSLIDE STRENGTH, NOT MARGINAL R-A. Three of five per-axis range CIs (hour_of_week, time_of_day, day_type) are entirely above 0.20 at their LOWER CI bound; the max_axis lower CI bound (0.4475) is more than 2x the R-A cut. DA''s R-C is decisively falsified on 4 of 5 per-axis CIs (only demand_quantile''s CI [0.023, 0.173] overlaps the R-C threshold at 0.10). The verdict is not borderline.
+
+
+  2. BINDING AXIS IS HOUR_OF_WEEK, NOT SEASON. Proponent''s binding-axis forecast was season at range 0.30. Realized: season range 0.1350 with CI [0.055, 0.240], 4th-of-5 by range. hour_of_week binds at range 0.575. The temperature-via-season prior translation is empirically rejected at the 95% CI level (season range CI upper bound 0.240 vs the R-A cut at 0.20 - season barely clears R-A; nothing like the 0.30 proponent predicted). The signal is CYCLICAL (hour_of_week, time_of_day, day_type all fire), not seasonal. This is the substantive downward update on the temperature hypothesis from clim-gap-nonstationary: in the post-cutoff window, the natural axis carrying the missing Z signal is weekly/social structure, not month-of-year climatology.
+
+
+  3. HOUR_OF_WEEK HOT ZONE = WEEKEND BLOCK. Strata 5/6/7 (bins of 21 hours each, by weekday*24 + (h-1)) carry alpha_L 0.5475/0.6100/0.5450 respectively, spanning Fri 10:00 through Sun 23:00. The coldest bin (0) is Mon 01:00 - Mon 21:00 at alpha_L = 0.035 (essentially Gaussian). Independent corroboration of the saturday-4x-weekday chi^2 signal from Q2A Finding #2 (S9) and the weekday/weekend structural asymmetry from eigenmodes-v1 (S2/S3). The day_type axis at the coarser temporal granularity shows the same ordering: saturday 0.6475 > sunday 0.485 > weekday 0.3025. The hour_of_week axis is essentially day_type plus within-week phase resolution; the phase resolution is where the additional range comes from (weekday 0.303 vs Mon-AM bin 0.035 - within-week heterogeneity is real signal).
+
+
+  4. TIME_OF_DAY OVERNIGHT-VS-REST CONTRAST IS A CLEAN SECOND STRUCTURAL SIGNAL. afternoon/morning_ramp/evening cluster at alpha_L = 0.4750-0.5975; overnight at 0.1125 (within-day lightest-tail strata mirror the within-week lightest-tail bins). This is independent corroboration that the signal is structural-cyclical at multiple temporal granularities, not a single-axis artifact.
+
+
+  5. ALPHA_L_MARGINAL = 0.4125 BELOW BOTH PRIORS. INSPECTION-ONLY per phase_a, not verdict-bearing. Interesting fact: both forecasters anchored to qualifier-exhaustion-memo''s 0.49-0.74 prior and both overshot. The marginal alpha_L is meaningfully lower than either anticipated, even as the per-stratum signal is much higher than either anticipated (max per-stratum alpha_L is 0.6475 on saturday, 0.61 on hour_of_week bin 6 - well above marginal 0.4125). Stratification reveals contamination concentrated where the marginal averages it down: the marginal is a misleading single number for what is a strongly heterogeneous non-Gaussian mass.
+
+
+  6. day_type RANGE 0.345 TRIGGERS PROPONENT''S WHAT_WOULD_CHANGE_MY_MIND CONDITION #4. Proponent registered: ''If day_type range > 0.15, M1''s per-day-type conditioning has not absorbed the day-type asymmetry in non-Gaussian mass. This would be a Q1/Q2A pipeline issue, not a P1 finding; arbiter should flag it.'' Realized day_type range = 0.345 comfortably above 0.15. Arbiter flag (NON-BLOCKING per proponent''s own framing): Q1''s M1 conditioning is per-day-type on nu (the Student-t shape) and on the per-(month, hour) climatology, but the mixture-fraction asymmetry across day-types is not absorbed. This is consistent with eigenmodes-v1 (S2/S3) showing weekday/weekend structural asymmetry at the operator level - the asymmetry is structural, not just shape-of-tails. The flag does not retract Q1/Q2A''s settled findings; it documents that day-type conditioning on Student-t shape alone does not exhaust day-type heterogeneity in the residual law. The natural follow-up is Q1A''s Z construction
+  on hour_of_week (the strongest axis), which subsumes day_type at finer resolution.
+
+
+  7. ROUTING: per phase_a.shape_outcomes.R-A.interpretation, R-A routes to Q1A with the binding axis becoming Q1A''s conditioning variable. Realized binding axis is hour_of_week, not season as proponent expected. Q1A''s Z should be derived from hour_of_week stratification (not from temperature-as-season-proxy, the prior the thread skeleton may have implicitly anticipated). The thread coordinator follows up; this arbiter writes thread_state_update.next_node_id = Q1A and notes_for_thread_coordinator pins hour_of_week as the Z axis.'
+finding_status: SETTLED
+if_provisional_what_to_reaudit: []
+thread_state_update:
+  thread_topic: resolution-paths-thread
+  node_id: P1
+  branch_fired: R-A
+  next_node_id: Q1A
+  sibling_branches_closed:
+  - Q1C
+  thread_state_transition: node_advance
+  notes_for_thread_coordinator: "P1.status: active -> settled. Q1A.status: planned -> active (next current_node_id). Q1C.status: planned -> closed (sibling not fired; branching_rules.P1.R-C would have routed there, but R-A fires).\n\nBINDING-AXIS PIN FOR Q1A: hour_of_week (NOT season as the thread skeleton's implicit prior may have anticipated via proponent's forecast). Q1A's Z is constructed from hour_of_week stratification per phase_a.shape_outcomes.R-A.interpretation: 'binding axis identifies where missing Z is concentrated. Routes to Q1A (Z-conditioning experiment using the strongest axis).' The hot zone is bins 5/6/7 (Fri evening through Sunday). Q1A's phase_a (when filled) should construct Z as either:\n  (a) the binary indicator of bin >= 5 (weekend window), or\n  (b) the 8-level categorical (preserving the granularity), or\n  (c) a continuous hour-of-week-mod-168 phase variable.\nThe exact Z construction is Q1A's pre-registration decision (not the arbiter's).\n\nSUBSTANTIVE PROVISO\
+    \ FOR Q1A: The day_type axis showed range 0.345 (> 0.15), triggering proponent's what_would_change_my_mind condition #4. Q1's M1 conditioning on per-day-type nu and per-(month, hour) climatology does not absorb day-type alpha_L asymmetry. Q1A's Z construction on hour_of_week subsumes day_type at finer resolution, so this is naturally addressed by the routed experiment; arbiter records it for the file but does not require a separate node.\n\nTHE TEMPERATURE PRIOR TAKES A HIT BUT IS NOT EXTINGUISHED. Proponent's temperature-via-season translation predicted season range ~0.30; realized 0.135 with CI [0.055, 0.240] barely clears R-A and is 4th-of-5 by range. season is not the binding signal. clim-gap-nonstationary's +1000 MW temperature gap remains the prior-supported candidate for the marginal pathology, but in the post-cutoff PIT residuals the localizing signal is weekly/social structure, not climatological. Q1C (temperature fallback) is closed as a sibling not fired but the temperature\
+    \ hypothesis could re-enter as a Q1B candidate or in a separate thread if hour_of_week Z conditioning doesn't close the gap."
+follow_up:
+  required: true
+  reasoning: "Two parallel follow-up items:\n\n1. THREAD ADVANCEMENT (required for state machine): thread-coordinator dispatch advances resolution-paths-thread to current_node_id = Q1A, with P1.status = settled and Q1C.status = closed (sibling not fired). The Q1A phase_a (when filled) must construct Z from hour_of_week stratification per phase_a.shape_outcomes.R-A.interpretation; see thread_state_update.notes_for_thread_coordinator for the axis pin.\n\n2. MEMORY UPDATE (no blocker, recommended): SETTLED finding warrants a new memory file mitacs-p1-patra-sen-per-stratum-localization.md capturing:\n  - Numeric record: max_axis_range = 0.575 [0.4475, 0.6475]; binding axis hour_of_week; per-axis range vector; per-stratum hot zone (Fri evening - Sunday on the weekly grid).\n  - Finding #2: temperature-via-season hypothesis empirically rejected at 95% CI; signal is weekly/social, not climatological. Update the temperature prior in mitacs-clim-gap-nonstationary memory: 'still candidate for marginal\
+    \ pathology; NOT the localizing signal in post-cutoff PIT residuals'.\n  - Finding #6: day_type range 0.345 - M1 conditioning does not absorb day-type alpha_L asymmetry. Cross-link to eigenmodes-v1 (S2/S3) and Q2A Finding #2 (S9).\n  - Cross-link to mitacs-q2b-non-distributional (S10): P1 is the first applied response to the joint S9+S10 identifiability obstruction; localization succeeds where decomposition failed, exactly because P1 introduces auxiliary information (stratification axes derived from time index) that the same-sigma-algebra Q2B candidates did not.\n  - Add (S11) to CLAUDE.md 'Settled findings since 2026-05-21' section with the headline numbers and the thread routing.\n\nPer workflow rules, memory update is performed by the user after settled findings; the arbiter declares memory_update_required = true and identifies the target file but does not write it. Per the task dispatch, MEMORY.md is NOT updated in THIS arbiter run; the user batches arbiter + thread-coordinator +\
+    \ memory update."
+  proposed_phase_a: null
+calibration_record:
+  proponent_correct: true
+  proponent_correct_detail: Outcome category R-A matches realized R-A. Substantive within-bucket forecasts (binding axis, magnitude) decisively wrong on 4 of 5 axes - proponent's 'proponent_correct = true' is mechanical, not substantive.
+  devils_advocate_correct: false
+  devils_advocate_correct_detail: 'DA''s outcome category R-C decisively falsified on 4/5 per-axis CIs. DA''s own what_would_change_my_mind condition #2 (''If R-A fires for hour_of_week with > 0.25 range'') is triggered: DA''s pure-orthogonality position is empirically refuted by their own pre-registered criterion. range_per_axis predictions all under-predicted by 5-15x for the four informative axes (e.g., day_type DA 0.03 vs realized 0.345; hour_of_week DA 0.05 vs realized 0.575). DA was closer on demand_quantile (DA 0.07 vs realized 0.075) but that''s the single uninformative axis.'
+  topic_difficulty: moderate
+  notes: 'FOURTH NAMED-FAILURE-MODE INSTANCE in the workflow''s history (after Q1 R-D-vs-R-C, eigenmodes-v1 O2-vs-O3, P1 mechanical-AMBIGUOUS-vs-tautology - the latter is a DIFFERENT P1 from the missing-content thread, not this resolution-paths thread''s P1). Pattern: registered criterion fires on a structure neither forecaster anticipated. This P1 differs from Q2B (the most recent prior instance) in DIRECTION: Q2B''s substantive verdict was STRONGER than mechanical (negative shares); this P1''s substantive verdict is ORTHOGONAL to the within-bucket forecasts (mechanical matches proponent on outcome category; within-bucket neither forecaster named the right binding axis or anticipated the magnitude). The mechanical-vs-substantive gap pattern can run in EITHER DIRECTION, and within the ''orthogonal'' shape can manifest as ''mechanical matches side A; substantive matches neither'' (this P1) or ''mechanical matches neither; substantive emerges from data'' (prior P1 in the missing-content thread).
+    The arbiter shape (mechanical-verdict-plus-substantive-content) accommodates all variants without engineering fixes; this is the ''fourth named failure mode'' working as designed per CLAUDE.md applied-audit workflow section.
+
+
+    FORECASTER BLIND SPOT WORTH NAMING: Both forecasters implicitly anchored to TEMPERATURE as the candidate Z (proponent via season-as-proxy; DA via temperature-orthogonal-to-natural-axes -> R-C). Neither forecaster gave significant weight to the WEEKLY/SOCIAL structure (hour-of-week, day-type) hypothesis even though Q2A Finding #2 (saturday 4x weekday chi^2 family-invariant) was an explicit pointer to that structure in the prior evidence. Proponent partially noted this (predicted hour_of_week range 0.25 second-strongest, max 0.40 CI upper bound) but under-weighted the magnitude. DA dismissed it via the qualifier-exhaustion-memo extension argument (''hour-of-week re-aggregates information already in other axes''). The realized signal (range 0.575 with lower CI 0.4475) is more than 2x the proponent''s CI upper bound and more than 8x the DA central call - both forecasters'' rationales were structurally biased toward expecting temperature/climatology to be the dominant axis. This is a calibration
+    data point for future forecasts on Ontario data: when Q2A and eigenmodes have settled weekday/weekend structural asymmetry findings, the prior weight on hour-of-week / day-type axes should be larger than either forecaster placed.
+
+
+    FORECASTERS'' WHAT_WOULD_CHANGE_MY_MIND CONDITIONS BOTH TRIGGERED: proponent''s condition #4 (day_type range > 0.15) is triggered at 0.345; DA''s condition #2 (R-A fires for hour_of_week with > 0.25 range) is triggered at 0.575. Both forecasters explicitly registered the contingencies that the data now falsifies their positions on; pre-registration discipline working as intended.'
+memory_update_required: true
+memory_update_target: '~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md
+
+  + add mitacs-p1-patra-sen-per-stratum-localization.md SETTLED R-A with the headline numerics (max_axis_range = 0.575 [0.4475, 0.6475]; binding axis hour_of_week; weekend hot-zone) and the substantive findings #2 (temperature-via-season rejected at 95%) and #6 (day_type range 0.345 - M1 conditioning does not absorb day-type asymmetry).
+
+  + cross-link from mitacs-q2a-richer-family (S9), mitacs-q2b-non-distributional (S10), mitacs-multiscale-defect-eigenmodes-v1 (S2/S3), mitacs-clim-gap-nonstationary (downward update on the temperature-as-localizing-axis hypothesis; the temperature prior survives as candidate for marginal pathology but is no longer the prior-supported localizing axis).
+
+  + flag for CLAUDE.md ''Settled findings since 2026-05-21'' section: add (S11) P1 R-A with summary, binding axis hour_of_week, resolution-paths thread advancement to Q1A.
+
+  + workflow note: fourth named-failure-mode instance, orthogonal shape variant (mechanical-matches-A / substantive-matches-neither).'
+git_sha: 3c3e2e0c947ab77a3bcaea14f36df841a22af632
+git_clean: false
+body_sha256: 5eb024b72dbeb0148000fe3f5e44da316b00685a0d5b15dde8df2b66d0218067
