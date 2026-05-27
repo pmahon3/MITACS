@@ -52,12 +52,27 @@ session locates this one's context.
 
 - **One entry per session.** Sessions are the natural unit (not
   days, not commits).
-- **Never edit a prior entry's body or frontmatter once written**,
-  except to append a cross-reference note at the bottom (e.g.
-  "→ continued in 2026-05-30.md after deferred items completed").
-  The git history is the audit trail; treating entries as
-  immutable matches the registry's hash-stamped artifact
-  discipline.
+- **Body**: write-once; subsequent additions go in a clearly-
+  marked `## Continuation: <topic>` section appended below the
+  original body. The original prose stays untouched. The git
+  history is the audit trail.
+- **Frontmatter**: MAY be refreshed via
+  `notes/lab/tools/lab_note.py --refresh <path>`. The helper
+  rewrites only the machine-derivable fields (`commits`,
+  `preregistrations_touched`, `memory_files_touched`,
+  `writeups_touched`, `settled_this_session`,
+  `dispatched_this_session`) from git + registry state since
+  the session's first commit. The helper does NOT touch
+  `focus`, `cross_programme_refs`, `deferred_to_next_session`,
+  or `status_at_end` — those are judgment fields the human owns.
+  Subject-line annotations on commits (e.g., em-dashes,
+  parenthetical hashes) are clobbered by `--refresh` — the
+  frontmatter is the *index*; rich narrative belongs in the
+  body.
+- **Cross-reference** at the bottom of an entry when a future
+  session resumes or supersedes it (e.g. "→ continued in
+  2026-05-30.md after deferred items completed"). This is
+  always permitted regardless of body-immutability.
 - **Status discipline:**
   - `status_at_end: wrapped` — session ended at a natural
     stopping point; deferred items are real next-actions, not
@@ -69,6 +84,57 @@ session locates this one's context.
     external (dependency, dependency on another agent, data
     unavailable) blocked progress; the deferred list should
     identify what would unblock.
+
+## Tooling
+
+`notes/lab/tools/lab_note.py` is a frontmatter helper. It owns
+nothing the agents (preregister / arbiter / thread-coordinator)
+already own and nothing the human writes (the body). It owns
+the *index* — the machine-derivable fields that go stale as the
+session continues past the entry's initial write.
+
+```
+# Scaffold a new entry with frontmatter pre-populated:
+.venv/bin/python notes/lab/tools/lab_note.py --new 2026-05-28
+.venv/bin/python notes/lab/tools/lab_note.py --new 2026-05-28-b   # multi-session day
+
+# Refresh an existing entry's frontmatter (rewrites the index,
+# preserves the body verbatim):
+.venv/bin/python notes/lab/tools/lab_note.py --refresh notes/lab/2026-05-28.md
+
+# Preview what --refresh would change without writing:
+.venv/bin/python notes/lab/tools/lab_note.py --diff notes/lab/2026-05-28.md
+```
+
+The session-boundary detection uses the existing `commits`
+field's first SHA as the start of the session window (parent of
+that commit). When `commits` is empty (a freshly scaffolded
+entry), it falls back to the commit that first added the file
+itself. This lets `--refresh` work correctly even when several
+sessions occur on the same calendar day or when an entry was
+written mid-session.
+
+Why a helper rather than an agent: the lab-note frontmatter is
+mechanical bookkeeping over git + registry state. Agents earn
+their dispatch overhead when they exercise judgment (preregister
+chooses cuts; arbiter renders verdicts; thread-coordinator
+amends trees). The frontmatter index does not. The agent-per-
+artifact pattern is preserved at the level it makes sense:
+agents own the hash-stamped registry artifacts they emit; the
+human owns the body prose; this helper owns the derivable index.
+
+## Workflow ownership map
+
+| Artifact | Owner | When written |
+|---|---|---|
+| `phase_a.yaml`, `proponent.yaml`, `devils_advocate.yaml` | `preregister`, `devils-advocate` agents | At experiment pre-registration |
+| `arbiter.yaml` + per-experiment `note.md` | `arbiter` agent | After Check R passes |
+| `thread.yaml` + thread `note.md` | `thread-coordinator` agent (sole writer) | Thread creation / amendment / state-advancement / closure |
+| `phase_fidelity_check_*.yaml` | `phase-fidelity` agent | Before run + before arbiter |
+| Memory files (`~/.claude/.../memory/*.md`) + `MEMORY.md` | **Human** | After arbiter declares `memory_update_required: true` (the user batches; agents identify the target but don't write) |
+| `CLAUDE.md` | **Human** | Discretionary; usually at settled-finding closure |
+| Lab note **body** | **Human** | At session start (template) + during/after session (prose) |
+| Lab note **frontmatter** | `lab_note.py --new` / `--refresh` helper + human (for judgment fields) | At session start (scaffold) + at session end (refresh) |
 
 ## Relationship to other content surfaces
 
