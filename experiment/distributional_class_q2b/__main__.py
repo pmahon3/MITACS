@@ -1007,7 +1007,7 @@ def _render_result_yaml(
         "references": [{
             "file": "phase_a.yaml",
             "body_sha256":
-                "8354a70bc4361fa3e874b98c764e8c0f41cd06c908b8614a4f4bb1cd913907fb",
+                "91f69aeb13783bfa54adc45fa3b4da7fe81f9ea3ed984e5381dd281b10d7dd8e",
         }],
         "artifact": {
             "primary_txt": str(artifact_txt_path),
@@ -1446,7 +1446,7 @@ def main(argv: list[str] | None = None) -> int:
             "R_C2_cut": R_C2_CUT,
             "share_denominator": SHARE_DENOMINATOR,
             "phase_a_body_sha256":
-                "8354a70bc4361fa3e874b98c764e8c0f41cd06c908b8614a4f4bb1cd913907fb",
+                "91f69aeb13783bfa54adc45fa3b4da7fe81f9ea3ed984e5381dd281b10d7dd8e",
         },
     }
     with out_pkl.open("wb") as f:
@@ -1488,7 +1488,7 @@ def main(argv: list[str] | None = None) -> int:
                 "anchor_h": anchor_h,
                 "embedding_dims": dict(dims),
                 "phase_a_body_sha256":
-                    "8354a70bc4361fa3e874b98c764e8c0f41cd06c908b8614a4f4bb1cd913907fb",
+                    "91f69aeb13783bfa54adc45fa3b4da7fe81f9ea3ed984e5381dd281b10d7dd8e",
                 "thread_body_sha256":
                     "05b732d41a26552121912412a8834a108175e811819916920c8b05c8b1d50d58",
                 "Q2A_chi2_baseline": CHI2_BASELINE,
@@ -1535,8 +1535,18 @@ def main(argv: list[str] | None = None) -> int:
             / "2026-05-26_q2b-non-distributional-decomposition"
             / "result.yaml"
         )
+        # Stamp via registry before writing so body_sha256/git_sha/git_clean
+        # land in the on-disk YAML in one shot. self_path=out_yaml excludes
+        # the artifact's own existence from the git_clean check (the file is
+        # not its own source change), matching how phase_a/proponent/DA are
+        # stamped. Closes a defect in commit 1376c77 where this block did a
+        # plain yaml.safe_dump without stamping, leaving result.yaml without
+        # the schema's required envelope fields and breaking registry verify.
+        from experiment.audit import registry as _registry
+        result_yaml_stamped = _registry.stamp(result_yaml, self_path=out_yaml)
         with out_yaml.open("w") as f:
-            yaml.safe_dump(result_yaml, f, sort_keys=False, default_flow_style=False)
+            yaml.safe_dump(result_yaml_stamped, f, sort_keys=False,
+                           default_flow_style=False)
         print(f"  wrote {out_yaml.relative_to(PROJECT_ROOT)}")
 
     return 0
