@@ -224,14 +224,14 @@ result.
   polish; pre-registration language scoped to §4.5 forward experiment only.
   See `mitacs-writeup-state`.
 - `writeup/tex/missing_content_memo.tex` → `missing_content_memo.pdf` — the
-  **kernel-family-agnostic theory memo**, 16pp, builds clean. Master citation
-  of (S1)–(S9) settled findings. Added 2026-05-26 from the seed
+  **kernel-family-agnostic theory memo**, 18pp, builds clean. Master citation
+  of (S1)–(S10) settled findings. Added 2026-05-26 from the seed
   `notes/seeds/multiscale_factor_coherence.md`. NOT a publication target;
-  internal memo that documents the framework + Q1/Q2A results.
+  internal memo that documents the framework + Q1/Q2A/Q2B results.
 
 ### Settled findings since 2026-05-21 (chronological)
-The applied-audit workflow has produced six settled / arbitered findings.
-Authoritative source is the memo's (S1)–(S9) numbering + the per-experiment
+The applied-audit workflow has produced seven settled / arbitered findings.
+Authoritative source is the memo's (S1)–(S10) numbering + the per-experiment
 memory files.
 
 - (S1, S6) **v2 multiscale-direct-h-step SETTLED**:
@@ -265,19 +265,45 @@ memory files.
   the realization cleanly. Thread amendment required (R-B2 = mandatory
   amendment per phase_a, NOT auto-advance); arbiter recommends
   reopening Q2B (non-distributional investigation).
+- (S10) **Q2B non-distributional decomposition SETTLED R-C3**
+  (mechanical = substantive; substantive STRONGER than mechanical):
+  Three-mechanism ablation decomposition of Q2A's χ² = 954 baseline.
+  Shares: mean_bias +0.109 [-0.39, +0.74]; variance_div -0.114
+  [-0.22, -0.01]; seam -0.139 [-0.17, -0.09]. All three below the
+  15% null floor → Q2B candidates empirically inadequate. **Two of
+  three sign-determined NEGATIVE at 95% CI** — ablations actively
+  WORSENED χ², which means mis-specification at the construction
+  level (mech_2's one-sided variance cap and mech_3's seam-domain
+  exclusion fail because the ensemble UNDER-disperses everywhere
+  and production iteration already handles the seam correctly).
+  Second arbiter without mechanical/substantive gap. **Framework-level
+  interpretation:** S9 + S10 are joint applied evidence for the
+  identifiability obstruction parked the same day at
+  `~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md`
+  (structured noise vs noisy structure are observationally
+  indistinguishable from κ_Q alone; Bergna et al. 2026 Prop 1,
+  Heckman-Singer 1984, Allahverdyan 2020). Resolution requires
+  auxiliary information: candidate Z testing (weather, hour-of-week,
+  secular drift), stratified Patra-Sen (genuinely novel applied
+  contribution per the framework's Phase-2 audit), or synthetic
+  Gaussian-DGP calibration. Thread should be declared EXHAUSTED;
+  new thread targets the three framework-prescribed resolution paths.
 
 ### Lines of inquiry
 - `2026-05-26_missing-content-thread`: **exhausted** under registered
   branching (P1 settled AMBIGUOUS → null per branching_rules; continuing
   requires amendment).
-- `2026-05-26_distributional-class-thread`: **active**, current node
-  Q2A SETTLED (S9) and awaiting amendment A2 to reopen Q2B. Amendment
-  A1 (closing Q2D, rerouting Q1's substantive R-C to Q2A) landed
-  2026-05-26 and Q2A ran successfully. The Q2A arbiter recommends
-  amendment A2 to reopen Q2B (non-distributional investigation) per
-  S9 Finding (a): all three richer-than-Student-t families are
-  chi²-indistinguishable → flexibility is bounded → missing content
-  is non-distributional.
+- `2026-05-26_distributional-class-thread`: **awaiting closure**
+  (active until thread-coordinator dispatch). Q1 SETTLED (S8) →
+  amendment A1 closed Q2D / rerouted to Q2A → Q2A SETTLED R-B2 (S9)
+  → amendment A2 reopened Q2B → Q2B SETTLED R-C3 (S10). The thread's
+  scope_limits ("tests the PREDICTIVE-DISTRIBUTION CLASS axis only")
+  are exhausted: S9 bounded the kernel-refinement lever and S10
+  bounded the naive σ-algebra-preserving manipulations. Q2B arbiter
+  recommends declaring EXHAUSTED rather than amending; a new thread
+  on the three framework-prescribed resolution paths (candidate Z,
+  stratified Patra-Sen, synthetic calibration) is the natural next
+  move per the disintegration diagnostic note.
 
 ### Frozen forward experiment (separate from the above)
 - ✅ **IESO retrospective head-to-head shown infeasible** from public archives.
@@ -296,7 +322,10 @@ memory files.
 ### Open
 - Web dashboard.
 - Forward-experiment results accrue with calendar time.
-- Q2B of `distributional-class-thread` (after amendment A2 reopens it).
+- New non-distributional thread (post-distributional-class-closure):
+  candidate Z testing + stratified Patra-Sen + synthetic Gaussian-DGP
+  calibration, per the disintegration diagnostic note's resolution
+  paths for the identifiability obstruction.
 - The Goal-4 paper's abstract (written last).
 - The kernel-family-agnostic theory memo's `/audit pure` audit in the
   theory-side `Resolvent_Framework` programme (not yet run; the memo
