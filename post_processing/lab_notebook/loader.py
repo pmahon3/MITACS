@@ -104,6 +104,7 @@ class MemoryFile:
     description: str  # from frontmatter, or first body line
     metadata: dict[str, Any]
     body: str
+    archived: bool = False  # True if file is under memory/_archive/
 
 
 @dataclass(frozen=True)
@@ -371,33 +372,46 @@ def load_notes(notes_dir: Path) -> list[NoteFile]:
 
 
 def load_memory_files(memory_dir: Path) -> list[MemoryFile]:
-    """Read every ``*.md`` under ``memory_dir``.
+    """Read every ``*.md`` under ``memory_dir`` AND ``memory_dir/_archive/``.
 
-    Returns an empty list if the directory does not exist (the app
-    runs fine on a machine without Claude Code installed).
+    Files under ``_archive/`` are loaded with ``archived=True`` so the
+    UI can group them separately. Returns an empty list if the
+    directory does not exist (the app runs fine on a machine without
+    Claude Code installed).
     """
     if not memory_dir.is_dir():
         return []
 
     out: list[MemoryFile] = []
-    for p in sorted(memory_dir.iterdir()):
-        if p.is_dir() or not p.name.endswith(".md"):
-            continue
-        try:
-            text = p.read_text(encoding="utf-8")
-        except OSError:
-            continue
-        fm, body = _split_frontmatter(text)
-        description = str(fm.get("description") or _first_h1(body) or p.stem)
-        metadata = fm.get("metadata") if isinstance(fm.get("metadata"), dict) else {}
-        out.append(
-            MemoryFile(
-                path=p,
-                name=p.stem,
-                description=description,
-                metadata=metadata,
-                body=body,
-            )
+    # Scan active dir + _archive subdir if present.
+    scan_targets: list[tuple[Path, bool]] = [(memory_dir, False)]
+    archive_dir = memory_dir / "_archive"
+    if archive_dir.is_dir():
+        scan_targets.append((archive_dir, True))
+
+    for scan_dir, is_archived in scan_targets:
+        for p in sorted(scan_dir.iterdir()):
+            if p.is_dir() or not p.name.endswith(".md"):
+                continue
+            # README files are directory metadata, not memories.
+            if p.stem.upper() == "README":
+                continue
+            try:
+                text = p.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            fm, body = _split_frontmatter(text)
+            description = str(fm.get("description") or _first_h1(body) or p.stem)
+            metadata = fm.get("metadata") if isinstance(fm.get("metadata"), dict) else {}
+            out.append(
+                MemoryFile(
+                    path=p,
+                    name=p.stem,
+                    description=description,
+                    metadata=metadata,
+                    body=body,
+                    archived=is_archived,
+                )
         )
     return out
 

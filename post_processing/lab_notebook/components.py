@@ -1475,50 +1475,77 @@ def notes_sidebar(
             children.append(note_card(n, is_active=(str(n.path) == active_id)))
 
     if corpus.memory:
-        children.append(
-            html.Div(
-                "memory files",
-                style={
-                    "fontSize": "11px",
-                    "fontWeight": "700",
-                    "color": "#718096",
-                    "letterSpacing": "0.5px",
-                    "margin": "14px 0 6px",
-                    "textTransform": "uppercase",
-                },
+        active_memory = [m for m in corpus.memory if not m.archived]
+        archived_memory = [m for m in corpus.memory if m.archived]
+
+        def _memory_card(m: MemoryFile, *, muted: bool = False) -> html.Div:
+            base = CARD_STYLE_ACTIVE if m.name == active_id else CARD_STYLE
+            if muted and m.name != active_id:
+                # Muted style for archived entries: lighter background, dimmer text.
+                base = {**base, "backgroundColor": "#fafafa", "opacity": "0.78"}
+            return html.Div(
+                id={"type": "memory-card", "id": m.name},
+                n_clicks=0,
+                style=base,
+                children=[
+                    html.Div(
+                        m.name,
+                        style={
+                            "fontWeight": "600",
+                            "fontFamily": "ui-monospace, monospace",
+                            "fontSize": "12px",
+                            "color": "#6b7280" if muted else "#1a202c",
+                        },
+                    ),
+                    html.Div(
+                        (m.description[:140] + "…")
+                        if len(m.description) > 140
+                        else m.description,
+                        style={
+                            "fontSize": "11px",
+                            "color": "#6b7280" if muted else "#4a5568",
+                            "marginTop": "4px",
+                            "lineHeight": "1.45",
+                        },
+                    ),
+                ],
             )
-        )
-        for m in corpus.memory:
+
+        if active_memory:
             children.append(
                 html.Div(
-                    id={"type": "memory-card", "id": m.name},
-                    n_clicks=0,
-                    style=(
-                        CARD_STYLE_ACTIVE if m.name == active_id else CARD_STYLE
-                    ),
-                    children=[
-                        html.Div(
-                            m.name,
-                            style={
-                                "fontWeight": "600",
-                                "fontFamily": "ui-monospace, monospace",
-                                "fontSize": "12px",
-                            },
-                        ),
-                        html.Div(
-                            (m.description[:140] + "…")
-                            if len(m.description) > 140
-                            else m.description,
-                            style={
-                                "fontSize": "11px",
-                                "color": "#4a5568",
-                                "marginTop": "4px",
-                                "lineHeight": "1.45",
-                            },
-                        ),
-                    ],
+                    f"memory files · active ({len(active_memory)})",
+                    style={
+                        "fontSize": "11px",
+                        "fontWeight": "700",
+                        "color": "#718096",
+                        "letterSpacing": "0.5px",
+                        "margin": "14px 0 6px",
+                        "textTransform": "uppercase",
+                    },
                 )
             )
+            for m in active_memory:
+                children.append(_memory_card(m))
+
+        if archived_memory:
+            children.append(
+                html.Div(
+                    f"memory files · archived ({len(archived_memory)})",
+                    style={
+                        "fontSize": "11px",
+                        "fontWeight": "700",
+                        "color": "#a0aec0",
+                        "letterSpacing": "0.5px",
+                        "margin": "18px 0 6px",
+                        "textTransform": "uppercase",
+                        "borderTop": "1px dashed #e2e8f0",
+                        "paddingTop": "12px",
+                    },
+                )
+            )
+            for m in archived_memory:
+                children.append(_memory_card(m, muted=True))
 
     return html.Div(children)
 
