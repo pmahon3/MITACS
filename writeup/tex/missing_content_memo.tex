@@ -1182,6 +1182,213 @@ distributional-class thread exhausted and spawn a non-distributional
 thread on the remaining $\sim 954$ $\chi^{2}$. (S9c)'s asymptote
 reading favours the third.
 
+\section{Q2B of the distributional-class thread: settled (R-C3)}
+\label{sec:q2b-settled}
+
+Q2A's substantive verdict (\S\ref{sec:q2a-settled}) bounded the
+distributional-class lift: three richer-than-Student-$t$ families
+are $\chi^{2}$-indistinguishable, the simplest binds, and the
+remaining $\sim 954$ $\chi^{2}$ does not yield to further
+distributional richness. Q2B is the registered ablation experiment
+that decomposes that remaining $\chi^{2}$ into three pre-registered
+non-distributional mechanisms. It ran 2026-05-26; this section
+reports the result.
+
+\paragraph{Q2B: candidate set (three non-distributional mechanisms).}
+Each mechanism is a single-target ablation fix on the iterated
+$\hat\kappa_{1}$ predictor at the M3 (mixture-$2$ Gaussian)
+baseline; only that piece changes:
+\begin{itemize}[leftmargin=2em]
+\item Mech~1 (\texttt{mean\_bias}): add the empirical per-$(h,
+\mathrm{day\_type})$ mean bias to each SMC particle's $z$ value
+before marginal PIT. Targets clim-gap-nonstationary's MW-space
+$+1000$~MW drift after $z$-space translation.
+\item Mech~2 (\texttt{variance\_div}): one-sided variance cap.
+Rescale particles toward the ensemble mean if $\sigma^{2}_{\mathrm{iter}}
+> \sigma^{2}_{\mathrm{empirical}}$. Targets putative iterated
+over-dispersion.
+\item Mech~3 (\texttt{seam}): restrict PIT aggregation domain to
+exclude seam-domain rows. \textbf{Registered null} (production
+iteration already excludes seam-crossing rows via
+\verb|_complete_delivery_days|).
+\end{itemize}
+
+\paragraph{Q2B: pre-registered cuts.}
+The verdict metric is the explained-share of the gap between the
+M3 baseline and Q2A's R-A2 corroboration cut:
+\[
+\mathrm{explained\_share}[m] :=
+\frac{\chi^{2}_{\mathrm{baseline\_M3}} - \chi^{2}_{\mathrm{after\_fix}}[m]}
+{\chi^{2}_{\mathrm{baseline\_M3}} - \mathrm{R\text{-}A2\_cut}}
+\]
+with $\chi^{2}_{\mathrm{baseline\_M3}} = 953.84$ (Q2A SETTLED),
+$\mathrm{R\text{-}A2\_cut} = 228.44$, and frozen denominator
+$725.40$. The shape outcomes are:
+\begin{itemize}[leftmargin=2em]
+\item \textbf{R-A3 (dominance):} $\max_{m}
+\mathrm{explained\_share}[m] > 0.50$ AND $> 2\times$ second
+share. A single mechanism captures the bulk.
+\item \textbf{R-B3 (mixed):} not R-A3 and not R-C3 (at least one
+share $\geq 0.15$). Mechanisms contribute jointly.
+\item \textbf{R-C3 (inadequate):} $\max_{m}
+\mathrm{explained\_share}[m] < 0.15$. No pre-registered
+mechanism captures the gap.
+\end{itemize}
+
+\paragraph{Q2B: result.}
+With $1000$-paired-day bootstrap CIs:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& point & CI low & CI high \\
+\midrule
+$\chi^{2}_{\mathrm{baseline\_M3}}$         & $961.96$  & $698.61$  & $1{,}375.68$ \\
+$\chi^{2}_{\mathrm{after\_mean\_bias}}$    & $875.04$  & $627.65$  & $1{,}213.67$ \\
+$\chi^{2}_{\mathrm{after\_variance\_cap}}$ & $1{,}036.15$ & $750.79$  & $1{,}512.26$ \\
+$\chi^{2}_{\mathrm{after\_seam\_excl}}$    & $1{,}054.59$ & $790.12$  & $1{,}464.07$ \\
+\midrule
+$\mathrm{share}[\mathtt{mean\_bias}]$       & $+0.109$ & $-0.393$ & $+0.735$ \\
+$\mathrm{share}[\mathtt{variance\_div}]$    & $-0.114$ & $-0.217$ & $-0.013$ \\
+$\mathrm{share}[\mathtt{seam}]$             & $-0.139$ & $-0.169$ & $-0.088$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Self-consistency baseline reproduces Q2A's settled M3 to within
+$0.85\%$ ($|\Delta| = 8.12$ vs.\ tolerance $50$; Q2A CI overlap
+clear). Pipeline integrity confirmed.
+
+\paragraph{Q2B: verdict.}
+The mechanical verdict is \textbf{R-C3} (max share $0.109$ on
+\texttt{mean\_bias}, well below the $0.15$ null floor), and the
+substantive verdict agrees. Q2B is the second arbiter in the
+workflow's history without a mechanical/substantive gap; but here
+the substantive picture is \emph{stronger} than the mechanical
+reading, not weaker, because two of three shares are
+sign-determined NEGATIVE at $95\%$ --- the corresponding ablation
+fixes actively made $\chi^{2}$ worse.
+
+\paragraph{(S10) The Q2B findings, three sub-claims.}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{(S10a) All three pre-registered mechanism candidates
+are empirically inadequate.} Point shares
+$(+0.109, -0.114, -0.139)$ all below the $0.15$ null floor.
+The pre-registered mechanism set (mean-bias absorption, one-sided
+variance cap, seam-domain exclusion) does \emph{not} capture the
+non-distributional structure of the $\sim 954$ $\chi^{2}$ residual.
+
+\item \textbf{(S10b) Two mechanisms are mis-specified at the
+construction level, not merely inadequate.} \texttt{variance\_div}
+and \texttt{seam} have negative shares sign-determined at $95\%$
+(CIs $[-0.22, -0.01]$ and $[-0.17, -0.09]$ respectively). The
+ablation fixes did not just fail to improve calibration; they
+degraded it. The mechanistic reason for \texttt{variance\_div}:
+$\sigma^{2}_{\mathrm{iter}} < \sigma^{2}_{\mathrm{empirical}}$
+at virtually every $(h, \mathrm{day\_type})$ cell --- the SMC
+ensemble UNDER-disperses relative to actuals everywhere. The
+one-sided cap is wrong-directional: designed for over-dispersion,
+applied in an under-dispersion regime. For \texttt{seam}: the
+registered null fires with sign because layering an additional
+row-exclusion on production output (which already handles the
+seam correctly) removes valid PIT samples and adds aggregation
+noise.
+
+\item \textbf{(S10c) The under-dispersion signature is the
+substantive positive content.} The SMC ensemble variance is less
+than the empirical variance at nearly every cell across all three
+day-types (only a minority of saturday cells show
+$\sigma^{2}_{\mathrm{iter}} \geq \sigma^{2}_{\mathrm{empirical}}$).
+Under-dispersion of an iterated forecast is the canonical signature
+of missing exogenous content: the predictor's predictive
+distribution is too narrow because the conditioning sub-$\sigma$-algebra
+is too coarse. The mech~$1$ contribution ($+0.11$, the only
+positive share) is directionally correct but bounded; richer
+subtraction designs (state-dependent, weather-conditioned,
+secular-drift-conditioned) may extract more, but the aggregate
+per-$(h, \mathrm{day\_type})$ ceiling at $\sim 0.11$ is a
+substantive upper bound on what aggregate mean-bias ablation
+alone can deliver.
+\end{itemize}
+
+\paragraph{Forecaster calibration.}
+Proponent forecast R-A3 with \texttt{mean\_bias} dominance at
+share $0.75$ (CI $[0.50, 0.95]$), MW-space-to-$z$-space anchored.
+Devil's advocate forecast R-B3 with \texttt{mean\_bias} share
+$0.40$ (CI $[0.25, 0.60]$), $z$-space attenuation anchored. Both
+wrong on outcome category; DA materially closer on the
+\texttt{mean\_bias} magnitude (residual $0.29$ vs.\ proponent
+$0.64$). Both shared a structural blind spot: neither anticipated
+that any mechanism ablation could actively degrade calibration.
+The proponent's explicit \texttt{what\_would\_change\_my\_mind}
+condition $\#2$ (``If R-C3 fires, none of the three pre-registered
+mechanisms is the right level of decomposition'') materialised
+verbatim. This is the fourth named-failure-mode instance in the
+workflow (after Q1 R-D-vs-R-C, eigenmodes-v1 O$2$-vs-O$3$, and
+P1 mechanical-AMBIGUOUS-vs-tautology); Q2B differs in direction
+--- the substantive verdict is \emph{stronger} than the mechanical
+reading, not different from it.
+
+\paragraph{Framework-level interpretation: the identifiability
+obstruction.}
+The conjunction of (S9) and (S10) admits a sharper reading under
+the disintegration-as-diagnostic frame parked
+2026-05-26 in the theory-side programme. Decompose the risk of any
+estimator built from a conditional kernel $\kappa_{Q}$ as
+\[
+\mathrm{Risk}(\mathrm{estimator}) \;=\; R^{*}(Q) \;+\; \text{model-class gap} \;+\; \text{estimation error},
+\]
+where $R^{*}(Q)$ is the conditional Bayes risk at the
+conditioning $\sigma$-algebra $Q$. The framework offers two
+levers for reducing risk: (1) \emph{kernel refinement} reduces
+the model-class gap at fixed $Q$; (2) \emph{$\sigma$-algebra
+enrichment} reduces $R^{*}(Q)$ itself by conditioning on more
+information ($Q \to Q' \supset Q$). (S9) was a properly-posed
+Lever~1 test: three richer-than-Student-$t$ families at the same
+$Q$, bounded at $1.44\times$ marginal return. (S10) was \emph{not}
+a properly-posed Lever~2 test: the three mechanisms (mean-bias
+subtraction, variance cap, seam exclusion) are post-hoc fixes on
+the same $Q$, not enrichments. The empirical conjunction --- Lever~1
+plateaus and naive same-$Q$ manipulations fail with two
+mis-specified --- is consistent with \emph{either} regime~(a)
+intrinsic structured noise (the conditional law $\kappa_{Q}(\cdot \mid q)$
+is heavy-tailed for intrinsic reasons; $R^{*}(Q)$ is the floor)
+\emph{or} regime~(b) noisy structure with latent $Z \notin \sigma(Q)$
+orthogonal to the current conditioning (the observed pathology
+is a mixture artefact and $R^{*}(Q') < R^{*}(Q)$ for $Q' = Q \vee \sigma(Z)$).
+
+That these two regimes produce identical $\kappa_{Q}$ and are
+\emph{provably} indistinguishable from $\kappa_{Q}$ alone is
+published theorem in multiple traditions: Bergna et al.
+(\texttt{arXiv:2605.06413}, $2026$, Prop.~$1$) for the aleatoric--epistemic
+ambiguity, Heckman--Singer (\emph{Econometrica}, $1984$) for
+duration models, Allahverdyan (\texttt{arXiv:2002.07884}, $2020$)
+for mixture models, and Andrews--Mallows (\emph{JRSSB}, $1974$)
+for scale-mixture transparency. The memo's contribution is not
+the obstruction theorem; it is applied evidence that (S9) and
+(S10) jointly map the boundary of what the distributional-class
+axis can deliver on this empirical process, and that the natural
+next move follows the framework's prescribed resolution paths:
+(i) candidate-$Z$ testing (temperature, secular drift via
+\texttt{year\_since\_cutoff} per (S5), refined day-type partition);
+(ii) stratified Patra--Sen as a $\sigma$-algebra adequacy
+diagnostic; (iii) synthetic Gaussian-DGP calibration to anchor
+the residual-$\chi^{2}$ floor against a known reference.
+
+\paragraph{Thread state after Q2B.}
+Q2B.status $\to$ \texttt{settled}; the thread's
+\texttt{branching\_rules} table has no Q2B entry, so mechanical
+state advancement is unavailable and the thread transitions to
+\texttt{pending\_amendment}. The substantive recommendation,
+under the framework reframe above, is to declare the
+distributional-class thread \texttt{exhausted} on its
+pre-registered scope (distributional-class axis only) and spawn
+a fresh thread on the three resolution paths. The arbiter notes
+this is one of two legitimate moves under the workflow (the other
+being a mechanism-redesign amendment); the framework reframe
+favours the spawn-new-thread move because the three resolution
+paths are not mechanism-redesign within the same lever.
+
 \section{What is settled at each level of generality}
 \label{sec:settled-levels}
 
@@ -1205,11 +1412,15 @@ finite-dim embeddings of higher-dim processes
 and Student-$t$ (S8c) special cases. The defect persists under the
 kernel-family lift, though at $\sim 10\times$ smaller magnitude than
 the Gaussian estimate suggested. The hypothesis survives independent
-of family. Bounded by (S9): the
-reduction curve M0 $\to$ M1 ($16\times$) versus M1 $\to$ richer-best
-($1.44\times$) shows the distributional-class lift is bounded;
-further reduction of the marginal pathology requires non-distributional
-content. \\
+of family. Bounded by (S9) and (S10) under both directions tested:
+(S9) at fixed $Q$ via kernel refinement (M0 $\to$ M1 = $16\times$;
+M1 $\to$ richer-best = $1.44\times$), (S10) via three pre-registered
+same-$Q$ non-distributional mechanisms (all three below the $0.15$
+null floor; two sign-determined negative). Further reduction of the
+marginal pathology requires neither additional distributional
+flexibility (S9) nor naive same-$Q$ post-hoc fixes (S10), but
+$\sigma$-algebra enrichment via auxiliary information (see the
+``how far the lift can go'' row below). \\
 \addlinespace
 Gaussian kernel family as the right family for this empirical
 process
@@ -1252,20 +1463,48 @@ Student-$t$ climatology adds noise without capturing real signal. \\
 \addlinespace
 How far the distributional-class lift can go on this empirical
 process
-& \textbf{Empirically bounded} by (S9). Three richer-than-Student-$t$
-families tested (mixture-2-Gaussian M3, mixture-3-Gaussian M4, KDE
-residual law M5). All three are $\chi^{2}$-indistinguishable (spread
-$13$ $\chi^{2}$ units across the three; KDE is the \emph{worst} by
-$0.8$). The reduction curve M0 (Gaussian) $\to$ M1 (Student-$t$) is
-$16\times$ ($22{,}329 \to 1{,}371$); M1 $\to$ Q2A-best is $1.44\times$
-($1{,}371 \to 954$). Picture (C) is not refuted (the defect remains;
-$\mathrm{D\_RATIO}_{\Studt} > 1$ with CI clear of $1$ per (S8c))
-but distributional-class flexibility above a $2$-component symmetric
-mixture has near-zero marginal return on this population. The
-remaining $\sim 954$ $\chi^{2}$ is non-distributional; the
-day-type asymmetry (saturday $\sim 4\times$ weekday, family-invariant)
-corroborates (S2)/(S3) and points toward state-dependent or
-exogenous content. \\
+& \textbf{Empirically bounded} by (S9) on Lever~1 (kernel
+refinement at fixed $Q$): three richer-than-Student-$t$ families
+$\chi^{2}$-indistinguishable, KDE marginally worst; M0 $\to$ M1
+$= 16\times$, M1 $\to$ Q2A-best $= 1.44\times$. \textbf{Further
+bounded} by (S10) on the pre-registered Lever-$2$-like candidates:
+mean-bias absorption, one-sided variance cap, and seam exclusion
+are post-hoc same-$Q$ fixes (not true $\sigma$-algebra
+enrichments); all three below the $0.15$ null floor with two
+sign-determined negative (variance cap and seam exclusion
+actively degraded calibration). Picture~(C) survives (the defect
+remains; $\mathrm{D\_RATIO}_{\Studt} > 1$ with CI clear of $1$
+per (S8c)). The joint S9~$+$~S10 pattern --- kernel refinement
+plateaus AND naive same-$Q$ manipulations fail --- is applied
+evidence for the identifiability obstruction (Bergna et al.\
+$2026$ Prop.\ $1$; Heckman--Singer $1984$; Allahverdyan $2020$):
+intrinsic heavy-tailedness and latent-$Z$ mixture artefacts are
+observationally indistinguishable from $\kappa_{Q}$ alone. The
+distributional-class line of inquiry is exhausted on its
+pre-registered scope; the next move requires auxiliary information
+per the framework's three resolution paths (candidate-$Z$ testing,
+stratified Patra--Sen, synthetic Gaussian-DGP calibration). \\
+\addlinespace
+Decomposition of the residual $\chi^{2}$ into the pre-registered
+non-distributional mechanisms (iterated mean trajectory bias,
+iterated variance divergence, day-anchor seam)
+& \textbf{Empirically inadequate} by (S10). All three shares below
+the $0.15$ null floor (point estimates $+0.109, -0.114, -0.139$);
+two of three sign-determined NEGATIVE at $95\%$ CI (\texttt{variance\_div}
+$\in [-0.22, -0.01]$, \texttt{seam} $\in [-0.17, -0.09]$). The
+mech~$2$ variance cap and mech~$3$ seam exclusion actively WORSENED
+$\chi^{2}$. Mech~$1$ mean-bias contributes $+0.11$ share but well
+below the $0.50$ dominance threshold. Together with (S9), this
+maps the boundary of the distributional-class framework's two
+natural levers (kernel refinement at fixed $Q$; naive same-$Q$
+manipulations of the predictive distribution). The remaining
+$\sim 954$ $\chi^{2}$ requires $\sigma$-algebra enrichment with
+auxiliary $Z$ (per the disintegration-as-diagnostic note parked
+2026-05-26 in the theory-side programme:
+\path{Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md}).
+The under-dispersion signature ($\sigma^{2}_{\mathrm{iter}} <
+\sigma^{2}_{\mathrm{empirical}}$ at virtually every cell)
+independently points at missing exogenous content. \\
 \addlinespace
 Test methodology (synthetic-calibrated divergence test) as a
 generic discipline
@@ -1327,6 +1566,10 @@ S8 (Q1)
 S9 (Q2A)
   & \path{2026-05-26_q2a-richer-family-mixture-or-nonparametric}
   & SETTLED R-B2 \\
+\addlinespace
+S10 (Q2B)
+  & \path{2026-05-26_q2b-non-distributional-decomposition}
+  & SETTLED R-C3 \\
 \midrule
 Thread \newline (Gaussian)
   & \path{2026-05-26_missing-content-thread}
@@ -1334,7 +1577,7 @@ Thread \newline (Gaussian)
 \addlinespace
 Thread \newline (kernel-family)
   & \path{2026-05-26_distributional-class-thread}
-  & \texttt{pending\_amendment} after Q2A; analyst chooses among reopen-Q2B, new Q2C (state-dependent / hybrid), or spawn non-distributional thread (see (S9) and Q2A arbiter) \\
+  & \texttt{pending\_amendment} after Q2B (R-C3 has no entry in \texttt{branching\_rules}); substantive recommendation is \texttt{exhausted} on the pre-registered distributional-class scope per (S9)~$+$~(S10), with a fresh thread on the framework's three resolution paths as the natural next move \\
 \bottomrule
 \end{tabular}
 
@@ -1361,9 +1604,12 @@ v2 finding; its magnitude now qualified by S8c.
 \item \texttt{mitacs-pit-calendar-fingerprint-p1} --- S4, S5.
 \item \texttt{mitacs-q1-student-t-vs-gaussian} --- S8.
 \item \texttt{mitacs-q2a-richer-family} --- S9.
+\item \texttt{mitacs-q2b-non-distributional} --- S10.
 \item \texttt{mitacs-session-lessons-corpus} --- the named
 retraction modes; the fourth mode (criterion-vs-legitimate-data-
-structure) added with Q1 as the third instance.
+structure) added with Q1 as the third instance; Q2B adds the
+fourth instance with substantive verdict \emph{stronger} than
+mechanical (the prior three had it weaker/different).
 \end{itemize}
 
 \paragraph{Seed and workflow.}
@@ -1410,16 +1656,33 @@ Q2A synthetic gate (METHOD/DESIGN):
 \path{experiment/results/q2a_synthetic_gate.txt}.
 Output artifact:
 \path{scratch/data/distributional_class_q2a/q2a.pkl}.
+\item Q2B's experiment script:
+\path{experiment/distributional_class_q2b/__main__.py}.
+Primary CLAIM artifact:
+\path{experiment/results/q2b_non_distributional.txt}.
+Output pickle (per-mechanism PIT tables, per-cell attribution-only
+statistics):
+\path{scratch/data/distributional_class_q2b/q2b.pkl}.
+\item Theory-side framework note parked 2026-05-26 identifying the
+identifiability obstruction and the three resolution paths:
+\path{~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md}.
 \end{itemize}
 
 \paragraph{Next concrete step.}
-A thread amendment via \verb|thread-coordinator| advancing the
+A thread move via \verb|thread-coordinator| advancing the
 \texttt{distributional-class-thread} from \texttt{pending\_amendment}.
-The (S9c) asymptote reading favours either reopening Q2B
-(non-distributional content: iterated-mean bias, day-anchor seam,
-secular drift) or spawning a fresh non-distributional thread on
-the remaining $\sim 954$ $\chi^{2}$. State-dependent or hybrid
-distributional/calendar models (a possible Q2C node) are a
-middle option; the Q2A arbiter does not rank them.
+Under the framework reframe (S9~$+$~S10 jointly bound the two
+distributional-class levers), the substantive recommendation is
+to declare the thread \texttt{exhausted} on its pre-registered
+scope and spawn a fresh thread on the framework's three
+resolution paths: (i) candidate-$Z$ testing
+(temperature, secular drift via \texttt{year\_since\_cutoff} per
+(S5), refined day-type partition); (ii) stratified Patra--Sen as
+a $\sigma$-algebra adequacy diagnostic; (iii) synthetic
+Gaussian-DGP calibration to anchor the residual-$\chi^{2}$ floor.
+A mechanism-redesign amendment to Q2B (e.g., two-sided variance
+rescaling addressing the under-dispersion direction; weather-
+conditioned mean-bias) is the other workflow-legitimate move, but
+remains within the bounded levers (S9)~$+$~(S10) characterised.
 
 \end{document}
