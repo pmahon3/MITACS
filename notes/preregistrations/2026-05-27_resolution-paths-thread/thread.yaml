@@ -1,0 +1,210 @@
+amendments: []
+body_sha256: 3fe3573938b0aa24e7332e090a578401722ed225330b12395101b66a58c8c2ab
+branching_rules:
+  P1:
+    R-A: Q1A
+    R-B: Q1A
+    R-C: Q1C
+  P2:
+    methodology_grade_calibration: null
+  Q1A:
+    R-A1A: null
+    R-B1A: Q1B
+    R-C1A: P2
+  Q1B:
+    R-A1B: null
+    R-B1B: null
+    R-C1B: P2
+  Q1C:
+    R-A1C: null
+    R-B1C: null
+    R-C1C: P2
+current_node_id: P1
+git_clean: true
+git_sha: 40b971bbe694c1f5969ebba7276712cd7bb38e5e
+nodes:
+  P1:
+    id: P1
+    name: patra-sen-per-stratum-localization
+    parent_branch: null
+    parent_id: null
+    phase_a_path: null
+    phase_a_skeleton:
+      candidate_set:
+      - demand_quantile
+      - time_of_day
+      - season
+      - day_type
+      - hour_of_week
+      metric_class: 'Plain Patra-Sen (2016) two-component mixture estimator α̂_L (lower 95%
+        bound on non-Gaussian mixture fraction) applied per stratum to the standardized residuals
+        of Q1''s M1 predictor (Student-t kernel; the best κ_1-only predictor). Stratification
+        across 5 axes: demand quantile (terciles), time-of-day (4 bins: overnight 00-05 /
+        morning ramp 06-10 / afternoon 11-16 / evening 17-23), season (3 bins: winter Nov-Mar
+        / summer Jun-Aug / shoulder Apr-May+Sep-Oct), day-type (3: weekday/saturday/sunday),
+        and hour-of-week (collapsed to 8 bins; finer than day-type+time-of-day combined).
+        Per axis: report α̂_L per stratum with 1000 paired-day bootstrap CIs; compute range_axis
+        = max(α̂_L) − min(α̂_L) across strata in that axis.
+
+        '
+      outcome_categories:
+      - R-A: max over axes of range(α̂_L) > 0.20 (Z detectable from current data; the binding
+          axis points at where Z is concentrated)
+      - R-B: max range in (0.10, 0.20] (marginal variation; Z hint present but not localized)
+      - R-C: max range < 0.10 (constant across all strata; Z orthogonal to current natural
+          conditioning)
+    status: planned
+  P2:
+    id: P2
+    name: synthetic-gaussian-DGP-calibration
+    notes: 'P2 is triggered when all live R-A branches (Q1A/B/C) fire R-C1A/B/C. Provides
+      interpretation framework for the thread-EXHAUSTED-UNRESOLVED case: Ontario''s α̂_L excess
+      above the synthetic floor would attribute the residual to structure even though no single
+      Z closes the gap.
+
+      '
+    parent_branch: null
+    parent_id: null
+    phase_a_path: null
+    phase_a_skeleton:
+      candidate_set:
+      - gaussian_floor
+      - single_Z_recovery
+      metric_class: 'Generate synthetic data with: (a) known-Gaussian DGP with matched autocorrelation;
+        (b) known covariate-dependent mixture DGP with single-Z structure. Run plain Patra-Sen
+        (per P1''s method) on both. Establish α̂_L floor under (a); confirm recovery under
+        (b). Provides a reference baseline against which Ontario''s α̂_L excess can be attributed.
+
+        '
+      outcome_categories:
+      - methodology_grade_calibration
+    status: planned
+  Q1A:
+    id: Q1A
+    name: Z1-conditioning-strongest-axis
+    parent_branch: R-A
+    parent_id: P1
+    phase_a_path: null
+    phase_a_skeleton:
+      candidate_set:
+      - strongest_Z_from_P1_R-A
+      metric_class: 'Re-fit M3 (mixture-2-Gaussian) with the additional conditioning variable
+        Z derived from P1''s strongest-signal stratification axis. Recompute marginal PIT
+        χ² on post-cutoff data. Use Q2A''s gate-derived cuts.
+
+        '
+      outcome_categories:
+      - R-A1A: χ² ≤ 228 (Q2A R-A2 cut; this Z closes the gap; specific Z identified)
+      - R-B1A: χ² in (228, 2284] (Z helps but doesn't close; multi-Z needed)
+      - R-C1A: χ² > 2284 (Z doesn't help; P1's signal was a false positive or the localization
+          missed the actual Z)
+      skeleton_thresholds_depend_on:
+      - field: binding_axis_and_Z_construction
+        rule: Q1A's specific Z is derived from P1's R-A binding axis at result time.
+        source: P1.result
+    status: planned
+  Q1B:
+    id: Q1B
+    name: Z2-conditioning-second-axis
+    parent_branch: R-A
+    parent_id: P1
+    phase_a_path: null
+    phase_a_skeleton:
+      candidate_set:
+      - second_strongest_Z_from_P1_R-A
+      metric_class: 'As Q1A but with Z derived from P1''s second-strongest-signal axis. Tests
+        multi-mechanism hypothesis: if Q1A delivers R-B1A (Z1 helps but doesn''t close), Z2
+        may close the gap when combined with Z1.
+
+        '
+      outcome_categories:
+      - R-A1B: cumulative-with-Z1 χ² ≤ 228 (Z1+Z2 close gap together)
+      - R-B1B: in (228, 2284]
+      - R-C1B: '> 2284 (Z2 redundant with Z1)'
+      skeleton_thresholds_depend_on:
+      - field: second_Z_construction
+        rule: Q1B's Z2 is the second-ranked axis from P1; Q1B's cumulative χ² is computed
+          against Q1A's Z1-conditioned baseline.
+        source: P1.result AND Q1A.result
+    status: planned
+  Q1C:
+    id: Q1C
+    name: temperature-fallback-prior-supported-Z
+    notes: 'Requires exogenous data source. ECCC (Environment and Climate Change Canada) historical
+      hourly weather is free, but the data acquisition + alignment is a pre-experiment infrastructure
+      cost that must land before Q1C''s phase_a is filled.
+
+      '
+    parent_branch: R-C
+    parent_id: P1
+    phase_a_path: null
+    phase_a_skeleton:
+      candidate_set:
+      - temperature
+      metric_class: 'If P1 returns R-C (constant α̂_L across all natural strata), test the
+        prior-supported Z anyway: temperature. clim-gap-nonstationary and postcovid-probe
+        both name temperature as the strongest a priori candidate. If R-A1C fires, P1''s signal
+        was a false null (temperature orthogonal to all five sketched stratification axes);
+        if R-C1C fires, the missing content is not temperature and (P2 calibration is the
+        next step).
+
+        '
+      outcome_categories:
+      - R-A1C: χ² ≤ 228 (temperature closes gap; P1 was false null)
+      - R-B1C: in (228, 2284]
+      - R-C1C: χ² > 2284 (temperature doesn't help either; → P2)
+    status: planned
+question: Of the three framework-prescribed resolution paths for the identifiability obstruction
+  (S9+S10), which closes the residual ~954 χ² of the κ_1 predictor on post-cutoff Ontario
+  data?
+references:
+- body_sha256: c89e2f7604f7dbe756e7598a1b8c796da503112dac3664db42de70c873e3a4bd
+  file: ../2026-05-26_distributional-class-thread/thread.yaml
+  relation: supersedes
+- body_sha256: 5a237eb6f43257c31650f1205d7335e250042b6286a5a4f3d6ead6af56cc8013
+  file: ../2026-05-26_q2b-non-distributional-decomposition/arbiter.yaml
+  relation: root
+resolution:
+  final_state: null
+  resolved_at: null
+  spawned_threads: []
+  summary: null
+root:
+  artifacts:
+  - body_sha256: c89e2f7604f7dbe756e7598a1b8c796da503112dac3664db42de70c873e3a4bd
+    file: ../2026-05-26_distributional-class-thread/thread.yaml
+  - body_sha256: 5a237eb6f43257c31650f1205d7335e250042b6286a5a4f3d6ead6af56cc8013
+    file: ../2026-05-26_q2b-non-distributional-decomposition/arbiter.yaml
+  closure_rule: 'Thread RESOLVED when cumulative explained share > 80% across the Z''s tested,
+    where share = (χ²_baseline − χ²_after_fix) / (χ²_baseline − R-A2_cut) following Q2B''s
+    convention. Specifically: Single Q1A.R-A1A with share > 0.80 → RESOLVED (single dominant
+    Z); Q1A.R-B1A + Q1B.R-A1B with cumulative > 0.80 → RESOLVED (multi-Z); Cumulative < 0.80
+    across all tested branches → EXHAUSTED-UNRESOLVED (P2 calibration provides closure framing).'
+  description: 'The distributional-class-thread was declared exhausted on 2026-05-26 (commit
+    543e3e8) following Q2B''s SETTLED R-C3 verdict (commit daad39f). Joint S9+S10 evidence
+    (Q2A bounded the kernel-refinement lever; Q2B bounded the pre-registered same-Q non-distributional
+    candidates with two sign-determined negative) is consistent with the identifiability obstruction
+    — published theorem per Bergna et al. (2026 Prop 1), Heckman-Singer (1984), Allahverdyan
+    (2020), Andrews-Mallows (1974). See the theory-side framework note `~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md`
+    (PARKED 2026-05-26) and its audit-correction note `disintegration_diagnostic_audit_correction.md`
+    (2026-05-27). The framework prescribes three resolution paths to break the structured-noise
+    / noisy-structure tie via auxiliary information: (i) candidate-Z testing; (ii) stratified
+    covariate-dependent mixture decomposition diagnostic; (iii) synthetic Gaussian-DGP calibration.
+    This thread tests these paths against Ontario κ_1 residuals.'
+  scope_limits: 'This thread tests the σ-algebra-enrichment axis with auxiliary information.
+    It does NOT re-test the distributional-class axis (closed by S9+S10). Results are attribution-grade
+    (no deployable predictors); adding Z to the predictor changes the conditioning σ-algebra,
+    so results are framed as σ-algebra adequacy / Bayes risk reduction, not as predictor improvements.
+    The methods-novelty branch of path (ii) was determined dead by literature scout 2026-05-26
+    (notes/literature/2026-05-26_stratified-patra-sen-scout.md, commit 8f0f3f3 / 40b971b):
+    Deb, Saha, Guntuboyina, Sen (2022, JASA, NPMLEmix) provides the canonical covariate-dependent
+    generalization. This thread uses plain Patra-Sen (2016) per stratum with range-threshold
+    verdict for P1 — sufficient for the registered verdict architecture without invoking NPMLEmix''s
+    Mosek dependency.
+
+    '
+schema: thread
+state: planning
+state_history: []
+topic: resolution-paths-thread
+written_at: '2026-05-27T07:00:00-07:00'
