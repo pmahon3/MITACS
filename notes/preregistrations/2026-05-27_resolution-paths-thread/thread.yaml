@@ -1,5 +1,5 @@
 amendments: []
-body_sha256: c97c3ad5906c21f3c19bb59dc9da7707a75d0f6ebfe9ede6aed489baa4711f71
+body_sha256: 9a5647a5f7ea6b3ee44d53e95c23e165e9d706d105db9afbf2c4f0cc25a3c6ba
 branching_rules:
   P1:
     R-A: Q1A
@@ -19,9 +19,9 @@ branching_rules:
     R-A1C: null
     R-B1C: null
     R-C1C: P2
-current_node_id: P1
-git_clean: true
-git_sha: c387aea5ec3a4c869ee4bb3f62d9a23e3d08b393
+current_node_id: Q1A
+git_clean: false
+git_sha: 3c3e2e0c947ab77a3bcaea14f36df841a22af632
 nodes:
   P1:
     id: P1
@@ -55,7 +55,7 @@ nodes:
           localized)
       - R-C: max range < 0.10 (constant across all strata; Z orthogonal to current
           natural conditioning)
-    status: active
+    status: settled
   P2:
     id: P2
     name: synthetic-gaussian-DGP-calibration
@@ -105,7 +105,7 @@ nodes:
       - field: binding_axis_and_Z_construction
         rule: Q1A's specific Z is derived from P1's R-A binding axis at result time.
         source: P1.result
-    status: planned
+    status: active
   Q1B:
     id: Q1B
     name: Z2-conditioning-second-axis
@@ -156,7 +156,7 @@ nodes:
       - R-A1C: χ² ≤ 228 (temperature closes gap; P1 was false null)
       - R-B1C: in (228, 2284]
       - R-C1C: χ² > 2284 (temperature doesn't help either; → P2)
-    status: planned
+    status: closed
 question: Of the three framework-prescribed resolution paths for the identifiability
   obstruction (S9+S10), which closes the residual ~954 χ² of the κ_1 predictor on
   post-cutoff Ontario data?
@@ -239,5 +239,38 @@ state_history:
   transition: planning_to_active
   triggered_by_arbiter: null
   written_at: '2026-05-27T08:54:52-07:00'
+- advancement_id: S2
+  branch_fired: R-A
+  git_sha: 3c3e2e0c947ab77a3bcaea14f36df841a22af632
+  node_settled: P1
+  notes: 'P1 SETTLED R-A (mechanical) at landslide strength: max_axis_range
+
+    = 0.575 [0.448, 0.648], binding axis = hour_of_week. Routes to
+
+    Q1A per branching_rules.P1.R-A. Q1A.status: planned -> active;
+
+    current_node_id: P1 -> Q1A. Q1C closed as sibling not fired
+
+    (R-C branch did not fire -- only R-A did). Substantive picture:
+
+    proponent''s R-A correct but binding-axis (season) and magnitude
+
+    95%-CI-falsified; DA''s R-C decisively falsified on 4 of 5 axes.
+
+    Fourth instance of the mechanical-vs-substantive-gap arbiter
+
+    pattern, in a new orthogonal shape. Q1A''s Z derives from
+
+    hour_of_week stratification (NOT season); the temperature prior
+
+    takes a hit but remains candidate for the marginal pathology.
+
+    '
+  prior_hash: c97c3ad5906c21f3c19bb59dc9da7707a75d0f6ebfe9ede6aed489baa4711f71
+  siblings_closed:
+  - Q1C
+  transition: node_advance
+  triggered_by_arbiter: 2026-05-27_p1-patra-sen-per-stratum-localization/arbiter.yaml
+  written_at: '2026-05-27T14:37:20-07:00'
 topic: resolution-paths-thread
 written_at: '2026-05-27T07:00:00-07:00'
