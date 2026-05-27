@@ -201,4 +201,12 @@ include the tag. The convention is to put `[SETTLED]` or
 (Auto-populated by `experiment/audit/registry.py` once that lands;
 manual until then.)
 
-- *(none yet — registry just opened)*
+Run `python -m experiment.audit.registry list` for the authoritative
+current state. Notable threaded entries:
+
+- `2026-05-27_resolution-paths-thread/` — thread on framework-prescribed
+  paths for S9+S10 obstruction. Current node: P1.
+- `2026-05-27_p1-patra-sen-per-stratum-localization/` — phase_a +
+  proponent + devils_advocate stamped. Node P1 of resolution-paths-thread.
+  Plain Patra-Sen (2016) per stratum on Q1 M1 residuals; 5 stratification
+  axes; verdict on max-axis range vs 0.20 / 0.10 thresholds.

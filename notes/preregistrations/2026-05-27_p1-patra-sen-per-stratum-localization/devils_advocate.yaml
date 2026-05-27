@@ -1,0 +1,119 @@
+body_sha256: b5331426aa6f94f36d91bd457152981edc02fcc4463ec9f66dc9297b9b5d40f7
+counter_prediction:
+  reasoning: 'Disagreeing with the proponent on outcome category (R-C, not R-A). My central call is that
+    all 5 natural axis ranges sit below the 0.10 noise floor (point ~0.03-0.06 each, max ~0.07). Reasoning:
+    qualifier-exhaustion-memo''s alpha_L-orthogonal-to-z-state finding extends to all natural axes derived
+    from time index + actuals; season / hour-of-week / time-of-day / day-type are all functions of the
+    time index already encoded in M1''s per-(month, hour) standardization; demand_quantile is the closest
+    to a real independent signal but sample-size collapse to tercile bins widens the Patra-Sen alpha_L
+    CI and likely keeps range below noise floor. alpha_L_marginal ~0.65 is upper-mid of the qualifier-exhaustion
+    prior, consistent with high marginal non-Gaussianity that is spatially uniform across natural strata.
+    R-C routes to Q1C (temperature fallback), which is the prior-supported Z exogenous to P1''s candidate
+    set.'
+  units: alpha_L and range dimensionless in [0, 1]; outcome category in {R-A, R-B, R-C}; binding_axis
+    null when no axis exceeds the 0.10 noise floor.
+  value:
+    alpha_L_marginal: 0.65
+    binding_axis: null
+    max_range: 0.07
+    outcome: R-C
+    range_per_axis:
+      day_type: 0.03
+      demand_quantile: 0.07
+      hour_of_week: 0.05
+      season: 0.05
+      time_of_day: 0.04
+forecast_ci:
+  high:
+    alpha_L_marginal: 0.78
+    max_range: 0.18
+  low:
+    alpha_L_marginal: 0.55
+    max_range: 0.03
+  reasoning: CI on max_range [0.03, 0.18] mostly sits below 0.20 (R-A) but crosses into the R-B band (0.10,
+    0.20] in the upper tail. Central call R-C; the upper-tail R-B region would require demand_quantile
+    to deliver a real signal that survives the noise floor. R-A is not in my 95% CI; I am committed to
+    alpha_L being approximately constant across natural axes.
+  width: 0.95
+git_clean: false
+git_sha: 92e76d01e04377e84ecdfced9d108bfe3262687a
+opportunity_cost:
+  alternative: 'A direct one-shot test of season-as-temperature-proxy: compute the Pearson correlation
+    between season (3-level ordinal) and historical Toronto Pearson hourly temperature (free ECCC archive)
+    over the post-cutoff window. If the correlation is high (|rho| > 0.7), season is a decent proxy and
+    the proponent''s prior translation is defensible. If low (|rho| < 0.3), season is a poor proxy and
+    Q1C''s temperature direct test is the only viable detection branch. Pre-registering P1 without this
+    number means the proponent''s binding_axis = season forecast is speculative on a quantity easily measured.'
+  notes: The pre-registration is well-formed AS WRITTEN. The opportunity cost is a one-shot empirical
+    anchor that would have informed the proponent's binding_axis choice; P1 reports per-axis alpha_L regardless,
+    so the empirical question is answered as a side effect even if my counter-prediction is the central
+    call.
+  ranking: complementary
+references:
+- body_sha256: a5f9d35b411d2b3c3735700ce312d70bb699b831250ff07b24a376eeb3067080
+  file: phase_a.yaml
+schema: devils_advocate
+severity: serious
+specific_failure_modes:
+- likelihood: 0.55
+  memory_ref: mitacs-qualifier-exhaustion
+  mode: alpha_L_orthogonal_to_all_natural_axes_per_qualifier_exhaustion_memo_extension_temperature_is_the_missing_Z_and_lies_outside_P1_candidate_set
+  rank: 1
+- likelihood: 0.4
+  memory_ref: mitacs-clim-gap-nonstationary
+  mode: season_is_not_an_independent_axis_because_it_is_a_function_of_time_index_already_encoded_in_M1s_per_month_hour_climatology
+  rank: 2
+- likelihood: 0.35
+  memory_ref: mitacs-q2a-richer-family
+  mode: hour_of_week_re_aggregates_day_type_x_time_of_day_information_already_in_other_axes_no_independent_variation_signal
+  rank: 3
+- likelihood: 0.25
+  memory_ref: null
+  mode: demand_quantile_is_the_closest_to_an_independent_axis_high_demand_strata_may_have_fatter_tails_but_per_stratum_sample_size_collapses_to_n_around_1000_and_patra_sen_alpha_L_CI_width_swamps_the_point_estimate_so_observed_range_stays_below_the_noise_floor_even_when_true_range_is_nonzero
+  rank: 4
+strongest_argument: 'The proponent''s central claim - that season acts as a temperature proxy with range
+  ~0.30 alpha_L variation - rests on a chain of assumptions that the qualifier-exhaustion-memo''s most-cited
+  empirical finding directly contradicts. The memo''s reported result is that alpha_L is ORTHOGONAL to
+  z-state across the delay-embedding coordinates of the marginal kappa_1 residual. Z-state is a NATURAL
+  CONDITIONING AXIS - it is exactly the kind of derived-from-existing-data stratification P1 is testing.
+  The natural extension of that orthogonality finding is that alpha_L is orthogonal to ALL natural conditioning
+  axes constructible from existing data (time index + actuals), because all such axes are themselves derived
+  from the same underlying time series. The proponent''s claim that season acts as a temperature proxy
+  assumes that season carries information NOT already in the z-state (or the residual conditioning that
+  produces it); but the season variable is a deterministic function of the time index, and the time index
+  is already encoded in the z-state via the month-of-year and hour-of-day standardization. Season is therefore
+  not a real independent axis - it is a re-encoding of information M1 has already conditioned on (the
+  per-(month, hour) climatology mu_{m,h}, sigma_{m,h}).
+
+
+  Second, the proponent''s hour_of_week ~0.25 forecast is similarly vulnerable: hour-of-week = day-of-week
+  x hour-of-day; day-of-week is already partitioned by day_type (weekday / saturday / sunday); hour-of-day
+  is already partitioned by time_of_day. The 8-bin hour-of-week collapse re-aggregates information that
+  the other natural axes already encode, just on a different grid. Q2A''s saturday 4x weekday pattern
+  survived FAMILY-INVARIANT - it is structural, not distributional - so it is structural at the level
+  of the conditioning, not at the level of mixture-fraction asymmetry. P1''s alpha_L on hour-of-week strata
+  is consequently expected to be small.
+
+
+  Third, the most-cited candidate Z (temperature) is NOT in any natural axis. Temperature varies within
+  a season; temperature varies within a day; temperature varies within an hour. None of P1''s 5 axes carries
+  temperature as a separable signal. If the missing Z is temperature, it is orthogonal to ALL 5 natural
+  axes by construction, and Q1C is the only branch that can detect it.
+
+
+  Net: R-C fires with all five axis ranges < 0.10 (point ~0.05 each), max_range ~ 0.07. alpha_L_marginal
+  lands at the upper end of the qualifier-exhaustion prior (~0.65) because the marginal mass is high but
+  spatially uniform across natural axes.'
+what_would_change_my_mind:
+- If max_range > 0.25 with binding_axis = season AND CI lower bound > 0.20, season carries a temperature-proxy
+  signal that is large enough to survive the noise floor with margin. The proponent's MW-space-to-z-space
+  translation of clim-gap-nonstationary holds and my qualifier-exhaustion-memo extension is empirically
+  refuted.
+- If R-A fires for hour_of_week OR demand_quantile with binding range > 0.25 (not season), the temperature-proxy
+  reading is wrong on the proxy choice but R-A as a class is correct - some natural axis does carry localizing
+  information. My pure-orthogonality position is refuted.
+- If alpha_L_marginal lands at the low end of the qualifier-exhaustion prior (< 0.50) AND R-C still fires,
+  the marginal pathology is less severe than the memo prior suggests; the structured-noise vs noisy-structure
+  tie may be soluble within the natural-axis candidate set after all, contradicting my position that exogenous
+  Z is required.
+written_at: '2026-05-27T09:10:00-07:00'
