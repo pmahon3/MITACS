@@ -809,11 +809,12 @@ def patra_sen_fit(
         c_n : float
             The Cramér–von Mises quantile used as the threshold.
     """
-    if F_b != "gaussian":
+    _ALLOWED_FB = {"gaussian", "uniform"}
+    if F_b not in _ALLOWED_FB:
         raise NotImplementedError(
-            f"F_b={F_b!r}: only 'gaussian' (standard normal) is "
-            "implemented. Plug-in for a different known background "
-            "would replace the F_b_at_sorted call below."
+            f"F_b={F_b!r}: only {sorted(_ALLOWED_FB)} are implemented. "
+            "Add a branch below if a different known background is "
+            "needed."
         )
 
     r = np.asarray(residuals, dtype=float).ravel()
@@ -824,6 +825,22 @@ def patra_sen_fit(
             f"patra_sen_fit needs at least 20 finite samples; got {n}. "
             "Stratum is too small for a meaningful α̂_L."
         )
+    if F_b == "uniform":
+        # Uniform[0,1] is the natural F_b when the input is a PIT — by
+        # Patra & Sen 2016 Theorem 1 (monotone invariance of α_0), the
+        # mixture-fraction estimator on u_PIT against Uniform[0,1] is
+        # equal to the estimator on u_std against Student-t(ν) with the
+        # same ν used in the PIT transform. Reject out-of-range inputs:
+        # u_PIT must lie in [0, 1].
+        if r.min() < 0.0 - 1e-9 or r.max() > 1.0 + 1e-9:
+            raise ValueError(
+                f"F_b='uniform' expects PIT values in [0, 1]; got "
+                f"min={r.min():.4f}, max={r.max():.4f}. Pass standardized "
+                "residuals with F_b='gaussian' instead, or the PIT scale "
+                "with F_b='uniform'."
+            )
+        # Numerical clamp into [0, 1] to handle FP noise at the boundary.
+        r = np.clip(r, 0.0, 1.0)
 
     # Threshold c_n for the confidence level. 95% is the paper's
     # explicit recommendation (line preceding Theorem 6: 0.6792). For
@@ -858,9 +875,14 @@ def patra_sen_fit(
     # the same points. F_n(X_(i)) = i/n for i = 1..n (right-continuous).
     r_sorted = np.sort(r)
     Fn_sorted = np.arange(1, n + 1, dtype=float) / n
-    # Standard normal CDF at the sorted sample points.
-    from scipy.stats import norm as _norm  # noqa: PLC0415
-    Fb_sorted = _norm.cdf(r_sorted)
+    # Background CDF F_b at the sorted sample points. For 'uniform' the
+    # CDF on [0, 1] is the identity F_b(x) = x; for 'gaussian' it's the
+    # standard normal CDF Φ(x).
+    if F_b == "uniform":
+        Fb_sorted = r_sorted.copy()
+    else:  # F_b == "gaussian"
+        from scipy.stats import norm as _norm  # noqa: PLC0415
+        Fb_sorted = _norm.cdf(r_sorted)
 
     # Grid of γ on [0, 1]. We include γ = 0 explicitly because the
     # paper's eq. (9) gives the well-defined limit

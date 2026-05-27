@@ -397,10 +397,12 @@ def test_multistep_composition() -> None:
 # guess — the empirical multi-seed distribution at n=2000 is what
 # actually constrains the gate; phase-fidelity Check P should look
 # at the empirical distribution before P1 fires.
-_PATRA_SEN_NULL_P95_MAX = 0.05      # cell A: 95th percentile of α̂_L
-_PATRA_SEN_NULL_ZERO_FRAC = 0.90    # cell A: P(α̂_L = 0) must be ≥ this
-_PATRA_SEN_HALF_MED_LO = 0.42       # cell B: median α̂_L lower bound
-_PATRA_SEN_HALF_MED_HI = 0.52       # cell B: median α̂_L upper bound
+_PATRA_SEN_NULL_P95_MAX = 0.05      # cells A / U-A: 95th percentile of α̂_L
+_PATRA_SEN_NULL_ZERO_FRAC = 0.90    # cells A / U-A: P(α̂_L = 0) must be ≥ this
+_PATRA_SEN_HALF_MED_LO = 0.42       # cell B (gaussian): median α̂_L lower bound
+_PATRA_SEN_HALF_MED_HI = 0.52       # cell B (gaussian): median α̂_L upper bound
+_PATRA_SEN_HALF_U_MED_LO = 0.40     # cell U-B (uniform): median α̂_L lower bound
+_PATRA_SEN_HALF_U_MED_HI = 0.50     # cell U-B (uniform): median α̂_L upper bound
 
 # Number of seeds for the multi-seed characterization. 50 is enough
 # to estimate p5/p50/p95 cleanly at the precision we gate on
@@ -416,13 +418,24 @@ def patra_sen_recovery(
 ) -> dict[str, float]:
     """Multi-seed Patra–Sen recovery test on known α_true cells.
 
-    Cell A: pure standard normal (α_true = 0). Theorem 5 of Patra & Sen
-    guarantees ``P(α̂_L = 0) = 1 − β = 0.95``; we measure the empirical
-    zero-fraction and the p95 across seeds.
+    Four cells across two F_b settings:
 
-    Cell B: 50/50 mixture of N(0,1) and N(3,1) (α_true = 0.5). α̂_L
-    is a LOWER confidence bound, so we expect α̂_L ≲ 0.5 with a
-    finite-sample-slack downside floor; we measure p5/p50/p95.
+      Cell A   — F_b=N(0,1); α_true = 0; pure standard normal.
+      Cell B   — F_b=N(0,1); α_true = 0.5; 50/50 N(0,1) + N(3,1) mixture.
+      Cell U-A — F_b=Uniform[0,1]; α_true = 0; pure Uniform[0,1].
+      Cell U-B — F_b=Uniform[0,1]; α_true = 0.5; 50/50 Uniform[0,1] +
+                 Beta(0.5, 5) mixture (Beta concentrated near 0 — clearly
+                 non-uniform signal).
+
+    Theorem 5 of Patra & Sen guarantees ``P(α̂_L = 0) = 1 − β = 0.95``
+    at α_0 = 0 regardless of F_b, so cells A and U-A use the same gate
+    (zero-fraction ≥ 0.90, p95 ≤ 0.05). α̂_L is a LOWER confidence
+    bound, so cells B / U-B expect α̂_L ≲ 0.5 with finite-sample slack.
+    The uniform-F_b cells are the precondition for P1
+    (``2026-05-27_p1-patra-sen-per-stratum-localization``), whose
+    methodology amendment switched from F_b=N(0,1) on standardized
+    residuals to F_b=Uniform[0,1] on PIT values (Patra-Sen 2016
+    Theorem 1 equivalence; matches Q1's measurement convention).
 
     The synthetic data is iid (no "days"). The Ontario P1 script uses
     paired-day bootstrap CIs at the outer loop — that resampling
@@ -437,6 +450,8 @@ def patra_sen_recovery(
 
     alpha_L_nulls = np.empty(n_seeds)
     alpha_L_halves = np.empty(n_seeds)
+    alpha_L_u_nulls = np.empty(n_seeds)
+    alpha_L_u_halves = np.empty(n_seeds)
     heur_null = np.empty(n_seeds)
     heur_half = np.empty(n_seeds)
 
@@ -457,6 +472,18 @@ def patra_sen_recovery(
         alpha_L_halves[k] = fit_half["alpha_L"]
         heur_half[k] = fit_half["alpha_hat_heuristic"]
 
+        # Cell U-A: pure Uniform[0,1] (α_true = 0).
+        u_null = rng.uniform(size=n)
+        fit_u_null = patra_sen_fit(u_null, F_b="uniform")
+        alpha_L_u_nulls[k] = fit_u_null["alpha_L"]
+
+        # Cell U-B: 50/50 mixture of Uniform[0,1] and Beta(0.5, 5).
+        # Beta(0.5, 5) concentrates near 0 — clean non-uniform alternative.
+        mask_u = rng.uniform(size=n) < 0.5
+        u_half = np.where(mask_u, rng.beta(0.5, 5, size=n), rng.uniform(size=n))
+        fit_u_half = patra_sen_fit(u_half, F_b="uniform")
+        alpha_L_u_halves[k] = fit_u_half["alpha_L"]
+
     # Quantile summaries. p5/p50/p95 follow the same convention as the
     # P1 phase_a's "alpha_L_marginal" sanity-check expects.
     pct = lambda a, q: float(np.percentile(a, q))  # noqa: E731
@@ -464,19 +491,28 @@ def patra_sen_recovery(
     return {
         "n": int(n),
         "n_seeds": int(n_seeds),
-        # Cell A summaries:
+        # Cell A summaries (F_b=N(0,1), α_true=0):
         "alpha_L_null_zero_frac": float(np.mean(alpha_L_nulls == 0.0)),
         "alpha_L_null_p50": pct(alpha_L_nulls, 50),
         "alpha_L_null_p95": pct(alpha_L_nulls, 95),
         "alpha_L_null_max": float(np.max(alpha_L_nulls)),
-        # Cell B summaries:
+        # Cell B summaries (F_b=N(0,1), α_true=0.5):
         "alpha_L_half_p5": pct(alpha_L_halves, 5),
         "alpha_L_half_p50": pct(alpha_L_halves, 50),
         "alpha_L_half_p95": pct(alpha_L_halves, 95),
+        # Cell U-A summaries (F_b=Uniform, α_true=0):
+        "alpha_L_u_null_zero_frac": float(np.mean(alpha_L_u_nulls == 0.0)),
+        "alpha_L_u_null_p50": pct(alpha_L_u_nulls, 50),
+        "alpha_L_u_null_p95": pct(alpha_L_u_nulls, 95),
+        "alpha_L_u_null_max": float(np.max(alpha_L_u_nulls)),
+        # Cell U-B summaries (F_b=Uniform, α_true=0.5):
+        "alpha_L_u_half_p5": pct(alpha_L_u_halves, 5),
+        "alpha_L_u_half_p50": pct(alpha_L_u_halves, 50),
+        "alpha_L_u_half_p95": pct(alpha_L_u_halves, 95),
         # Heuristic medians (diagnostic only):
         "alpha_hat_heuristic_null_p50": pct(heur_null, 50),
         "alpha_hat_heuristic_half_p50": pct(heur_half, 50),
-        # c_n from the last fit (same across seeds; just for the report):
+        # c_n from the last fit (same across seeds and F_b; just for the report):
         "c_n": float(fit_null["c_n"]),
     }
 
@@ -507,6 +543,29 @@ def test_patra_sen_recovery() -> None:
         "α̂_L is a LOWER bound on α_true=0.5, so the median should sit "
         "slightly below 0.5; large deviations indicate the PAVA "
         "projection or the c_n threshold is wrong."
+    )
+    # Cell U-A: same Theorem-5 guarantee as Cell A, but with F_b=Uniform.
+    assert res["alpha_L_u_null_zero_frac"] >= _PATRA_SEN_NULL_ZERO_FRAC, (
+        f"Cell U-A zero-fraction {res['alpha_L_u_null_zero_frac']:.2f} < "
+        f"{_PATRA_SEN_NULL_ZERO_FRAC}. Theorem 5 holds for any F_b under "
+        "F continuous; failure here indicates the uniform-F_b branch in "
+        "patra_sen_fit is wrong."
+    )
+    assert res["alpha_L_u_null_p95"] <= _PATRA_SEN_NULL_P95_MAX, (
+        f"Cell U-A p95 α̂_L = {res['alpha_L_u_null_p95']:.4f} > "
+        f"{_PATRA_SEN_NULL_P95_MAX}. Uniform null must give α̂_L ≈ 0 "
+        "with the same finite-sample tightness as the Gaussian null."
+    )
+    # Cell U-B: median α̂_L for Uniform[0,1] + Beta(0.5, 5) mixture.
+    assert (
+        _PATRA_SEN_HALF_U_MED_LO <= res["alpha_L_u_half_p50"]
+        <= _PATRA_SEN_HALF_U_MED_HI
+    ), (
+        f"Cell U-B median α̂_L = {res['alpha_L_u_half_p50']:.4f} outside "
+        f"[{_PATRA_SEN_HALF_U_MED_LO}, {_PATRA_SEN_HALF_U_MED_HI}]. "
+        "α̂_L is a LOWER bound on α_true=0.5; Beta(0.5,5) is concentrated "
+        "near 0 so the mixture is well-separated from uniform and α̂_L "
+        "should sit just below 0.5 with finite-sample slack."
     )
 
 
@@ -605,11 +664,27 @@ def report() -> tuple[str, bool]:
     p(f"    α̂_L  p95    = {ps['alpha_L_half_p95']:.4f}")
     p(f"    α̃_0  p50    = {ps['alpha_hat_heuristic_half_p50']:.4f}  "
       "(§5 heuristic, diagnostic only)")
+    p("  --- F_b = Uniform[0,1] (P1 methodology precondition) ---")
+    p(f"  α_true = 0.00 (pure Uniform[0,1]):")
+    p(f"    P(α̂_L = 0)  = {ps['alpha_L_u_null_zero_frac']:.2f}   "
+      f"(tol ≥ {_PATRA_SEN_NULL_ZERO_FRAC:.2f}; Theorem 5 same as Cell A)")
+    p(f"    α̂_L  p50    = {ps['alpha_L_u_null_p50']:.4f}")
+    p(f"    α̂_L  p95    = {ps['alpha_L_u_null_p95']:.4f}   "
+      f"(tol ≤ {_PATRA_SEN_NULL_P95_MAX:.2f})")
+    p(f"    α̂_L  max    = {ps['alpha_L_u_null_max']:.4f}")
+    p(f"  α_true = 0.50 (50/50 Uniform[0,1] + Beta(0.5, 5)):")
+    p(f"    α̂_L  p5     = {ps['alpha_L_u_half_p5']:.4f}")
+    p(f"    α̂_L  p50    = {ps['alpha_L_u_half_p50']:.4f}   "
+      f"(tol [{_PATRA_SEN_HALF_U_MED_LO:.2f}, {_PATRA_SEN_HALF_U_MED_HI:.2f}])")
+    p(f"    α̂_L  p95    = {ps['alpha_L_u_half_p95']:.4f}")
     p(f"  c_n = {ps['c_n']:.4f} (Cramér–von Mises 95% asymptotic quantile)")
     ps_ok = (
         ps["alpha_L_null_zero_frac"] >= _PATRA_SEN_NULL_ZERO_FRAC
         and ps["alpha_L_null_p95"] <= _PATRA_SEN_NULL_P95_MAX
         and _PATRA_SEN_HALF_MED_LO <= ps["alpha_L_half_p50"] <= _PATRA_SEN_HALF_MED_HI
+        and ps["alpha_L_u_null_zero_frac"] >= _PATRA_SEN_NULL_ZERO_FRAC
+        and ps["alpha_L_u_null_p95"] <= _PATRA_SEN_NULL_P95_MAX
+        and _PATRA_SEN_HALF_U_MED_LO <= ps["alpha_L_u_half_p50"] <= _PATRA_SEN_HALF_U_MED_HI
     )
     p("RESULT: " + ("PASS" if ps_ok else "FAIL"))
 

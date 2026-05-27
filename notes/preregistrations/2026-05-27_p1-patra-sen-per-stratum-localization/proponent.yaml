@@ -1,31 +1,44 @@
-body_sha256: bd839850b996caeb11d46f4ad632f2ed9a2184190c2d51ebba0d14fa1077146f
+body_sha256: ab9558e3a5629229b15d686e74251c568559372f4e2f49b6af089f1e93ffe3f9
 confidence: 0.5
 forecast:
-  reasoning: 'Three lines of evidence point to R-A with season binding at range ~0.30 (max-over-axis).
+  reasoning: 'Three lines of evidence point to R-A with season binding at range ~0.30
+    (max-over-axis).
 
 
-    (a) The strongest a priori candidate Z is temperature (mitacs-clim-gap-nonstationary''s +1000 MW gap,
-    mitacs-postcovid-probe''s ''exogenous info is the lever''). In the absence of exogenous data, the
-    only natural axis that correlates strongly with temperature is season; the season axis should therefore
-    inherit a temperature signal as a proxy. Winter (Nov-Mar) and summer (Jun-Aug) are high-load, high-volatility
-    regimes where heavy-tailed residuals concentrate; shoulder (Apr-May, Sep-Oct) is the quiescent regime
-    with closer-to-Gaussian residuals. A 0.30-point spread in alpha_L between winter/summer and shoulder
-    is consistent with the magnitude of the climatology-gap effect.
+    (a) The strongest a priori candidate Z is temperature (mitacs-clim-gap-nonstationary''s
+    +1000 MW gap, mitacs-postcovid-probe''s ''exogenous info is the lever''). In the
+    absence of exogenous data, the only natural axis that correlates strongly with
+    temperature is season; the season axis should therefore inherit a temperature
+    signal as a proxy. Winter (Nov-Mar) and summer (Jun-Aug) are high-load, high-volatility
+    regimes where heavy-tailed residuals concentrate; shoulder (Apr-May, Sep-Oct)
+    is the quiescent regime with closer-to-Gaussian residuals. A 0.30-point spread
+    in alpha_L between winter/summer and shoulder is consistent with the magnitude
+    of the climatology-gap effect.
 
 
-    (b) Q2A''s Finding #2 (saturday chi^2 ~ 4x weekday chi^2, family-invariant across M1/M3/M4/M5) suggests
-    day-type or hour-of-week structure. Day-type is already conditioning M1''s fit, so its alpha_L variation
-    should be small (predicted range ~0.05). Hour-of-week is the finer-grained axis that captures within-week
-    heterogeneity that day-type aggregates over; predicted range ~0.25, second-strongest.
+    (b) Q2A''s Finding #2 (saturday chi^2 ~ 4x weekday chi^2, family-invariant across
+    M1/M3/M4/M5) suggests day-type or hour-of-week structure. Day-type is already
+    conditioning M1''s fit, so its alpha_L variation should be small (predicted range
+    ~0.05). Hour-of-week is the finer-grained axis that captures within-week heterogeneity
+    that day-type aggregates over; predicted range ~0.25, second-strongest.
 
 
-    (c) qualifier-exhaustion-memo''s marginal alpha_L >= 0.49-0.74 sets the unstratified prior; my point
-    forecast 0.60 is mid-range and consistent with M1 residuals (which are NOT the corrected predictor
-    but the diagnostic-level kappa_1 residual against actuals). Demand quantile (0.10) is intermediate:
-    high-demand strata likely have fatter tails than low-demand strata, but the per-stratum sample size
-    is reduced (~33%) and bootstrap noise widens the noise floor.'
-  units: alpha_L and range dimensionless in [0, 1]; outcome category in {R-A, R-B, R-C}; binding_axis
-    is one of {demand_quantile, time_of_day, season, day_type, hour_of_week}.
+    (c) qualifier-exhaustion-memo''s marginal alpha_L >= 0.49-0.74 sets the unstratified
+    prior; my point forecast 0.60 is mid-range and consistent with M1 residuals (which
+    are NOT the corrected predictor but the diagnostic-level kappa_1 residual against
+    actuals). Demand quantile (0.10) is intermediate: high-demand strata likely have
+    fatter tails than low-demand strata, but the per-stratum sample size is reduced
+    (~33%) and bootstrap noise widens the noise floor. [Pre-run methodology amendment
+    2026-05-27: phase_a re-stamped to use u_PIT against F_b = Uniform[0,1] per Patra-Sen
+    2016 Theorem 1; the 0.49-0.74 marginal sanity-check anchor is superseded under
+    the corrected null and the alpha_L_marginal forecast (0.60) is retained as an
+    INSPECTION-ONLY descriptive value, not a binding sanity-check. Binding-axis ranking
+    and outcome category are preserved by Theorem 1''s per-row invariance; magnitude
+    values may shift modestly under the tighter null (per-stratum aggregates mix day-types
+    with different ν̂, so Theorem 1 invariance is per-row not per-stratum-aggregate).]'
+  units: alpha_L and range dimensionless in [0, 1]; outcome category in {R-A, R-B,
+    R-C}; binding_axis is one of {demand_quantile, time_of_day, season, day_type,
+    hour_of_week}.
   value:
     alpha_L_marginal: 0.6
     binding_axis: season
@@ -48,28 +61,32 @@ forecast_ci:
     hour_of_week_range: 0.12
     max_range: 0.18
     season_range: 0.18
-  reasoning: CI on max_range [0.18, 0.45] straddles the R-A / R-B boundary (0.20). Central call R-A but
-    the lower tail crosses into R-B. CI on season_range matches max_range (season is forecast to be the
-    binding axis). hour_of_week_range CI [0.12, 0.40] also straddles the R-A bar; if hour_of_week binds
-    instead of season the verdict is still R-A but with different downstream Z construction. alpha_L_marginal
+  reasoning: CI on max_range [0.18, 0.45] straddles the R-A / R-B boundary (0.20).
+    Central call R-A but the lower tail crosses into R-B. CI on season_range matches
+    max_range (season is forecast to be the binding axis). hour_of_week_range CI [0.12,
+    0.40] also straddles the R-A bar; if hour_of_week binds instead of season the
+    verdict is still R-A but with different downstream Z construction. alpha_L_marginal
     CI [0.45, 0.78] spans the qualifier-exhaustion-memo prior range.
   width: 0.95
 git_clean: false
-git_sha: 92e76d01e04377e84ecdfced9d108bfe3262687a
+git_sha: 90cfc2ad6316b2f6e52b03624dc966be05902c4f
 references:
-- body_sha256: a5f9d35b411d2b3c3735700ce312d70bb699b831250ff07b24a376eeb3067080
+- body_sha256: f427552392b0699aa761ed43d74c20cd4f938c9b949abd4c6e38de10ae6c9327
   file: phase_a.yaml
 schema: proponent
 what_would_change_my_mind:
-- If max_range < 0.10 (R-C fires), no natural axis carries a localizing signal. Either the missing Z is
-  exogenous (temperature) and orthogonal to all natural axes, or the noisy-structure / structured-noise
-  tie leans toward intrinsic structured noise. The temperature prior is still defensible but season being
-  a temperature proxy fails.
-- If max_range > 0.20 but binding_axis != season (e.g., hour_of_week or time_of_day binds with > 0.25
-  range and season is < 0.15), the temperature-via-season interpretation is wrong on the proxy choice.
-  R-A still fires but Q1A's downstream Z construction targets a temporal-cycle variable, not temperature.
-- If alpha_L_marginal is outside [0.40, 0.85], there is a pipeline mismatch between Q1 M1 residuals and
-  the qualifier-exhaustion baseline. The verdict is BLOCKED for diagnosis before proceeding.
-- If day_type range > 0.15, M1's per-day-type conditioning has not absorbed the day-type asymmetry in
-  non-Gaussian mass. This would be a Q1 / Q2A pipeline issue, not a P1 finding; arbiter should flag it.
+- If max_range < 0.10 (R-C fires), no natural axis carries a localizing signal. Either
+  the missing Z is exogenous (temperature) and orthogonal to all natural axes, or
+  the noisy-structure / structured-noise tie leans toward intrinsic structured noise.
+  The temperature prior is still defensible but season being a temperature proxy fails.
+- If max_range > 0.20 but binding_axis != season (e.g., hour_of_week or time_of_day
+  binds with > 0.25 range and season is < 0.15), the temperature-via-season interpretation
+  is wrong on the proxy choice. R-A still fires but Q1A's downstream Z construction
+  targets a temporal-cycle variable, not temperature.
+- If alpha_L_marginal is outside [0.40, 0.85], there is a pipeline mismatch between
+  Q1 M1 residuals and the qualifier-exhaustion baseline. The verdict is BLOCKED for
+  diagnosis before proceeding.
+- If day_type range > 0.15, M1's per-day-type conditioning has not absorbed the day-type
+  asymmetry in non-Gaussian mass. This would be a Q1 / Q2A pipeline issue, not a P1
+  finding; arbiter should flag it.
 written_at: '2026-05-27T09:05:00-07:00'

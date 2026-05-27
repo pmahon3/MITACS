@@ -1,80 +1,118 @@
-affects_registered_spec: false
+affects_registered_spec: true
 ambiguous_region:
-  action: Q1A still fires using the marginal-strongest axis; the verdict is informative but not decisive.
-    A subsequent thread amendment may be needed if Q1A's R-A1A doesn't fire.
+  action: Q1A still fires using the marginal-strongest axis; the verdict is informative
+    but not decisive. A subsequent thread amendment may be needed if Q1A's R-A1A doesn't
+    fire.
   range: R-B fires (max range in (0.10, 0.20])
 baselines:
-  primary: qualifier-exhaustion-memo's alpha_L >= 0.49-0.74 prior for marginal (unstratified) sanity check.
-    P1's alpha_L_marginal should land in or near this range; large deviation indicates pipeline mismatch.
-  secondary: 'Synthetic recovery gate (METHOD/DESIGN). Generate synthetic data with two known true-alpha
-    settings: (i) alpha_true = 0.0 (pure Gaussian, expect alpha_L = 0 within Patra-Sen CI); (ii) alpha_true
-    = 0.50 (50/50 Gaussian + mixture, expect alpha_L = 0.45-0.55 within Patra-Sen CI). Confirm the production
-    fitter recovers both before the Ontario diagnostic runs. ~30 sec wall-clock; runs every invocation
-    as in-script self-test.'
-body_sha256: a5f9d35b411d2b3c3735700ce312d70bb699b831250ff07b24a376eeb3067080
+  primary: alpha_L_marginal on the full residual pool (unstratified Patra-Sen on u_PIT
+    against F_b = Uniform[0,1]) is reported as INSPECTION-ONLY context for the range
+    statistic. Under the corrected method (Patra-Sen 2016 Theorem 1 reparameterization
+    to PIT scale + Uniform null) there is no anchored prior value for alpha_L_marginal;
+    the qualifier-exhaustion-memo's 0.49-0.74 was stamped under a different null and
+    is non-load-bearing here. The verdict depends on range_axis values, not the marginal
+    level.
+  secondary: 'Synthetic recovery gate (METHOD/DESIGN). Generate synthetic data with
+    two known true-alpha settings: (i) alpha_true = 0.0 (pure Gaussian, expect alpha_L
+    = 0 within Patra-Sen CI); (ii) alpha_true = 0.50 (50/50 Gaussian + mixture, expect
+    alpha_L = 0.45-0.55 within Patra-Sen CI). The existing cells validate the estimator
+    under F_b = N(0,1) (standard form). A parallel cell validates the estimator under
+    F_b = Uniform[0,1] on PIT-transformed data (the form P1 actually uses), confirming
+    the Theorem-1 reparameterization is implemented correctly and the same alpha_0
+    is recovered on both nulls. Confirm the production fitter recovers all cells before
+    the Ontario diagnostic runs. ~30 sec wall-clock; runs every invocation as in-script
+    self-test.'
+body_sha256: f427552392b0699aa761ed43d74c20cd4f938c9b949abd4c6e38de10ae6c9327
 ci_method:
-  details: '1000 paired-day bootstraps of post-cutoff days. Per resample: recompute alpha_L per stratum
-    per axis, recompute range_axis. Report 95% percentile CI on each alpha_L and each range.'
+  details: '1000 paired-day bootstraps of post-cutoff days. Per resample: recompute
+    alpha_L per stratum per axis, recompute range_axis. Report 95% percentile CI on
+    each alpha_L and each range.'
   type: paired_day_bootstrap
   width: 95 percent percentile interval
 corroboration_criterion:
   numeric: R-A fires (max range > 0.20)
-  reasoning: 'R-A localizes where the missing Z is concentrated. The binding axis becomes Q1A''s conditioning
-    variable. Most likely binding axes per priors: season (temperature proxy without temperature data)
-    or hour-of-week (Q2A Finding #2 saturday 4x weekday is consistent with hour-of-week structure).'
+  reasoning: 'R-A localizes where the missing Z is concentrated. The binding axis
+    becomes Q1A''s conditioning variable. Most likely binding axes per priors: season
+    (temperature proxy without temperature data) or hour-of-week (Q2A Finding #2 saturday
+    4x weekday is consistent with hour-of-week structure).'
 data:
-  cutoff_handling: Standard; P1 uses Q1's already-standardized residuals (residuals divided by M1's per-anchor
-    Student-t scale parameter). Stratification axes are computed from the existing time index + actuals
-    (no exogenous data, no leakage).
+  cutoff_handling: Standard; P1 uses Q1's already-computed PIT values u_PIT = F_{t_{ν̂}}((z_actual
+    - z_iter)/s_iter) where ν̂ is Q1's per-day-type Student-t shape estimate. By construction
+    u_PIT is on the [0,1] PIT scale and (under correct calibration) Uniform[0,1]-distributed.
+    P1 does NOT refit Q1's M1 kernel. Stratification axes are computed from the existing
+    time index + actuals (no exogenous data, no leakage).
   partition:
     dev: not used
     test: post-cutoff 2025-01-01 .. 2026-05-16 (same population as Q1/Q2A/Q2B)
-    train: pre-cutoff library was used by Q1 to fit M1; P1 does NOT refit. P1 operates on Q1's already-fit
-      residuals.
-  source: 'Q1''s M1 (Student-t kernel) residuals on post-cutoff Ontario data. Loaded from scratch/data/distributional_class_q1/q1.pkl
-    (per Q1''s run); falls back to refit via the production fitter if the pickle is insufficient. Same
-    post-cutoff population as Q1/Q2A/Q2B: all delivery days from 2025-01-01 through 2026-05-16.'
+    train: pre-cutoff library was used by Q1 to fit M1; P1 does NOT refit. P1 operates
+      on Q1's already-fit residuals.
+  source: 'Q1''s M1 PIT values (`u_PIT`) on post-cutoff Ontario data, loaded directly
+    from scratch/data/distributional_class_q1/q1.pkl (Q1''s run output). Specifically
+    the `pit_M1` DataFrame (columns: delivery_day, h, day_type, u_PIT, nu_used; n=12000
+    post-cutoff rows). P1 does NOT refit and does NOT recompute standardized residuals;
+    it operates on the PIT values Q1 emitted. Same post-cutoff population as Q1/Q2A/Q2B:
+    all delivery days from 2025-01-01 through 2026-05-16.'
 falsification_criterion:
   numeric: R-C fires (max range < 0.10 across all 5 axes)
-  reasoning: R-C is the substantive falsification of the noisy-structure hypothesis under the natural
-    stratifications we have. If none of demand / time / season / day-type / hour-of-week shows systematic
-    alpha_L variation, the missing content is orthogonal to all these natural axes - either intrinsic
-    structured noise OR Z that requires data we don't have (temperature, weather, grid events). This makes
+  reasoning: R-C is the substantive falsification of the noisy-structure hypothesis
+    under the natural stratifications we have. If none of demand / time / season /
+    day-type / hour-of-week shows systematic alpha_L variation, the missing content
+    is orthogonal to all these natural axes - either intrinsic structured noise OR
+    Z that requires data we don't have (temperature, weather, grid events). This makes
     the next step less informed and increases P2's relevance.
-git_clean: false
-git_sha: 92e76d01e04377e84ecdfced9d108bfe3262687a
+git_clean: true
+git_sha: 90cfc2ad6316b2f6e52b03624dc966be05902c4f
 hypothesis:
-  counter: 'See devils_advocate.yaml. R-C: alpha_L is approximately constant (range < 0.10) across ALL
-    five natural axes. The missing Z is exogenous and orthogonal to time/calendar/demand stratifications;
-    only temperature (Q1C) can detect it because no natural axis in P1''s candidate set carries the temperature
-    signal cleanly. The qualifier-exhaustion-memo''s z-state-orthogonality finding generalizes to all
-    natural conditioning.'
-  proponent: R-A fires with the season axis binding at range ~0.30 (max over the five axes), driven by
-    temperature being the most plausible missing Z per mitacs-clim-gap-nonstationary and mitacs-postcovid-probe.
-    Season acts as a temperature proxy in the absence of exogenous data and concentrates the heavy-tailed
-    contamination at winter/summer extremes vs shoulder months. alpha_L_marginal lands in the qualifier-exhaustion-memo's
-    0.49-0.74 prior (point ~0.60); binding axis identifies the conditioning variable Q1A uses to construct
-    its Z.
-metric: "PRIMARY: for each of 5 stratification axes, compute per-stratum alpha_L (lower 95% Patra-Sen\
-  \ 2016 bound on non-Gaussian mixture fraction), then range_axis = max(alpha_L_point) - min(alpha_L_point)\
-  \ across that axis's strata. The verdict metric is max_axis(range_axis).\n\nStratification axes (5,\
-  \ pre-locked, matching thread skeleton candidate_set):\n  1. demand_quantile: terciles of concurrent\
-  \ actual demand (low / medium / high). 3 strata.\n  2. time_of_day: 4 bins of hour-of-day: overnight\
-  \ (0-5), morning ramp (6-10), afternoon (11-16), evening (17-23). 4 strata.\n  3. season: 3 bins of\
-  \ month: winter (Nov-Mar), summer (Jun-Aug), shoulder (Apr-May, Sep-Oct). 3 strata.\n  4. day_type:\
-  \ weekday, saturday, sunday. 3 strata. Included as reference (already used as conditioning in M1's fit,\
-  \ so any alpha_L variation across these strata is sanity-baseline, not novel signal).\n  5. hour_of_week:\
-  \ 168 hours collapsed to 8 bins of 21 hours each. Captures finer temporal structure than day_type+time_of_day\
-  \ separately.\n\nFor each (axis, stratum):\n  - Collect M1's standardized residuals u_i = (z_actual\
-  \ - z_iter) / s_iter that fall in that stratum.\n  - Apply plain Patra-Sen (2016) two-component mixture\
-  \ estimator: treats empirical CDF F_n as alpha F_+ + (1-alpha) F_0 where F_0 is Gaussian(0,1) and F_+\
-  \ is unspecified. Returns alpha_L^{95%} = lower 95% confidence bound on alpha.\n  - Bootstrap: 1000\
-  \ paired-day resamples; recompute alpha_L per resample; report 95% CI on alpha_L per stratum.\n\nPer\
-  \ axis: range_axis = max(alpha_L_point) - min(alpha_L_point) across strata. CI on range_axis via the\
-  \ range statistic recomputed on each bootstrap resample.\n\nVerdict: binding_axis = argmax_axis range_axis.\
-  \ Verdict outcome (R-A/B/C) determined by max range value vs thresholds 0.20 / 0.10.\n\nSECONDARY /\
-  \ informational:\n  - alpha_L_marginal (unstratified Patra-Sen on full residual pool) as sanity check\
-  \ against qualifier-exhaustion-memo prior of 0.49-0.74. Large deviation indicates pipeline mismatch.\n\
+  counter: 'See devils_advocate.yaml. R-C: alpha_L is approximately constant (range
+    < 0.10) across ALL five natural axes. The missing Z is exogenous and orthogonal
+    to time/calendar/demand stratifications; only temperature (Q1C) can detect it
+    because no natural axis in P1''s candidate set carries the temperature signal
+    cleanly. The qualifier-exhaustion-memo''s z-state-orthogonality finding generalizes
+    to all natural conditioning.'
+  proponent: R-A fires with the season axis binding at range ~0.30 (max over the five
+    axes), driven by temperature being the most plausible missing Z per mitacs-clim-gap-nonstationary
+    and mitacs-postcovid-probe. Season acts as a temperature proxy in the absence
+    of exogenous data and concentrates the heavy-tailed contamination at winter/summer
+    extremes vs shoulder months. alpha_L_marginal lands in the qualifier-exhaustion-memo's
+    0.49-0.74 prior (point ~0.60); binding axis identifies the conditioning variable
+    Q1A uses to construct its Z.
+metric: "PRIMARY: for each of 5 stratification axes, compute per-stratum alpha_L (lower\
+  \ 95% Patra-Sen 2016 bound on non-Gaussian-mixture fraction), then range_axis =\
+  \ max(alpha_L_point) - min(alpha_L_point) across that axis's strata. The verdict\
+  \ metric is max_axis(range_axis).\n\nStratification axes (5, pre-locked, matching\
+  \ thread skeleton candidate_set):\n  1. demand_quantile: terciles of concurrent\
+  \ actual demand (low / medium / high). 3 strata.\n  2. time_of_day: 4 bins of hour-of-day:\
+  \ overnight (0-5), morning ramp (6-10), afternoon (11-16), evening (17-23). 4 strata.\n\
+  \  3. season: 3 bins of month: winter (Nov-Mar), summer (Jun-Aug), shoulder (Apr-May,\
+  \ Sep-Oct). 3 strata.\n  4. day_type: weekday, saturday, sunday. 3 strata. Included\
+  \ as reference (already used as conditioning in M1's fit, so any alpha_L variation\
+  \ across these strata is sanity-baseline, not novel signal).\n  5. hour_of_week:\
+  \ 168 hours collapsed to 8 bins of 21 hours each. Captures finer temporal structure\
+  \ than day_type+time_of_day separately.\n\nFor each (axis, stratum):\n  - Collect\
+  \ u_PIT values from the `u_PIT` column of `pit_M1` (Q1's M1 PIT values, post-cutoff)\
+  \ that fall in that stratum.\n  - Apply plain Patra-Sen (2016) two-component mixture\
+  \ estimator: treats empirical CDF F_n as alpha F_+ + (1-alpha) F_0 where F_0 = Uniform[0,1]\
+  \ (the natural null for a calibrated PIT) and F_+ is unspecified. Returns alpha_L^{95%}\
+  \ = lower 95% confidence bound on alpha.\n  - Justification for F_b = Uniform[0,1]\
+  \ on u_PIT (rather than F_b = N(0,1) on u_std): by Patra & Sen (2016) Theorem 1,\
+  \ alpha_0 is invariant under strictly-monotone transformations of the underlying\
+  \ data. The map u_PIT = F_{t_{ν̂}}(u_std) is strictly monotone, so applying Patra-Sen\
+  \ with F_b = Uniform on u_PIT returns the same alpha_0 (and the same alpha_L^{95%}\
+  \ up to bootstrap noise) as applying it with F_b = Student-t(ν̂) on u_std. F_b =\
+  \ N(0,1) on u_std would be the WRONG null under M1 (Student-t kernel) and would\
+  \ conflate kernel-family mismatch with the stratum-localized non-Gaussian mass P1\
+  \ is testing for. F_b = Uniform on u_PIT measures departure from M1's modeled law\
+  \ directly.\n  - Bootstrap: 1000 paired-day resamples; recompute alpha_L per resample;\
+  \ report 95% CI on alpha_L per stratum.\n\nPer axis: range_axis = max(alpha_L_point)\
+  \ - min(alpha_L_point) across strata. CI on range_axis via the range statistic recomputed\
+  \ on each bootstrap resample.\n\nVerdict: binding_axis = argmax_axis range_axis.\
+  \ Verdict outcome (R-A/B/C) determined by max range value vs thresholds 0.20 / 0.10.\n\
+  \nSECONDARY / informational:\n  - alpha_L_marginal (unstratified Patra-Sen on full\
+  \ u_PIT pool against F_b = Uniform[0,1]) reported as INSPECTION-ONLY context for\
+  \ the range statistic. Under the corrected method there is no anchored prior for\
+  \ the marginal alpha_L value (the qualifier-exhaustion-memo's 0.49-0.74 was derived\
+  \ under a different null and does not transfer via Theorem 1 to a specific numerical\
+  \ range here); it is reported for descriptive context, not as a sanity check.\n\
   \  - Per-axis full strata ranking table for use by Q1A's Z construction.\n"
 references:
 - body_sha256: 3fe3573938b0aa24e7332e090a578401722ed225330b12395101b66a58c8c2ab
@@ -94,43 +132,49 @@ related_seed:
 - ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md
 - ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic_audit_correction.md
 - notes/literature/2026-05-26_stratified-patra-sen-scout.md
-research_question: Does the non-Gaussian mixture fraction alpha_L in the kappa_1 predictor's residuals
-  vary systematically across natural conditioning strata (demand quantile, time-of-day, season, day-type,
-  hour-of-week)? If yes, the variation localizes where the missing Z is concentrated, informing which
-  exogenous variable to test in Q1A/B.
+research_question: Does the non-Gaussian mixture fraction alpha_L in the kappa_1 predictor's
+  residuals vary systematically across natural conditioning strata (demand quantile,
+  time-of-day, season, day-type, hour-of-week)? If yes, the variation localizes where
+  the missing Z is concentrated, informing which exogenous variable to test in Q1A/B.
 schema: phase_a
 shape_outcomes:
   R-A:
     criterion: max over 5 axes of range(alpha_L) > 0.20
-    interpretation: Z detectable from current data; binding axis identifies where missing Z is concentrated.
-      Routes to Q1A (Z-conditioning experiment using the strongest axis).
+    interpretation: Z detectable from current data; binding axis identifies where
+      missing Z is concentrated. Routes to Q1A (Z-conditioning experiment using the
+      strongest axis).
   R-B:
     criterion: max range in (0.10, 0.20]
-    interpretation: Marginal variation; Z hint present but not cleanly localized. Routes to Q1A (use the
-      marginal-strongest axis anyway).
+    interpretation: Marginal variation; Z hint present but not cleanly localized.
+      Routes to Q1A (use the marginal-strongest axis anyway).
   R-C:
     criterion: max range < 0.10 (all 5 axes return approximately constant alpha_L)
-    interpretation: Z orthogonal to all 5 natural conditioning axes. Routes to Q1C (temperature fallback,
-      the prior-supported Z that may be orthogonal to all our current stratifications).
+    interpretation: Z orthogonal to all 5 natural conditioning axes. Routes to Q1C
+      (temperature fallback, the prior-supported Z that may be orthogonal to all our
+      current stratifications).
 stopping_criterion:
   reasoning: Pre-registration complete; verdict determined by realized range values.
-  rule: Run synthetic recovery gate; load Q1 M1 residuals (or refit if pickle insufficient); stratify
-    on 5 axes; apply Patra-Sen per stratum; bootstrap; compute range per axis; evaluate R-A/B/C; emit
-    result. STOP. No iteration; no parameter tuning; no cross-axis interaction.
+  rule: Run synthetic recovery gate; load Q1 M1 residuals (or refit if pickle insufficient);
+    stratify on 5 axes; apply Patra-Sen per stratum; bootstrap; compute range per
+    axis; evaluate R-A/B/C; emit result. STOP. No iteration; no parameter tuning;
+    no cross-axis interaction.
 thread:
   node_id: P1
   parent_branch: null
   thread_body_sha256: 3fe3573938b0aa24e7332e090a578401722ed225330b12395101b66a58c8c2ab
   thread_topic: resolution-paths-thread
-  threshold_derivations: "Numeric thresholds (R-A: range > 0.20; R-C: < 0.10) are NOT derived from a synthetic\
-    \ gate (unlike Q2A's gate-derived 228/2284). They are set on non-data principled bases:\n  - 0.20:\
-    \ substantive variation threshold. alpha_L spanning 20 percentage points across strata of a single\
-    \ axis is large enough that the binding stratum carries meaningfully more non-Gaussian mass than the\
-    \ lightest stratum; small enough to be detectable at n ~ 1000-3000 per stratum.\n  - 0.10: noise floor.\
-    \ Bootstrap CI width on alpha_L at the sample sizes we have is ~0.05-0.10 per stratum (extrapolating\
-    \ from Patra-Sen 2016 paper's reported behavior at n ~ 2000); range < 0.10 is within sampling noise.\n\
-    The qualifier-exhaustion-memo alpha_L >= 0.49-0.74 marginal range provides the prior for what unstratified\
-    \ alpha_L looks like; the stratified variation question is orthogonal."
+  threshold_derivations: "Numeric thresholds (R-A: range > 0.20; R-C: < 0.10) are\
+    \ NOT derived from a synthetic gate (unlike Q2A's gate-derived 228/2284). They\
+    \ are set on non-data principled bases:\n  - 0.20: substantive variation threshold.\
+    \ alpha_L spanning 20 percentage points across strata of a single axis is large\
+    \ enough that the binding stratum carries meaningfully more non-Gaussian mass\
+    \ than the lightest stratum; small enough to be detectable at n ~ 1000-3000 per\
+    \ stratum.\n  - 0.10: noise floor. Bootstrap CI width on alpha_L at the sample\
+    \ sizes we have is ~0.05-0.10 per stratum (extrapolating from Patra-Sen 2016 paper's\
+    \ reported behavior at n ~ 2000); range < 0.10 is within sampling noise.\nThe\
+    \ qualifier-exhaustion-memo alpha_L >= 0.49-0.74 marginal range provides the prior\
+    \ for what unstratified alpha_L looks like; the stratified variation question\
+    \ is orthogonal."
 topic: p1-patra-sen-per-stratum-localization
 variables:
   dependent:
@@ -142,18 +186,21 @@ variables:
   - binding_axis
   - binding_axis_strata_ranking
   excluded:
-  - reasoning: 'The verdict architecture is range-threshold (R-A: range > 0.20; R-C: < 0.10), not formal
-      distance-covariance test. Plain Patra-Sen 2016 per stratum suffices. Avoiding NPMLEmix''s Mosek
-      dependency. Cite Deb et al. 2022 as the more rigorous joint approach we deliberately don''t use;
-      cite Patra-Sen 2016 as the per-stratum method. See thread scope_limits and notes/literature/2026-05-26_stratified-patra-sen-scout.md.'
+  - reasoning: 'The verdict architecture is range-threshold (R-A: range > 0.20; R-C:
+      < 0.10), not formal distance-covariance test. Plain Patra-Sen 2016 per stratum
+      suffices. Avoiding NPMLEmix''s Mosek dependency. Cite Deb et al. 2022 as the
+      more rigorous joint approach we deliberately don''t use; cite Patra-Sen 2016
+      as the per-stratum method. See thread scope_limits and notes/literature/2026-05-26_stratified-patra-sen-scout.md.'
     variable: covariate_dependent_joint_NPMLE_NPMLEmix
-  - reasoning: P1 stratifies on quantities already in hand (no exogenous data). Temperature stratification
-      belongs to Q1C (conditional experiment) not P1 (diagnostic). If P1's R-C fires (all natural axes
-      constant), Q1C tests temperature as the prior-supported candidate even without P1's pointer.
+  - reasoning: P1 stratifies on quantities already in hand (no exogenous data). Temperature
+      stratification belongs to Q1C (conditional experiment) not P1 (diagnostic).
+      If P1's R-C fires (all natural axes constant), Q1C tests temperature as the
+      prior-supported candidate even without P1's pointer.
     variable: temperature_stratification
-  - reasoning: P1 reports per-axis range only. Cross-axis interactions (e.g., demand_quantile x time_of_day
-      joint stratification) would require >25 strata, sample-size issues, and a more complex verdict.
-      Reserved for thread amendment if marginal axes are inconclusive.
+  - reasoning: P1 reports per-axis range only. Cross-axis interactions (e.g., demand_quantile
+      x time_of_day joint stratification) would require >25 strata, sample-size issues,
+      and a more complex verdict. Reserved for thread amendment if marginal axes are
+      inconclusive.
     variable: cross_axis_interactions
   independent:
   - stratification_axis
