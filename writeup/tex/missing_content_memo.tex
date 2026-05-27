@@ -3,6 +3,7 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{booktabs}
+\usepackage{longtable}
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{xcolor}
@@ -1395,11 +1396,20 @@ paths are not mechanism-redesign within the same lever.
 To summarise the campaign's standing under the kernel-family-aware
 framework:
 
-\begin{center}
-\begin{tabular}{P{0.40\textwidth}P{0.55\textwidth}}
+\begin{longtable}{P{0.40\textwidth}P{0.55\textwidth}}
 \toprule
 \textbf{Level} & \textbf{Status} \\
 \midrule
+\endfirsthead
+\toprule
+\textbf{Level} & \textbf{Status} (continued) \\
+\midrule
+\endhead
+\midrule
+\multicolumn{2}{r}{\textit{continued on next page}} \\
+\endfoot
+\bottomrule
+\endlastfoot
 Algebraic framework
 (Defs.\ \ref{def:factorization}, \ref{def:coherence})
 & \textbf{Settled} as a coherent formal proposal. Not yet
@@ -1519,9 +1529,7 @@ reliably; recognises pre-registered-criterion-vs-legitimate-data-
 structure as the fourth named failure mode (now three instances:
 eigenmodes-v1, P1, Q1) for which the arbiter pattern IS the
 prevention. \\
-\bottomrule
-\end{tabular}
-\end{center}
+\end{longtable}
 
 The framework's general formulation in \S\ref{sec:framework} is
 the right object to register with the theory-side audit pipeline
@@ -1543,7 +1551,7 @@ hash-stamped via \verb|experiment.audit.registry.stamp(...,| \verb|self_path=...
 chains verifiable via \verb|registry verify|.
 
 \noindent
-\begin{tabular}{P{0.10\textwidth}P{0.50\textwidth}P{0.32\textwidth}}
+\begin{tabular}{P{0.12\textwidth}P{0.53\textwidth}P{0.27\textwidth}}
 \toprule
 \textbf{Source} & \textbf{Entry} & \textbf{Verdict} \\
 \midrule
@@ -1572,12 +1580,12 @@ S10 (Q2B)
   & SETTLED R-C3 \\
 \midrule
 Thread \newline (Gaussian)
-  & \path{2026-05-26_missing-content-thread}
+  & \texttt{2026-05-26\_missing-} \newline \texttt{content-thread}
   & \texttt{exhausted} \\
 \addlinespace
 Thread \newline (kernel-family)
-  & \path{2026-05-26_distributional-class-thread}
-  & \texttt{pending\_amendment} after Q2B (R-C3 has no entry in \texttt{branching\_rules}); substantive recommendation is \texttt{exhausted} on the pre-registered distributional-class scope per (S9)~$+$~(S10), with a fresh thread on the framework's three resolution paths as the natural next move \\
+  & \texttt{2026-05-26\_distributional-} \newline \texttt{class-thread}
+  & \texttt{exhausted} per (S9)~$+$~(S10); fresh thread on the framework's three resolution paths is the natural next move \\
 \bottomrule
 \end{tabular}
 
@@ -1665,24 +1673,22 @@ statistics):
 \path{scratch/data/distributional_class_q2b/q2b.pkl}.
 \item Theory-side framework note parked 2026-05-26 identifying the
 identifiability obstruction and the three resolution paths:
-\path{~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md}.
+\path{disintegration_diagnostic.md} in
+\path{Resolvent_Framework/notes/unsorted/}.
 \end{itemize}
 
 \paragraph{Next concrete step.}
-A thread move via \verb|thread-coordinator| advancing the
-\texttt{distributional-class-thread} from \texttt{pending\_amendment}.
-Under the framework reframe (S9~$+$~S10 jointly bound the two
-distributional-class levers), the substantive recommendation is
-to declare the thread \texttt{exhausted} on its pre-registered
-scope and spawn a fresh thread on the framework's three
-resolution paths: (i) candidate-$Z$ testing
-(temperature, secular drift via \texttt{year\_since\_cutoff} per
-(S5), refined day-type partition); (ii) stratified Patra--Sen as
-a $\sigma$-algebra adequacy diagnostic; (iii) synthetic
-Gaussian-DGP calibration to anchor the residual-$\chi^{2}$ floor.
-A mechanism-redesign amendment to Q2B (e.g., two-sided variance
-rescaling addressing the under-dispersion direction; weather-
-conditioned mean-bias) is the other workflow-legitimate move, but
-remains within the bounded levers (S9)~$+$~(S10) characterised.
+The \texttt{distributional-class-thread} was declared
+\texttt{exhausted} on 2026-05-26 (commit \texttt{543e3e8})
+following Q2B's R-C3 verdict; under the framework reframe
+(S9~$+$~S10 jointly bound the two distributional-class levers),
+amending the thread further within its pre-registered scope
+would not address the identifiability obstruction. The natural
+next move is a fresh thread on the framework's three resolution
+paths: (i) candidate-$Z$ testing (temperature, secular drift
+via \texttt{year\_since\_cutoff} per (S5), refined day-type
+partition); (ii) stratified Patra--Sen as a $\sigma$-algebra
+adequacy diagnostic; (iii) synthetic Gaussian-DGP calibration
+to anchor the residual-$\chi^{2}$ floor.
 
 \end{document}
