@@ -1,0 +1,217 @@
+body_sha256: 483477a5508a439cc8dee26f201d655373cdf2c5d31c6fe60af3c15d9fdc5235
+confidence: 0.5
+counter_prediction:
+  head_to_head_winner: SIR
+  landslide_qualifier_predicted: false
+  outcome: R-B1A'
+  reasoning: "P1's social-weekly signal lives in alpha_L (stratum-mixture-fraction) space\n\u2014 a different functional of\
+    \ the residual law from SIR's linear-projection\nand FastICA's non-Gaussian-component spaces; the top-component-only verdict\n\
+    rule plus FastICA's whitening of the second-moment structure carrying the\nvariance-modulation signal will land max_rho\
+    \ in the [0.3, 0.5) R-B1A' band,\nwith SIR winning the head-to-head narrowly because SIR's slicing of Y\ncaptures the\
+    \ (day_type, time_of_day) linear-combination version of P1's\naxis more directly than FastICA's pre-whitened logcosh contrast\
+    \ isolates\nthe cyclic phase as an independent component.\n"
+  rho_max_point: 0.42
+  rho_max_units: max(|Spearman rho|) between top component and cyc_sin/cyc_cos
+  units_note: 'rho_max is dimensionless; both methods'' top-component-vs-cyclic-phase
+
+    alignment is on the same Spearman scale, max-of-two-Spearman per the
+
+    pre-locked cyclic-rho rule.
+
+    '
+forecast:
+  head_to_head_margin_point: 0.1
+  head_to_head_winner: SIR
+  landslide_qualifier_predicted: false
+  near_tie_flag_predicted: false
+  permutation_null_max_rho_95upper_ci95:
+  - 0.07
+  - 0.14
+  permutation_null_max_rho_95upper_point: 0.1
+  realized_max_rho_exceeds_permutation_null: true
+  rho_FastICA_ci95:
+  - 0.18
+  - 0.43
+  rho_FastICA_point: 0.3
+  rho_SIR_ci95:
+  - 0.28
+  - 0.52
+  rho_SIR_point: 0.4
+  rho_diff_SIR_minus_FastICA_ci95:
+  - -0.02
+  - 0.22
+  rho_diff_SIR_minus_FastICA_point: 0.1
+  rho_max_ci95:
+  - 0.3
+  - 0.54
+  rho_max_point: 0.42
+git_clean: false
+git_sha: 769d854ff21e92fe16d230c037f6daf647133d28
+opportunity_cost: "If R-B1A' fires as forecast, the Q1A' verdict is INDEPENDENT and NON-GATING\nper thread.branching_rules\
+  \ \u2014 no thread state transition is triggered \u2014 but\nthe substantive sub-finding (head-to-head SIR vs FastICA, top-component\n\
+  loadings on X) is methodologically valuable for the writeup section on\ndata-driven Z-recovery in the kappa_Q diagnostic\
+  \ context\n(disintegration_diagnostic.md section (f) menu of methods). If R-A1A' fires\n(proponent's call), the Q1A'/Q1A\
+  \ divergence-or-agreement structure becomes\nthe cross-experiment note in the arbiter. If R-C1A' fires (lowest-probability\n\
+  branch under either forecast), the methodological reading is \"data-driven\nmethods cannot blindly recover what hand-specification\
+  \ revealed\" \u2014\nsubstantively important for the future-Z-discovery framing but not falsifying\nP1's finding. The faster\
+  \ alternative to running both Q1A and Q1A' in parallel\nwould be running Q1A only (which is the thread-state-advancing experiment)\n\
+  and deferring Q1A' to a later dated entry contingent on Q1A's outcome; the\nparallel run was chosen to maximize information\
+  \ per analyst-day. ~1-2\nanalyst-days for Q1A' (SIR helper build + FastICA fit + bootstrap +\npermutation null), partially\
+  \ shared with the Q1A run via the same paired-day\nbootstrap infrastructure.\n"
+outcome: R-B1A'
+rationale_summary: "P1's social-weekly signal lives in alpha_L space (a stratum-mixture-fraction\nlower bound), a DIFFERENT\
+  \ functional of the residual law from the linear-projection\n(SIR) and non-Gaussianity-maximizing (FastICA) functionals\
+  \ tested here. The\ncovariate matrix X is dominated by within-day signals (time_of_day_sin/cos,\nlag-1, lag-24) while the\
+  \ cyclic hour_of_week target is a 168-period weekly\nfundamental largely captured by the cross-product of (day_type, time_of_day)\n\
+  \u2014 SIR's top direction will mix these into a linear combination but the cyclic\nalignment will be split across at least\
+  \ two directions, putting the\nTOP-component-only rho_SIR around 0.40; FastICA's pre-whitening removes\nsecond-moment structure\
+  \ (variance modulation by stratum, the Q2B\nunder-dispersion signature) where much of the social-weekly signal lives,\n\
+  so its top-by-kurtosis component will load primarily on the heavy-tailed\nmarginal residual rather than on the cyclic phase,\
+  \ putting rho_FastICA around\n0.30. Net: both methods sense social-weekly structure but the TOP-component-only\nverdict\
+  \ statistic lands in R-B1A's [0.3, 0.5) band; substantive picture is that\nP1's discretized-axis approach finds signal that\
+  \ linear/non-Gaussianity-maximizing\ndata-driven tools cannot cleanly recover as a SINGLE top component, which is a\nmethodologically\
+  \ important null for the \"validates P1's axis via independent\nmethods\" reading.\n"
+references:
+- body_sha256: b14d09cbec08207179e8cffca584de04a7855ff359888a8a0e4c8e30ce8b0806
+  file: phase_a.yaml
+  relation: phase_a
+- body_sha256: 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6
+  file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  relation: thread
+schema: devils_advocate
+severity: serious
+specific_failure_modes:
+- memory_cite: phase_a.yaml metric block (cyclic-rho rule + d_X=9 X column structure)
+  mode: 'SIR top-direction split across cyclic-phase basis. hour_of_week''s sin/cos
+
+    representation has 2 degrees of freedom (cyc_sin, cyc_cos at 2*pi/168) but
+
+    X has no direct cyclic-phase column; SIR''s linear projection of X onto Y
+
+    can capture the social-weekly alignment only by combining
+
+    day_type_saturday, day_type_sunday, time_of_day_sin, time_of_day_cos,
+
+    lag-1, lag-24 into a sum that approximates the cyclic phase. This sum
+
+    will be split across at least 2 SIR directions (one for
+
+    weekday-vs-weekend gradient, one for time-of-day-within-day shape), so
+
+    the TOP direction''s rho-vs-cyc_sin OR rho-vs-cyc_cos statistic captures
+
+    at most ~50-60% of the recoverable cyclic alignment. rho_SIR
+
+    top-direction-only lands around 0.40, not 0.60+.
+
+    '
+  rank: 1
+- memory_cite: memory/mitacs-q2b-non-distributional.md + memory/mitacs-rebaseline-facts.md
+  mode: "FastICA whitening destroys the second-moment structure carrying the\nsocial-weekly signal. Q2B (S10) established\
+    \ that the ensemble\nUNDER-disperses at virtually every (h, day_type) cell \u2014 i.e., the\nconditional law has more\
+    \ variance than the predicted distribution\nprovides, and that variance modulation by stratum is one signature of\nthe\
+    \ missing exogenous content. FastICA's\nsklearn.decomposition.FastICA(whiten='unit-variance') pre-whitens X\nbefore applying\
+    \ logcosh; the variance-modulation-by-hour_of_week signal\nis largely a second-moment phenomenon that is removed at pre-whitening\n\
+    time. The top-by-|excess_kurtosis| component then loads on the\nheavy-tailed kappa_1 PIT marginal (excess kurtosis 24-33\
+    \ per\nrebaseline-facts) \u2014 NOT on the cyclic phase. rho_FastICA lands around\n0.25-0.35.\n"
+  rank: 2
+- memory_cite: ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md section (a) + memory/mitacs-p1-patra-sen-localization.md
+  mode: "alpha_L is a lower bound on a tail-mass fraction, NOT a linear-projection\nor independent-component signal strength.\
+    \ Per disintegration_diagnostic.md\nsection (a), Patra-Sen targets alpha* = sup{alpha : F minus alpha*F_0 is\na valid\
+    \ sub-CDF}; P1's alpha_L range 0.575 is a floor of identifiability,\nnot an estimate of true alpha_0. The same underlying\
+    \ weekly-cyclic\nheterogeneity that produces a 0.575 alpha_L range across hour_of_week\nstrata need not produce a |rho|\
+    \ >= 0.5 alignment between the TOP\nSIR/FastICA direction and the cyclic phase \u2014 these are different\nfunctionals\
+    \ of the residual law and a strong signal in one functional is\nnot guaranteed in the other.\n"
+  rank: 3
+- memory_cite: memory/mitacs-clim-gap-nonstationary.md + phase_a.yaml metric block (X columns demand_lag1, demand_lag24)
+  mode: "Clim-gap component is hour-flat and orthogonal to hour_of_week. The\npost-cutoff actual-mu gap is ~+1000 MW hour-flat\
+    \ and growing through\n2025-2026 (mitacs-clim-gap-nonstationary). If the secular-drift component\nof the residuals loads\
+    \ on lag-24 (which carries day-over-day demand\ngrowth), SIR's top direction may align with lag-24 \u2014 a non-cyclic\n\
+    direction \u2014 rather than with the (day_type, time_of_day) cyclic-phase\ncombination. SIR top-component loadings on\
+    \ X expected: high on lag-24\nand lag-1, modest on day_type, modest on time_of_day \u2014 yielding a TOP\ndirection that\
+    \ is more about demand-magnitude than weekly-cyclic-phase,\ndragging rho_SIR down further toward the R-B1A'/R-C1A' boundary.\n"
+  rank: 4
+- memory_cite: phase_a.yaml metric.CYCLIC-rho RULE (phase ceiling 0.707)
+  mode: 'Cyclic-rho rule''s phase ceiling at 0.707 means the proponent''s landslide
+
+    threshold is structurally close to the design ceiling. Even if SIR or
+
+    FastICA DID cleanly recover a sin(omega*t + phi) direction, the
+
+    worst-case-phase max(|rho_sin|, |rho_cos|) is 0.707 (per phase_a''s
+
+    explicit PHASE CEILING discussion). The proponent expecting max_rho >= 0.6
+
+    is forecasting near the design ceiling and is therefore sensitive to any
+
+    phase-misalignment; a half-recovered direction at the design-ceiling
+
+    midpoint sits at ~0.35-0.45, which is the R-B1A'' band.
+
+    '
+  rank: 5
+strongest_argument: "The discriminating-test framing of Q1A' rests on a single load-bearing\npremise \u2014 that the alpha_L\
+  \ localization signal P1 detected in\nstratum-mixture-fraction space will reappear as the TOP direction in\nlinear-projection-of-Y-onto-X\
+  \ space (SIR) and as the TOP non-Gaussian source\nin independent-component space (FastICA). This premise is empirically\n\
+  uncorroborated.\n\nThree concrete reasons it is likely to fail at the TOP-component level:\n\n(1) hour_of_week is a 168-period\
+  \ circular variable; its sin/cos\nrepresentation has TWO degrees of freedom and the natural SIR projection of\n(day_type_saturday,\
+  \ day_type_sunday, time_of_day_sin, time_of_day_cos,\nlag-1, lag-24) onto Y will distribute the cyclic alignment across\
+  \ at least\ntwo SIR directions, so the rho_top-vs-cyc_sin OR rho_top-vs-cyc_cos\nstatistic (the cyclic-rho rule's max-of-two)\
+  \ on the FIRST direction captures\nat most ~half of the recoverable cyclic alignment \u2014 a top-direction max_rho\naround\
+  \ 0.35-0.45 is the structural ceiling under the SIR top-direction-only\nverdict rule.\n\n(2) FastICA whitens before applying\
+  \ the logcosh non-Gaussianity contrast.\nWhitening removes second-moment structure where Q2B's under-dispersion\nsignature\
+  \ lives (s^2_iter < s^2_emp at virtually every (h, day_type) cell,\nper mitacs-q2b-non-distributional). The kappa_1 PIT\
+  \ residual marginal is\nstrongly heavy-tailed (excess kurtosis 24-33 per mitacs-rebaseline-facts;\nnu ~ 4.2-4.6 per Q1 S8),\
+  \ so FastICA's top-by-kurtosis component will load\nprimarily on the heavy-tailed marginal residual rather than on the\n\
+  social-weekly phase \u2014 expected rho_FastICA around 0.25-0.35.\n\n(3) The disintegration-diagnostic note flags that Patra-Sen\
+  \ targets\nalpha* = sup{alpha : F minus alpha*F_0 is a valid sub-CDF} and the empirical\nalpha_L is a LOWER BOUND, not an\
+  \ estimate of true alpha_0; the \"range 0.575\"\nin P1 may reflect the floor of identifiability rather than the actual signal\n\
+  strength, so the same underlying signal need not produce |rho| >= 0.5 in\nlinear-projection or ICA space.\n\nThe most likely\
+  \ outcome is R-B1A' with SIR winning narrowly on the\nhead-to-head (SIR's slicing of Y captures the (day_type, time_of_day)\n\
+  linear-combination version of P1's axis more directly than FastICA's\npre-whitened non-Gaussianity contrast can isolate\
+  \ the cyclic phase as an\nindependent component).\n"
+what_would_change_my_mind:
+- condition: rho_FastICA point estimate >= 0.55 with lower CI bound >= 0.45
+  interpretation: "FastICA's logcosh contrast IS sensitive to the social-weekly signal even\nafter whitening \u2014 the heavy-tailed\
+    \ marginal does NOT dominate the\ntop-by-kurtosis component, and the cyclic phase emerges as a\ndistinguishable non-Gaussian\
+    \ direction. My pre-whitening-destroys-second-\nmoment-signal failure mode (#2) is empirically falsified, and the\nproponent's\
+    \ FastICA-wins-head-to-head call is correct.\n"
+- condition: 'rho_SIR point estimate >= 0.55 AND SIR top-component loadings on X show
+
+    high weight on (day_type_saturday + day_type_sunday + time_of_day_sin +
+
+    time_of_day_cos) combined and low weight on (lag-1, lag-24)
+
+    '
+  interpretation: "SIR's linear projection IS recovering the (day_type, time_of_day)\ncyclic-phase combination as a single\
+    \ dominant direction \u2014 not split\nacross two directions and not dragged off by lag-24's demand-magnitude\ncontent.\
+    \ My split-across-two-directions failure mode (#1) is empirically\nfalsified; the structural ceiling at 0.40 is not binding.\n"
+- condition: max_rho point estimate >= 0.50 AND lower CI bound >= 0.50 (landslide R-A1A')
+  interpretation: "My R-B1A' central forecast is wrong; data-driven recovery is robust. The\nsubstantive picture flips to\
+    \ \"SDR/ICA validates P1's axis without\npre-specification\" \u2014 methodologically the strongest possible outcome for\n\
+    the writeup. I lose the DA position cleanly: P1's alpha_L signal DOES\ntranslate into linear-projection/non-Gaussianity-maximizing\
+    \ space at\nlandslide strength.\n"
+- condition: max_rho point estimate < 0.30 (R-C1A' fires) with permutation-null 95% upper bound also crossed
+  interpretation: 'Both methods miss the signal entirely; my R-B1A'' central forecast
+
+    overshoots in the other direction. The substantive picture is either
+
+    (a) P1''s alpha_L signal is artifactual at the linear/ICA-functional
+
+    level (P1 finds discrete bin granularity that is invisible to continuous
+
+    data-driven methods) or (b) n=12000 is below SDR/ICA sensitivity for
+
+    this effect size. Both interpretations are substantively informative for
+
+    the writeup; my partial-recovery picture is wrong but my "different
+
+    functional" reasoning still holds with stronger force.
+
+    '
+- condition: rho_diff_SIR_minus_FastICA 95% CI excludes zero on the NEGATIVE side (FastICA strictly higher than SIR at 95%)
+  interpretation: "My head-to-head call (SIR wins narrowly) is falsified at the\nhead-to-head sub-finding level even if the\
+    \ outcome category (R-B1A')\nmatches. Substantively this would mean FastICA's logcosh contrast on the\npost-whitened residuals\
+    \ IS finding a non-Gaussian cyclic component that\nSIR's linear projection cannot capture as a single direction \u2014\
+    \ the\nproponent's FastICA-wins call is correct even if the landslide qualifier\nfails.\n"
+written_at: '2026-05-27T16:30:00-07:00'

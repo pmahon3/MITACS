@@ -1,0 +1,316 @@
+affects_registered_spec: false
+ambiguous_region:
+  action: 'R-B1A'' fires: max(|ρ_SIR|, |ρ_FastICA|) lies in [0.3, 0.5). Partial recovery — at least one of the two data-driven
+    methods senses a social-weekly direction in the κ̂_Q PIT residuals but does not dominantly identify it. Per branching_rules.Q1A''.R-B1A''
+    = null in the thread, the verdict is INDEPENDENT and NON-GATING — no thread state transition is triggered. The arbiter
+    records the head-to-head sub-finding (which of SIR / FastICA scored higher, with paired-bootstrap CI on the difference)
+    and the independent-substantive reading ''data-driven methods sense but do not confirm P1''s hand-specified hour_of_week
+    axis as the dominant direction.'''
+  range: max(|ρ_SIR|, |ρ_FastICA|) in [0.3, 0.5) (R-B1A', per thread skeleton)
+baselines:
+  primary: 'Permutation-null distribution of max(|ρ_SIR|, |ρ_FastICA|) under H0 of no relationship between X and Y. Specifically:
+    shuffle the post-cutoff Y = u_PIT vector independently of X (preserving the day-paired bootstrap row structure to maintain
+    within-day temporal coupling on X but breaking the cross-row Y-X linkage); re-fit SIR and FastICA on each of 1000 permutations;
+    record the empirical 95% upper bound on max(|ρ_SIR|, |ρ_FastICA|) under the null. This is the chance-level baseline: if
+    the realized max(|ρ|) lies BELOW the permutation-null 95% upper bound, no recovery has occurred regardless of which R-*
+    category fires mechanically. The permutation null is INFORMATIONAL (it does not override the pre-locked 0.3 / 0.5 cuts
+    from the thread skeleton); it is reported as a calibration anchor on top of the mechanical verdict.'
+  secondary: 'METHOD/DESIGN synthetic recovery gate (required by the workflow''s discipline rule — any diagnostic that reimplements
+    production logic is a hypothesis, not a finding, until confirmed through the production code path). Construction: (i)
+    synthesize a 12000-row X with the same column structure as Ontario''s post-cutoff X (see metric section for the explicit
+    column list); (ii) construct synthetic Y = α·sin(2π·hour_of_week/168) + β·cos(2π·hour_of_week/168) + ε with α = β = 1.0
+    and ε ~ N(0, σ²) calibrated so the signal-to-noise ratio matches the order-of-magnitude estimate from P1''s hot-zone α̂_L
+    ≈ 0.6 (target: SNR ≈ 1.5). hour_of_week is RECOVERABLE in the synthetic by construction but is NOT a column of X; (iii)
+    run the production paths (sliced_inverse_regression_fit, sklearn.decomposition.FastICA) on synthetic (X, Y); compute max(|ρ|)
+    per the metric''s cyclic-ρ rule. Recovery gate threshold: max(|ρ_SIR_synth|, |ρ_FastICA_synth|) ≥ 0.70 (well above the
+    0.5 R-A1A'' cut and at the lower-bound of the phase-ceiling under Spearman). Companion null check: re-run with permuted
+    synthetic Y (no signal); confirm max(|ρ_synth_null|) < 0.30. BOTH checks must PASS before the Ontario diagnostic runs.
+    The gate validates that the production paths can recover a known cyclic structure when one exists; if it cannot, any null
+    result on Ontario data is consistent with implementation defect rather than a true substantive null. ~20-30 sec wall-clock;
+    runs every invocation as in-script self-test.'
+body_sha256: b14d09cbec08207179e8cffca584de04a7855ff359888a8a0e4c8e30ce8b0806
+ci_method:
+  details: '1000 paired-day bootstrap resamples of post-cutoff days (pair = (delivery_day, day_type) preserving within-day
+    correlation; same scheme as Q1, Q2A, P1, Q1A). Per resample: re-fit SIR and FastICA on the resampled rows for the head-to-head
+    comparison (both methods see the SAME paired-day resample for paired comparison); recompute top-component-vs-cyclic-hour_of_week
+    |ρ| per the cyclic-ρ rule (see metric). Report 95% percentile CIs on |ρ_SIR|, |ρ_FastICA|, max(|ρ_SIR|, |ρ_FastICA|),
+    and the difference (|ρ_SIR| - |ρ_FastICA|).'
+  type: paired_day_bootstrap
+  width: 95 percent percentile interval
+corroboration_criterion:
+  numeric: 'R-A1A'' fires AT LANDSLIDE STRENGTH: max(|ρ_SIR|, |ρ_FastICA|) point estimate ≥ 0.5 AND the lower bootstrap 95%
+    CI bound also ≥ 0.5 (analogous to P1 R-A landslide reading where point 0.575 and lower CI 0.448 both cleared 0.20).'
+  reasoning: 'A single point estimate ≥ 0.5 with a CI straddling the cut is mechanical R-A1A'' but substantively borderline
+    (one of the methods accidentally crosses the cut on a favorable resample). Requiring the lower CI bound also clearing
+    0.5 is the landslide reading: at least one data-driven method robustly recovers a direction aligned with hour_of_week,
+    with no pre-specification. The substantive reading ''SDR/ICA validates P1''s hand-specified-axis approach as a method''
+    requires landslide; if only the point clears (CI straddles), the arbiter records mechanical R-A1A'' with the ''landslide-not-met''
+    qualifier and the substantive picture is ''consistent with recovery, not robust.'''
+data:
+  cutoff_handling: No leakage. The post-cutoff Y = u_PIT residuals are Q1's already-emitted pickled PIT values (pit_M1); these
+    are the same residuals P1 ran on (per the F_b=Uniform methodology amendment + Theorem 1 monotone-invariance). X is constructed
+    entirely from the time index (delivery_day, h) and from raw demand at lag-1 and lag-24 (which are pre-cutoff for all post-cutoff
+    target rows by construction of the lag). No fitting is performed on data; the SIR and FastICA fits operate ONLY on the
+    post-cutoff (X, Y) pairs (this is a diagnostic of κ̂_Q's residuals, not a re-fit of κ̂_Q itself). The pre-cutoff library
+    is NOT used (Q1's M1 was already fit on pre-cutoff and its PIT residuals computed once for post-cutoff; that artifact
+    is the input). hour_of_week is derived from the time index but is EXPLICITLY EXCLUDED from X — the discriminating test
+    is whether SIR/FastICA recover it WITHOUT being given it.
+  partition:
+    dev: not used
+    test: post-cutoff 2025-01-01 .. 2026-05-16 (same population as Q1, Q2A, Q2B, P1, Q1A)
+    train: not used (Q1's already-emitted M1 PIT residuals are the diagnostic input; no re-fit of κ̂_Q here)
+  source: 'Ontario IESO demand (cfg.paths.historical_csvs) routed through Q1''s already-emitted PIT residuals. Specifically:
+    (a) Y = u_PIT from Q1''s M1 predictor (Student-t kernel), the SAME 12000-row post-cutoff residual series P1 was run on;
+    (b) X = an n_rows × d_X matrix constructed inline from the post-cutoff time index and raw demand lags, see metric for
+    the column list. P1''s pickle is loaded only for cross-checking that the (delivery_day, h) -> hour_of_week derivation
+    matches P1''s bin labels; not an input to the SIR/FastICA fits.'
+date: '2026-05-27'
+falsification_criterion:
+  numeric: 'R-C1A'' fires: max(|ρ_SIR|, |ρ_FastICA|) < 0.3.'
+  reasoning: 'R-C1A'' is the falsification of ''data-driven methods recover P1''s hand-specified axis'': neither SIR nor FastICA
+    finds a top component aligned with the weekly-cyclic hour_of_week phase above the conventional ''medium'' effect-size
+    floor. Two non-exclusive interpretations: (a) P1''s hand-specified hour_of_week axis is an artifact of the marginal PIT
+    pathology rather than a genuine non-Gaussian latent component (P1 finds the discrete bin granularity, but the underlying
+    continuous structure is not picked up by linear SDR or non-Gaussianity-maximizing ICA); (b) hour_of_week''s effect on
+    residuals is below SDR/ICA''s sensitivity floor on this sample size (n=12000). The arbiter cannot mechanically distinguish
+    (a) from (b); both are substantive readings consistent with R-C1A''. Per branching_rules.Q1A''.R-C1A'' = null, this verdict
+    does NOT advance or close the thread state machine — Q1A''s χ²-based verdict (R-A1A / R-B1A / R-C1A) is the thread-state-advancing
+    reading.'
+git_clean: false
+git_sha: 769d854ff21e92fe16d230c037f6daf647133d28
+hypothesis:
+  counter: 'See devils_advocate.yaml. R-B1A'' or R-C1A'': hour_of_week is a discrete bin label (P1''s 8-bin construction;
+    bin = (weekday·24 + (h-1)) // 21) whose effect on residuals concentrates in a small number of strata (hot zone bins 5/6/7
+    are 37.6% of post-cutoff rows; cold zone bin 0 is ~12.5%). A linear SDR via SIR with 10 slices will mix this categorical-like
+    signal with the continuous-noise structure of demand_lag1/lag24 and ramp-out-the-day time_of_day; FastICA''s non-Gaussianity
+    contrast (logcosh) is most sensitive to heavy-tailed marginals, not to social-weekly periodicities. Expected max(|ρ|)
+    lies in [0.2, 0.45], straddling the 0.3 cut. The substantive picture is that P1''s discretized-axis approach finds signal
+    that the linear/non-Gaussianity-maximizing data-driven tools cannot.'
+  proponent: See proponent.yaml. R-A1A' fires (max(|ρ_SIR|, |ρ_FastICA|) ≥ 0.5) at landslide strength. The hot-zone vs cold-zone
+    α̂_L gap of 0.575 in P1 corresponds to ~57% of mass in the non-Gaussian mixture component varying across hour_of_week
+    bins; FastICA's non-Gaussianity contrast is specifically designed to isolate this type of structure, and SIR with 10 slices
+    recovers cyclic central subspaces robustly on n=12000. Expected max(|ρ|) ≥ 0.6 (likely with FastICA scoring higher than
+    SIR because the social-weekly signal is non-Gaussian-mixture rather than dimension-reducing).
+metric: "PRIMARY: head-to-head between two data-driven Z-recovery methods (SIR, FastICA) against a SINGLE verdict cut. The\
+  \ verdict statistic is:\n\n  max_rho = max(|ρ_SIR|, |ρ_FastICA|)\n\nwhere each |ρ_method| is the top-component-vs-cyclic-hour_of_week\
+  \ alignment computed per the cyclic-ρ rule below.\n\nX MATRIX CONSTRUCTION (PRE-LOCKED; d_X = 9 columns):\n\n  Col 1 (demand_quantile_continuous):\
+  \ empirical CDF rank of z_actual within the post-cutoff pool, mapped to [0, 1]. Continuous (NOT P1's tercile).\n  Col 2\
+  \ (time_of_day_sin):   sin(2π · h / 24), h ∈ {1..24}.\n  Col 3 (time_of_day_cos):   cos(2π · h / 24).\n  Col 4 (season_sin):\
+  \        sin(2π · day_of_year / 365.25).\n  Col 5 (season_cos):        cos(2π · day_of_year / 365.25).\n  Col 6 (day_type_saturday):\
+  \ 1 if day_type==saturday else 0.\n  Col 7 (day_type_sunday):   1 if day_type==sunday else 0.\n                        \
+  \     (day_type==weekday is the dropped baseline for identifiability.)\n  Col 8 (demand_lag1):       raw demand at lag-1\
+  \ (MW), z-scored over the post-cutoff pool.\n  Col 9 (demand_lag24):      raw demand at lag-24 (MW), z-scored over the post-cutoff\
+  \ pool.\n\n  Total d_X = 9. hour_of_week is EXPLICITLY EXCLUDED. day_of_week is implicitly captured by (day_type_saturday,\
+  \ day_type_sunday); finer than day-type resolution (e.g., Friday-vs-Monday within weekday) is NOT in X, mirroring the absence\
+  \ of hour_of_week. Per-column standardization: SIR receives X with each column z-scored over post-cutoff rows (standard\
+  \ SIR preprocessing); FastICA whitens internally (sklearn's default whiten='unit-variance').\n\nRESPONSE Y (PRE-LOCKED):\
+  \ Y = u_PIT, the per-row PIT value from Q1's M1 predictor (Student-t kernel), the SAME series P1 was run on. Y is a scalar\
+  \ in [0, 1].\n\nCYCLIC HOUR_OF_WEEK REFERENCE (PRE-LOCKED):\n\n  hour_of_week = weekday · 24 + (h-1)    ∈ {0, 1, ..., 167},\
+  \ weekday ∈ {0=Mon, ..., 6=Sun}, h ∈ {1..24}.\n  cyc_sin = sin(2π · hour_of_week / 168)   (weekly fundamental).\n  cyc_cos\
+  \ = cos(2π · hour_of_week / 168)\n\nThis is a TWO-COLUMN representation; the weekly fundamental frequency 2π/168 is the\
+  \ lowest non-trivial harmonic consistent with the P1 8-bin (21-hour) structure. Higher harmonics (2π/84, 2π/56, ...) are\
+  \ NOT in the reference — the pre-registered test is alignment with the fundamental.\n\nSIR FIT PROCEDURE (PRE-LOCKED; production\
+  \ helper required):\n\n  Production path: processing.innovations.estimator.sliced_inverse_regression_fit(X, Y, n_slices=10)\n\
+  \  Returns: {'directions': (d_X, d_X) array ordered by decreasing eigenvalue; 'eigenvalues': (d_X,) vector from the SIR\
+  \ generalized eigenproblem}.\n  Top component = first column of 'directions' (largest eigenvalue).\n  Top-component projection\
+  \ of X onto Y: scores = X_standardized @ directions[:, 0]  — a length-n vector.\n  n_slices = 10 (Li 1991 default; chosen\
+  \ pre-data; not tunable post-data).\n\nFASTICA FIT PROCEDURE (PRE-LOCKED):\n\n  Production path: sklearn.decomposition.FastICA(n_components=10,\
+  \ algorithm='parallel', fun='logcosh', whiten='unit-variance', random_state=42).fit_transform(np.hstack([X, Y[:, None]])).\n\
+  \  Y is appended to X as the LAST column so FastICA can decompose the joint (X, Y) space and identify non-Gaussian directions\
+  \ that load on Y; standard usage of FastICA for residual-driven Z recovery (Hyvärinen & Oja 2000).\n  n_components = d_X\
+  \ + 1 = 10 (preserves full dimensional information).\n  FAST_ICA_SEED = 42 (pre-locked).\n  Top non-Gaussian component selection:\
+  \ post-fit, compute |excess_kurtosis_j| = |E[(s_j - mean)^4]/var^2 - 3| for each recovered source s_j; the top component\
+  \ is the one with MAX |excess_kurtosis_j|. Top-component scores = the corresponding source vector (length n).\n\nCYCLIC-ρ\
+  \ RULE (PRE-LOCKED; THE LOAD-BEARING DECISION):\n\n  For each method, compute:\n    ρ_sin = Spearman(top_component_scores,\
+  \ cyc_sin)\n    ρ_cos = Spearman(top_component_scores, cyc_cos)\n    |ρ_method| = max(|ρ_sin|, |ρ_cos|)\n\n  RATIONALE &\
+  \ PHASE CEILING: hour_of_week is a circular variable; a single Spearman against either sin OR cos alone cannot recover a\
+  \ perfectly aligned cyclic component because Spearman is rank-based and sinusoids are non-monotone over their full period.\
+  \ Taking the max captures alignment under ARBITRARY PHASE φ: a top component proportional to sin(ωt + φ) gives max(|ρ_sin|,\
+  \ |ρ_cos|) in [~0.707, 1.0] depending on φ (worst-case at φ = π/4 + kπ/2; best-case at φ in {0, π/2, π, 3π/2}). This is\
+  \ the DESIGN CEILING under the Spearman rule: a realized max(|ρ|) ≈ 0.71 must be read as 'R-A1A' at worst-case phase' (still\
+  \ landslide-class), not as ambiguous. The 0.5 R-A1A'/R-B1A' boundary sits comfortably below 0.707 so the rule is phase-robust\
+  \ there; the 0.3 R-B1A'/R-C1A' boundary is phase-robust because no cyclic alignment of any phase falls below 0.3 unless\
+  \ the component is genuinely poorly aligned.\n\n  Alternative considered and rejected: phase-invariant circular-R² from\
+  \ regressing the top component on (cyc_sin, cyc_cos) jointly. Rejected to honor the thread skeleton's literal wording ('|Spearman\
+  \ ρ|'); the max-of-both rule respects Spearman exactly while accommodating circularity.\n\nHEAD-TO-HEAD VERDICT RULE (PRE-LOCKED):\n\
+  \n  The verdict fires on max(|ρ_SIR|, |ρ_FastICA|):\n    - if max_rho >= 0.5:                          R-A1A' (hour_of_week\
+  \ recovered; at least one method validates P1's axis)\n    - if max_rho in [0.3, 0.5):                   R-B1A' (partial\
+  \ recovery; methods sense but don't dominantly identify)\n    - if max_rho < 0.3:                           R-C1A' (not\
+  \ recovered; P1's axis artifactual or below sensitivity floor)\n\n  All three verdicts route to null in thread branching_rules.Q1A'\
+  \ — the verdict is INDEPENDENT and NON-GATING with respect to thread state. The head-to-head sub-finding records which method\
+  \ (SIR or FastICA) scored higher and by how much (|ρ| difference and its 95% paired-bootstrap CI), even though the verdict\
+  \ statistic max() does not depend on the ranking.\n\nTIE / NEAR-TIE HANDLING: methods are NEAR-TIE if ||ρ_SIR| - |ρ_FastICA||\
+  \ < 1.0 · paired-bootstrap SE of the difference (1σ of the paired difference distribution). On NEAR-TIE: verdict uses max()\
+  \ as above (mechanical), AND the sub-finding records 'no ranking' between SIR and FastICA, AND the landslide CI bound check\
+  \ uses the method with the higher point estimate. On NOT-NEAR-TIE: the sub-finding records which method won and by how much.\n\
+  \nVERDICT-CUT TRACEABILITY: the cuts 0.5 and 0.3 are inherited VERBATIM from the thread skeleton (resolution-paths-thread\
+  \ Q1A' node, post-amendment A1, body_sha256 21a8bb20...). They are NOT derived from a prior node's data; they are pre-locked\
+  \ at thread-amendment time. The 0.5 cut is the conventional 'strong recovery' threshold for |ρ| (any |ρ| >= 0.5 is conventionally\
+  \ 'strong' in social-science effect-size literature, e.g., Cohen 1988); the 0.3 cut is the conventional 'medium' threshold.\n\
+  \nSECONDARY / informational:\n  - Per-method top-component loadings on each of the 9 X columns (which X columns the top\
+  \ component most resembles), reported with paired-bootstrap CIs.\n  - Per-method eigenvalue / excess-kurtosis spectrum (informational;\
+  \ for diagnosing whether the top component is well-separated from runners-up).\n  - Permutation-null distribution of max_rho\
+  \ (1000 reps; reported as 'chance-level baseline').\n  - |ρ_SIR| - |ρ_FastICA| difference and its 95% paired-bootstrap CI\
+  \ (head-to-head sub-finding).\n  - Cross-check: confirm P1's pickle (pit_M1) and the (delivery_day, h) -> hour_of_week derivation\
+  \ give the same hot-zone assignment as P1's bin labels (no input-substitution defect)."
+phase: A
+references:
+- body_sha256: 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6
+  file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  relation: thread
+- body_sha256: a2b13f6d8bcd6d2e4206322fc056c9b4388e761c5b5d651282e0f34d634e6d63
+  file: ../2026-05-27_q1a-z-conditioning-strongest-axis/phase_a.yaml
+  relation: sibling_phase_a
+- body_sha256: 5eb024b72dbeb0148000fe3f5e44da316b00685a0d5b15dde8df2b66d0218067
+  file: ../2026-05-27_p1-patra-sen-per-stratum-localization/arbiter.yaml
+  relation: parent_node_arbiter
+related_memory:
+- mitacs-p1-patra-sen-localization
+- mitacs-q2a-richer-family
+- mitacs-q2b-non-distributional
+- mitacs-q1-student-t-vs-gaussian
+- mitacs-clim-gap-nonstationary
+- mitacs-multiscale-defect-eigenmodes-v1
+- mitacs-rebaseline-facts
+related_seed:
+- notes/seeds/multiscale_factor_coherence.md
+- writeup/tex/missing_content_memo.tex
+- ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md
+- ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic_audit_correction.md
+research_question: 'Do data-driven Z-recovery methods — Sliced Inverse Regression (SIR; Li 1991) and FastICA (Hyvärinen &
+  Oja 2000) — recover hour_of_week as a top non-Gaussian / dimension-reducing component of κ̂_Q''s PIT residuals when hour_of_week
+  is EXPLICITLY EXCLUDED from the input covariate matrix, validating P1''s hand-specified binding axis via independent methods?
+  Verdict statistic: max(|ρ_SIR|, |ρ_FastICA|) against the cyclic weekly-fundamental hour_of_week phase (sin/cos at 2π/168),
+  pre-locked cuts at 0.5 (R-A1A'' recovered) / 0.3 (R-B1A'' partial) / under-0.3 (R-C1A'' not recovered).'
+schema: phase_a
+shape_outcomes:
+  R-A1A':
+    criterion: max(|ρ_SIR|, |ρ_FastICA|) ≥ 0.5 (at least one data-driven method's top component aligns with the weekly-cyclic
+      hour_of_week phase at conventional 'strong' effect size)
+    interpretation: 'hour_of_week IS recovered. The head-to-head sub-finding records which method (SIR or FastICA) scored
+      higher (with paired-bootstrap CI on the difference). Substantive reading: data-driven Z-recovery methods validate P1''s
+      hand-specified axis without pre-specification — the approach generalizes for future Z-discovery when the candidate set
+      is less obvious (e.g., the framework note disintegration_diagnostic.md §(f)). LANDSLIDE qualifier: if BOTH the point
+      estimate AND the lower 95% CI bound of max(|ρ|) clear 0.5, substantive reading is ''robust independent recovery''; if
+      only the point clears (CI straddles), mechanical R-A1A'' fires with ''landslide-not-met'' recorded. PHASE CEILING: a
+      realized max(|ρ|) ≈ 0.707 (worst-case phase under Spearman against sin/cos separately) is still landslide-class; the
+      0.5 cut is phase-robust. Per thread branching_rules.Q1A''.R-A1A'' = null, this verdict is INDEPENDENT and NON-GATING
+      with respect to thread state — Q1A''s χ²-based verdict drives thread advancement.'
+  R-B1A':
+    criterion: max(|ρ_SIR|, |ρ_FastICA|) in [0.3, 0.5) (better method's top component partially aligns with hour_of_week phase,
+      at conventional 'medium' effect size)
+    interpretation: 'Partial recovery. Both methods sense the social-weekly structure to some degree but neither dominantly
+      identifies it. Substantive reading: P1''s hand-specified axis captures a real signal, but the linear central-subspace
+      (SIR) and non-Gaussianity-maximizing (FastICA) views of the residuals only partially align with it — the underlying
+      structure may be discrete-categorical (bin-like) in a way that doesn''t reduce cleanly to a single cyclic direction.
+      The head-to-head sub-finding records which method scored higher. Per thread branching_rules.Q1A''.R-B1A'' = null, INDEPENDENT
+      and NON-GATING.'
+  R-C1A':
+    criterion: max(|ρ_SIR|, |ρ_FastICA|) < 0.3 (neither method recovers an hour_of_week-aligned direction at the conventional
+      'medium' effect-size floor)
+    interpretation: 'hour_of_week NOT recovered. Two non-exclusive readings: (a) P1''s hand-specified hour_of_week axis is
+      an artifact of the marginal PIT pathology rather than a genuine non-Gaussian latent component, or (b) the effect is
+      below SDR/ICA sensitivity at n=12000. The arbiter cannot mechanically distinguish (a) from (b) — both are substantive
+      readings consistent with R-C1A''. The head-to-head sub-finding records which method scored higher (still informative;
+      in (b) the higher score is closer to the floor, in (a) both are at chance level). Per thread branching_rules.Q1A''.R-C1A''
+      = null, INDEPENDENT and NON-GATING.'
+stopping_criterion:
+  reasoning: Pre-registration complete; verdict determined by realized max(|ρ|) against pre-locked cuts. No iteration, no
+    parameter tuning post-data, no swap of the cyclic-ρ rule. The head-to-head structure is locked at two methods (SIR, FastICA);
+    adding a third (e.g., MAVE, LiNGAM, FCI from the disintegration_diagnostic.md §(f) menu) after seeing Q1A' results would
+    require a new dated entry per the append-only rule. The Q1A' verdict is INDEPENDENT of Q1A's outcome — the arbiter renders
+    against R-A1A'/R-B1A'/R-C1A' regardless of whether Q1A fires R-A1A, R-B1A, or R-C1A.
+  rule: Run synthetic recovery gate (per baselines.secondary); load post-cutoff X (9 columns per metric) and Y (u_PIT from
+    pit_M1); standardize X column-wise; fit SIR via sliced_inverse_regression_fit(X, Y, n_slices=10); fit FastICA via sklearn.decomposition.FastICA(n_components=10,
+    fun='logcosh', whiten='unit-variance', random_state=42).fit_transform(np.hstack([X, Y[:, None]])); extract top component
+    per the pre-locked rule for each method; compute |ρ_method| = max(|Spearman(scores, cyc_sin)|, |Spearman(scores, cyc_cos)|);
+    1000-rep paired-day bootstrap on (|ρ_SIR|, |ρ_FastICA|, max(|ρ|)); 1000-rep permutation null for chance-level baseline;
+    verdict R-A1A'/R-B1A'/R-C1A' per max(|ρ_SIR|, |ρ_FastICA|); emit result. STOP.
+thread:
+  independence_clause: 'Q1A'' is a NON-GATING sibling of Q1A under P1.R-A. The Q1A'' arbiter renders its verdict against R-A1A''/R-B1A''/R-C1A''
+    INDEPENDENTLY of Q1A''s χ²-based verdict (R-A1A/R-B1A/R-C1A). Per thread.branching_rules.Q1A'' = {R-A1A'': null, R-B1A'':
+    null, R-C1A'': null}, no Q1A'' outcome advances or closes the thread state machine — Q1A''s verdict is the thread-state-advancing
+    reading. Q1A and Q1A'' run in parallel; they share the SAME u_PIT residual series (Q1''s M1 PIT) as input but apply different
+    reading methods (Q1A: stratified M3 re-fit with Z = hour_of_week-derived plus χ² recompute; Q1A'': linear-SDR and non-Gaussianity-maximizing-ICA
+    on residuals with hour_of_week EXCLUDED from X). The Q1A'' verdict provides a consistency-check reading on whether P1''s
+    hand-specified hour_of_week axis is recoverable by data-driven methods, validating (or not) the approach for future Z-discovery
+    in less-obvious candidate-set contexts. A divergence between Q1A and Q1A'' (e.g., Q1A R-A1A but Q1A'' R-C1A'') is itself
+    substantively informative and is captured in the arbiter''s cross-experiment note.'
+  node_id: Q1A'
+  parent_branch: R-A
+  thread_body_sha256: 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6
+  thread_topic: resolution-paths-thread
+  threshold_derivations: 'Numeric thresholds (R-A1A'': max_rho ≥ 0.5; R-B1A'': max_rho in [0.3, 0.5); R-C1A'': max_rho < 0.3)
+    are inherited VERBATIM from the thread skeleton''s Q1A''.phase_a_skeleton.outcome_categories (post-amendment A1, thread
+    body_sha256 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6). They are NOT derived from prior-node data
+    — they are pre-locked at thread-amendment time. Conventional rationale: in social-science effect-size literature (Cohen
+    1988 and successors), |ρ| ≥ 0.5 is ''strong'', |ρ| in [0.3, 0.5) is ''medium'', |ρ| < 0.3 is ''weak-to-negligible''. The
+    thread amendment chose these conventional cuts rather than gate-derived (data-dependent) cuts because Q1A''s metric (|Spearman
+    ρ|) is not on the χ² scale of Q1A/Q2A/Q2B and has no Q1A''-internal gate (the synthetic recovery gate validates implementation,
+    not threshold calibration).
+
+
+    The cyclic-ρ rule (max(|ρ_top_vs_sin|, |ρ_top_vs_cos|)) is the phase_a author''s pre-locked specification of the thread
+    skeleton''s informal phrase ''|Spearman ρ| between the top component''s loadings and the cyclic hour_of_week phase.''
+    The thread skeleton''s skeleton_thresholds_depend_on.hour_of_week_cyclic_phase rule explicitly designates this construction
+    as the phase_a author''s call. The max-of-both rule respects Spearman literally while accommodating the circularity of
+    hour_of_week (a single Spearman against either sin OR cos alone has known non-monotonicity issues — see metric.CYCLIC-ρ
+    RULE for the rationale).
+
+
+    SIR PRODUCTION HELPER: SIR is not currently in the .venv (no `dimred`, no `sliced` package). A new production helper `sliced_inverse_regression_fit(X,
+    Y, n_slices=10)` will be added to `processing/innovations/estimator.py` as a one-time pre-data build step, mirroring the
+    `patra_sen_fit` pattern. The helper is whitelisted in `experiment/audit/code_path.py` PRODUCTION_SYMBOLS as `processing.innovations.estimator.sliced_inverse_regression_fit`.
+    The helper''s recovery gate is `baselines.secondary` (synthetic with known cyclic structure must yield max(|ρ|) ≥ 0.70).
+    This build step is PRE-REGISTERED here (not a deviation): it is part of the experiment infrastructure required to execute
+    Q1A'' via production paths. Without it, the SIR fit would be inline in the experiment script and trigger /audit code-path
+    REIMPLEMENTED. FastICA is whitelisted as `sklearn.decomposition.FastICA` (already in .venv, sklearn 1.7.0).'
+topic: q1a-prime-sdr-ica-sibling
+variables:
+  dependent:
+  - rho_SIR
+  - rho_FastICA
+  - max_rho
+  - rho_SIR_ci95
+  - rho_FastICA_ci95
+  - max_rho_ci95
+  - rho_diff_SIR_minus_FastICA
+  - rho_diff_ci95
+  - rho_SIR_phase_sin
+  - rho_SIR_phase_cos
+  - rho_FastICA_phase_sin
+  - rho_FastICA_phase_cos
+  - sir_eigenvalue_spectrum
+  - fastica_kurtosis_spectrum
+  - sir_top_component_loadings_on_X
+  - fastica_top_component_loadings_on_X
+  - permutation_null_max_rho_ci95
+  - winner
+  - near_tie_flag
+  excluded:
+  - reasoning: hour_of_week is the candidate Z whose recoverability is being tested WITHOUT pre-specification. Including it
+      in X would defeat the experiment's purpose (the verdict statistic would trivially fire R-A1A' if hour_of_week is in
+      X). Its cyclic representation (cyc_sin, cyc_cos at 2π/168) appears ONLY as the reference target for the |ρ| computation,
+      NOT as an input to SIR or FastICA.
+    variable: hour_of_week
+  - reasoning: Higher harmonics of the weekly cycle (2π/84, 2π/56, ...) are not in scope for the reference target. P1's 8-bin
+      structure corresponds to the lowest-resolution consistent fundamental; testing higher harmonics would be a post-hoc
+      multiplication of comparisons. If R-C1A' fires, a follow-up exploring higher harmonics could be a new dated entry.
+    variable: higher_harmonics_of_hour_of_week
+  - reasoning: Temperature requires exogenous data (ECCC hourly weather) and is the domain of Q1C (closed by P1 R-A firing).
+      Including temperature in X for Q1A' would conflate the data-driven-recovery-of-P1's-axis question with the candidate-Z-test
+      question; the two are distinct experiments by design.
+    variable: temperature_or_exogenous_Z
+  - reasoning: Other data-driven Z-recovery methods (MAVE, SAVE, LiNGAM, FCI; per disintegration_diagnostic.md §(f)) are not
+      in the head-to-head. The thread skeleton pins candidate_set to ['SIR', 'FastICA']. Adding a third method after seeing
+      Q1A' results would violate the append-only rule. If R-C1A' fires, a new thread node testing MAVE or LiNGAM is a natural
+      follow-up.
+    variable: additional_data_driven_methods_MAVE_SAVE_LiNGAM_FCI
+  - reasoning: Cross-axis joint stratification (e.g., (day_type, hour_of_week, demand_quantile)) is the domain of Q1B and
+      cross-axis Z amendments; Q1A' is a SINGLE-Z recovery diagnostic on the same data footprint as P1.
+    variable: cross_axis_joint_Z_constructions
+  independent:
+  - method
+  - X_column_subset
+  - Z_construction
+written_at: '2026-05-27T16:17:06-07:00'

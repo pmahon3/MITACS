@@ -1,5 +1,26 @@
-amendments: []
-body_sha256: 9a5647a5f7ea6b3ee44d53e95c23e165e9d706d105db9afbf2c4f0cc25a3c6ba
+amendments:
+- amendment_id: A1
+  changes:
+  - 'Add node Q1A'' (parent_branch: R-A, parent_id: P1, status: active)'
+  - Add branching_rules.Q1A' with all three outcomes mapped to null (independent verdict;
+    non-gating w.r.t. thread state machine)
+  - current_node_id unchanged (remains Q1A; Q1A' is out-of-state-machine sibling)
+  - branching_rules.P1.R-A unchanged (remains Q1A per settled-node immutability rule)
+  - P1 node entry unchanged (settled-node immutability rule)
+  git_sha: 769d854ff21e92fe16d230c037f6daf647133d28
+  prior_tree_hash: 9a5647a5f7ea6b3ee44d53e95c23e165e9d706d105db9afbf2c4f0cc25a3c6ba
+  reason: 'Add Q1A'' as a non-gating sibling of Q1A under P1.R-A. Per the disintegration_diagnostic
+    note §(f), data-driven Z-recovery (SDR via SIR; ICA via FastICA) is recommended
+    as a consistency check on P1''s hand-specified hour_of_week binding axis. The
+    original thread tree only included candidate-Z testing as type-1 auxiliary information;
+    data-driven Z-discovery was implicit in the framework but not registered as a
+    thread node. Running Q1A'' in parallel with Q1A means the consistency check fires
+    regardless of Q1A''s χ²-closure outcome, validating P1''s hand-specified-axis
+    approach as a method.
+
+    '
+  written_at: '2026-05-27T16:04:06-07:00'
+body_sha256: 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6
 branching_rules:
   P1:
     R-A: Q1A
@@ -11,6 +32,10 @@ branching_rules:
     R-A1A: null
     R-B1A: Q1B
     R-C1A: P2
+  Q1A':
+    R-A1A': null
+    R-B1A': null
+    R-C1A': null
   Q1B:
     R-A1B: null
     R-B1B: null
@@ -20,8 +45,8 @@ branching_rules:
     R-B1C: null
     R-C1C: P2
 current_node_id: Q1A
-git_clean: false
-git_sha: 3c3e2e0c947ab77a3bcaea14f36df841a22af632
+git_clean: true
+git_sha: 769d854ff21e92fe16d230c037f6daf647133d28
 nodes:
   P1:
     id: P1
@@ -105,6 +130,43 @@ nodes:
       - field: binding_axis_and_Z_construction
         rule: Q1A's specific Z is derived from P1's R-A binding axis at result time.
         source: P1.result
+    status: active
+  Q1A':
+    id: Q1A'
+    name: q1a-prime-sdr-ica-sibling
+    parent_branch: R-A
+    parent_id: P1
+    phase_a_path: null
+    phase_a_skeleton:
+      candidate_set:
+      - SIR
+      - FastICA
+      metric_class: 'Data-driven Z-recovery on κ̂_Q''s PIT residuals via SIR and FastICA
+        (head-to-head). Input covariate matrix: the 4 non-hour_of_week P1 axes (demand_quantile,
+        time_of_day, season, day_type) plus lagged demand (lag-1, lag-24). hour_of_week
+        explicitly EXCLUDED from the input matrix — the discriminating empirical test
+        is whether the methods recover an hour_of_week-aligned direction WITHOUT being
+        pre-specified. For each method, identify the top component (highest eigenvalue
+        for SIR; highest non-Gaussianity for FastICA), project hour_of_week onto a
+        cyclic representation (sin/cos pair at the weekly fundamental frequency 2π/168),
+        compute |Spearman ρ| between the top component''s loadings and the cyclic
+        hour_of_week phase. 1000-rep paired-day bootstrap CIs on each ρ.
+
+        '
+      outcome_categories:
+      - R-A1A': max(|ρ_SIR|, |ρ_FastICA|) ≥ 0.5 (P1's hand-specified hour_of_week
+          IS recovered by at least one data-driven method; SDR/ICA validates the approach)
+      - R-B1A': max(|ρ_SIR|, |ρ_FastICA|) in [0.3, 0.5) (partial recovery; methods
+          sense the social-weekly structure but don't dominantly identify it)
+      - R-C1A': max(|ρ_SIR|, |ρ_FastICA|) < 0.3 (hour_of_week NOT recovered; P1's
+          hand-specified axis is either an artifact or below SDR/ICA's sensitivity
+          floor)
+      skeleton_thresholds_depend_on:
+      - field: hour_of_week_cyclic_phase
+        rule: cyclic representation computed at the weekly fundamental frequency 2π/168;
+          precise sin/cos column construction is the phase_a author's call.
+        source: P1.result (binding axis = hour_of_week; weekly fundamental from the
+          21-hour bin structure used in P1)
     status: active
   Q1B:
     id: Q1B

@@ -1,0 +1,88 @@
+schema: proponent
+written_at: '2026-05-27T16:33:33-07:00'
+references:
+- file: phase_a.yaml
+  body_sha256: b14d09cbec08207179e8cffca584de04a7855ff359888a8a0e4c8e30ce8b0806
+  relation: phase_a
+- file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  body_sha256: 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6
+  relation: thread
+
+outcome: R-A1A'
+confidence: 0.70
+
+forecast:
+  rho_SIR_point: 0.45
+  rho_SIR_ci95: [0.35, 0.55]
+  rho_FastICA_point: 0.60
+  rho_FastICA_ci95: [0.48, 0.70]
+  rho_max_point: 0.60
+  rho_max_ci95: [0.50, 0.71]
+  head_to_head_winner: FastICA
+  head_to_head_margin_point: 0.15
+  landslide_qualifier_predicted: true
+  permutation_null_exceeded: true
+  permutation_null_max_predicted: 0.08
+
+rationale_summary: |
+  P1 settled R-A at landslide strength, locating the missing-Z structure
+  on a social-weekly grid with hour_of_week range 0.575 [0.448, 0.648]
+  and a sharp hot-zone (Fri 10:00 - Sun 23:00, bins 5/6/7) vs cold-zone
+  (Mon 01:00-21:00, bin 0) signature. The Q1A' X matrix contains
+  day_type indicators, time_of_day sin/cos, and lag-1/lag-24 demand —
+  these jointly proxy the social-weekly grid as a linear combination.
+  SIR's central subspace should pick up that combination as a top
+  direction; FastICA, designed to isolate maximally non-Gaussian
+  components and operating on residuals with excess kurtosis ~25-33,
+  should exploit the heavy-tailed mixture structure that lives ON the
+  social-weekly grid (Q1 S8 + P1 hot/cold pattern). FastICA wins by
+  ~0.15 because non-Gaussian-mixture structure is FastICA's direct
+  target, whereas SIR sees it indirectly through a non-monotone link
+  function (sliced regression on residuals against a 10-slice grid).
+  R-A1A' at landslide strength is the predicted outcome; the
+  permutation null should sit near 0.06-0.10 (chance-level for n=12000
+  paired rows).
+
+evidence_chain:
+  - claim: "P1 hour_of_week α̂_L range 0.575 [0.448, 0.648] is a strong, concentrated cyclic signal"
+    source: "memory/mitacs-p1-patra-sen-localization.md (S11 SETTLED R-A)"
+  - claim: "Hot zone bins 5/6/7 carry α̂_L 0.55-0.61; cold zone bin 0 at 0.035 — the social-weekly grid is sharply non-uniform"
+    source: "memory/mitacs-p1-patra-sen-localization.md hot/cold table"
+  - claim: "Q1's M1 residuals carry excess kurtosis ~25-33 (univariate, scalar one-step innovation), exactly the substrate FastICA's logcosh contrast is designed for"
+    source: "CLAUDE.md mitacs-rebaseline-facts + mitacs-q1-student-t-vs-gaussian.md (S8); univariate non-Gaussianity is rank-1 per mitacs-rank1-structural"
+  - claim: "X contains day_type_saturday/sunday and time_of_day sin/cos; together these linearly carve the social-weekly grid that P1 read via discrete bins. Lagged demand at lag-24 also carries day-shape information."
+    source: "phase_a.yaml metric.X MATRIX CONSTRUCTION"
+  - claim: "Framework programme explicitly endorses this test: 'if these methods recover hour_of_week blindly, that validates the approach'"
+    source: "~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md §(f), final paragraph"
+  - claim: "Day_type axis range 0.345 in P1 corroborates Q2A Finding 2 (saturday 4× weekday) and eigenmodes-v1 (S2/S3) weekday/weekend asymmetry — so the day_type indicators in X are themselves strong proxies for the hot zone"
+    source: "memory/mitacs-p1-patra-sen-localization.md day_type axis + cross-link"
+  - claim: "Spearman against (sin, cos) separately has worst-case phase-ceiling ≈0.707; my point forecast 0.60 sits comfortably below the ceiling but well above the 0.5 cut"
+    source: "phase_a.yaml metric.CYCLIC-ρ RULE.RATIONALE & PHASE CEILING"
+
+what_would_change_my_mind:
+  - condition: "Synthetic recovery gate (baselines.secondary) fails — max(|ρ_SIR_synth|, |ρ_FastICA_synth|) < 0.70 on the SNR≈1.5 cyclic-DGP"
+    interpretation: "Implementation defect or sample-size/SNR ceiling lower than P1's regime would suggest; the Ontario result becomes uninterpretable, and a null reading there is consistent with capacity failure rather than substantive non-recovery."
+  - condition: "FastICA top component (by max |excess kurtosis|) loads heavily on demand_lag1 or demand_quantile_continuous rather than on day_type / time_of_day"
+    interpretation: "The heavy-tailed structure FastICA isolates is the demand-magnitude tail rather than the social-weekly mixture component, and ρ vs cyclic phase will drop below 0.3 even though the residual is non-Gaussian. Would route to R-C1A' substantively as 'P1's axis is discrete-bin-categorical and not picked up by linear/non-Gaussianity-maximizing reductions.'"
+  - condition: "Permutation null 95% upper bound exceeds 0.20 (much higher than expected ~0.08)"
+    interpretation: "Chance-level baseline is itself elevated by within-day temporal coupling preserved in the paired-day shuffle; the 0.3/0.5 cuts effectively shift up and R-A1A' becomes harder to clear at landslide. Would weaken confidence in the realized verdict."
+  - condition: "SIR top eigenvalue is within 1.5× of the 2nd eigenvalue (poor separation) AND FastICA top |excess kurtosis| is within 1.2× of 2nd"
+    interpretation: "Neither method has a well-separated top component; the 'top component' is itself a near-tie and the |ρ| vs cyclic phase reading is unreliable. Substantive picture would shift toward R-B1A' (partial recovery, diffuse across modes — echoing eigenmodes-v1 S3's diffuse-defect pattern)."
+
+process_note: |
+  This proponent was re-dispatched after the original simultaneous
+  proponent/devils-advocate dispatch failed with a socket error before
+  any proponent write reached disk. The devils-advocate had stamped
+  successfully and its file existed on disk at re-dispatch time. Per
+  the hard constraint in the dispatch prompt, this proponent did NOT
+  read devils_advocate.yaml in this directory, nor any
+  devils_advocate.yaml in any sibling directory (including
+  2026-05-27_q1a-z-conditioning-strongest-axis/devils_advocate.yaml),
+  at any point. The DA file's existence was confirmed via `ls` on the
+  preregistration directory; its contents were not observed. The
+  simultaneity-by-non-observation rule was complied with. Documented
+  in the session lab note.
+
+git_sha: 769d854ff21e92fe16d230c037f6daf647133d28
+git_clean: false
+body_sha256: 92e5b8f2c1a461fc1be9e08e24edfa870a013784b8e889e968a9d888c7b6d695
