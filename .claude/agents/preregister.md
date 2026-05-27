@@ -111,6 +111,68 @@ deviations_from_phase_a:
 - The registry directory is append-only. To revise an artifact,
   emit a new dated entry that references the prior one.
 
+## Pre-run methodology amendment (carve-out to append-only)
+
+The append-only rule above exists to prevent post-hoc adaptation:
+once you've seen the data, you cannot quietly rewrite phase_a to fit
+it. That threat model does not apply BEFORE any experiment data is
+touched.
+
+When a phase_a `baselines.secondary` self-test (or any other pre-run
+gate: code-path, Check P, synthetic sanity) catches a defect in
+phase_a itself BEFORE the experiment script touches real data, the
+defect must be fixable. Otherwise the workflow's own catch-the-error-
+early machinery is wasted: the only path forward would be to emit a
+new dated entry, which is heavyweight for what is structurally a
+typo or methodology-clarification fix.
+
+**Carve-out rule.** Pre-run methodology corrections to phase_a may be
+applied IN-PLACE via re-stamp, subject to all four conditions:
+
+1. **Pre-data**: the experiment script has not yet been run on real
+   data. The only thing that has run is a pre-registered sanity gate
+   (synthetic self-test, code-path audit, Check P), and that gate
+   has fired BLOCKING or FAIL.
+2. **Forecast-consistent**: the proponent and devils-advocate
+   numeric forecasts remain consistent with the corrected phase_a.
+   (If a sign error in phase_a's prose was already correct in the
+   proponent's numbers — the proponent forecast a chi² reduction
+   that's only achievable under the correct sign — then re-stamping
+   phase_a's prose without touching the proponent is forecast-
+   consistent. If forecasts depend on the typo for consistency,
+   they must be re-stamped too, and the change is more substantive
+   than a typo fix — escalate to a new dated entry.)
+3. **Git-history-preserved**: the original (defective) phase_a is
+   preserved in git history; the commit message documents the
+   defect, the gate that caught it, and the correction. Anyone
+   running `git log -p phase_a.yaml` sees the full chain.
+4. **Re-verified**: after re-stamp, `registry.verify_file` passes
+   on phase_a, proponent, and devils-advocate (the latter two have
+   their `references[].body_sha256` updated to the new phase_a hash
+   and are themselves re-stamped). Optionally re-run the gate that
+   caught the original defect to confirm the fix works.
+
+The carve-out applies ONLY pre-data. Once the experiment script has
+run on real data, the append-only rule is back in force: any
+subsequent phase_a change requires a new dated entry that references
+the prior, and the analyst must justify why a result was reported
+under the prior phase_a if the new phase_a supersedes it.
+
+Concrete examples of in-scope corrections:
+- Sign typo in a fix definition ("subtract X" should be "add X")
+  caught by synthetic self-test.
+- Off-by-one in horizon convention caught by Check P L1.
+- Wrong field name in a `variables.dependent` entry caught by
+  Check P structural review before the script runs.
+
+Out-of-scope (require new dated entry):
+- Adding a new outcome category after seeing realized chi² is in
+  R-B band you wish you'd called R-A.
+- Changing a numeric threshold (0.50 → 0.30) after seeing realized
+  shares.
+- Adding or removing a candidate from the candidate set after the
+  experiment has fit it.
+
 ## Thread membership (when phase_a is a node in a thread)
 
 If the experiment belongs to a pre-registered thread (line of
