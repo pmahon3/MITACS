@@ -1372,9 +1372,19 @@ axis can deliver on this empirical process, and that the natural
 next move follows the framework's prescribed resolution paths:
 (i) candidate-$Z$ testing (temperature, secular drift via
 \texttt{year\_since\_cutoff} per (S5), refined day-type partition);
-(ii) stratified Patra--Sen as a $\sigma$-algebra adequacy
-diagnostic; (iii) synthetic Gaussian-DGP calibration to anchor
-the residual-$\chi^{2}$ floor against a known reference.
+(ii) stratified covariate-dependent two-component mixture
+decomposition via NPMLEmix (Deb, Saha, Guntuboyina, Sen, JASA
+2022; arXiv:1810.07897) as a $\sigma$-algebra adequacy
+diagnostic;\footnote{The disintegration note's Phase-2 audit row
+listed ``Patra--Sen conditional diagnostic'' as a novel applied
+contribution; a second-pass literature scout (2026-05-26;
+\path{notes/literature/2026-05-26_stratified-patra-sen-scout.md})
+falsified this, finding that Deb et al.\ (2022, by Sen of
+Patra--Sen 2016) provide the strictly more general joint NPMLE
+of $\pi^*(x)$ with a formal distance-covariance adequacy test in
+their Section~6. The methodology is canonical; the diagnostic
+value is unchanged.} (iii) synthetic Gaussian-DGP calibration to
+anchor the residual-$\chi^{2}$ floor against a known reference.
 
 \paragraph{Thread state after Q2B.}
 Q2B.status $\to$ \texttt{settled}; the thread's
@@ -1493,7 +1503,8 @@ observationally indistinguishable from $\kappa_{Q}$ alone. The
 distributional-class line of inquiry is exhausted on its
 pre-registered scope; the next move requires auxiliary information
 per the framework's three resolution paths (candidate-$Z$ testing,
-stratified Patra--Sen, synthetic Gaussian-DGP calibration). \\
+stratified NPMLEmix per Deb et al.\ 2022, synthetic Gaussian-DGP
+calibration). \\
 \addlinespace
 Decomposition of the residual $\chi^{2}$ into the pre-registered
 non-distributional mechanisms (iterated mean trajectory bias,
@@ -1687,8 +1698,9 @@ would not address the identifiability obstruction. The natural
 next move is a fresh thread on the framework's three resolution
 paths: (i) candidate-$Z$ testing (temperature, secular drift
 via \texttt{year\_since\_cutoff} per (S5), refined day-type
-partition); (ii) stratified Patra--Sen as a $\sigma$-algebra
-adequacy diagnostic; (iii) synthetic Gaussian-DGP calibration
-to anchor the residual-$\chi^{2}$ floor.
+partition); (ii) stratified covariate-dependent two-component
+mixture decomposition via NPMLEmix (Deb et al.\ 2022) as a
+$\sigma$-algebra adequacy diagnostic; (iii) synthetic Gaussian-DGP
+calibration to anchor the residual-$\chi^{2}$ floor.
 
 \end{document}
