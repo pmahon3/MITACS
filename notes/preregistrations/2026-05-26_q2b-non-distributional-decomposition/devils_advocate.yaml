@@ -2,28 +2,17 @@ schema: devils_advocate
 written_at: '2026-05-26T23:40:00-04:00'
 references:
 - file: phase_a.yaml
-  body_sha256: 8354a70bc4361fa3e874b98c764e8c0f41cd06c908b8614a4f4bb1cd913907fb
-strongest_argument: 'The proponent''s central claim - that the +1000 MW MW-space gap translates to a dominant (~0.75) z-space mech_1 share - hinges on a translation step the proponent does not justify.
-  The MW-space gap in mitacs-clim-gap-nonstationary is on the REGISTERED PREDICTOR (full demand iteration through forecast = mu + sigma*z_next). The Q2B kappa_1 marginal is in z-space, standardized against
-  a FIXED pre-cutoff climatology that does not see the post-cutoff drift. The kappa_1 INNOVATION is the variable being PIT-evaluated, not the full demand forecast; a +1000 MW MW-space drift maps to a z-space
-  first-moment offset of roughly 1000/sigma_clim ~ 0.3-0.5 standard deviations (sigma_clim ~ 2000-3000 MW depending on hour). This is non-trivial but attenuated relative to the proponent''s implicit assumption
-  that the MW-space dominance translates 1-to-1 to z-space chi^2 dominance.
+  body_sha256: 91f69aeb13783bfa54adc45fa3b4da7fe81f9ea3ed984e5381dd281b10d7dd8e
+strongest_argument: 'The proponent''s central claim - that the +1000 MW MW-space gap translates to a dominant (~0.75) z-space mech_1 share - hinges on a translation step the proponent does not justify. The MW-space gap in mitacs-clim-gap-nonstationary is on the REGISTERED PREDICTOR (full demand iteration through forecast = mu + sigma*z_next). The Q2B kappa_1 marginal is in z-space, standardized against a FIXED pre-cutoff climatology that does not see the post-cutoff drift. The kappa_1 INNOVATION is the variable being PIT-evaluated, not the full demand forecast; a +1000 MW MW-space drift maps to a z-space first-moment offset of roughly 1000/sigma_clim ~ 0.3-0.5 standard deviations (sigma_clim ~ 2000-3000 MW depending on hour). This is non-trivial but attenuated relative to the proponent''s implicit assumption that the MW-space dominance translates 1-to-1 to z-space chi^2 dominance.
 
 
-  Second, Q2A''s Finding #2 (Saturday chi^2 ~ 4x weekday chi^2, family-invariant across M1/M3/M4/M5) indicates day-type-specific structure that survives every distributional family tested. This structure
-  could be EITHER a mean-bias asymmetry (Saturday''s empirical_mean_bias differs from weekday''s by more than mech_1''s per-day-type subtraction can absorb at the aggregate marginal level) OR a variance-divergence
-  asymmetry (Saturday''s iterated SMC variance compounds differently due to lower-data-density library cells). Either way the day-type pattern is unlikely to be fully captured by mech_1 alone; mech_2 is
-  plausibly capturing structurally distinct content.
+  Second, Q2A''s Finding #2 (Saturday chi^2 ~ 4x weekday chi^2, family-invariant across M1/M3/M4/M5) indicates day-type-specific structure that survives every distributional family tested. This structure could be EITHER a mean-bias asymmetry (Saturday''s empirical_mean_bias differs from weekday''s by more than mech_1''s per-day-type subtraction can absorb at the aggregate marginal level) OR a variance-divergence asymmetry (Saturday''s iterated SMC variance compounds differently due to lower-data-density library cells). Either way the day-type pattern is unlikely to be fully captured by mech_1 alone; mech_2 is plausibly capturing structurally distinct content.
 
 
-  Third, the iterated heavy-tailed variance over h=24 under M3 mixture-2-Gaussian is non-trivial by construction. M3''s symmetric two-component centred mixture has higher per-step kurtosis than Gaussian;
-  iterated over 24 steps the central limit pull toward Gaussian competes with the per-step kurtosis injection, and the resulting iterated marginal variance can substantially exceed the empirical (which
-  is the actual residual against actuals, not against a forecast trajectory). Mech_2''s variance-cap is one-sided (only fires when sigma2_iter > sigma2_empirical), so when it fires it does real attribution
-  work; I forecast it captures roughly 0.35 of the gap.
+  Third, the iterated heavy-tailed variance over h=24 under M3 mixture-2-Gaussian is non-trivial by construction. M3''s symmetric two-component centred mixture has higher per-step kurtosis than Gaussian; iterated over 24 steps the central limit pull toward Gaussian competes with the per-step kurtosis injection, and the resulting iterated marginal variance can substantially exceed the empirical (which is the actual residual against actuals, not against a forecast trajectory). Mech_2''s variance-cap is one-sided (only fires when sigma2_iter > sigma2_empirical), so when it fires it does real attribution work; I forecast it captures roughly 0.35 of the gap.
 
 
-  Net: R-B3 fires with mech_1 ~ 0.40 and mech_2 ~ 0.35, neither dominant under the > 2x clause. Mech_3 ~ 0.02 (registered null holds; near zero but not exactly zero due to small library-composition noise
-  at the seam boundary).'
+  Net: R-B3 fires with mech_1 ~ 0.40 and mech_2 ~ 0.35, neither dominant under the > 2x clause. Mech_3 ~ 0.02 (registered null holds; near zero but not exactly zero due to small library-composition noise at the seam boundary).'
 specific_failure_modes:
 - rank: 1
   mode: z_space_vs_MW_space_attenuation_of_mean_bias_share_proponent_assumes_1to1_translation
@@ -54,10 +43,7 @@ counter_prediction:
     chi2_after_seam_exclusion_fix: 939
     chi2_baseline_M3_self_consistency: 953.84
   units: explained_share dimensionless in [0, 1]; chi^2 dimensionless for 10-bin uniform; outcome category in {R-A3, R-B3, R-C3}; dominant_mechanism null when no single dominance
-  reasoning: 'Disagreeing with the proponent on outcome category (R-B3, not R-A3) and dominance structure (no single dominant mechanism, not mech_1 dominant). My central call is mech_1 ~ 0.40 and mech_2
-    ~ 0.35 with mech_3 ~ 0.02; max share 0.40 is below the 0.50 dominance bar, and even setting that aside 0.40 is not > 2 x 0.35 = 0.70 so R-A3''s separation clause fails on its own. R-B3 fires by complement.
-    Reasoning: the MW-space +1000 MW gap attenuates to z-space at ~0.3-0.5 sigma_clim, doing real work but not dominant; iterated variance under M3''s heavy-tail mixture at h=24 compounds non-trivially
-    and mech_2''s one-sided cap captures comparable share; mech_3 is near zero (registered null holds).'
+  reasoning: 'Disagreeing with the proponent on outcome category (R-B3, not R-A3) and dominance structure (no single dominant mechanism, not mech_1 dominant). My central call is mech_1 ~ 0.40 and mech_2 ~ 0.35 with mech_3 ~ 0.02; max share 0.40 is below the 0.50 dominance bar, and even setting that aside 0.40 is not > 2 x 0.35 = 0.70 so R-A3''s separation clause fails on its own. R-B3 fires by complement. Reasoning: the MW-space +1000 MW gap attenuates to z-space at ~0.3-0.5 sigma_clim, doing real work but not dominant; iterated variance under M3''s heavy-tail mixture at h=24 compounds non-trivially and mech_2''s one-sided cap captures comparable share; mech_3 is near zero (registered null holds).'
 forecast_ci:
   width: 0.95
   low:
@@ -72,23 +58,15 @@ forecast_ci:
     explained_share_seam: 0.05
     chi2_after_mean_bias_fix: 772
     chi2_after_variance_cap_fix: 809
-  reasoning: 'CI on mech_1 share [0.25, 0.60] crosses the R-A3 dominance bar (0.50) on the upper side. CI on mech_2 share [0.20, 0.55] also crosses 0.50 on the upper side. The CIs reflect asymmetric uncertainty:
-    my central call is R-B3, but R-A3 fires in the upper-tail joint region where one share exceeds 0.50 AND > 2x the other. The chi^2 CIs are derived from the explained_share formula inverted; the bounds
-    map non-monotonically because the formula decreases in share.'
+  reasoning: 'CI on mech_1 share [0.25, 0.60] crosses the R-A3 dominance bar (0.50) on the upper side. CI on mech_2 share [0.20, 0.55] also crosses 0.50 on the upper side. The CIs reflect asymmetric uncertainty: my central call is R-B3, but R-A3 fires in the upper-tail joint region where one share exceeds 0.50 AND > 2x the other. The chi^2 CIs are derived from the explained_share formula inverted; the bounds map non-monotonically because the formula decreases in share.'
 what_would_change_my_mind:
-- If mech_1 explained_share > 0.65 with tight CI (lower bound > 0.50), the z-space attenuation concern is empirically minor and the proponent's MW-space-to-z-space translation assumption holds. The day-type-asymmetry
-  concern (failure mode 3) would also be subordinated since mech_1 evidently absorbs it at the aggregate.
-- If R-A3 fires for mech_2 (mech_2 > 0.50 AND > 2x mech_1), the iterated-variance-divergence mechanism dominates and my prediction is wrong on direction (which mechanism dominates) but right on category
-  (no, actually wrong on both; R-A3 vs R-B3). However, this would validate my underlying concern that the proponent under-weighted mech_2.
-- If chi2_baseline_M3 self-consistency check fails (Q2B re-run does not match Q2A's 953.84 within bootstrap CI overlap), the verdict is BLOCKED regardless of outcome category. The disagreement on shares
-  would be moot.
+- If mech_1 explained_share > 0.65 with tight CI (lower bound > 0.50), the z-space attenuation concern is empirically minor and the proponent's MW-space-to-z-space translation assumption holds. The day-type-asymmetry concern (failure mode 3) would also be subordinated since mech_1 evidently absorbs it at the aggregate.
+- If R-A3 fires for mech_2 (mech_2 > 0.50 AND > 2x mech_1), the iterated-variance-divergence mechanism dominates and my prediction is wrong on direction (which mechanism dominates) but right on category (no, actually wrong on both; R-A3 vs R-B3). However, this would validate my underlying concern that the proponent under-weighted mech_2.
+- If chi2_baseline_M3 self-consistency check fails (Q2B re-run does not match Q2A's 953.84 within bootstrap CI overlap), the verdict is BLOCKED regardless of outcome category. The disagreement on shares would be moot.
 opportunity_cost:
-  alternative: 'A z-space-to-MW-space sensitivity quantification of the clim-gap-nonstationary signal (one-shot computation: what is the empirical_mean_bias in z-space, computed directly from post-cutoff
-    data, and how does its magnitude compare to the iterated SMC standard deviation at each (h, day_type)?) would have been cheap (no SMC propagation needed) and would have grounded the proponent''s translation
-    assumption in a single empirical number. Pre-registering Q2B without this number means the proponent''s dominance forecast is speculative on a quantity easily measured.'
+  alternative: 'A z-space-to-MW-space sensitivity quantification of the clim-gap-nonstationary signal (one-shot computation: what is the empirical_mean_bias in z-space, computed directly from post-cutoff data, and how does its magnitude compare to the iterated SMC standard deviation at each (h, day_type)?) would have been cheap (no SMC propagation needed) and would have grounded the proponent''s translation assumption in a single empirical number. Pre-registering Q2B without this number means the proponent''s dominance forecast is speculative on a quantity easily measured.'
   ranking: complementary
-  notes: The pre-registration is well-formed AS WRITTEN. The opportunity cost is a one-shot insight that would have informed forecast width without changing the experiment design; Q2B produces the empirical_mean_bias
-    matrix as a side product, so the question is answered by Q2B's secondary outputs even if the central verdict is on explained_share.
-git_sha: 419e7063964c378f31483862bf861e00344d9b69
-git_clean: true
-body_sha256: 75449f2986d932d300ae4a145cdba089f60a4818f02081e0d76052ba31b06a1f
+  notes: The pre-registration is well-formed AS WRITTEN. The opportunity cost is a one-shot insight that would have informed forecast width without changing the experiment design; Q2B produces the empirical_mean_bias matrix as a side product, so the question is answered by Q2B's secondary outputs even if the central verdict is on explained_share.
+git_sha: f34bd93dd97c0aab07f59b7f106c0cf5459aca8b
+git_clean: false
+body_sha256: f4565c502a83fff3e167a9ace18b135347aa6a3f9853231182e77e19e8178fbe

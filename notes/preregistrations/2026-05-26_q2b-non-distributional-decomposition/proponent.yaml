@@ -2,7 +2,7 @@ schema: proponent
 written_at: '2026-05-26T23:35:00-04:00'
 references:
 - file: phase_a.yaml
-  body_sha256: 8354a70bc4361fa3e874b98c764e8c0f41cd06c908b8614a4f4bb1cd913907fb
+  body_sha256: 91f69aeb13783bfa54adc45fa3b4da7fe81f9ea3ed984e5381dd281b10d7dd8e
 forecast:
   value:
     outcome: R-A3
@@ -18,22 +18,13 @@ forecast:
   reasoning: 'Three lines of evidence converge on R-A3 with mech_1 dominant at share ~ 0.75 and chi2_after_mean_bias_fix ~ 409.
 
 
-    (a) The prior cited in mitacs-clim-gap-nonstationary is load-bearing here: the post-cutoff actual-mu gap on the registered predictor is approximately +1000 MW HOUR-FLAT and growing through 2025-2026,
-    with no recency-window choice closing it. This is a first-moment offset in the iterated forecast trajectory by construction; the operator''s sigma*z_next contribution carries the diurnal shape but cannot
-    compensate for a flat MW-space bias of that magnitude. In z-space (kappa_1''s representation) this maps to a systematic mean offset of order sigma_iter*z (where sigma_iter is the iterated SMC standard
-    deviation), which is precisely what mech_1''s empirical_mean_bias subtraction targets. Subtracting per-(h, day_type) empirical mean bias is an upper-bound attribution on this driver and should account
-    for the majority of the residual chi^2 above the R-A2 cut.
+    (a) The prior cited in mitacs-clim-gap-nonstationary is load-bearing here: the post-cutoff actual-mu gap on the registered predictor is approximately +1000 MW HOUR-FLAT and growing through 2025-2026, with no recency-window choice closing it. This is a first-moment offset in the iterated forecast trajectory by construction; the operator''s sigma*z_next contribution carries the diurnal shape but cannot compensate for a flat MW-space bias of that magnitude. In z-space (kappa_1''s representation) this maps to a systematic mean offset of order sigma_iter*z (where sigma_iter is the iterated SMC standard deviation), which is precisely what mech_1''s empirical_mean_bias subtraction targets. Subtracting per-(h, day_type) empirical mean bias is an upper-bound attribution on this driver and should account for the majority of the residual chi^2 above the R-A2 cut.
 
 
-    (b) Q1 (S8d, mitacs-q1-student-t-vs-gaussian) established that heavy-tailedness lives in the kappa_1 INNOVATION, not the seasonal climatology (M1 outperformed M2 in Q1). The iterated SMC variance under
-    M3 mixture-2-Gaussian compounds the per-step kappa_1 innovation variance over horizon h; this is non-trivial but well-behaved (no random-walk explosion at h=24 since the C_1 drift is contractive in
-    expectation). Mech_2''s variance cap targets only the upper tail of iterated variance dispersion; I forecast its share around 0.15 - it does real work where iterated variance modestly exceeds empirical,
-    but does not dominate.
+    (b) Q1 (S8d, mitacs-q1-student-t-vs-gaussian) established that heavy-tailedness lives in the kappa_1 INNOVATION, not the seasonal climatology (M1 outperformed M2 in Q1). The iterated SMC variance under M3 mixture-2-Gaussian compounds the per-step kappa_1 innovation variance over horizon h; this is non-trivial but well-behaved (no random-walk explosion at h=24 since the C_1 drift is contractive in expectation). Mech_2''s variance cap targets only the upper tail of iterated variance dispersion; I forecast its share around 0.15 - it does real work where iterated variance modestly exceeds empirical, but does not dominate.
 
 
-    (c) Production already excludes seam-crossing iteration via _complete_delivery_days (see processing/innovations/estimator.py line 763 docstring confirming day_anchor_hour mask kwarg was removed). Mech_3
-    layers a redundant aggregation-domain filter; its expected share is ~0 by construction. If it reads > 0.05, there is an undetected seam leak in production and the diagnostic is itself informative; I
-    forecast 0.0 (no leak).'
+    (c) Production already excludes seam-crossing iteration via _complete_delivery_days (see processing/innovations/estimator.py line 763 docstring confirming day_anchor_hour mask kwarg was removed). Mech_3 layers a redundant aggregation-domain filter; its expected share is ~0 by construction. If it reads > 0.05, there is an undetected seam leak in production and the diagnostic is itself informative; I forecast 0.0 (no leak).'
 forecast_ci:
   width: 0.95
   low:
@@ -48,19 +39,13 @@ forecast_ci:
     explained_share_seam: 0.05
     chi2_after_mean_bias_fix: 591
     chi2_after_variance_cap_fix: 736
-  reasoning: CI on mech_1 share [0.50, 0.95] keeps R-A3 in central call but crosses the R-A3/R-B3 boundary (mech_1 share = 0.50 with mech_2 = 0.30 would tip to R-B3 since 0.50 is not > 2x 0.30 = 0.60).
-    CI on mech_2 share [0.05, 0.30] reflects uncertainty about how often iterated SMC variance exceeds empirical at the (h, day_type) cell level. CI on mech_3 share [0.0, 0.05] is asymmetric (one-sided,
-    bounded below by 0) reflecting the registered null prior. chi2_after_fix CIs computed from the explained_share formula inverted; non-monotone bounds reflect the formula's inversion (high share -> low
-    chi^2 and vice versa).
+  reasoning: CI on mech_1 share [0.50, 0.95] keeps R-A3 in central call but crosses the R-A3/R-B3 boundary (mech_1 share = 0.50 with mech_2 = 0.30 would tip to R-B3 since 0.50 is not > 2x 0.30 = 0.60). CI on mech_2 share [0.05, 0.30] reflects uncertainty about how often iterated SMC variance exceeds empirical at the (h, day_type) cell level. CI on mech_3 share [0.0, 0.05] is asymmetric (one-sided, bounded below by 0) reflecting the registered null prior. chi2_after_fix CIs computed from the explained_share formula inverted; non-monotone bounds reflect the formula's inversion (high share -> low chi^2 and vice versa).
 what_would_change_my_mind:
-- If mech_1 explained_share < 0.30, the MW-space +1000 MW gap does not translate cleanly to z-space chi^2 contribution. The clim-gap-nonstationary signal is in MW-space and the kappa_1 marginal is in z-space;
-  the proponent assumes a roughly direct translation, but the standardization step may attenuate it more than expected.
-- If R-C3 fires (all shares < 0.15), none of the three pre-registered mechanisms is the right level of decomposition. The substantive non-distributional content lives in covariates outside the Q2B candidate
-  set (weather, state-space dimension, day-type partition refinement) and the thread needs amendment for a richer mechanism set.
-- If mech_2 explained_share > mech_1 explained_share, iterated variance divergence is doing more work than the proponent's first-moment-dominant prior expects. Picture (C) may have a second-moment failure
-  mode the proponent under-weighted.
+- If mech_1 explained_share < 0.30, the MW-space +1000 MW gap does not translate cleanly to z-space chi^2 contribution. The clim-gap-nonstationary signal is in MW-space and the kappa_1 marginal is in z-space; the proponent assumes a roughly direct translation, but the standardization step may attenuate it more than expected.
+- If R-C3 fires (all shares < 0.15), none of the three pre-registered mechanisms is the right level of decomposition. The substantive non-distributional content lives in covariates outside the Q2B candidate set (weather, state-space dimension, day-type partition refinement) and the thread needs amendment for a richer mechanism set.
+- If mech_2 explained_share > mech_1 explained_share, iterated variance divergence is doing more work than the proponent's first-moment-dominant prior expects. Picture (C) may have a second-moment failure mode the proponent under-weighted.
 - If mech_3 explained_share > 0.10, production seam handling has a leak and the Q1/Q2A results need re-audit; the diagnostic is then informative beyond Q2B's primary verdict.
 confidence: 0.55
-git_sha: 419e7063964c378f31483862bf861e00344d9b69
-git_clean: true
-body_sha256: aa68579f28dc7b102591d87787e2431ea17246af353005fa777dd01656ae8929
+git_sha: f34bd93dd97c0aab07f59b7f106c0cf5459aca8b
+git_clean: false
+body_sha256: a2a0893e0bc40ef5da0752d1c4a93514ab4235841f49a248de6580dc40887cfd
