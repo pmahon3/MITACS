@@ -1,14 +1,14 @@
 <<<PROVENANCE
 {
-  "body_sha256": "96a019d7e55709707c931b61537a7bf5bdad33653454f53db836e0e45dfa9433",
-  "generated_utc": "2026-05-27T01:24:00+00:00",
+  "body_sha256": "118141c7a2e4944bf658d7331b2603289b59daaad6841b72ca323db284a9258a",
+  "generated_utc": "2026-05-27T01:35:04+00:00",
   "git_clean": true,
-  "git_sha": "b2f46923ae302d8f1c846469d0e4170ed9ed58c5",
+  "git_sha": "194468a63a0846e824bf4491e4644c716ca3e781",
   "grade": "CLAIM-GRADE",
-  "inputs_fingerprint": "bbca59b6418040b7509dae86f699ea7570ad9e6ed3a0afd9a89fe0c2b1d298f7",
+  "inputs_fingerprint": "986abee0aaaad1bf03da02c4432dd3501be6f077d0204ed0f8f75e03d94bd6a5",
   "reproducibility": {
     "frozen_spec_hash": "f0dd9c8795fda781fa8cab80ddd9ec9fb844af284cdb3077c0d1116b13e0536d",
-    "git_sha": "b2f46923ae302d8f1c846469d0e4170ed9ed58c5",
+    "git_sha": "194468a63a0846e824bf4491e4644c716ca3e781",
     "inputs": {
       "Q2A_chi2_baseline": 953.84,
       "R_A2_cut": 228.44,
@@ -21,7 +21,7 @@
         "weekday": 2
       },
       "fits_source": "Q2A pickle",
-      "phase_a_body_sha256": "8354a70bc4361fa3e874b98c764e8c0f41cd06c908b8614a4f4bb1cd913907fb",
+      "phase_a_body_sha256": "91f69aeb13783bfa54adc45fa3b4da7fe81f9ea3ed984e5381dd281b10d7dd8e",
       "share_denominator": 725.4000000000001,
       "thread_body_sha256": "05b732d41a26552121912412a8834a108175e811819916920c8b05c8b1d50d58"
     },
@@ -134,5 +134,5 @@ CONFIG
   R_A2_cut: 228.44
   R_C2_cut: 2284.44
   share_denominator: 725.4000000000001
-  phase_a_body_sha256: 8354a70bc4361fa3e874b98c764e8c0f41cd06c908b8614a4f4bb1cd913907fb
+  phase_a_body_sha256: 91f69aeb13783bfa54adc45fa3b4da7fe81f9ea3ed984e5381dd281b10d7dd8e
 

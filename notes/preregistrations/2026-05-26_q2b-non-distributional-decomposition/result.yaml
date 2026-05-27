@@ -1,8 +1,8 @@
 schema: result
-written_at: 2026-05-27T01:24:00.968083+00:00Z
+written_at: 2026-05-27T01:35:04.253979+00:00Z
 references:
 - file: phase_a.yaml
-  body_sha256: 8354a70bc4361fa3e874b98c764e8c0f41cd06c908b8614a4f4bb1cd913907fb
+  body_sha256: 91f69aeb13783bfa54adc45fa3b4da7fe81f9ea3ed984e5381dd281b10d7dd8e
 artifact:
   primary_txt: experiment/results/q2b_non_distributional.txt
   pickle: scratch/data/distributional_class_q2b/q2b.pkl
@@ -321,3 +321,6 @@ secondary_results:
     R_C3_null: 0.15
     source: phase_a.yaml metric + Q2A SETTLED
 execution_deviations: []
+git_sha: 194468a63a0846e824bf4491e4644c716ca3e781
+git_clean: false
+body_sha256: 68d156a8b74b55d3a049a9b6f02d050c57189116ad4d05b0493df4707b95339e
