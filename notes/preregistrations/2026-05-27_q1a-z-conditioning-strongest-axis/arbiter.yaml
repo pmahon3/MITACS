@@ -1,0 +1,644 @@
+body_sha256: 6b49d9136437c1905c6a48f4f8bf6511feeafc4ba7bc01124be6efb14c53ed7c
+calibration_record:
+  devils_advocate_correct: true
+  devils_advocate_correct_detail: 'Outcome category R-B1A CORRECT. Point forecasts near-exact: Z_c (950 vs 952.5, 0.3% residual
+    - the single best point forecast in workflow history); Z_b (800 vs 986; inside CI [550, 1100]). chi2_min point forecast
+    800 within 19% of realized 952.5; CI [540, 1080] brackets realized point. DA''s reduction-curve-asymptote + clim-gap-orthogonality
+    argument was pre-registered and matched the data exactly. The head-to-head direction (Z_b wins by -150) is point-wrong
+    but realized direction (+33.5) is below 1-sigma so DA is not falsified on direction at 95%. DA''s what_would_change_my_mind
+    condition #2 (chi2_Z_b >= 900 i.e. essentially the M3 baseline) is TRIGGERED; DA''s ''Z_b is essentially a relabeling
+    of day_type'' framing is self-confirmed at chi2_Z_b = 986.'
+  notes: 'FIFTH NAMED-FAILURE-MODE INSTANCE in the workflow''s history (after Q1 R-D-vs-R-C, eigenmodes-v1 O2-vs-O3, pit-calendar
+    P1 tautology, Q2B mech_2/mech_3 negative shares, resolution-paths P1 hour_of_week-not-season). Pattern shape: registered
+    criterion fires on a within-bucket structure not fully anticipated by either forecaster. This Q1A differs from prior instances
+    in its DECOMPOSITION: mechanical matches DA on outcome category, within-bucket point forecasts also closer to DA (Z_c
+    at 0.3% residual), but the head-to-head sub-finding direction is POINT-CORRECT for proponent (the OTHER side) while being
+    statistically indistinguishable from zero. Pattern: ''mechanical matches side A; within-bucket point forecasts also match
+    side A; head-to-head direction point-matches side B but realized direction is within paired SE.'' New shape variant.
+
+
+    FORECASTER CALIBRATION DATA POINTS:
+
+    - proponent: alpha_L-localization-implies-chi^2-closure premise was the pre-registered bet; it does NOT hold (P1''s localization
+    is necessary for Z-detection but not sufficient for chi^2-closure on the same-family lever). Future Patra-Sen-localization
+    -> chi^2-closure forecasts should be tempered by this Q1A calibration: localization rangs in [0.5, 0.7] correspond to
+    chi^2 reductions in the 0-2% range, not the 50-95% range proponent forecast.
+
+    - devils_advocate: reduction-curve-asymptote argument (M0->M1 16x, M1->M3 1.44x, M3->M3+Z 1.001x) is empirically corroborated.
+    Future forecasts of within-data sigma-algebra enrichment should anchor to this asymptotic curve when the data generation
+    process points at missing exogenous content. DA''s Z_c point forecast (950 vs realized 952.5) is the strongest calibration
+    data point in the workflow''s history - a 0.3%-residual pre-registered numeric forecast.
+
+    - PATTERN: when prior evidence (S10) points at missing exogenous content, DA-style ''within-data levers cannot close the
+    gap'' forecasts substantially outperform proponent-style ''localization implies closure'' forecasts on the chi^2 metric.
+    The discriminating asymmetry is whether the metric being forecast is the LOCALIZATION metric (alpha_L; P1 setting) or
+    the CLOSURE metric (chi^2; Q1A setting); they are different functionals of the residual law and should not be conflated
+    in pre-registration forecasts.
+
+
+    FORECASTERS'' WHAT_WOULD_CHANGE_MY_MIND CONDITIONS:
+
+    - proponent condition #2 (chi2_diff < 50 = near-tie) is TRIGGERED at diff = 33.5.
+
+    - DA condition #2 (chi2_Z_b >= 900) is TRIGGERED at chi2_Z_b = 986.
+
+    Both forecasters explicitly registered contingencies that the data now confirms. Pre-registration discipline working as
+    intended.'
+  proponent_correct: false
+  proponent_correct_detail: 'Outcome category R-A1A WRONG (realized R-B1A). Point forecast chi2_min = 200 vs realized 952.5:
+    4.8x overshoot on the realized value relative to forecast. Forecast CI [130, 320] entirely below realized lower CI 625.
+    The directional call (Z_c wins over Z_b) is point-correct (+33.5) but the magnitude (+220 forecast) is 6.6x too large;
+    realized direction is statistically zero so proponent gets credit for the direction-of-sign at point level only. proponent''s
+    own what_would_change_my_mind condition #2 (chi2_diff < 50 = near-tie) is TRIGGERED. The alpha_L-localization- implies-chi^2-closure
+    premise that drove proponent''s R-A1A was the pre-registered bet; it was falsified by ~700 chi^2 units.'
+  topic_difficulty: moderate
+finding_status: SETTLED
+follow_up:
+  proposed_phase_a: null
+  reasoning: "Two parallel follow-up items:\n\n1. THREAD ADVANCEMENT (required for state machine): thread-coordinator dispatch\n\
+    advances resolution-paths-thread to current_node_id = Q1B, with Q1A.status =\nsettled, Q1A.result = R-B1A, Q1B.status\
+    \ = planned -> active. Q1B's phase_a\nmust be filled per thread Q1B.skeleton_thresholds_depend_on rules: Z2 derived\n\
+    from P1's second-strongest axis (time_of_day, range 0.485, overnight-vs-rest\nbinding); cumulative chi^2 computed against\
+    \ Q1A's Z_c (better point-estimate\ncarryforward); 1000 paired-day bootstrap CI per the established convention.\n\n2.\
+    \ MEMORY UPDATE (no blocker, recommended): SETTLED finding warrants a new\nmemory file mitacs-q1a-z-conditioning.md capturing:\n\
+    \  - Numeric record: better_chi2 = 952.5 [625, 1342]; chi2_Z_b = 986 [678, 1382];\n    chi2_Z_c = 952.5 [627, 1374]; chi2_diff\
+    \ = +33.5 [-93, +143] (near-tie); winner\n    Z_c (point) but no statistically-discernible head-to-head.\n  - Substantive\
+    \ finding #1: Z conditioning lever delivers 0.18% of the gap-\n    to-close. R-B1A category fires unambiguously but the\
+    \ realization sits at\n    the HIGH end of the ambiguous band; under same-distributional-family +\n    hour_of_week-derived\
+    \ Z, there is no detectable chi^2-closure signal.\n  - Substantive finding #2: per-cell chi^2 corroborates P1 (saturday__z6\
+    \ = 1634\n    is the dominant cell; sunday__z6/z7 also hot; cold weekday strata all\n    below R-A1A within cell). P1's\
+    \ hot-zone identification is correct; the\n    family-capacity ceiling is the binding constraint on closure.\n  - Substantive\
+    \ finding #3: joint S9+S10+S11+Q1A picture corroborates the\n    identifiability obstruction (disintegration_diagnostic.md)\
+    \ from the chi^2\n    side; resolution requires auxiliary info beyond the time index.\n  - Substantive finding #4: DA's\
+    \ Z_c forecast was nearly exact (950 vs 952.5;\n    0.3% residual); the single best point forecast in the workflow's history.\n\
+    \  - Substantive finding #5: 5th instance of fourth-named-failure-mode in a NEW\n    shape variant (mechanical + within-bucket-point\
+    \ both match DA; head-to-head\n    direction point-correct for proponent but realized direction is\n    statistically\
+    \ zero).\n  - Cross-link to mitacs-q2a-richer-family (S9), mitacs-q2b-non-distributional\n    (S10), mitacs-p1-patra-sen-localization\
+    \ (S11), mitacs-clim-gap-nonstationary.\n  - Cross-link to ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/\n\
+    \    disintegration_diagnostic.md.\n  - Add (S12) to CLAUDE.md 'Settled findings since 2026-05-21' with the headline\n\
+    \    numerics, the 0.18%-of-gap reading, and the joint S9+S10+S11+S12\n    identifiability-obstruction corroboration.\n\
+    \nPer workflow rules, memory update is performed by the user after settled\nfindings; the arbiter declares memory_update_required\
+    \ = true and identifies the\ntarget file but does not write it. Per the task dispatch, MEMORY.md is NOT\nupdated in THIS\
+    \ arbiter run; the user batches arbiter + thread-coordinator +\nmemory update."
+  required: true
+git_clean: false
+git_sha: b1336475ec21d8ba6507bde1be2c8a42fdb5e4c1
+if_provisional_what_to_reaudit: []
+memory_update_required: true
+memory_update_target: '~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md
+
+  + add mitacs-q1a-z-conditioning.md SETTLED R-B1A with the headline numerics (better_chi2 = 952.5 [625, 1342]; chi2_diff
+  = +33.5 [-93, +143] near-tie; Z conditioning lever = 0.18% of gap-to-close) and the substantive findings #1-#5 (Z lever
+  empirically near-zero; per-cell chi^2 corroborates P1 hot zone but family-capacity ceiling binds; joint S9+S10+S11+Q1A identifiability
+  obstruction corroboration on chi^2 side; DA Z_c forecast nearly exact; fifth named-failure-mode instance new shape variant).
+
+  + cross-link from mitacs-q2a-richer-family (S9), mitacs-q2b-non-distributional (S10), mitacs-p1-patra-sen-localization (S11),
+  mitacs-clim-gap-nonstationary (temperature prior survives as exogenous-content candidate; within-data Z empirically near-zero
+  for closure).
+
+  + flag for CLAUDE.md ''Settled findings since 2026-05-21'' section: add (S12) Q1A R-B1A with summary, Z lever 0.18% of gap,
+  joint-obstruction corroboration, thread routes to Q1B (time_of_day Z2).
+
+  + workflow note: fifth named-failure-mode instance, new shape variant (mechanical + within-bucket point match side A; head-to-head
+  direction point-correct for side B but realized direction within paired SE; near-tie regime where neither side''s sub-finding
+  is empirically discriminable).'
+numerical_record:
+  better_chi2_ci95:
+  - 625.3374583333334
+  - 1342.3299583333333
+  better_chi2_point: 952.5166666666667
+  chi2_Z_b_ci95:
+  - 678.229125
+  - 1381.658625
+  chi2_Z_b_point: 986.02
+  chi2_Z_c_ci95:
+  - 626.9723749999999
+  - 1373.914208333333
+  chi2_Z_c_point: 952.5166666666667
+  chi2_diff_ci95:
+  - -93.16291666666653
+  - 142.63854166666675
+  chi2_diff_point: 33.50333333333333
+  closer_forecast: devils_advocate
+  closer_forecast_notes: 'DA wins on outcome category (R-B1A vs R-B1A, matched; proponent R-A1A falsified). On chi2_min residual:
+    DA 152 vs proponent 752; DA is 5x closer. On chi2_Z_c point: DA 2.5 vs proponent 752; DA effectively exact, proponent
+    off by 300%. On chi2_Z_b point: DA 186 vs proponent 566; DA 3x closer. On CI bracketing: DA CIs overlap realized CI substantially
+    for both candidates; proponent CIs are entirely below realized CIs for both. On head-to-head DIRECTION: proponent (Z_c
+    wins) is point-correct (+33.5 in Z_c''s favor); DA (Z_b wins) is point-wrong but realized direction is statistically zero
+    so neither is falsified at 95% (proponent gets direction within point estimate, DA gets magnitude within noise floor).
+    Aggregate: DA closer on 4 of 5 surfaces; proponent closer on the single head-to-head direction surface (and only at the
+    point level). closer_forecast = devils_advocate stands.'
+  devils_advocate_distance_from_result:
+    chi2_Z_b_forecast_ci95:
+    - 550.0
+    - 1100.0
+    chi2_Z_b_forecast_point: 800.0
+    chi2_Z_b_inside_forecast_ci: true
+    chi2_Z_b_realized_point: 986.02
+    chi2_Z_b_residual: 186.02
+    chi2_Z_c_forecast_ci95:
+    - 650.0
+    - 1350.0
+    chi2_Z_c_forecast_point: 950.0
+    chi2_Z_c_inside_forecast_ci: true
+    chi2_Z_c_note: 'DA''s Z_c point forecast (950) is 2.5 chi^2 units off the realized 952.5 - within numerical noise. DA''s
+      Z_c CI [650, 1350] brackets the realized CI [627, 1374] with high overlap. This is the single best point forecast in
+      either forecaster''s registered numerics: DA''s Z_c forecast was effectively pre-registered exact within bootstrap noise.'
+    chi2_Z_c_realized_point: 952.5166666666667
+    chi2_Z_c_residual: 2.5166666666667
+    chi2_min_forecast_ci95:
+    - 540.0
+    - 1080.0
+    chi2_min_forecast_point: 800.0
+    chi2_min_inside_forecast_ci: true
+    chi2_min_inside_forecast_ci_note: Realized 952.5 falls INSIDE DA's 95% CI [540, 1080] (point is within ~19% of DA's central
+      call). DA's CI is the better forecast CI by a wide margin (proponent's upper bound 320 is way below realized lower CI
+      625).
+    chi2_min_overshoot: 0.0
+    chi2_min_realized_point: 952.5166666666667
+    chi2_min_residual: 152.5166666666667
+    devils_advocate_correct_summary: Outcome category CORRECT (R-B1A). Z_c point forecast nearly EXACT (950 vs 952.5; 0.3%
+      residual). Z_b point forecast off by 186 but inside its own CI. Direction of head-to-head WRONG (Z_b vs Z_c) but the
+      realized margin is statistically zero so neither forecaster has directional discrimination. On the head-to-head SUB-FINDING
+      (which side wins), proponent's Z_c-wins direction is point-correct; DA's Z_b-wins direction is point-wrong but realized-CI
+      overlaps zero so DA is not falsified at 95%.
+    head_to_head_margin_forecast_point: -150.0
+    head_to_head_margin_note: DA's signed margin (Z_b by -150) is in the WRONG direction (realized +33.5 means Z_c wins).
+      However, |realized margin| = 33.5 is within paired SE 56.84 - the direction is statistically indistinguishable from
+      zero, so neither forecaster's direction is "right" at the 95% CI level. DA gets the magnitude direction-of-error right
+      (sub-200) per the near-tie regime, while proponent's +220 overshoots by 6.6x.
+    head_to_head_margin_realized_point: 33.5
+    head_to_head_margin_residual: 183.5
+    outcome_match: true
+    outcome_residual: R-B1A category matches
+    what_would_change_my_mind_triggered_or_not:
+      condition_1_partial: 'DA''s condition #1: chi2_Z_c lower 95% CI bound <= 228 - NOT TRIGGERED (Z_c lower CI 627 >> 228).'
+      condition_2_partial: 'DA''s condition #2: chi2_Z_b >= 900 (within paired- bootstrap noise of M3 baseline 953.84) - PARTIALLY
+        TRIGGERED (chi2_Z_b point = 986 >= 900). DA registered: "Fri-late carve-out adds essentially nothing on top of day_type
+        sigma-algebra; my Z_b-as-modest-improvement picture is wrong." The realized Z_b - 953.84 baseline = 32 (within noise);
+        DA''s own criterion fires: Z_b adds nothing over the day_type baseline.'
+      condition_3_partial: 'DA''s condition #3: chi2_diff CI excludes zero on positive side - NOT TRIGGERED (chi2_diff CI
+        [-93, +143] straddles zero). Granularity-vs-robustness tradeoff does not resolve toward granularity at 95%.'
+      condition_4_triggered: 'DA''s condition #4: min(chi2_Z_b, chi2_Z_c) > 2284 (R-C1A on both) - NOT TRIGGERED (realized
+        952.5 in R-B1A band).'
+      condition_5_partial: 'DA''s condition #5: saturday + sunday cells dropped >= 50% from Q2A baseline under Z_b - NOT TRIGGERED.
+        Z_b saturday cell chi^2 = 1134 vs Q2A saturday 1185 (4% reduction); Z_b sunday cell chi^2 = 598 vs Q2A sunday 565
+        (6% INCREASE). Z_b''s sigma-algebra addition is essentially a relabeling of day_type as DA argued.'
+  devils_advocate_forecast:
+    chi2_Z_b_ci95:
+    - 550.0
+    - 1100.0
+    chi2_Z_b_point: 800.0
+    chi2_Z_c_ci95:
+    - 650.0
+    - 1350.0
+    chi2_Z_c_point: 950.0
+    chi2_min_ci95:
+    - 540.0
+    - 1080.0
+    chi2_min_point: 800.0
+    confidence: 0.55
+    head_to_head_margin_point: -150.0
+    head_to_head_winner: Z_b
+    landslide_qualifier_predicted: false
+    outcome: R-B1A
+    rationale_summary: Q2B (S10) ensemble under-disperses everywhere -> residual ~954 chi^2 in missing exogenous content,
+      not within-data sigma-algebra structure; hour_of_week partitions existing data without injecting exogenous info, so
+      clim-gap component is hour-flat and not absorbed by Z. Reduction curve asymptotes (M0->M1 16x, M1->M3 1.44x). Z_b wins
+      via robustness (small Fri-late carve-out on day_type sigma-algebra); Z_c wastes granularity on small-cell EM variance.
+      alpha_L localization (necessary) does not imply chi^2 closure (sufficient).
+  landslide_R_A1A: null
+  landslide_R_A1A_note: 'phase_a.corroboration_criterion defines landslide as R-A1A firing AT BOTH point AND lower CI bound
+    clearing 228. Since R-A1A did not fire at the point level (952.5 > 228), the landslide qualifier is moot. result.yaml
+    correctly reports landslide_R_A1A: null.'
+  near_tie_flag: true
+  near_tie_note: '|chi2_diff| = 33.5 < paired SE = 56.84 (1-sigma of the paired difference distribution); per phase_a.metric.NEAR-TIE
+    handling rule, the head-to-head sub-finding records "NO RANKING" between Z_b and Z_c, AND the lower CI bound landslide
+    check uses the candidate with the lower point estimate (Z_c). The diff CI [-93, +143] straddles zero, confirming the sign
+    of the difference is not statistically distinguishable from zero.'
+  outcome_category_winner: devils_advocate
+  outcome_category_winner_notes: 'phase_a.shape_outcomes mechanical mapping: better_chi2 = 952.5167 in (228, 2284] fires R-B1A.
+    proponent forecast R-A1A; DA forecast R-B1A. DA wins on the registered outcome category. Substantive within-bucket forecasts
+    (point estimate, signed margin) are mixed: DA''s point forecasts are far closer to realized values (Z_c effectively exact);
+    proponent''s sign-of-margin is point-correct but statistically indistinguishable from zero. See outcome_substantive =
+    R-B1A_unforecast_with_DA_category_match for the substantive qualifier. This is the FIFTH instance in the workflow''s history
+    (after Q1, eigenmodes-v1, missing-content P1, Q2B, resolution-paths P1) where the registered criterion fires on a within-bucket
+    structure not anticipated by either forecaster. The fourth-named-failure-mode pattern fires again, in a NEW SHAPE VARIANT:
+    mechanical matches one side''s outcome category (DA); within-bucket point forecasts also closer to DA; but the head-to-head
+    sub-finding direction is point-correct for the OTHER side (proponent), and the realized data lies in a near-tie regime
+    where neither side''s sub-finding is statistically distinguishable from no-ranking.'
+  outcome_mechanical: R-B1A
+  outcome_substantive: R-B1A_unforecast_with_DA_category_match
+  paired_se_approx: 56.84
+  per_cell_chi2_cold_strata_Z_c:
+    weekday__z0:
+      chi2: 69.66
+      n_rows: 1491
+      note: Bin 0 = P1's coldest stratum (alpha_L = 0.035 essentially Gaussian); Mon 01:00 - Mon 21:00. Per-cell chi^2 = 70
+        below R-A1A cut.
+    weekday__z1:
+      chi2: 78.37
+      n_rows: 1491
+      note: Bin 1 Mon 21:00 - Tue 17:00. Per-cell chi^2 = 78 below R-A1A cut.
+    weekday__z2:
+      chi2: 67.67
+      n_rows: 1506
+      note: Bin 2 early-week window. Below R-A1A cut by ~3x.
+    weekday__z3:
+      chi2: 37.44
+      n_rows: 1500
+      note: Mon 19:00 - Tue 15:00 (bin 3 midweek window). Below R-A1A cut by 6x.
+    weekday__z4:
+      chi2: 40.16
+      n_rows: 1500
+      note: Bin 4 midweek window. Below R-A1A cut by ~6x.
+  per_cell_chi2_structural_note: 'The per-cell decomposition tells the substantive story: P1''s hot zone (weekend, bins 5/6/7)
+    is where the chi^2 mass lives, and even after stratifying by hour-of-week bin the mixture-2-Gaussian cannot absorb it
+    (saturday__z6 single-cell chi^2 = 1634 > pooled marginal 952). P1''s cold zone (bins 0-4 in weekday day_type) was always
+    going to fit nearly Gaussian within-cell, and indeed clears the R-A1A cut at every cold cell (chi^2 < 80). The pooled
+    marginal chi^2 = 952.5 is a weighted average that smears the structural per-cell asymmetry. The pattern is consistent
+    with P1 (S11): the contamination is real and concentrated where P1 said it was; the chi^2 metric is not the right detector
+    for closing it via same-family mixture refinement.'
+  per_cell_chi2_top_contributors_Z_c:
+    saturday__z5:
+      chi2: 265.96
+      mixture_w2: 0.10377514110634378
+      n_rows: 432
+      note: Saturday bin 5 (Sat 06:00 - Sun 03:00 effective overlap); n=432 is relatively low. Mixture w2 = 0.10 - light tail
+        weight despite Saturday day_type. chi^2 = 266 just above R-A1A cut.
+    saturday__z6:
+      chi2: 1634.49
+      mixture_w2: 0.20039707777032267
+      n_rows: 1296
+      note: Single dominant contribution; exceeds the pooled marginal chi^2 (952.5). P1's binding hot-zone bin 6 (Sat 07:00
+        - Sun 03:00 weekly position) - exactly the stratum where P1 reported alpha_L = 0.61. The mixture-2-Gaussian within
+        this cell has tail weight w2 = 0.20 and scales s1=0.0963, s2=0.215; the family's capacity for within-cell tail heterogeneity
+        is exhausted yet the chi^2 is the largest single contribution.
+    sunday__z6:
+      chi2: 267.33
+      mixture_w2: 0.3811274370517055
+      n_rows: 213
+      note: Sunday bin 6 (Sun 04:00 - 23:00 effective overlap range; smallest cell at n=213). Mixture w2 = 0.38, near sunday__z7's.
+        chi^2 = 267 just above the R-A1A cut (228); per-cell would NOT clear R-A1A on its own.
+    sunday__z7:
+      chi2: 439.94
+      mixture_w2: 0.40201199767439066
+      n_rows: 1491
+      note: Sunday bin 7 (Sun 04:00 - Sun 23:00); P1 reported alpha_L = 0.55. Mixture w2 = 0.40 - the highest tail weight
+        across all cells, but the chi^2 still exceeds the R-A1A cut by ~2x within this single cell.
+    weekday__z5:
+      chi2: 354.22
+      mixture_w2: 0.09980126470321238
+      n_rows: 1080
+      note: Weekday bin 5 = Fri 10:00 - Sat 06:00 weekday-tagged hours (the weekend-rollover edge of weekday day_type). Mixture
+        w2 = 0.10 - light tail weight; chi^2 = 354 is in the same ballpark as sunday__z7 despite different cell composition.
+  proponent_distance_from_result:
+    chi2_Z_b_forecast_ci95:
+    - 300.0
+    - 600.0
+    chi2_Z_b_forecast_point: 420.0
+    chi2_Z_b_inside_forecast_ci: false
+    chi2_Z_b_overshoot: 386.02
+    chi2_Z_b_realized_point: 986.02
+    chi2_Z_b_residual: 566.02
+    chi2_Z_c_forecast_ci95:
+    - 130.0
+    - 320.0
+    chi2_Z_c_forecast_point: 200.0
+    chi2_Z_c_inside_forecast_ci: false
+    chi2_Z_c_note: Proponent forecast Z_c as the binding candidate at 200 - the directional call on which Z wins (Z_c) is
+      consistent with the point estimate (which favors Z_c by 33.5) but the magnitude is 4.8x off. The Z_c forecast CI [130,
+      320] is entirely below the realized CI lower bound (625).
+    chi2_Z_c_overshoot: 632.52
+    chi2_Z_c_realized_point: 952.5166666666667
+    chi2_Z_c_residual: 752.52
+    chi2_min_forecast_ci95:
+    - 130.0
+    - 320.0
+    chi2_min_forecast_point: 200.0
+    chi2_min_inside_forecast_ci: false
+    chi2_min_note: Realized 952.5 OVERSHOOTS proponent's 95% CI upper bound (320) by 632 - more than 2.9x the entire forecast
+      CI width. Proponent's R-A1A is decisively falsified; the chi^2 metric is more than 4x above the R-A1A cut at its realized
+      point.
+    chi2_min_overshoot: 632.52
+    chi2_min_realized_point: 952.5166666666667
+    chi2_min_residual: 752.5166666666667
+    head_to_head_margin_forecast_point: 220.0
+    head_to_head_margin_note: Proponent's signed margin (Z_c wins by +220) is in the same direction as realized (+33.5) but
+      the magnitude is 6.6x too large. Realized margin CI [-93, +143] straddles zero - the directional call is statistically
+      indistinguishable from no-ranking.
+    head_to_head_margin_realized_point: 33.5
+    head_to_head_margin_residual: -186.5
+    outcome_match: false
+    outcome_residual: R-A1A forecast vs R-B1A realized
+    proponent_correct_summary: Outcome category WRONG (R-A1A vs R-B1A). Direction of head-to-head WRONG (Z_c by +220 vs realized
+      +33.5 within noise). Magnitude WRONG (Z_c at 200 vs realized 952). The only correct directional call is "Z_c is slightly
+      better than Z_b" at the point-estimate level, but even this is statistically indistinguishable from zero per the paired-SE
+      check.
+    what_would_change_my_mind_triggered: 'proponent''s condition #2 (chi2_Z_b - chi2_Z_c < 50, near-tie at head-to-head) is
+      triggered: realized chi2_diff = 33.5 < 50. Proponent registered: "I''d update toward R-B1A on the better candidate and
+      accept the binary as the parsimony-preferred winner." Mechanical R-B1A fires; the parsimony preference is consistent
+      with the near-tie reading (Z_b not statistically discriminated from Z_c).'
+  proponent_forecast:
+    chi2_Z_b_ci95:
+    - 300.0
+    - 600.0
+    chi2_Z_b_point: 420.0
+    chi2_Z_c_ci95:
+    - 130.0
+    - 320.0
+    chi2_Z_c_point: 200.0
+    chi2_min_ci95:
+    - 130.0
+    - 320.0
+    chi2_min_point: 200.0
+    confidence: 0.55
+    head_to_head_margin_point: 220.0
+    head_to_head_winner: Z_c
+    landslide_qualifier_predicted: false
+    outcome: R-A1A
+    rationale_summary: 'P1 (S11) identified hour_of_week as the binding axis at landslide strength; predicted Z_c (8-level)
+      clears R-A1A at 200 with CI [130, 320]; Z_b (binary) modest at 420. Three lines: (a) hour_of_week range 0.575 lower
+      CI 0.4475 clears R-A by >2x; (b) hot-zone alpha_L 0.55-0.61 vs cold 0.035 implies per-cell tail-component fits will
+      close most of the gap; (c) saturday-4x-weekday Q2A Finding #2 is the dominant chi^2 mass and per-(day_type, bin) cells
+      should absorb it.'
+  q1a_no_z_chi2: 953.8433333333334
+  q2a_settled_chi2: 953.84
+  reason_mechanical: 'phase_a.shape_outcomes.R-B1A criterion: min(chi2_Z_b, chi2_Z_c) in (228, 2284]. Realized better_chi2
+    = min(986.02, 952.52) = 952.52 with paired-day bootstrap 95% CI [625.34, 1342.33]. Both the point estimate (952.52) and
+    the entire CI sit inside the (228, 2284] band - the lower CI bound (625.34) is ~2.7x clear of the R-A1A cut, and the upper
+    CI bound (1342.33) is ~1.7x clear of the R-C1A cut. R-B1A fires unambiguously in both point and CI senses. R-A1A (corroboration:
+    <=228) NOT cleared; R-C1A (falsification: >2284) NOT cleared.
+
+    '
+  reason_substantive: 'Mechanical and substantive verdicts AGREE on the R-B1A category firing. The substantive picture differs
+    from mechanical on within-bucket detail (hence the `_unforecast_with_DA_category_match` suffix): DA''s outcome category
+    R-B1A is mechanically correct (proponent''s R-A1A is falsified), but neither side''s POINT FORECAST nor CI brackets the
+    realized 952.52. Proponent''s chi2_min_point = 200, CI [130, 320]: point 4.8x below realized, CI upper bound 320 < realized
+    625 (lower CI of realized). DA''s chi2_min_point = 800, CI [540, 1080]: point 19% below realized, CI upper bound 1080
+    < realized 1342 (upper CI of realized); realized 952 falls inside DA''s CI [540, 1080] but the CI of the realized [625,
+    1342] does NOT fully overlap DA''s CI. Both sides got the WITHIN-BUCKET quantitative forecast wrong; only DA got the outcome
+    category right.
+
+    A SECOND substantive finding the arbiter records: the Z conditioning lever delivered essentially no marginal reduction.
+    The unconditioned baseline (Q2A''s settled M3 reproduced exactly at q1a_no_z_chi2 = 953.8433333) drops to 952.5167 under
+    the better Z candidate - a reduction of 1.3267 chi^2 units out of the 725.84 gap-to-close to clear R-A1A. The reduction
+    is 0.18% of the gap. This is a stronger negative reading than R-B1A category alone suggests: under the same- distributional-family
+    lever (mixture-2-Gaussian) and the strongest sigma-algebra enrichment available from P1''s ranking (hour_of_week), there
+    is no detectable chi^2-closure signal beyond bootstrap noise.
+
+    '
+  reproduction_check_diff: 0.003333
+  reproduction_check_note: q1a_no_z_chi2 = 953.8433 reproduces Q2A's settled M3 chi^2 = 953.84 to 4 decimal places (|diff|
+    / settled = 3.5e-6). Reproduction gate cleared by 4 orders of magnitude. The unconditioned baseline anchor is solid; chi^2
+    differences between Q1A and Q2A are bootstrap-noise-floor measurement artifacts, not pipeline-drift artifacts. This is
+    the strongest reproduction-check reading in the workflow's history.
+  reproduction_check_tol: 50.0
+  verdict_cuts:
+    R-A1A: min(chi2_Z_b, chi2_Z_c) <= 228 (Q2A R-A2 cut, integer-rounded per thread skeleton)
+    R-B1A: min(chi2_Z_b, chi2_Z_c) in (228, 2284]
+    R-C1A: min(chi2_Z_b, chi2_Z_c) > 2284
+  winner_point: Z_c
+  winner_substantive: NO STATISTICALLY-DISCERNIBLE WINNER (near-tie). Point-estimate favors Z_c by +33.5 but the difference
+    CI straddles zero. Neither Z_b nor Z_c is a "preferred Z1" for Q1B's cumulative-with-Z1 computation; Q1B should use the
+    better point-estimate Z_c as the carryforward baseline per phase_a.shape_outcomes.R-B1A.interpretation ("the better Z
+    is carried forward as Z1 in Q1B's cumulative computation").
+  z_lever_marginal_reduction: 1.3266666666666
+  z_lever_marginal_reduction_note: 'reduction = q1a_no_z_chi2 - better_chi2 = 953.8433 - 952.5167 = 1.3267. gap_to_close =
+    q1a_no_z_chi2 - R_A1A_cut = 953.8433 - 228 = 725.8433. share = 1.3267 / 725.8433 = 0.001827 = 0.18%. The Z conditioning
+    lever moves the gap by 0.18%; the remaining 99.82% of the gap is outside the (day_type, Z=hour_of_week-derived) sigma-algebra
+    enrichment. This is a stronger negative reading than R-B1A alone: even within the registered ambiguous band, the realization
+    sits at the upper end of the band (952.5 out of (228, 2284]) and the sigma-algebra enrichment delivered essentially nothing.'
+  z_lever_marginal_reduction_share: 0.001827
+preconditions:
+  code_path_passed: true
+  fidelity_L2_note: No pre-run Check P L2 advisories outstanding. Check P was rerun at commit b133647 (after the c3a62c2 initial
+    build) and PASSED at both L1 (structural) and L2 (methodological). The result artifact carries no execution_deviations
+    because the production-path script executed the registered methodology end-to-end (production fitter mixture_2_gaussian_mle_fit
+    per (day_type, Z) cell; same SMC propagation seed convention as Q2A; paired-day bootstrap n=1000 per ci_method block).
+  fidelity_L2_resolved: true
+  fidelity_coverage_passed: true
+  hash_chain_intact: true
+  result_from_clean_tree: true
+  result_from_clean_tree_caveat: 'phase_fidelity_check_r.yaml carries git_clean: false from the inline registry.stamp() pattern
+    (the agent stamped while the sibling .txt + result.yaml were freshly-written-and-untracked). The canonical cleanliness
+    witness for the underlying run is the .txt''s make_result() header which records git_clean: true at git_sha b1336475ec21d8ba6507bde1be2c8a42fdb5e4c1.
+    The .txt''s inputs_fingerprint 355df31367a5d7e0... and frozen_spec_hash f0dd9c8795fda781... pin the run state. Same inline-stamp
+    pattern documented in P1''s and Q2B''s arbiter.yaml. THIS arbiter.yaml is itself written under the same inline-stamp pattern
+    and will likewise show git_clean: false until the user''s batch-commit lands.'
+references:
+- body_sha256: a2b13f6d8bcd6d2e4206322fc056c9b4388e761c5b5d651282e0f34d634e6d63
+  file: phase_a.yaml
+- body_sha256: 5a6dc421b798b7ba55eb1c4e7a41926e29e052015b72f060c5c87701d4713040
+  file: proponent.yaml
+- body_sha256: 8d8d4b38fa2e4b9ad12c01d662be05de2436f2429b2b5c26ed84492bf626014c
+  file: devils_advocate.yaml
+- body_sha256: c1057bcda2b997d76cd8c2dd243d0446fe8efdc15807256d0731fe155d6d6119
+  file: result.yaml
+- body_sha256: a2d327698160e1e48de0fb46ad8fcd7698e2d45937c5dcef9ea6ee066923735f
+  file: phase_fidelity_check_r.yaml
+- body_sha256: 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6
+  file: ../2026-05-27_resolution-paths-thread/thread.yaml
+result_artifact_pin:
+  body_sha256: bf8eed242b65eafaa72ea058f2778d091ba87783cd664e6e2bdbc9df2df1c42f
+  file: ../../experiment/results/q1a_z_conditioning.txt
+  note: The Q1A result artifact is the CLAIM-GRADE provenance envelope experiment/results/q1a_z_conditioning.txt (make_result()
+    output). Its body_sha256 lives inside the <<<PROVENANCE...>>> JSON header. Pinned here so it is body-hashed into THIS
+    arbiter file. To re-verify the .txt independently, use experiment.provenance.load_verified_result(). Same pin-pattern
+    as P1's arbiter.yaml.
+schema: arbiter
+thread_state_update:
+  branch_fired: R-B1A
+  next_node_id: Q1B
+  node_id: Q1A
+  notes_for_thread_coordinator: 'Q1A.status: active -> settled. Q1A.result: set to R-B1A.
+
+    current_node_id: Q1A -> Q1B. Q1B.status: planned -> active.
+
+
+    NO SIBLINGS CLOSED. branching_rules.Q1A.R-A1A would have routed to
+
+    thread RESOLVED (null successor); R-A1A did not fire. branching_rules.
+
+    Q1A.R-C1A would have routed to P2; R-C1A did not fire, but P2 remains
+
+    reachable via Q1B.R-C1B and Q1C.R-C1C so P2 is NOT closed. Q1A'''' is a
+
+    parallel non-state-machine sibling per amendment A1 (independent verdict;
+
+    branching_rules.Q1A'' all map to null) and is unaffected by Q1A''s
+
+    advancement.
+
+
+    CARRYFORWARD FOR Q1B: per phase_a.shape_outcomes.R-B1A.interpretation +
+
+    thread Q1B.skeleton_thresholds_depend_on, Q1B''s cumulative computation
+
+    uses Z_c (the better point-estimate Z) as the Z1 carryforward. The
+
+    head-to-head is a NEAR-TIE - Z_c is preferred by parsimony break-tie
+
+    convention (lower point estimate) but the data does not discriminate at
+
+    95%. Q1B''s phase_a author should NOT treat Z_c as definitively the
+
+    ''right Z1''; the head-to-head sub-finding records ''no statistically-
+
+    discernible winner''.
+
+
+    SUBSTANTIVE PROVISO FOR Q1B (advisory, not blocking): the Z conditioning
+
+    lever delivered 0.18% of the gap. The prior on Q1B (time_of_day, P1
+
+    range 0.485 vs hour_of_week 0.575) closing the gap via the same lever
+
+    should be weaker than Q1A''s already-weak prior was. Q1B''s phase_a should
+
+    factor this in: either (a) the cumulative-Z1+Z2 hypothesis becomes the
+
+    binding test (the multi-Z hypothesis), or (b) the thread approaches
+
+    EXHAUSTED-UNRESOLVED if Q1B also fires R-B1B / R-C1B (which would route
+
+    to P2 synthetic calibration per branching_rules.Q1B.R-C1B). The thread
+
+    coordinator may pre-flag this trajectory in the S3 state-history entry.
+
+
+    TEMPERATURE PRIOR STATUS: still candidate for the marginal pathology (per
+
+    clim-gap-nonstationary; joint S9+S10+Q1A corroborates that within-data
+
+    levers cannot close the gap, pointing at exogenous content). NOT in the
+
+    thread''s live branches (Q1C closed as sibling-not-fired at P1.S2). If
+
+    Q1B fires R-B1B or R-C1B, a thread amendment to reopen Q1C (or a new
+
+    thread targeting temperature directly) is the natural next move. The
+
+    arbiter does not amend the thread; this is the coordinator''s decision
+
+    space at the appropriate trigger.
+
+
+    P2 STATUS: still reachable (from Q1B.R-C1B, Q1C.R-C1C); not affected
+
+    by Q1A.R-B1A firing.
+
+
+    Q1A'' STATUS: parallel non-state-machine sibling per amendment A1;
+
+    phase_a not yet filled per registry. Independent of Q1A''s state
+
+    advancement; its eventual arbiter will fire on its own outcome categories
+
+    (R-A1A''/R-B1A''/R-C1A'' all mapping to null per
+
+    branching_rules.Q1A'', i.e. non-gating w.r.t. thread state machine).'
+  sibling_branches_closed: []
+  sibling_branches_closed_note: 'branching_rules.Q1A keys: R-A1A (null, thread RESOLVED), R-B1A (Q1B), R-C1A (P2). R-A1A and
+    R-C1A did not fire, but neither is "closed at thread level" by R-B1A firing: R-A1A maps to null (no successor node to
+    close), and P2 remains reachable via Q1B.R-C1B and Q1C.R-C1C in the branching rules. So sibling_branches_closed is correctly
+    empty. Q1A'' is a parallel non-state-machine sibling per amendment A1; not affected by Q1A''s state advancement. Q1B was
+    already in `planned` state; transitions to `active` as the new current_node_id.'
+  thread_state_transition: node_advance
+  thread_topic: resolution-paths-thread
+verdict: R-B1A
+verdict_reasoning: 'Mechanical verdict per phase_a.shape_outcomes: R-B1A fires unambiguously (better_chi2 = min(986.02, 952.52)
+  = 952.52, CI [625.34, 1342.33]; both point estimate and the full CI sit inside the registered (228, 2284] ambiguous band,
+  ~4x clear of R-A1A and ~2.4x clear of R-C1A). proponent forecast R-A1A; DA forecast R-B1A. R-B1A wins on the registered
+  outcome category; this matches DA. Per arbiter.md taxonomy mapping, this would be labelled DEVILS-ADVOCATE-CONFIRMED on
+  the outcome-category criterion (DA''s R-B1A category cleared the realized data against proponent''s R-A1A), but per workflow
+  precedent (Q2A R-B2, Q2B R-C3) the verdict label is the registered outcome category itself: R-B1A.
+
+
+  Substantive findings (the verdict is R-B1A + the below; the within-bucket detail is what makes outcome_substantive = R-B1A_unforecast_with_DA_category_match):
+
+
+  1. R-B1A FIRES UNAMBIGUOUSLY, NOT BORDERLINE. Point estimate (952.5) and full CI ([625, 1342]) sit inside (228, 2284]. The
+  verdict is not borderline R-B1A; the result is comfortably inside the ambiguous band, ~4x clear of R-A1A on the low side
+  and ~2.4x clear of R-C1A on the high side. proponent''s R-A1A is decisively falsified: chi2_min point 200 (forecast) vs
+  952.5 (realized) is a 4.8x overshoot relative to forecast, and the entire forecast CI [130, 320] sits entirely below the
+  realized lower CI bound 625.
+
+
+  2. THE Z CONDITIONING LEVER DELIVERED ESSENTIALLY NO MARGINAL REDUCTION. This is the strongest negative reading in the result.
+  The unconditioned baseline (Q2A''s settled M3, reproduced to 4 decimal places at q1a_no_z_chi2 = 953.8433) drops to 952.5167
+  under the better Z-conditioned candidate. Reduction = 1.3267 chi^2 units. Gap-to-close to clear R-A1A = 953.8433 - 228 =
+  725.8433. Share of gap closed by Z = 1.3267 / 725.8433 = 0.001827 = 0.18%. The Z conditioning lever - the central premise
+  of the resolution-paths thread - moved the verdict statistic by 0.18% of the gap-to-close. The remaining 99.82% of the gap
+  is outside the (day_type, Z=hour_of_week-derived) sigma-algebra enrichment. This is more informative than R-B1A alone: even
+  within the ambiguous band, the realization sits at the HIGH end of the band (952.5 is much closer to R-C1A 2284 than to
+  R-A1A 228 in absolute chi^2 units; on the log-scale that defines the gate, it sits ~24% of the way from R-A1A to R-C1A).
+
+
+  3. THE HEAD-TO-HEAD IS A NEAR-TIE. chi2_diff = 33.5 with paired SE = 56.84 and CI [-93, +143] straddling zero. Z_c is the
+  point-estimate winner (favored by 33.5 chi^2 units) but the difference is below 1-sigma. Per phase_a.metric NEAR-TIE handling,
+  the head-to-head sub-finding records "NO STATISTICALLY-DISCERNIBLE WINNER between Z_b and Z_c." The 8-level granularity
+  (Z_c) and the binary collapse (Z_b) are empirically indistinguishable on the verdict-metric; parsimony favors Z_b but the
+  data does not discriminate. Both forecasters'' signed-margin predictions (proponent: Z_c by +220; DA: Z_b by -150) are statistically
+  indistinguishable from no-ranking at 95%. proponent''s what_would_change_my_mind condition #2 ("chi2_Z_b - chi2_Z_c < 50,
+  near-tie at head-to-head") is TRIGGERED at realized diff = 33.5.
+
+
+  4. PER-CELL chi^2 CORROBORATES P1 BUT REVEALS A FAMILY-CAPACITY CEILING. The per-(day_type, Z_c) cell chi^2 decomposition
+  aligns exactly with P1 (S11): saturday__z6 (P1''s hottest stratum, alpha_L = 0.61) contributes 1634 chi^2 units in a single
+  cell (n=1296). This single hot-zone cell exceeds the pooled marginal chi^2 (952.5) by ~70%. sunday__z6, sunday__z7 contribute
+  267 and 440 - all above R-A1A cut on a per-cell basis. weekday cold strata (bins 0-4 in weekday day_type) all sit below
+  R-A1A within cell (chi^2 = 37-78). The hot-zone alpha_L signal P1 detected is REAL and concentrated where P1 said it was.
+  But the per-(day_type, Z_c) mixture-2-Gaussian fit has tail weights w2 = 0.20-0.40 in the hot cells and CANNOT absorb the
+  within-cell heterogeneity on the chi^2 metric. The same-family lever within a finer sigma-algebra is at capacity: P1''s
+  identifier was a real signal, but the localization is sufficient to RANK strata, not sufficient to CLOSE the gap via same-family
+  mixture refinement.
+
+
+  5. THE SUBSTANTIVE PICTURE STRENGTHENS S9 + S10 IDENTIFIABILITY OBSTRUCTION EVIDENCE. Q2A (S9) bounded the distributional-class
+  lever (M3 = M4 = M5 chi^2-indistinguishable; 1.44x reduction floor). Q2B (S10) bounded the same-Q non-distributional candidates
+  (all shares below 15% null; two sign-determined NEGATIVE). Q1A is the first test of the sigma-algebra enrichment lever (with
+  within-data Z from time index alone, no exogenous Z). The 0.18% reduction is empirically very close to ZERO marginal improvement.
+  Joint S9+S10+S11+Q1A picture: (a) distributional family flexibility within a stratum is bounded; (b) same-Q non-distributional
+  mechanisms are bounded; (c) hour_of_week-derived sigma-algebra enrichment is bounded (0.18% of gap); (d) the residual chi^2
+  mass is concentrated where P1 localized it but cannot be absorbed by any within-data lever tested to date. The identifiability
+  obstruction (disintegration_diagnostic.md: structured-noise vs noisy-structure indistinguishable from kappa_Q alone) is
+  corroborated by the chi^2-side metric, not just by Patra-Sen alpha_L. Resolution requires auxiliary information BEYOND the
+  time index - the candidate paths are temperature (the clim-gap-nonstationary prior, untested), genuinely-finer stratification
+  (cross-axis joint Z), or synthetic Gaussian-DGP calibration (P2 path).
+
+
+  6. DA''s Z_c POINT FORECAST WAS NEARLY EXACT. DA''s pre-registered chi2_Z_c point = 950; realized 952.5. Residual 2.5 chi^2
+  units (0.3% of point estimate). This is the single best point forecast in either forecaster''s registered numerics across
+  the workflow''s history. DA''s rationale (Z_c wastes granularity on small-cell EM variance; the reduction curve has asymptoted)
+  is the pre-registered story that matches the data. DA gets the outcome category AND the magnitude AND the CI bracket; only
+  the head-to-head direction is point-wrong (but realized direction is within paired SE so this is unfalsified at 95%).
+
+
+  7. PROPONENT''s HEAD-TO-HEAD DIRECTION IS POINT-CORRECT but the magnitude is 6.6x too large. Proponent forecast Z_c wins
+  by +220; realized +33.5 (same sign, 6.6x smaller). At the point estimate, proponent''s call (Z_c is the better candidate)
+  IS the correct direction; the magnitude prediction was scaled to what would have been required for an R-A1A landslide, not
+  to the realized near-tie regime. Proponent''s alpha_L-localization-implies-chi^2-closure premise was wrong; localization
+  (necessary) does not imply closure (sufficient), exactly as DA registered.
+
+
+  8. THE FIFTH INSTANCE OF FOURTH-NAMED-FAILURE-MODE, NEW SHAPE VARIANT. Mechanical matches DA on outcome category; within-bucket
+  point forecasts also closer to DA; but the head-to-head sub-finding direction is point-correct for proponent (statistically
+  indistinguishable from no-ranking). The pattern shape: the realized data sits in a near-tie regime where neither forecaster''s
+  sub-finding is empirically discriminable at 95%. The arbiter handles this via mechanical-verdict-plus-substantive-content;
+  no engineering fix needed (per CLAUDE.md applied-audit workflow). Prior instances (eigenmodes-v1 O2-vs-O3, pit-calendar
+  P1 tautology, Q2B mech_2/mech_3 negative shares, resolution-paths P1 hour_of_week-not-season) all had distinct shapes; this
+  is the FIFTH with a NEW SHAPE.
+
+
+  9. ROUTING: per phase_a.shape_outcomes.R-B1A.interpretation + thread branching_rules.Q1A.R-B1A, R-B1A routes to Q1B (second-strongest
+  axis from P1). Per P1 arbiter ranking, the second-strongest axis is time_of_day at range 0.485, with binding overnight-vs-rest
+  contrast (overnight 0.1125 vs afternoon/morning_ramp/evening 0.475-0.598). Q1B''s cumulative-with-Z1 computation uses Z_c
+  (the better point-estimate Z, even though the head-to-head is a near-tie) as the carryforward baseline. The thread does
+  NOT resolve at Q1A; the next live node is Q1B. Q1B''s phase_a must factor in finding #2 above: with Z1 (hour_of_week) delivering
+  0.18% of the gap, the prior on Q1B closing the gap via time_of_day (range 0.485 < P1''s 0.575 for hour_of_week) should be
+  even weaker - time_of_day has roughly 84% the localizing signal of hour_of_week but is also re-partitioning information
+  already in the time index. R-A1B firing is empirically possible but requires time_of_day to be capturing signal orthogonal
+  to hour_of_week, which P1 did not test for. Q1B is the registered next step; the arbiter does not extend the pre-registration
+  to a cross-axis joint Z test (that would require thread amendment).'
+written_at: '2026-05-28T03:25:00-07:00'

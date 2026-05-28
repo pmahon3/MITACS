@@ -1,0 +1,167 @@
+<<<PROVENANCE
+{
+  "body_sha256": "bf8eed242b65eafaa72ea058f2778d091ba87783cd664e6e2bdbc9df2df1c42f",
+  "generated_utc": "2026-05-28T02:54:39+00:00",
+  "git_clean": true,
+  "git_sha": "b1336475ec21d8ba6507bde1be2c8a42fdb5e4c1",
+  "grade": "CLAIM-GRADE",
+  "inputs_fingerprint": "355df31367a5d7e0cc1558cbfef3eb3c33c25ad1e461fcc2f4d3b4f59eb7d8ed",
+  "reproducibility": {
+    "frozen_spec_hash": "f0dd9c8795fda781fa8cab80ddd9ec9fb844af284cdb3077c0d1116b13e0536d",
+    "git_sha": "b1336475ec21d8ba6507bde1be2c8a42fdb5e4c1",
+    "inputs": {
+      "MIN_CELL_SIZE": 200,
+      "R_A1A_cut": 228,
+      "R_C1A_cut": 2284,
+      "anchor_h": 0,
+      "data_cutoff": "2024-12-31T23:00:00",
+      "embedding_dims": {
+        "saturday": 2,
+        "sunday": 4,
+        "weekday": 2
+      },
+      "phase_a_body_sha256": "a2b13f6d8bcd6d2e4206322fc056c9b4388e761c5b5d651282e0f34d634e6d63",
+      "q1a_reproduction_chi2": 953.8433333333334,
+      "q2a_settled_chi2": 953.84,
+      "thread_body_sha256": "21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6"
+    },
+    "lib_versions": {
+      "edynamics": "0.3.14",
+      "numpy": "2.2.4",
+      "pandas": "2.2.3",
+      "scipy": "1.15.2"
+    },
+    "seeds": {
+      "rng_purpose_offsets": {
+        "bootstrap": "SEED_BASE + _Z_BOOT_OFFSET",
+        "bootstrap_offset": 8011,
+        "reproduction_no_z": "SEED_BASE_Q2A + 100 + _TAG_SEED_OFFSET_M3 (replays Q2A's M3 SMC seed exactly)",
+        "smc_per_z": "SEED_BASE + 100 + _Z_SEED_OFFSET[tag]",
+        "smc_per_z_offsets": {
+          "Z_b": 67,
+          "Z_c": 73
+        },
+        "synthetic_gate": "SEED_BASE + 9001 (Z-conditional) / 9101 (false-Z)"
+      },
+      "seed_base": 20260527,
+      "seed_base_q2a": 20260526
+    }
+  },
+  "schema": "mitacs.experiment.result_provenance/1",
+  "title": "Q1A: Z-conditioning head-to-head (Z_b binary vs Z_c 8-level categorical) on M3 / marginal PIT"
+}
+PROVENANCE>>>
+
+Q1A — Z-conditioning (head-to-head Z_b vs Z_c) on M3
+======================================================================
+
+Pre-registration: notes/preregistrations/
+  2026-05-27_q1a-z-conditioning-strongest-axis/phase_a.yaml
+  phase_a body_sha256: a2b13f6d8bcd6d2e4206322fc056c9b4388e761c5b5d651282e0f34d634e6d63
+Cuts from thread skeleton (integer-rounded forms of Q2A cuts):
+  R-A1A (corroboration):    better_chi2 <= 228
+  R-C1A (falsification):    better_chi2  > 2284
+  R-B1A (ambiguous band):   (228, 2284]
+
+REPRODUCTION CHECK (M3 with NO Z conditioning vs Q2A settled)
+----------------------------------------------------------------------
+  Q1A reproduction chi^2: 953.8
+  Q2A settled chi^2:      953.84
+  |diff|:                 0.0  (tol 50.0)
+
+MARGINAL PIT CHI^2 PER Z CANDIDATE (post-cutoff, 10-bin)
+----------------------------------------------------------------------
+  chi2_Z_b:      986.0    bootstrap 95% CI [678.2, 1381.7]  median 1012.6
+  chi2_Z_c:      952.5    bootstrap 95% CI [627.0, 1373.9]  median 977.2
+
+HEAD-TO-HEAD CHI^2 DIFFERENCE (Z_b - Z_c)
+----------------------------------------------------------------------
+  chi2_diff = +33.5
+  bootstrap 95% CI [-93.2, +142.6]  median +34.5
+  near_tie: True
+
+BETTER (verdict) CHI^2
+----------------------------------------------------------------------
+  better_chi2 = min(Z_b, Z_c) = 952.5
+  winner                     = Z_c
+  bootstrap 95% CI [625.3, 1342.3]  median 970.2
+  landslide qualifier (R-A1A only): FALSE
+
+PRE-REGISTERED VERDICT
+----------------------------------------------------------------------
+  verdict: R-B1A
+  reason:  better_chi2 = min(Z_b=986.0, Z_c=952.5) = 952.5 in (R-A1A 228, R-C1A 2284]; Z conditioning helps but does not close. Sub-finding: NEAR-TIE; chi^2 diff = +33.5. Thread branches to Q1B.
+
+PER-CELL FITTED MIXTURE PARAMETERS (mix-2)
+----------------------------------------------------------------------
+  [Z_b]
+    weekday Z=0: w=(0.846, 0.154)  s=(0.095, 0.240)  n=122996
+    weekday Z=1: w=(0.900, 0.100)  s=(0.088, 0.239)  n=18912
+    saturday Z=1: w=(0.714, 0.286)  s=(0.088, 0.203)  n=28368
+    sunday Z=0: w=(0.953, 0.047)  s=(0.110, 0.625)  n=1183
+    sunday Z=1: w=(0.647, 0.353)  s=(0.086, 0.182)  n=27206
+  [Z_c]
+    weekday Z=0: w=(0.679, 0.321)  s=(0.081, 0.192)  n=23660
+    weekday Z=1: w=(0.877, 0.123)  s=(0.094, 0.257)  n=24843
+    weekday Z=2: w=(0.875, 0.125)  s=(0.096, 0.260)  n=24840
+    weekday Z=3: w=(0.892, 0.108)  s=(0.104, 0.265)  n=24831
+    weekday Z=4: w=(0.891, 0.109)  s=(0.100, 0.264)  n=24822
+    weekday Z=5: w=(0.900, 0.100)  s=(0.088, 0.239)  n=18912
+    saturday Z=5: w=(0.896, 0.104)  s=(0.099, 0.270)  n=5910
+    saturday Z=6: w=(0.800, 0.200)  s=(0.096, 0.215)  n=22458
+    sunday Z=0: w=(0.953, 0.047)  s=(0.110, 0.625)  n=1183
+    sunday Z=6: w=(0.619, 0.381)  s=(0.062, 0.118)  n=2364
+    sunday Z=7: w=(0.598, 0.402)  s=(0.085, 0.175)  n=24842
+
+PER-CELL CHI^2 CONTRIBUTION (informational decomposition)
+----------------------------------------------------------------------
+  [Z_b]
+    saturday Z=1: chi^2 =  1134.0  n=1728
+    sunday Z=1: chi^2 =   598.0  n=1704
+    weekday Z=0: chi^2 =   210.9  n=7488
+    weekday Z=1: chi^2 =   372.8  n=1080
+  [Z_c]
+    saturday Z=5: chi^2 =   266.0  n=432
+    saturday Z=6: chi^2 =  1634.5  n=1296
+    sunday Z=6: chi^2 =   267.3  n=213
+    sunday Z=7: chi^2 =   439.9  n=1491
+    weekday Z=0: chi^2 =    69.7  n=1491
+    weekday Z=1: chi^2 =    78.4  n=1491
+    weekday Z=2: chi^2 =    67.7  n=1506
+    weekday Z=3: chi^2 =    37.4  n=1500
+    weekday Z=4: chi^2 =    40.2  n=1500
+    weekday Z=5: chi^2 =   354.2  n=1080
+
+POOLING FALLBACK LOG (cells that pooled to parent day_type)
+----------------------------------------------------------------------
+  [Z_b]
+    (no cells pooled — every (day_type, Z) cell met MIN_CELL_SIZE)
+  [Z_c]
+    (no cells pooled — every (day_type, Z) cell met MIN_CELL_SIZE)
+
+PIT HISTOGRAMS (10-bin) — post-cutoff marginal
+----------------------------------------------------------------------
+  Z_b: [np.int64(1677), np.int64(1603), np.int64(1526), np.int64(1359), np.int64(1303), np.int64(1247), np.int64(987), np.int64(914), np.int64(745), np.int64(639)]
+  Z_c: [np.int64(1754), np.int64(1596), np.int64(1466), np.int64(1363), np.int64(1286), np.int64(1132), np.int64(1071), np.int64(883), np.int64(707), np.int64(742)]
+
+INLINE SYNTHETIC GATE
+----------------------------------------------------------------------
+  all_ok: True
+  synth_cell_z0_param_recovery: w_r_true=0.1, w_r_fit=0.14465154914833167, s2_true=3.0, s2_fit=2.6428515909367825, ok_w=True, ok_s=True
+  synth_cell_z1_param_recovery: w_r_true=0.4, w_r_fit=0.419070642683982, s2_true=4.0, s2_fit=3.917118406580919, ok_w=True, ok_s=True
+  synth_cell_z0_chi2: chi2=13.1, ceiling=60.0, ok=True
+  synth_cell_z1_chi2: chi2=9.290000000000001, ceiling=60.0, ok=True
+  false_z_companion_collapse: all_cells_collapsed=True
+
+CONFIG
+----------------------------------------------------------------------
+  n_particles: 200
+  n_bootstrap: 1000
+  n_pit_bins: 10
+  seed_base: 20260527
+  seed_base_q2a: 20260526
+  R_A1A_cut: 228
+  R_C1A_cut: 2284
+  min_cell_size: 200
+  phase_a_body_sha256: a2b13f6d8bcd6d2e4206322fc056c9b4388e761c5b5d651282e0f34d634e6d63
+

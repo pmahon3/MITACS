@@ -20,7 +20,7 @@ amendments:
 
     '
   written_at: '2026-05-27T16:04:06-07:00'
-body_sha256: 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6
+body_sha256: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
 branching_rules:
   P1:
     R-A: Q1A
@@ -44,9 +44,9 @@ branching_rules:
     R-A1C: null
     R-B1C: null
     R-C1C: P2
-current_node_id: Q1A
-git_clean: true
-git_sha: 769d854ff21e92fe16d230c037f6daf647133d28
+current_node_id: Q1B
+git_clean: false
+git_sha: b1336475ec21d8ba6507bde1be2c8a42fdb5e4c1
 nodes:
   P1:
     id: P1
@@ -112,7 +112,7 @@ nodes:
     name: Z1-conditioning-strongest-axis
     parent_branch: R-A
     parent_id: P1
-    phase_a_path: null
+    phase_a_path: 2026-05-27_q1a-z-conditioning-strongest-axis/phase_a.yaml
     phase_a_skeleton:
       candidate_set:
       - strongest_Z_from_P1_R-A
@@ -130,7 +130,8 @@ nodes:
       - field: binding_axis_and_Z_construction
         rule: Q1A's specific Z is derived from P1's R-A binding axis at result time.
         source: P1.result
-    status: active
+    result: R-B1A
+    status: settled
   Q1A':
     id: Q1A'
     name: q1a-prime-sdr-ica-sibling
@@ -171,6 +172,26 @@ nodes:
   Q1B:
     id: Q1B
     name: Z2-conditioning-second-axis
+    notes: 'Predecessor-carryforward from Q1A.R-B1A (arbiter body_sha256 6b49d9136437c1905c6a48f4f8bf6511feeafc4ba7bc01124be6efb14c53ed7c):
+      Z1 = Z_c (8-level hour_of_week stratification) is the parsimony-preferred point-estimate
+      winner used as Q1B''s cumulative baseline. NEAR-TIE CAVEAT: chi2_diff = +33.5
+      [-93, +143] straddles zero (paired SE 56.84 > |diff|); Z_b (binary weekend carve-out)
+      and Z_c are statistically indistinguishable on the verdict-metric. Q1B''s phase_a
+      author should NOT treat Z_c as definitively the right Z1; the head-to-head sub-finding
+      records ''no statistically-discernible winner.'' SUBSTANTIVE PROVISO: the Q1A
+      Z lever delivered 0.18% of the gap-to-close (1.3267 out of 725.8433 chi^2 units).
+      P1 second-strongest axis is time_of_day at range 0.485 (vs hour_of_week 0.575),
+      so the prior on Q1B closing the gap via the same within-data sigma-algebra-enrichment
+      lever is even weaker than Q1A''s already-weak prior. Q1B''s phase_a should factor
+      this in: either (a) the cumulative-Z1+Z2 multi-Z hypothesis becomes the binding
+      test, or (b) the thread approaches EXHAUSTED-UNRESOLVED if Q1B also fires R-B1B/R-C1B
+      (R-C1B routes to P2 synthetic calibration per branching_rules.Q1B.R-C1B). The
+      temperature prior (clim-gap-nonstationary) remains candidate for the marginal
+      pathology but is not in the thread''s live branches; thread amendment to reopen
+      Q1C (or a new thread targeting temperature directly) is a natural next move
+      if Q1B fires R-B1B/R-C1B.
+
+      '
     parent_branch: R-A
     parent_id: P1
     phase_a_path: null
@@ -191,7 +212,7 @@ nodes:
         rule: Q1B's Z2 is the second-ranked axis from P1; Q1B's cumulative χ² is computed
           against Q1A's Z1-conditioned baseline.
         source: P1.result AND Q1A.result
-    status: planned
+    status: active
   Q1C:
     id: Q1C
     name: temperature-fallback-prior-supported-Z
@@ -334,5 +355,62 @@ state_history:
   transition: node_advance
   triggered_by_arbiter: 2026-05-27_p1-patra-sen-per-stratum-localization/arbiter.yaml
   written_at: '2026-05-27T14:37:20-07:00'
+- advancement_id: S3
+  branch_fired: R-B1A
+  git_sha: b1336475ec21d8ba6507bde1be2c8a42fdb5e4c1
+  node_settled: Q1A
+  notes: 'Q1A SETTLED R-B1A (mechanical = substantive on outcome category; DA wins
+    on outcome category and on 4 of 5 within-bucket surfaces; proponent direction-of-sign
+    point-correct but realized direction within paired SE so statistically zero).
+    better_chi2 = 952.5167 [625.34, 1342.33] sits comfortably inside the registered
+    (228, 2284] ambiguous band - ~4x clear of R-A1A on the low side, ~2.4x clear of
+    R-C1A on the high side. Routes to Q1B per branching_rules.Q1A.R-B1A. Q1A.status:
+    active -> settled; Q1B.status: planned -> active; current_node_id: Q1A -> Q1B.
+
+
+    NO SIBLINGS CLOSED at thread level. branching_rules.Q1A.R-A1A maps to null (would
+    have routed to thread RESOLVED; did not fire). branching_rules.Q1A.R-C1A maps
+    to P2 (did not fire, but P2 remains reachable via Q1B.R-C1B and Q1C.R-C1C so P2
+    is NOT closed). Q1A'' is a parallel non-state-machine sibling per amendment A1
+    (independent verdict; branching_rules.Q1A'' all map to null); unchanged by this
+    advancement.
+
+
+    CARRYFORWARD: Z_c (8-level hour_of_week stratification) is the parsimony-preferred
+    point-estimate winner used as Q1B''s Z1 baseline. NEAR-TIE CAVEAT: chi2_diff =
+    +33.5 [-93, +143] straddles zero (paired SE 56.84 > |diff|); Z_b and Z_c are statistically
+    indistinguishable on the verdict-metric. Recorded in nodes.Q1B.notes for the phase_a
+    author.
+
+
+    SUBSTANTIVE PRE-FLAG (per arbiter''s notes_for_thread_coordinator advisory): the
+    Q1A Z lever delivered 0.18% of the gap-to-close (1.3267 out of 725.8433 chi^2
+    units). Joint S9+S10+S11+Q1A picture corroborates the identifiability obstruction
+    from the chi^2 side - within-data sigma-algebra enrichment via the strongest P1
+    axis (hour_of_week) is empirically bounded near zero. P1''s second-strongest axis
+    (time_of_day, range 0.485) re-partitions information already in the time index;
+    the prior on Q1B closing the gap via the same lever is weaker than Q1A''s already-weak
+    prior. Trajectory pre-flag: if Q1B fires R-B1B / R-C1B, the thread approaches
+    EXHAUSTED-UNRESOLVED; R-C1B routes to P2 (synthetic Gaussian-DGP calibration),
+    and a thread amendment to reopen Q1C (temperature) or a new thread targeting temperature
+    directly becomes the natural next move outside the registered branching. Per phase-fidelity
+    / pre-registration discipline, the coordinator does not extend the tree here;
+    this trajectory pre-flag is advisory only and does not amend branching_rules.
+
+
+    DA''s Z_c point forecast (950 vs realized 952.5; 0.3% residual) is the single
+    best pre-registered numeric point forecast in the workflow''s history. Fifth instance
+    of fourth-named-failure-mode in a NEW SHAPE VARIANT: mechanical + within-bucket
+    point forecasts both match DA; head-to-head direction point-correct for proponent
+    but realized direction is within paired SE (statistically zero). Memory file mitacs-q1a-z-conditioning.md
+    + CLAUDE.md (S12) update are required follow-ups (arbiter.memory_update_required
+    = true); the coordinator does not write those.
+
+    '
+  prior_hash: 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6
+  siblings_closed: []
+  transition: node_advance
+  triggered_by_arbiter: 2026-05-27_q1a-z-conditioning-strongest-axis/arbiter.yaml
+  written_at: '2026-05-27T20:11:35-07:00'
 topic: resolution-paths-thread
 written_at: '2026-05-27T07:00:00-07:00'

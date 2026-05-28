@@ -1,0 +1,290 @@
+artifact:
+  emitted_by: experiment.q1a_z_conditioning.__main__
+  grade: CLAIM
+  notes: Primary CLAIM artifact is the .txt under experiment/results/ written via experiment.provenance.make_result (carries
+    its own header + body hash). Pickle holds the full PIT tables and per-cell fitted-params dicts for re-analysis.
+  pickle: scratch/data/q1a_z_conditioning/q1a.pkl
+  primary_txt: experiment/results/q1a_z_conditioning.txt
+body_sha256: c1057bcda2b997d76cd8c2dd243d0446fe8efdc15807256d0731fe155d6d6119
+code_path_audit:
+  blocking: false
+  tool: .venv/bin/python -m experiment.audit.code_path experiment/q1a_z_conditioning/__main__.py
+  verdict: PRODUCTION-PATH
+execution_deviations: []
+git_clean: false
+git_sha: b1336475ec21d8ba6507bde1be2c8a42fdb5e4c1
+primary_result:
+  chi2_Z_b_ci95:
+  - 678.229125
+  - 1381.658625
+  chi2_Z_c_ci95:
+  - 626.9723749999999
+  - 1373.914208333333
+  chi2_diff_ci95:
+  - -93.16291666666653
+  - 142.63854166666675
+  ci_high:
+    better_chi2: 1342.3299583333333
+    chi2_Z_b: 1381.658625
+    chi2_Z_c: 1373.914208333333
+    chi2_diff: 142.63854166666675
+  ci_low:
+    better_chi2: 625.3374583333334
+    chi2_Z_b: 678.229125
+    chi2_Z_c: 626.9723749999999
+    chi2_diff: -93.16291666666653
+  ci_method_actually_used: paired_day_bootstrap_n=1000
+  metric: better_chi2 = min(chi2_Z_b, chi2_Z_c) on post-cutoff marginal PIT
+  outcome_reason: 'better_chi2 = min(Z_b=986.0, Z_c=952.5) = 952.5 in (R-A1A 228, R-C1A 2284]; Z conditioning helps but does
+    not close. Sub-finding: NEAR-TIE; chi^2 diff = +33.5. Thread branches to Q1B.'
+  outcome_verdict: R-B1A
+  value:
+    better_chi2: 952.5166666666667
+    chi2_Z_b: 986.02
+    chi2_Z_c: 952.5166666666667
+    chi2_diff: 33.50333333333333
+    landslide_R_A1A: null
+    near_tie_flag: true
+    winner: Z_c
+references:
+- body_sha256: a2b13f6d8bcd6d2e4206322fc056c9b4388e761c5b5d651282e0f34d634e6d63
+  file: phase_a.yaml
+schema: result
+secondary_results:
+- name: per_cell_mixture_params_Z_b
+  value:
+    saturday:
+      1:
+        n_library: 28368
+        scales:
+        - 0.08823051777261376
+        - 0.20335374020797428
+        weights:
+        - 0.7135759301033521
+        - 0.2864240698966479
+    sunday:
+      0:
+        n_library: 1183
+        scales:
+        - 0.11047269263776224
+        - 0.6249559784812064
+        weights:
+        - 0.9529354450717232
+        - 0.04706455492827677
+      1:
+        n_library: 27206
+        scales:
+        - 0.08552266680569962
+        - 0.18214375695773516
+        weights:
+        - 0.6471640118790761
+        - 0.35283598812092387
+    weekday:
+      0:
+        n_library: 122996
+        scales:
+        - 0.09523280528763742
+        - 0.24028053632095853
+        weights:
+        - 0.846423136723033
+        - 0.15357686327696696
+      1:
+        n_library: 18912
+        scales:
+        - 0.08770522639901834
+        - 0.2392699803979032
+        weights:
+        - 0.9001987352967876
+        - 0.09980126470321238
+- name: per_cell_mixture_params_Z_c
+  value:
+    saturday:
+      5:
+        n_library: 5910
+        scales:
+        - 0.09882916363984277
+        - 0.2703957704211887
+        weights:
+        - 0.8962248588936562
+        - 0.10377514110634378
+      6:
+        n_library: 22458
+        scales:
+        - 0.09634584246437643
+        - 0.21505678965098307
+        weights:
+        - 0.7996029222296773
+        - 0.20039707777032267
+    sunday:
+      0:
+        n_library: 1183
+        scales:
+        - 0.11047269263776224
+        - 0.6249559784812064
+        weights:
+        - 0.9529354450717232
+        - 0.04706455492827677
+      6:
+        n_library: 2364
+        scales:
+        - 0.0617356837573776
+        - 0.11750517336995385
+        weights:
+        - 0.6188725629482945
+        - 0.3811274370517055
+      7:
+        n_library: 24842
+        scales:
+        - 0.08454099491977292
+        - 0.1751330006741286
+        weights:
+        - 0.5979880023256093
+        - 0.40201199767439066
+    weekday:
+      0:
+        n_library: 23660
+        scales:
+        - 0.08145872765311998
+        - 0.19150791301188444
+        weights:
+        - 0.6785892591282573
+        - 0.3214107408717427
+      1:
+        n_library: 24843
+        scales:
+        - 0.09361900501271359
+        - 0.2572615190296988
+        weights:
+        - 0.8769460134302903
+        - 0.12305398656970967
+      2:
+        n_library: 24840
+        scales:
+        - 0.09625514266965227
+        - 0.26024925450720887
+        weights:
+        - 0.8747083803084909
+        - 0.12529161969150915
+      3:
+        n_library: 24831
+        scales:
+        - 0.10427329830210544
+        - 0.26542250296428643
+        weights:
+        - 0.8923831536707231
+        - 0.10761684632927693
+      4:
+        n_library: 24822
+        scales:
+        - 0.09975447031034566
+        - 0.2639136951221927
+        weights:
+        - 0.8910758240832666
+        - 0.10892417591673342
+      5:
+        n_library: 18912
+        scales:
+        - 0.08770522639901834
+        - 0.2392699803979032
+        weights:
+        - 0.9001987352967876
+        - 0.09980126470321238
+- name: per_cell_chi2_contribution_Z_b
+  notes: "Per-(day_type, Z_b) cell 10-bin marginal PIT chi^2. Informational decomposition; the verdict statistic is the pooled-marginal\
+    \ chi^2 in primary_result. Per phase_a \xA7metric.SECONDARY: 'Per-cell chi^2 contribution decomposition.'"
+  value:
+    saturday__z1:
+      chi2: 1133.9791666666665
+      n_rows: 1728
+    sunday__z1:
+      chi2: 597.9953051643192
+      n_rows: 1704
+    weekday__z0:
+      chi2: 210.928952991453
+      n_rows: 7488
+    weekday__z1:
+      chi2: 372.75925925925924
+      n_rows: 1080
+- name: per_cell_chi2_contribution_Z_c
+  notes: Per-(day_type, Z_c) cell 10-bin marginal PIT chi^2. Informational decomposition (same convention as per_cell_chi2_contribution_Z_b).
+  value:
+    saturday__z5:
+      chi2: 265.9629629629629
+      n_rows: 432
+    saturday__z6:
+      chi2: 1634.4938271604938
+      n_rows: 1296
+    sunday__z6:
+      chi2: 267.3286384976526
+      n_rows: 213
+    sunday__z7:
+      chi2: 439.9389671361502
+      n_rows: 1491
+    weekday__z0:
+      chi2: 69.66398390342053
+      n_rows: 1491
+    weekday__z1:
+      chi2: 78.36955063715628
+      n_rows: 1491
+    weekday__z2:
+      chi2: 67.66533864541833
+      n_rows: 1506
+    weekday__z3:
+      chi2: 37.44
+      n_rows: 1500
+    weekday__z4:
+      chi2: 40.16
+      n_rows: 1500
+    weekday__z5:
+      chi2: 354.22222222222223
+      n_rows: 1080
+- name: pooling_fallback_log_Z_b
+  value: {}
+- name: pooling_fallback_log_Z_c
+  value: {}
+- name: reproduction_check_no_z
+  notes: "Per phase_a \xA7metric.SECONDARY 'Reproduction check': re-running M3 with no Z conditioning on the pre-cutoff library\
+    \ reproduces Q2A's chi^2 = 953.84 within paired-bootstrap noise. ASSERTION: blocking on FAIL."
+  value:
+    abs_diff: 0.0033333333333303017
+    ok: true
+    q1a_no_z_chi2: 953.8433333333334
+    q2a_settled_chi2: 953.84
+    tol: 50.0
+- name: inline_synthetic_gate
+  notes: "Per phase_a \xA7baselines.secondary: known Z-conditional DGP (Z=0: 0.9 N(0,1)+0.1 N(0,3); Z=1: 0.6 N(0,1)+0.4 N(0,4)).\
+    \ BLOCKING: per-cell parameter recovery within 0.15 AND per-cell PIT chi^2 < 60.0."
+  value:
+    all_ok: true
+    checks:
+    - name: synth_cell_z0_param_recovery
+      ok_s: true
+      ok_w: true
+      s2_fit: 2.6428515909367825
+      s2_true: 3.0
+      w_r_fit: 0.14465154914833167
+      w_r_true: 0.1
+    - name: synth_cell_z1_param_recovery
+      ok_s: true
+      ok_w: true
+      s2_fit: 3.917118406580919
+      s2_true: 4.0
+      w_r_fit: 0.419070642683982
+      w_r_true: 0.4
+    - ceiling: 60.0
+      chi2: 13.1
+      name: synth_cell_z0_chi2
+      ok: true
+    - ceiling: 60.0
+      chi2: 9.290000000000001
+      name: synth_cell_z1_chi2
+      ok: true
+    - all_cells_collapsed: true
+      name: false_z_companion_collapse
+- name: pre_registered_cuts
+  value:
+    R_A1A_cut: 228
+    R_C1A_cut: 2284
+    source: resolution-paths-thread skeleton (Q1A node); integer-rounded forms of Q2A's gate-validated R-A2_cut=228.44 and
+      R-C2_cut=2284.44.
+written_at: 2026-05-28T02:54:39.698646+00:00Z
