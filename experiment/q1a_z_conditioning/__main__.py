@@ -707,6 +707,7 @@ def _render_body(
     outcome: dict,
     synth: dict,
     fallback_log: dict[str, dict[tuple[str, int], int]],
+    per_cell_chi2: dict[str, dict[tuple[str, int], dict[str, Any]]],
     config_block: dict,
 ) -> str:
     L: list[str] = []
@@ -780,6 +781,20 @@ def _render_body(
                     f"s=({s[0]:.3f}, {s[1]:.3f})  n={fit['n']}"
                 )
     L.append("")
+    L.append("PER-CELL CHI^2 CONTRIBUTION (informational decomposition)")
+    L.append("-" * 70)
+    for tag in ("Z_b", "Z_c"):
+        L.append(f"  [{tag}]")
+        cells = per_cell_chi2[tag]
+        if not cells:
+            L.append("    (no cells)")
+        else:
+            for (dt, z_val), entry in sorted(cells.items()):
+                L.append(
+                    f"    {dt} Z={z_val}: chi^2 = {entry['chi2']:>7.1f}  "
+                    f"n={entry['n_rows']}"
+                )
+    L.append("")
     L.append("POOLING FALLBACK LOG (cells that pooled to parent day_type)")
     L.append("-" * 70)
     for tag in ("Z_b", "Z_c"):
@@ -825,6 +840,7 @@ def _render_result_yaml(
     outcome: dict,
     synth: dict,
     fallback_log: dict[str, dict[tuple[str, int], int]],
+    per_cell_chi2: dict[str, dict[tuple[str, int], dict[str, Any]]],
     repro_chi2: float,
     config_block: dict,
     artifact_txt_path: Path,
@@ -856,6 +872,21 @@ def _render_result_yaml(
     ci_low_c, ci_high_c = ci_for("Z_c")
     ci_low_better, ci_high_better = ci_for("better")
     ci_low_diff, ci_high_diff = ci_for("diff")
+
+    # Landslide qualifier on R-A1A (structured field; previously rendered
+    # in body only). Per phase_a §corroboration_criterion: R-A1A at
+    # landslide strength requires BOTH point AND lower-bound 95% CI to
+    # clear R_A1A_CUT (228). Only well-defined when verdict is R-A1A
+    # AND a bootstrap CI exists for `better`.
+    landslide_R_A1A: bool | None = None
+    if outcome["verdict"] == "R-A1A":
+        if ci_low_better is not None:
+            landslide_R_A1A = (
+                outcome["better_chi2"] <= R_A1A_CUT
+                and ci_low_better <= R_A1A_CUT
+            )
+        else:
+            landslide_R_A1A = None  # no CI -> cannot evaluate
 
     return {
         "schema": "result",
@@ -899,6 +930,7 @@ def _render_result_yaml(
                 "chi2_diff": float(outcome["chi2_diff"]),
                 "winner": outcome["winner"],
                 "near_tie_flag": bool(outcome["near_tie"]),
+                "landslide_R_A1A": landslide_R_A1A,
             },
             "ci_low": {
                 "chi2_Z_b": ci_low_b,
@@ -928,6 +960,38 @@ def _render_result_yaml(
             {
                 "name": "per_cell_mixture_params_Z_c",
                 "value": cells_for("Z_c"),
+            },
+            {
+                "name": "per_cell_chi2_contribution_Z_b",
+                "value": {
+                    f"{dt}__z{z}": {
+                        "chi2": entry["chi2"],
+                        "n_rows": entry["n_rows"],
+                    }
+                    for (dt, z), entry in per_cell_chi2["Z_b"].items()
+                },
+                "notes": (
+                    "Per-(day_type, Z_b) cell 10-bin marginal PIT chi^2. "
+                    "Informational decomposition; the verdict statistic "
+                    "is the pooled-marginal chi^2 in primary_result. "
+                    "Per phase_a §metric.SECONDARY: 'Per-cell chi^2 "
+                    "contribution decomposition.'"
+                ),
+            },
+            {
+                "name": "per_cell_chi2_contribution_Z_c",
+                "value": {
+                    f"{dt}__z{z}": {
+                        "chi2": entry["chi2"],
+                        "n_rows": entry["n_rows"],
+                    }
+                    for (dt, z), entry in per_cell_chi2["Z_c"].items()
+                },
+                "notes": (
+                    "Per-(day_type, Z_c) cell 10-bin marginal PIT chi^2. "
+                    "Informational decomposition (same convention as "
+                    "per_cell_chi2_contribution_Z_b)."
+                ),
             },
             {
                 "name": "pooling_fallback_log_Z_b",
@@ -1148,6 +1212,26 @@ def main(argv: list[str] | None = None) -> int:
               f"fallback rows={n_fallback}  ({time.time()-t0:.1f}s)")
         print()
 
+    # ---- Per-cell chi^2 contribution decomposition (phase_a §metric
+    # SECONDARY informational + variables.dependent items 10/11). For
+    # each (tag, day_type, z_value) cell, compute the 10-bin marginal
+    # PIT chi^2 over the post-cutoff rows in that cell. The decomposition
+    # is reported informationally; the verdict statistic is the
+    # POOLED-marginal chi^2 above. ----
+    per_cell_chi2: dict[str, dict[tuple[str, int], dict[str, Any]]] = {
+        "Z_b": {}, "Z_c": {},
+    }
+    for tag in ("Z_b", "Z_c"):
+        for (dt, z_val), grp in pit_tables[tag].groupby(
+            ["day_type", "z_value"], sort=False
+        ):
+            u = grp["u_PIT"].to_numpy()
+            cell_chi2, _cell_h = _marginal_pit_chi2(u)
+            per_cell_chi2[tag][(str(dt), int(z_val))] = {
+                "chi2": float(cell_chi2),
+                "n_rows": int(len(u)),
+            }
+
     # ---- Paired-day bootstrap ----
     chi2_diff_se: float | None = None
     if args.skip_bootstrap:
@@ -1218,6 +1302,7 @@ def main(argv: list[str] | None = None) -> int:
         "outcome": outcome,
         "synth_gate": synth,
         "fallback_log": fallback_log,
+        "per_cell_chi2": per_cell_chi2,
         "config": {
             "n_particles": args.n_particles,
             "n_bootstrap": args.n_bootstrap if not args.skip_bootstrap else 0,
@@ -1254,6 +1339,7 @@ def main(argv: list[str] | None = None) -> int:
             outcome=outcome,
             synth=synth,
             fallback_log=fallback_log,
+            per_cell_chi2=per_cell_chi2,
             config_block=config_block,
         )
         out_txt = (
@@ -1312,6 +1398,7 @@ def main(argv: list[str] | None = None) -> int:
             outcome=outcome,
             synth=synth,
             fallback_log=fallback_log,
+            per_cell_chi2=per_cell_chi2,
             repro_chi2=float(repro_chi2),
             config_block=config_block,
             artifact_txt_path=out_txt.relative_to(PROJECT_ROOT),
