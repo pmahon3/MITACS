@@ -358,12 +358,135 @@ def fig_ck_divergence() -> Path:
     return out
 
 
+# ---------------------------------------------------------------------------
+# Figure 6: Act-2 directed-search forest plot
+# ---------------------------------------------------------------------------
+#
+# Reads the headline chi^2 + 95% paired-day-bootstrap CIs per pre-registered
+# experiment from each experiment's result.yaml, draws a horizontal forest
+# plot on a common chi^2 axis, with the pre-registered R-A (<=228), R-B
+# ((228, 2284]), R-C (>2284) cut bands as background shading. This is the
+# Section 7 summary figure: a reviewer skimming the abstract + this figure
+# can recover the directed-search arc.
+#
+# Q1's M0 Gaussian baseline (22,328 chi^2) is the starting point Act 1
+# closes by 16x; M0 is intentionally OFF the forest plot (would dominate
+# the x-axis and make the in-band differences invisible). The caption
+# names M0 so the reader sees where the search starts.
+#
+# P1 is a per-stratum alpha_L diagnostic, not a chi^2 statistic; it does
+# not sit on the chi^2 forest. Its role in the narrative is "the localising
+# diagnostic that named hour_of_week as the binding axis"; the caption
+# names this role.
+
+
+# Hard-coded headline numerics, verified against result.yaml on 2026-05-29
+# (this script is meant to be cheap; the bootstrap numbers are stable and
+# documented in the per-experiment registry artifacts).
+FOREST_EXPERIMENTS = [
+    # (label,    date,         metric_label,            point,    ci_low,    ci_high)
+    ("Q1",     "2026-05-26", "M1 Student-$t$ kernel", 1371.6,   1069.1,    1817.2),
+    ("Q2A",    "2026-05-26", "effective $\\chi^2$",    953.8,    685.2,    1356.9),
+    ("Q2B",    "2026-05-26", "best mech. fix",         875.0,    627.6,    1213.7),
+    ("Q1A",    "2026-05-27", "better $\\chi^2$",       952.5,    625.3,    1342.3),
+    ("Q1B",    "2026-05-27", "better $\\chi^2$",       662.2,    468.1,     944.5),
+    ("Q1B$'$", "2026-05-29", "better $\\chi^2$",       679.1,    480.9,     987.1),
+]
+
+# Pre-registered cuts, inherited from the resolution-paths-thread skeleton.
+R_A_CUT = 228     # corroboration target (Q2A's R-A2 gate-derived cut)
+R_C_CUT = 2284    # falsification cut (Q2A's R-C2 gate-derived cut)
+
+# M0 Gaussian baseline (Q1's starting point) -- documented in caption, not
+# plotted on the forest (would dominate the x-axis).
+M0_POINT, M0_CI = 22328.6, (19028.1, 25730.8)
+
+
+def fig_act2_forest() -> Path:
+    """Act-2 directed-search summary forest plot. Reader skimming abstract
+    + this figure recovers the arc.
+
+    Convention: position-on-common-scale is the most-accurately-decoded
+    visual encoding (Cleveland-McGill 1984); the pre-registered cut bands
+    are the directed-search structure made visual."""
+    fig, ax = plt.subplots(figsize=(6.5, 3.6))
+
+    # ---- Background: pre-registered R-A / R-B / R-C bands -----------------
+    # R-A (<= 228): corroboration target, the gap-closure outcome. Green.
+    # R-B ((228, 2284]): partial; the band realised by every experiment.
+    # R-C (> 2284): falsification, calibration regressed. Red.
+    XMIN, XMAX = 100, 2500
+    ax.axvspan(XMIN,    R_A_CUT, color="#2ca25f", alpha=0.10, zorder=0)
+    ax.axvspan(R_A_CUT, R_C_CUT, color="#999999", alpha=0.08, zorder=0)
+    ax.axvspan(R_C_CUT, XMAX,    color="#de2d26", alpha=0.10, zorder=0)
+    ax.axvline(R_A_CUT, color="#2ca25f", lw=0.9, ls="--", zorder=1)
+    ax.axvline(R_C_CUT, color="#de2d26", lw=0.9, ls="--", zorder=1)
+
+    # ---- Per-experiment markers + CI bars --------------------------------
+    # Y-axis: chronological order, top-down (most recent at bottom).
+    # Each experiment uses a uniform marker style; only position+CI carry
+    # info (per criterion 11: CIs visible and equally weighted).
+    y_positions = list(range(len(FOREST_EXPERIMENTS), 0, -1))
+    for ypos, (label, date, metric, pt, lo, hi) in zip(y_positions, FOREST_EXPERIMENTS):
+        ax.errorbar(pt, ypos, xerr=[[pt - lo], [hi - pt]],
+                    fmt="o", color="#252525", ecolor="#525252",
+                    elinewidth=1.2, capsize=3, markersize=5.0, zorder=3)
+        # Right-side annotation: point estimate + tight CI
+        ax.text(2580, ypos, f"{pt:>6.1f}  [{lo:.0f}, {hi:.0f}]",
+                va="center", ha="left", fontsize=8, family="monospace",
+                color="#252525")
+
+    ax.set_yticks(y_positions)
+    ax.set_yticklabels([f"{lab} ({d[5:]})" for lab, d, *_ in FOREST_EXPERIMENTS],
+                       fontsize=9)
+    ax.set_ylim(0.4, len(FOREST_EXPERIMENTS) + 0.6)
+
+    # ---- X-axis: chi^2, with R-A / R-B / R-C band labels at top -----------
+    ax.set_xscale("log")
+    ax.set_xlim(XMIN, XMAX)
+    ax.set_xticks([100, 228, 500, 1000, 2284])
+    ax.set_xticklabels(["100", "228\n(R-A cut)", "500", "1000", "2284\n(R-C cut)"],
+                       fontsize=8)
+    ax.set_xlabel(r"marginal-PIT $\chi^2$  (post-cutoff; 95% paired-day bootstrap CI)",
+                  fontsize=9)
+
+    # Band labels (centred horizontally in each band, above the data).
+    # Vertical position 0.8 above topmost row gives ~half-row clearance
+    # for the right-side annotation header at 0.4.
+    ax.text(150,  len(FOREST_EXPERIMENTS) + 0.8, "R-A\n(corrob.)",
+            ha="center", va="center", fontsize=7.5, color="#1a7748",
+            style="italic")
+    ax.text(720,  len(FOREST_EXPERIMENTS) + 0.8, "R-B  (partial / inconclusive)",
+            ha="center", va="center", fontsize=7.5, color="#525252",
+            style="italic")
+    ax.text(2400, len(FOREST_EXPERIMENTS) + 0.8, "R-C\n(falsif.)",
+            ha="center", va="center", fontsize=7.5, color="#a30015",
+            style="italic")
+
+    ax.grid(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    # Extend ylim slightly to fit the band labels on the top row
+    ax.set_ylim(0.4, len(FOREST_EXPERIMENTS) + 1.1)
+    # Numeric column header
+    ax.text(2580, len(FOREST_EXPERIMENTS) + 0.8, "point  [95% CI]",
+            va="center", ha="left", fontsize=8, family="monospace",
+            color="#252525", weight="bold")
+
+    fig.subplots_adjust(left=0.13, right=0.78, top=0.92, bottom=0.18)
+    out = FIGS / "fig_act2_forest.pdf"
+    fig.savefig(out)
+    plt.close(fig)
+    return out
+
+
 def main() -> None:
     for fn in (fig_per_horizon_mae,
                fig_diurnal_envelope,
                fig_multisigma_coverage,
                fig_pit_panel,
-               fig_ck_divergence):
+               fig_ck_divergence,
+               fig_act2_forest):
         path = fn()
         print(f"  wrote {path.relative_to(ROOT)}")
 

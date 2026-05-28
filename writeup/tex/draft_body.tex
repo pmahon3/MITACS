@@ -594,6 +594,24 @@ uniform density of perfect calibration.}
 \label{fig:pit}
 \end{figure}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{fig_pit_by_horizon.pdf}
+\caption{The marginal-PIT pathology grows sharply with propagation
+horizon. At $h = 1$ the four SMC predictors all read approximately
+uniform with mild over-coverage of the lower tail; by $h = 12$ the
+distribution has collapsed to a pile-up at $\text{PIT} = 0$ and a
+right-decreasing tail across all four predictors, signalling that
+actuals fall below the predictive's lower quantiles far more often
+than the uniform expectation. The Gaussian kernel family is
+already strained at $h = 1$ and structurally inadequate at iterated
+horizons. Section~\ref{sec:univariate-extent} measures how much of
+this pathology the Student-$t$ kernel-family extension recovers at
+the marginal-PIT level (the conventional single-horizon test;
+pooled over $h$).}
+\label{fig:pit-by-horizon}
+\end{figure}
+
 \subsection{Validation against synthetic ground truth}
 \label{sec:synth}
 
@@ -733,7 +751,35 @@ are stamped via \verb|experiment.provenance.make_result()| with
 body-SHA256 fingerprints, and the registry chain
 \verb|verify|-resolves clean at the time of writing. The five
 experiments are reported below in their registered chronological
-order.
+order; Figure~\ref{fig:act2-forest} summarises where each lands
+against its pre-registered cuts.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{fig_act2_forest.pdf}
+\caption{The directed search bounds the within-data lever space
+inside R-B. Each experiment is reported with $95\%$ paired-day
+bootstrap CI bars on its primary marginal-PIT $\chi^2$ statistic;
+background shading marks the pre-registered R-A corroboration
+(green, $\le 228$), R-B inconclusive band (grey,
+$(228, 2284]$), and R-C falsification (red, $> 2284$) thresholds
+inherited from Q2A's gate-derived cuts. \emph{All six experiments
+fall in R-B} --- none clears the corroboration target, none
+triggers falsification. Q1's M1 Student-$t$ kernel
+(top, $\chi^2 = 1371.6$) is the post-Act-1 starting point, $16\times$
+below Q1's Gaussian baseline M0 ($\chi^2 = 22{,}328.6$;
+not plotted, would dominate the axis). The directed search reduces
+this further only inside R-B: Q1B and Q1B$'$ at $\chi^2 \approx 670$
+are the lowest the within-data lever space reaches. Q1A and Q2A
+co-locate within $1.3\,\chi^2$ at the seed-equality reproduction
+point (cross-experiment audit-chain corroboration). P1's per-stratum
+$\hat\alpha_L$ diagnostic is on a different scale ($\alpha_L \in
+[0, 1]$; binding axis \texttt{hour\_of\_week} with
+$\mathrm{range}(\hat\alpha_L) = 0.575$) and is not on this forest;
+its role is to \emph{locate} the residual structure that the
+$\chi^2$-side experiments here probe.}
+\label{fig:act2-forest}
+\end{figure}
 
 \paragraph{Q2A (2026-05-26): does the residual live in the
 distributional family beyond Student-$t$?} Q1's $16\times$ lift
@@ -929,16 +975,37 @@ candidate per the under-dispersion signature
 ($\sigma^{2}_{\mathrm{iter}} < \sigma^{2}_{\mathrm{empirical}}$
 at virtually every $(h, \mathrm{day\_type})$ cell from
 Section~\ref{sec:directed-search}'s Q2B finding) and the
-climatology-gap non-stationarity record; (ii) stratified
-covariate-dependent two-component mixture decomposition via
-NPMLEmix (Deb, Saha, Guntuboyina, Sen, JASA 2022;
-\texttt{arXiv:1810.07897}) as a $\sigma$-algebra adequacy
+non-stationary climatology gap (Figure~\ref{fig:clim-gap-temporal});
+(ii) stratified covariate-dependent two-component mixture
+decomposition via NPMLEmix (Deb, Saha, Guntuboyina, Sen, JASA
+2022; \texttt{arXiv:1810.07897}) as a $\sigma$-algebra adequacy
 diagnostic for any proposed auxiliary $Z$; (iii) synthetic
 Gaussian-DGP calibration to anchor the residual-$\chi^2$ floor
 against a known reference. None of the three is pursued in this
 paper; the first is the subject of the registered forward
 experiment described below, and the others are the framework-
 prescribed next-thread agenda.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{fig_clim_gap_temporal.pdf}
+\caption{The post-cutoff climatology gap is non-stationary and
+growing. Monthly mean of $(\mathrm{actual} - \mu_{m,h})$ across the
+post-cutoff window, under both the full-history climatology
+(blue) and a two-year-recency-window climatology (orange). Neither
+specification absorbs the drift: by 2026 the residual sits at
+$+1000$--$+1500~\mathrm{MW}$ and growing. The drift is hour-flat
+(structure preserved across the $24$-hour delivery clock) and
+day-type-invariant in shape. Under the kernel framing, a
+non-stationary residual that no re-windowing on the same
+conditioning $\sigma$-algebra can absorb is the signature of
+$\sigma$-algebra under-coverage by missing exogenous content. The
+direction of the drift (post-cutoff actual systematically above
+the climatology mean) is consistent with the under-dispersion
+signature of Section~\ref{sec:directed-search}'s Q2B finding;
+hourly temperature is the prior-supported candidate $Z$.}
+\label{fig:clim-gap-temporal}
+\end{figure}
 
 \subsection{Registered forward prediction experiment}
 \label{sec:registered}
