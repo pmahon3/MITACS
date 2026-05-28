@@ -1,0 +1,719 @@
+schema: arbiter
+topic: q1b-prime-smc-tightening
+written_at: '2026-05-30T10:00:00-07:00'
+references:
+- file: phase_a.yaml
+  body_sha256: 7ed3eea35553b9c5cd3e03d0003603ed4d56337d151362d4a11c2d1955b75e78
+- file: proponent.yaml
+  body_sha256: a294b6d5d295a33a67999f6845a0634e8c072f91373b04997a44cf5bbc585afb
+- file: devils_advocate.yaml
+  body_sha256: 036b52caf8d85501265923d6a1f58ea19687b89c2719278184abe6e7f8c04764
+- file: result.yaml
+  body_sha256: 3c1954e24fb590b396c8150f0878e3421dbe2601f82b62015106ecd41c5d01d8
+- file: phase_fidelity_check_p.yaml
+  body_sha256: 25d7a968bb65a314579a4a37afe751378f43b4e15aa70dd67bcafc9ae79dca6c
+- file: phase_fidelity_check_r.yaml
+  body_sha256: 6e6d2cb7e6a4ce1ef0a74a1ea4dcfb21dd18ab8b742715060d0ab4e9426f855f
+- file: phase_fidelity_check_t.yaml
+  body_sha256: eeae43ffdb90321f973bc20ae6ebbe673da8e1a51286e4401199433963228833
+- file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
+- file: ../2026-05-27_q1b-z2-conditioning-second-axis/arbiter.yaml
+  body_sha256: d8650cb75f9c1cfcc9c5fa74ff76e8cfab0e99fca5f532ffe6c9a21e1034c1c4
+  relation: predecessor_node_arbiter
+- file: ../2026-05-27_q1b-z2-conditioning-second-axis/result.yaml
+  body_sha256: b3b1efa7d028cd6caa6220493847a5d2b8fa6de957814211df01df6294baaa6d
+  relation: predecessor_node_result
+result_artifact_pin:
+  file: result.yaml
+  body_sha256: 3c1954e24fb590b396c8150f0878e3421dbe2601f82b62015106ecd41c5d01d8
+  pickle: scratch/data/q1b_z2_conditioning/q1b_prime_n400.pkl
+  grade: INSPECTION-ONLY
+  grade_note: 'Per result.yaml.grade_demotion_reason + artifact.primary_txt_note: Q1B'' did NOT emit a separate CLAIM-GRADE .txt provenance envelope. The script''s hardcoded .txt output path collided with
+    Q1B''s committed CLAIM-GRADE artifact (Check P missed the literal-string parameterization at commit 1a1b72e; substitution set in commit 8cd2935 covered phase_a hash + thread hash + prereg-dir but did
+    not cover the .txt filename). The run overwrote Q1B''s .txt in-place; .txt was restored from HEAD per user adjudication. Q1B'' is therefore PROVENANCE-GRADE INSPECTION-ONLY: result.yaml + pickle ARE
+    the durable record (both produced by audited-PRODUCTION-PATH code with all BLOCKING gates passed; reproduction-check #1 |diff|=5.225 and #2 |diff|=44.595 within tol=50). The arbiter renders against
+    primary_result block normally; downstream citation MUST read as "INSPECTION-ONLY diagnostic." This is a registry-housekeeping caveat, not a scientific one.'
+preconditions:
+  code_path_passed: true
+  fidelity_coverage_passed: true
+  hash_chain_intact: true
+  fidelity_L2_resolved: true
+  fidelity_L2_note: Pre-run Check P PASSED L1 10/10 (structural, BLOCKING) and L2 6/6 (methodological, including the previously-OPERATIONALLY_BLOCKING advisory on result.yaml placement + phase_a-hash tagging
+    now RESOLVED via commit 8cd2935's 10-string substitution). Check P body_sha256 25d7a968... Check T CONSISTENT verifying phase_a is a valid specialization of thread skeleton nodes."Q1B'".phase_a_skeleton.
+    Check R PASS at body_sha256 6e6d2cb7..., all 5/5 dependent variables present with CI bounds derivable. The .txt grade demotion (see result_artifact_pin.grade_note) is out of Check R scope and does not
+    block arbitration; it is captured as an INSPECTION-ONLY annotation on the verdict.
+  result_from_clean_tree: true
+  result_from_clean_tree_caveat: 'result.yaml stamped at git_clean: true (sha da7228b3...). phase_fidelity_check_r.yaml stamped at git_clean: true (sha 2aace572...). phase_fidelity_check_p.yaml + code_path_audit.md
+    stamped under inline-stamp pattern (git_clean: false because companion files were freshly written / untracked at stamp time); same pattern as Q1A, Q1B, P1, Q2B arbiter chains. THIS arbiter.yaml is itself
+    written under the same inline-stamp pattern and will likewise show git_clean: false until the user''s batch-commit lands. Same documented carve-out as predecessor arbiter (Q1B body_sha256 51eaf64e...).'
+thread:
+  thread_topic: resolution-paths-thread
+  node_id: Q1B'
+  parent_branch: R-A
+  thread_body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
+verdict: R-B1B'
+verdict_reasoning: 'Mechanical verdict per phase_a.metric.verdict_cuts: R-B1B'' fires unambiguously. Realized cumulative_chi2_improvement_above_Z_c CI95 = [-34.576, +471.622]; CI WIDTH = 471.622 - (-34.576)
+  = 506.198 chi^2 ∈ (357.27, 524.0]. Realized better_chi2 = 679.128; point-shift = |679.128 - 662.223| = 16.905 ≤ 50 (point-stability sub-criterion PASS). Combined: R-B1B'' fires on the CI-width band AND
+  clears the point-stability conjunct. R-A1B'' (corroboration: width ≤ 357.27) NOT cleared (148.93 chi^2 above cut); R-C1B'' (falsification: width > 524.0 OR point-shift > 50) NOT cleared on either disjunct
+  (width is 17.80 chi^2 below 524.0; point-shift is 33.10 chi^2 below 50). Proponent forecast R-A1B'' (width 338 [290, 395]); DA forecast R-B1B'' (width 419 [370, 480]). R-B1B'' matches DA on outcome category;
+  the substantive within-band picture is materially different from DA''s implicit prior (see substantive findings below).
+
+
+  Substantive findings (the verdict is R-B1B'' + the below; both mechanical and substantive verdicts ALIGN on R-B1B'', so there is NO mechanical/substantive gap; the substantive content sharpens the framework-level
+  reading):
+
+
+  1. R-B1B'' FIRES UNAMBIGUOUSLY BUT NEAR THE R-C1B'' BOUNDARY. Realized width 506.198 sits at 89.3% of the R-B1B'' band width (lower edge 357.27; upper edge 524.0; band midpoint 440.63). Lower-edge headroom
+  = 148.93 chi^2; upper-edge headroom = 17.80 chi^2. The realized width is 8.4x closer to R-C1B'' than to R-A1B''. This is a structurally different R-B1B'' shape than Q1B''s settled R-B1B (which sat unambiguously
+  interior to its (228, 2284] band, 2.05x clear of R-A1B on the low side and 2.42x clear of R-C1B on the high side per Q1B''s arbiter). Q1B'' fires R-B1B'' at the OPPOSITE end of its band — near the widening
+  anomaly threshold.
+
+
+  2. THE CI WIDENED, NOT NARROWED (CENTRAL NEW FINDING). Q1B realized width = 476.358 chi^2 at N=200; Q1B'' realized width = 506.198 chi^2 at N=400. Delta = +29.840 chi^2 (+6.26% WIDENING). Both forecasters
+  predicted NARROWING under N doubling (proponent: 25%+ narrowing to ≤ 357.27; DA: 12% narrowing to 419). The realized DIRECTION-OF-MAGNITUDE on width change is OPPOSITE BOTH forecasts. Under the 1/N SMC
+  variance scaling argument with V_total = V_smc + V_eval (V_smc → V_smc/2 under N: 200 → 400), a widening realization implies V_smc/V_total well below DA''s 7% lower-bound estimate AND decisively below
+  the proponent''s 87.5% requirement. The +6.3% widening is within paired-bootstrap finite-sample noise on the realized width MEASUREMENT itself (phase_a''s 110%-cut at 524.0 acknowledges this as the R-C1B''
+  lower-bound rationale), so the central-tendency direction is informative — the CI does NOT narrow under denser SMC because EVAL-WINDOW-NOISE DOMINATES the realized CI width, not SMC particle-level sampling
+  variance.
+
+
+  3. CUMULATIVE-REDUCTION POINT ALSO DECREASED. Q1B cumulative_chi2_improvement_above_Z_c point = +290.293 chi^2; Q1B'' cumulative point = +273.388. Delta at point = -16.905 chi^2 (-5.82%). SMC doubling
+  not only widened the CI; it slightly REDUCED the realized closure on top. The DA''s mid-range V_smc estimate predicted a small downward point-shift due to SMC bias correction at higher M (DA forecast
+  268 chi^2 cumulative; realized 273.388 is 5.4 chi^2 above DA''s point — closest single forecast surface DA hit). Proponent''s SMC-bias-scales-1/N argument expected point-shift ~15 chi^2 (small); realized
+  16.905 is within both forecasters'' point-shift CIs but the DIRECTION of the cumulative-reduction shift (slightly DOWN at point) is consistent with DA''s SMC-bias-correction reading and contrary to proponent''s
+  implicit "small symmetric residual" reading.
+
+
+  4. PROPONENT''S OWN PRE-REGISTERED FALSIFICATION CONDITION TRIGGERED. Proponent.what_would_change_my_mind condition #1: "realized CI width > 400 chi^2 → SMC-dominance forecast falsified at strong form;
+  V_smc/V_total < ~0.60." Realized 506.198 >> 400. Proponent registered "the DA''s eval-window-dominance reading would be correct in this case." Proponent''s strong-form forecast is REFUTED by proponent''s
+  own pre-registered numeric condition; this is unambiguous, not requiring arbiter judgment.
+
+
+  5. DA''S MODEST-SMC-VARIANCE READING SURVIVES BUT ON A DIFFERENT INFERENTIAL SURFACE THAN DA''S CI-WIDTH POINT FORECAST. DA''s strongest_argument empirical-decomposition (V_smc/V_total ~ 0.07 from Q1B''s
+  chi2_diff paired SE = 44.71 as the eval-window-noise floor proxy) implied a ~98% width retention (realized 467 chi^2; 0.98 share of Q1B''s 476.358 anchor). Realized 506.198 (1.063 share) is HIGHER than
+  DA''s central forecast of 419 (0.88 share) by 87.2 chi^2 (DA''s CI [370, 480] entirely below realized by 26.2 chi^2 at the upper bound). The substantive picture DA argued for (eval-window-noise dominates;
+  SMC contribution bounded; modest tightening) is empirically confirmed AT THE DIRECTION-OF-DOMINANCE LEVEL (eval-window-noise IS the dominant variance component, refuting proponent''s strong-form SMC-dominance)
+  but DA''s WIDTH POINT FORECAST is also falsified on the narrowing direction. Both forecasters got the magnitude direction wrong; both fall below the realized width at CI upper bound. DA''s outcome-category
+  bet (R-B1B'') wins mechanically because the R-B1B'' band is wide enough to accommodate the realized widening AS WELL AS DA''s and proponent''s predicted narrowings; the band itself is the unfalsifiability
+  zone for direction errors.
+
+
+  6. POINT-SHIFT FORECASTS BOTH SUCCEED. Realized |better_chi2_point - 662.223| = 16.905. Proponent forecast 15 [2, 38]: realized inside CI; residual +1.905. DA forecast 22 [5, 47]: realized inside CI;
+  residual -5.095. Both forecasters got point-stability right: SMC doubling did not destabilize the realized estimate; seed-dependence, library-fit drift, and other R-C1B'' failure modes are empirically
+  ruled out. The script''s reproduction-check ASSERTS at lines 1442/1472 also PASSED (within tol=50) at N=400, consistent with point stability at the parent-fit layers as well.
+
+
+  7. NEAR-TIE BETWEEN Z2_b AND Z2_c PRESERVED AT N=400. Q1B chi2_diff = +33.776 with paired SE = 44.71 (|diff|/SE = 0.756). Q1B'' chi2_diff = +24.107 with paired SE ≈ 38.73 (|diff|/SE = 0.622); CI [-48.154,
+  +103.672] straddles zero. Z2_c remains the parsimony-preferred point-estimate winner. The diff distribution moved slightly toward zero (-9.67 chi^2 at point; paired SE narrowed by ~13.4%, consistent with
+  marginal SMC contribution to within-pair variance). The NEAR-TIE STRUCTURAL PROPERTY of the head-to-head holds — SMC doubling did not resolve the Z2_b vs Z2_c ranking question. This matches DA''s shape
+  forecast (NEAR-TIE preserved; DA predicted paired SE narrowing to ~32 from 44.71; realized 38.73 is between DA''s prediction and Q1B''s anchor).
+
+
+  8. REPRODUCTION-CHECK DRIFT ASYMMETRY IS INFORMATIVE SIDE-CHANNEL (per phase_a.baselines.secondary). repro_chi2_no_z drift = 5.225 chi^2 (10.5% of tol=50); repro_chi2_zc drift = 44.595 chi^2 (89.2% of
+  tol=50). Asymmetry ratio = 8.54x. The Z_c-stratified parent layer (Q1A''s carryforward anchor) is materially more SMC-noise-sensitive at N=200 than the no-Z pooled layer (Q2A''s anchor) — by ~8.5x. This
+  is a finite-sample per-stratum effect: Z_c partitions reduce per-cell N from the full library to ~1000-7000-row sub-libraries; the within-stratum SMC particle resampling is less stable than the pooled
+  SMC propagation is. Substantively: SMC variance IS non-trivial at the Z_c-stratified parent fit; doubling N revealed it (the drift would have been ~0 if SMC variance contributed nothing). DA''s "modest
+  SMC variance" reading is corroborated at this side-channel layer; proponent''s "SMC dominates" reading is NOT corroborated (the no-Z layer drift is essentially zero, demonstrating that pooled SMC variance
+  is small even at N=200; if SMC truly dominated the CI width, the no-Z baseline drift would also be material at N doubling).
+
+
+  9. THE SEVENTH NAMED-FAILURE-MODE INSTANCE (NEW SHAPE VARIANT: BOTH FORECASTS DIRECTIONALLY FALSIFIED ON CENTRAL TENDENCY). Workflow precedent: 4th-named-failure-mode = registered criterion fires on legitimate-but-unanticipated
+  data structure. Prior six shapes: (S8/Q1) R-D mechanical / R-C substantive; (S9/Q2A) M3=M4=M5 chi²-indistinguishable; (S10/Q2B) two sign-determined NEGATIVE shares; (S11/P1) hour_of_week-not-season binding;
+  (S12/Q1A) near-tie head-to-head with exact DA point forecast; (S13/Q1B) mixed scoring decomposition across forecast surfaces. Q1B''''s NEW SHAPE: BOTH FORECASTERS PREDICTED NARROWING ON OPPOSITE STRONG-FORM
+  PRIORS (proponent: SMC-dominates → strong narrowing; DA: eval-window-dominates with SMC contributing → modest narrowing). Realized: WIDENING (+6.3%). The mechanical R-B1B'' band fires because it is wide
+  enough to absorb the disagreement (the band spans 357.27-524.0 covering both NARROWING-to-419 and WIDENING-to-506). NEITHER side''s direction-of-magnitude forecast on the verdict-metric is confirmed;
+  BOTH are falsified. The outcome-category mechanical match for DA is necessary but not sufficient for substantive forecast confirmation. New shape variant label: "OUTCOME-CATEGORY MATCHES ONE SIDE (DA)
+  BUT BOTH SIDES FALSIFIED ON DIRECTION-OF-MAGNITUDE; THE REGISTERED CATEGORY BAND ITSELF IS THE UNFALSIFIABILITY ZONE FOR DIRECTION ERRORS."
+
+
+  10. FRAMEWORK READING (binding for kernel-family-agnostic theory memo + CLAUDE.md framework section at next refresh). Q1B'' confirms the user''s locked decision (d) framing: the wide Q1B CI [+8.06, +484.4]
+  is INTRINSIC TO THE DATA, NOT TO THE ESTIMATOR. SMC-tightening (the methodological lever Q1B'' was designed to test) does not narrow the CI; it slightly widens it. The (a)/(b)/(c) amendment-direction
+  adjudication surfaced in Q1B''s S4 advance must proceed on substantive grounds — within-data SMC tightening is empirically EXHAUSTED as a CI-narrowing mechanism. Joint S9+S10+S11+S12+S13 corpus EXTENDS:
+  within-data tightening levers are bounded both SUBSTANTIVELY (single-axis vs joint multi-axis sigma-algebra enrichment, per S13) AND METHODOLOGICALLY (SMC particle count doubling does not narrow the realized
+  CI). The identifiability obstruction reading (auxiliary information beyond the time index required for full closure) carries forward UNCHANGED; Q1B'' is the methodological-side confirmation of what S13
+  established substantively. This is the workflow-level result Q1B'' was registered to produce; the negative-finding outcome was pre-flagged in phase_a §ambiguous_region.action as the most actionable for
+  the user''s adjudication of (a)/(b)/(c).
+
+
+  11. ROUTING: per thread branching_rules.Q1B'' = {R-A1B'': null, R-B1B'': null, R-C1B'': null}, no auto-advancement. Q1B'' is the non-state-machine sibling added by amendment A2 (parent_branch R-A under
+  Q1B); per the amendment, settlement does NOT advance current_node_id (which remains null per S4 thread state-history, awaiting user adjudication of three-way amendment decision). The thread-coordinator
+  dispatch is structurally similar to Q1B''s S4: Q1B''.status: active → settled; Q1B''.result: R-B1B''; current_node_id transition = none; thread_state_transition = node_settled_no_advance. NO SIBLINGS
+  CLOSED. Q1A'' (parallel non-state-machine sibling per amendment A1) is unaffected by Q1B''''s state advancement. P2 remains reachable via Q1C.R-C1C. The user-side decision space for (a)/(b)/(c) is now
+  informed by Q1B''''s empirical confirmation that the CI is intrinsic; the (a) third-within-data-Z-axis path is the most-aligned-with-S13''s-joint-multi-axis-finding next-step; (b) cross-axis joint stratification
+  thread is the framework-reading-driven option; (c) temperature/exogenous-Z arm remains the framework-prescribed full-closure path. Q1B'' does not statistically rank them; the user adjudicates.'
+mechanical_verdict: R-B1B'
+substantive_verdict: R-B1B'
+substantive_verdict_suffix_note: 'No suffix (e.g., _SUBSTANTIVE_FAVORABLE or _SUBSTANTIVE_UNFAVORABLE) because mechanical and substantive verdicts ALIGN on R-B1B''. The substantive content sharpens the
+  FRAMEWORK reading (Q1B''s wide CI is intrinsic to the data, not the estimator; eval-window-noise dominates; SMC-tightening lever empirically negative as CI-narrowing mechanism) but does not pull the verdict
+  toward either neighboring category. Q1B''s pattern (mechanical R-B1B + substantive _FAVORABLE because the 290 chi^2 reduction was materially informative on top of the band) does not repeat here: Q1B''
+  delivers a +29.84 chi^2 width INCREASE and -16.905 chi^2 cumulative-reduction point DECREASE, both within the registered tolerances for R-B1B'' but neither in a direction that warrants a FAVORABLE substantive
+  sharpening.'
+aggregate: SETTLED
+reason_mechanical: 'phase_a.metric.verdict_cuts: R-B1B'' fires if realized CI95 width in (357.27, 524.0] AND point-shift ≤ 50. Realized cumulative CI95 = [-34.576, +471.622]; WIDTH = 506.198 chi^2. Realized
+  better_chi2 = 679.128; point-shift = |679.128 - 662.223| = 16.905. Both cuts cleared: 506.198 ∈ (357.27, 524.0] (148.93 chi^2 above lower edge; 17.80 chi^2 below upper edge); 16.905 ≤ 50 (33.10 chi^2
+  below tol). R-A1B'' (corroboration: width ≤ 357.27 AND |point-shift| ≤ 50) NOT cleared on the CI-width conjunct (realized 506.198 > 357.27). R-C1B'' (falsification: width > 524.0 OR |point-shift| > 50)
+  NOT cleared on either disjunct (realized 506.198 < 524.0 AND 16.905 < 50). R-B1B'' fires unambiguously and uniquely.'
+reason_substantive: 'Mechanical and substantive verdicts AGREE on R-B1B'' firing. Unlike Q1B (where substantive content pulled toward _SUBSTANTIVE_FAVORABLE because the 290 chi^2 cumulative reduction was
+  materially informative), Q1B''''s substantive content is BAND-NEUTRAL on direction (no suffix; verdict is plain R-B1B'') but FRAMEWORK-SHARPENING on interpretation (the verdict confirms what Q1B'' was
+  registered to test: SMC-tightening lever does not narrow the CI; eval-window-noise dominates; (a)/(b)/(c) adjudication proceeds on substantive grounds).
+
+
+  The CENTRAL substantive finding: the CI WIDENED slightly (+29.84 chi^2; +6.3%) rather than narrowing as both forecasters predicted. Both forecasters'' direction-of-magnitude forecasts on the verdict-metric
+  are FALSIFIED at the central tendency (proponent predicted ≥25% narrowing to ≤ 357.27 chi^2; DA predicted ~12% narrowing to 419 chi^2; realized +6% widening to 506.198). The registered R-B1B'' band absorbs
+  the disagreement because the band itself is wide enough to span both NARROWING-to-419 and WIDENING-to-506; the realized direction-of-magnitude error is INVISIBLE TO THE MECHANICAL VERDICT CATEGORY. This
+  is the seventh named-failure-mode instance and the new shape variant: outcome-category mechanical match for DA, but BOTH SIDES falsified on direction-of-magnitude; the registered band itself is the unfalsifiability
+  zone for direction errors.
+
+
+  The framework-reading sharpening: Q1B'' confirms the user''s locked decision (d) framing. The wide Q1B CI on cumulative_chi2_improvement_above_Z_c [+8.06, +484.4] (width 476.358) is INTRINSIC TO THE DATA,
+  NOT TO THE ESTIMATOR. Doubling SMC particles (a methodological-side tightening lever) does not narrow it; the residual variance is eval-window-noise (the fixed ~12,000-row post-cutoff window + paired-day
+  bootstrap finite-sample noise on a chi^2 statistic of this construction). The within-data tightening levers are bounded both SUBSTANTIVELY (single-axis vs joint multi-axis sigma-algebra enrichment, per
+  S13''s finding that joint delivers 40% but full closure does not fire) AND METHODOLOGICALLY (SMC particle count doubling does not narrow the realized CI). The (a)/(b)/(c) amendment-direction adjudication
+  surfaced in Q1B''s S4 advance proceeds on substantive grounds; the empirical SMC-tightening lever is empirically EXHAUSTED.
+
+
+  Reproduction-check side-channel: drift asymmetry (no_z 5.225 vs zc_only 44.595; 8.5x ratio) is informative. The Z_c-stratified parent fit IS more SMC-noise-sensitive at N=200 than the no-Z pooled fit
+  (consistent with finite-sample per-stratum SMC variance contributing non-trivially at the per-cell level). DA''s "modest SMC variance" reading is corroborated at this layer; proponent''s strong-form SMC-dominance
+  reading is NOT corroborated (if SMC truly dominated the realized CI, the no-Z drift would also be material at N=400, not the observed ~5 chi^2). The asymmetry sharpens the framework reading from S13:
+  joint-stratification finite-sample noise is the residual within-data driver of CI width, not the SMC propagation step itself.
+
+
+  Point-shift sub-criterion satisfied. |better_chi2 - 662.223| = 16.905, well within tol=50. SMC doubling did not destabilize the realized point estimate; R-C1B'' on the point-stability disjunct does not
+  fire. Both proponent (15 [2, 38]) and DA (22 [5, 47]) forecasted point-shift correctly; the realized 16.905 falls inside BOTH CIs. This is the one forecast surface where both forecasters succeeded together.
+
+
+  Near-tie head-to-head preserved at N=400 (chi2_diff = +24.107 with paired SE ≈ 38.73; |diff|/SE = 0.622; CI [-48.154, +103.672] straddles zero). The diff distribution moved slightly toward zero (-9.67
+  chi^2 at point) and paired SE narrowed by ~13.4% (consistent with marginal SMC contribution to within-pair variance, validating part of DA''s structural argument about within-pair SMC contribution being
+  non-trivial but bounded). Z2_c remains the parsimony-preferred winner.'
+numerical_record:
+  verdict_cuts:
+    R-A1B': cumulative_chi2_improvement_above_Z_c CI95 width <= 357.27 AND |better_chi2_point - 662.223| <= 50
+    R-B1B': cumulative_chi2_improvement_above_Z_c CI95 width in (357.27, 524.0] AND |better_chi2_point - 662.223| <= 50
+    R-C1B': cumulative_chi2_improvement_above_Z_c CI95 width > 524.0 OR |better_chi2_point - 662.223| > 50
+  cumulative_chi2_improvement_above_Z_c_point: 273.3883666666667
+  cumulative_chi2_improvement_above_Z_c_ci95:
+  - -34.57579999999992
+  - 471.6218666666665
+  cumulative_chi2_improvement_above_Z_c_ci95_width: 506.197666666666
+  cumulative_chi2_improvement_above_Z_c_ci95_width_note: PRIMARY verdict-metric. Derived as ci95[1] - ci95[0] = 471.6219 - (-34.5758) = 506.1977 chi^2 per phase_a.threshold_derivations.ci_width_cuts "Check
+    R / arbiter computes width = ci95[1] - ci95[0]" and Check P L1 item primary_metric_cumulative_ci_width_derivable_from_existing_fields PASS-by-derivation.
+  better_chi2_point: 679.1283333333333
+  better_chi2_ci95:
+  - 480.89483333333334
+  - 987.0924999999999
+  better_chi2_ci95_width: 506.197666666666
+  better_chi2_ci95_width_note: Identical to cumulative CI width by construction (cumulative = 952.5167 - better_chi2 is affine; variances and CI widths equal). Reported for cross-comparison; not a verdict
+    input.
+  point_shift_from_662_223: 16.90533333333329
+  point_shift_from_662_223_note: '|better_chi2_point - 662.223| = |679.1283 - 662.223| = 16.9053. Point-stability sub-criterion tol = 50. Realized point-shift 16.905 << 50; R-C1B'' point-stability disjunct
+    does NOT fire.'
+  chi2_Z2_b_point: 703.235
+  chi2_Z2_b_ci95:
+  - 504.4128333333333
+  - 1019.0761666666665
+  chi2_Z2_c_point: 679.1283333333333
+  chi2_Z2_c_ci95:
+  - 484.2784583333333
+  - 991.861875
+  chi2_diff_point: 24.106666666666683
+  chi2_diff_ci95:
+  - -48.15399999999998
+  - 103.6719583333335
+  chi2_diff_ci95_width: 151.8259583333335
+  paired_se_approx: 38.7311118
+  near_tie_flag: true
+  near_tie_note: '|chi2_diff| / paired_se = 24.107 / 38.731 = 0.622 < 1.0. Per phase_a.metric NEAR-TIE handling rule, the head-to-head sub-finding records "NO STATISTICALLY-DISCERNIBLE WINNER between Z2_b
+    and Z2_c at N=400". CI [-48.154, +103.672] straddles zero (sign of the difference not statistically distinguishable from zero at 95%). The NEAR-TIE structural property of the Q1B head-to-head holds
+    at N=400; SMC doubling did not resolve the Z2_b vs Z2_c ranking question. The diff distribution moved slightly toward zero (-9.67 chi^2 from Q1B''s +33.776) and paired SE narrowed by ~13.4% (Q1B SE
+    44.71; Q1B'' SE 38.73), consistent with marginal SMC contribution to within-pair variance.'
+  winner_point: Z2_c
+  winner_substantive: NO STATISTICALLY-DISCERNIBLE WINNER (near-tie). Point estimate favors Z2_c by +24.107 chi^2 units; paired-bootstrap CI on the difference straddles zero. Neither Z2_b nor Z2_c is statistically
+    discriminated as the preferred Z2; Z2_c is the parsimony-preferred point-estimate carryforward per phase_a''s near-tie convention (inherited from Q1B's Z2_c carryforward).
+  q1b_no_z_chi2: 959.065
+  q2a_settled_chi2: 953.84
+  reproduction_check_1_diff: 5.225
+  reproduction_check_1_note: q1b_no_z_chi2 = 959.065 (at N=400) reproduces Q2A's settled M3 chi^2 = 953.84 within tol=50. |diff|/tol = 0.1045 = 10.5% of tolerance budget consumed. Drift small; consistent
+    with finite-sample SMC re-draw at higher M with held seeds (no significant SMC variance at the no-Z pooled fit at N=200; drift at N=400 well within bootstrap noise envelope).
+  q1b_zc_only_chi2: 997.1116666666666
+  q1a_settled_chi2: 952.5167
+  reproduction_check_2_diff: 44.5949666666666
+  reproduction_check_2_note: q1b_zc_only_chi2 = 997.112 (at N=400) reproduces Q1A's settled M3 chi^2 = 952.5167 within tol=50. |diff|/tol = 0.892 = 89.2% of tolerance budget consumed. Drift moderate; the
+    Z_c-stratified parent fit IS materially more SMC-noise-sensitive at N=200 than the no-Z pooled fit, by ratio 44.595 / 5.225 = 8.54x. This asymmetry is informative side-channel per phase_a.baselines.secondary
+    catch-and-report semantics — the per-cell SMC propagation in the Z_c-stratified layer carries non-trivial finite-sample noise (per-cell N ~ 1000-7000 rows after Z_c partition vs the full library at
+    no-Z), corroborating DA's "modest SMC variance" reading and refuting proponent's strong-form SMC-dominance reading.
+  reproduction_check_drift_asymmetry: 8.535
+  reproduction_check_drift_asymmetry_note: 'Asymmetry ratio = repro_chi2_zc_drift / repro_chi2_no_z_drift = 44.595 / 5.225 = 8.54x. Informative side-channel per phase_a.baselines.secondary: SMC variance
+    at N=200 IS non-trivial at the Z_c-stratified parent layer, but NOT at the no-Z pooled layer. Coherent with the substantive reading that joint-stratification finite-sample noise is the residual within-data
+    driver of CI width at the parent fits, not the SMC propagation step itself. Sharpens the framework reading from S13 (joint-stratification effects are observable both substantively in cumulative reduction
+    AND methodologically in SMC sensitivity).'
+  reproduction_check_tol: 50.0
+  width_change_vs_q1b:
+    q1b_width: 476.358
+    q1b_prime_width: 506.197666666666
+    delta_width: 29.83966666666605
+    delta_pct: 6.264
+    direction: WIDENING
+    note: 'Q1B realized cumulative CI width = 476.358 chi^2 at N_PARTICLES=200; Q1B'' realized width = 506.198 chi^2 at N=400. Delta = +29.840 chi^2; +6.26% WIDENING. Both proponent (R-A1B'' forecast: width
+      <= 357.27, ≥ 25% narrowing) and DA (R-B1B'' forecast: width 419, ~12% narrowing) had direction-of-magnitude forecasts on NARROWING. Realized direction is OPPOSITE BOTH FORECASTS. The mechanical R-B1B''
+      band fires because the band is wide enough to absorb the disagreement (357.27 to 524.0 covers both the narrowing forecasts and the realized widening); the registered band itself is the unfalsifiability
+      zone for direction errors on the verdict-metric.'
+  cumulative_chi2_improvement_change_vs_q1b:
+    q1b_cumulative_point: 290.293
+    q1b_prime_cumulative_point: 273.3883666666667
+    delta_cumulative_point: -16.9046333333333
+    delta_pct: -5.8237
+    note: Q1B cumulative_chi2_improvement_above_Z_c at point = +290.293; Q1B' cumulative point = +273.388. Delta = -16.905 chi^2 (-5.82%). SMC doubling slightly REDUCED the realized closure on top of widening
+      the CI. DA's SMC-bias-correction reading predicted a small downward point shift (DA forecast 268 chi^2 cumulative; realized 273.388 is 5.4 chi^2 above DA's point — closest single forecast surface
+      DA hit). Proponent's small-symmetric-residual reading is consistent with the magnitude (within proponent's point-shift CI [2, 38]) but the DIRECTION of the change (down at point) is consistent with
+      DA's SMC-bias-correction interpretation.
+  band_position:
+    realized_width: 506.197666666666
+    band_lower_edge: 357.27
+    band_upper_edge: 524.0
+    band_midpoint: 440.635
+    lower_edge_headroom: 148.927666666666
+    upper_edge_headroom: 17.802333333334
+    position_fraction_from_lower: 0.8932
+    position_fraction_from_upper: 0.1068
+    note: 'Realized width sits 89.3% of the way through the R-B1B'' band, NEAR the R-C1B'' upper boundary. Upper-edge headroom = 17.80 chi^2 (3.4% of cut value); lower-edge headroom = 148.93 chi^2 (148.93/357.27
+      = 41.7% of cut value). The realized width is 8.4x closer to R-C1B'' than to R-A1B''. This is a structurally different R-B1B'' shape than Q1B''s settled R-B1B (which sat unambiguously interior to its
+      (228, 2284] band, 2.05x clear of R-A1B on the low side and 2.42x clear of R-C1B on the high side per Q1B''s arbiter §reason_mechanical). Q1B'' R-B1B'' fires at the OPPOSITE end of its band from Q1B''s
+      position. Substantively this matters because: (a) R-B1B'' position-near-R-C1B'' is consistent with the "+6.3% widening" central finding (widening pushes the realization toward R-C1B''); (b) the realization
+      is closer to a widening-anomaly threshold than to a narrowing-success threshold, sharpening the framework reading that SMC-tightening does not narrow the CI.'
+  outcome_mechanical: R-B1B'
+  outcome_substantive: R-B1B'
+  outcome_category_winner: devils_advocate
+  outcome_category_winner_notes: DA forecast R-B1B'; realized R-B1B'. DA wins on the registered outcome category. Proponent forecast R-A1B'; falsified (realized 506.198 well above R-A1B' cut 357.27). Substantive
+    within-bucket forecasts (CI-width point estimate, direction-of-magnitude on width change, point-shift, near-tie shape) are mixed across surfaces (see calibration_record). The realized width 506.198
+    falls ABOVE BOTH forecaster CI upper bounds (proponent CI [290, 395] above by +111; DA CI [370, 480] above by +26); neither forecaster's bracket contains the realized width. Both forecasters predicted
+    NARROWING; realized WIDENING. The aggregate substantive interpretation favors mechanical R-B1B' + the framework-reading sharpening (SMC-tightening lever empirically negative as CI-narrowing mechanism;
+    eval-window-noise dominates; CI is intrinsic to data).
+  closer_forecast: devils_advocate
+  closer_forecast_notes: 'DA wins on the registered outcome category (R-B1B'' vs realized R-B1B'' matches; proponent R-A1B'' falsified). On CI-width point residual: proponent (338 vs realized 506.198) =
+    residual 168.198; DA (419 vs realized 506.198) = residual 87.198 — DA 1.93x closer. On direction-of-magnitude (CI change): NEITHER (both predicted narrowing; realized widening). On point-shift forecast:
+    BOTH succeed (realized 16.905 inside proponent [2, 38] AND inside DA [5, 47]). On near-tie SHAPE: BOTH predicted near-tie at N=400; both correct (realized |diff|/SE = 0.622 < 1.0; CI straddles zero).
+    On cumulative-reduction point: DA forecast 268, realized 273.388 (residual +5.388 = closest single forecast surface DA hit); proponent forecast 290.293 - 15 = 275.293 (proponent implied via point-shift
+    forecast), residual +1.905 — proponent closer at point but only because proponent''s point-shift forecast happened to bracket realized closely (this is the point-stability sub-criterion surface, not
+    the cumulative-reduction surface directly). On CI bracketing: realized cumulative CI [-34.576, +471.622]; proponent forecast cumulative narrows to ~270 +/- noise; DA forecast cumulative ~268 [17, 514]
+    — DA''s CI [17, 514] OVERLAPS realized substantially; proponent did not register a cumulative-CI bound directly. DA closer on outcome category, magnitude of CI-width residual, and cumulative-CI bracketing;
+    proponent closer on cumulative-reduction point only (via point-shift conjunct). Aggregate: DA closer on more surfaces; closer_forecast = devils_advocate, but the within-band substantive content is materially
+    different from DA''s implicit prior (DA expected modest narrowing; realized widening — DA''s magnitude/direction were also wrong, just less wrong than proponent''s).'
+calibration_record:
+  proponent_correct: false
+  proponent_correct_detail: 'Outcome category R-A1B'' WRONG (realized R-B1B''). Point forecast CI width = 338 chi^2 vs realized 506.198: 1.50x undershoot. Forecast CI [290, 395] entirely below realized
+    lower CI bound — proponent''s within-bucket bracket does NOT contain realized at any margin (realized 506.198 is 111.2 chi^2 above proponent''s CI upper bound 395). The directional call (width NARROWS
+    under N doubling) is FALSIFIED on direction (realized WIDENS). Point-shift forecast 15 [2, 38]: realized 16.905 inside CI; proponent gets credit on the point-stability sub-criterion. Near-tie shape:
+    proponent forecasted chi2_diff narrowing to point ~25 with SE ~32; realized 24.107 with SE 38.73 — CLOSER TO PROPONENT''S POINT THAN DA''S (DA forecast 30 with SE 42). Proponent''s SHAPE-direction on
+    chi2_diff: chi2_diff_N400 ~ +25 (vs Q1B''s +33.776); realized 24.107 (small downward shift consistent with proponent). The cumulative-reduction prediction (derived from CI-width forecast 338): proponent
+    implicitly forecasted cumulative point ~290 +/- noise; realized 273.388 is 16.9 chi^2 below Q1B''s 290.293 — proponent''s "small symmetric residual" reading is half-correct (magnitude small; direction
+    down rather than symmetric).
+
+
+    Proponent''s OWN what_would_change_my_mind condition #1 (realized width > 400) is TRIGGERED at realized 506.198 (>> 400). Proponent registered: "The SMC-dominance forecast is falsified at the strong
+    form. If the realized width lands above 400, V_smc/V_total < ~0.60. The DA''s eval-window-dominance reading would be correct in this case." Proponent''s strong-form forecast is REFUTED by proponent''s
+    own pre-registered numeric condition; this is unambiguous, not requiring arbiter judgment. Proponent''s structural argument (V_smc dominates within-pair variance per the chi2_diff paired-SE-as-eval-window-floor
+    decomposition) is empirically WRONG on the implied magnitude (V_smc/V_total ~ 0.99 implied by proponent''s 338 point; realized 506.198 implies V_smc/V_total << 0.07 even below DA''s estimate). Proponent''s
+    asymmetric-payoff structure (PASS → primary verdict in proponent''s favor; FAIL → side-channel confirms SMC dominance at parent layer) is also empirically wrong: the asserts PASSED at N=400 with no_z
+    drift = 5.225 (negligible) AND zc drift = 44.595 (moderate but within tol), so the "FAIL → side-channel confirms SMC dominance" branch did not fire, and the realized side-channel drift asymmetry (8.5x
+    zc-over-no_z) corroborates DA''s "modest SMC variance" reading rather than proponent''s "SMC dominates."
+
+
+    NET PROPONENT SCORING: Outcome category wrong. Magnitude wrong (CI-width undershoot by 168 at point, by 111 at CI upper). Direction-of-magnitude (narrowing vs widening) wrong. Point-shift sub-criterion
+    correct. Near-tie shape correct (and closer to realized than DA''s shape forecast). Pre-registered falsification condition #1 TRIGGERED — proponent''s strong-form bet is refuted by proponent''s own
+    pre-registered numeric. Aggregate: proponent loses on the primary verdict-metric direction AND magnitude AND outcome category; wins on point-stability and near-tie shape sub-surfaces.'
+  devils_advocate_correct: true
+  devils_advocate_correct_detail: 'Outcome category R-B1B'' CORRECT (mechanical match). Point forecast CI width = 419 chi^2 vs realized 506.198: residual +87.198. Forecast CI [370, 480]: realized 506.198
+    is 26.198 chi^2 above DA''s CI upper bound — DA''s bracket does NOT contain realized at 95%, but DA is direction-corrected (DA''s lower bound 370 is closer to realized 506.198 than proponent''s upper
+    bound 395 is). The directional call (width NARROWS under N doubling) is ALSO FALSIFIED on direction (realized WIDENS). DA''s point-shift forecast 22 [5, 47]: realized 16.905 inside CI; DA gets credit
+    on the point-stability sub-criterion. Near-tie shape: DA forecasted chi2_diff narrowing with SE shrinking from 44.71 to ~32; realized SE 38.73 is BETWEEN Q1B''s anchor (44.71) and DA''s forecast (32).
+    DA''s NEAR-TIE preserved-at-N=400 forecast is CONFIRMED. Cumulative-reduction point forecast 268 [17, 514]: realized 273.388 (residual +5.388 = closest single forecast surface DA hit). DA''s cumulative-CI
+    bracket OVERLAPS realized cumulative CI [-34.576, +471.622] substantially (DA''s [17, 514] overlaps realized at [17, 471.622], covering ~80% of realized CI). Reproduction-check drift forecasts 5 [0,
+    35]: realized 5.225 (no_z) inside CI, 44.595 (zc_only) above CI upper bound — DA''s drift forecast was direction-correct on which baseline has more SMC variance (DA argued Z_c-stratified is per-stratum-finite-sample-sensitive)
+    but magnitude-undershot on the zc_only drift (DA forecast 5 chi^2; realized 44.6 chi^2 = 8.9x undershoot). DA''s 8.5x drift asymmetry is informative side-channel per DA''s SMC-modest-but-non-trivial
+    reading; coherent with DA''s strongest_argument empirical decomposition.
+
+
+    DA''s OWN what_would_change_my_mind conditions: Condition #1 (realized CI width on cumulative ≤ 357.27 → DA''s eval-window-dominance forecast falsified, proponent wins) NOT TRIGGERED at realized 506.198
+    (>> 357.27); DA''s direction-of-dominance reading survives. Condition #2 (|point-shift| > 50 → R-C1B'' regardless of CI band) NOT TRIGGERED (realized 16.905 << 50). Condition #3 (realized CI width >
+    524.0 → R-C1B'') NOT TRIGGERED (realized 506.198 < 524.0; close call at 96.6% of cut). Condition #4 (either repro_check |diff| > 50) NOT TRIGGERED (no_z 5.225 < 50; zc_only 44.595 < 50 with 11% headroom).
+    Condition #5 (V_smc/V_total post-hoc > 0.40) requires post-hoc decomposition not directly reported in result.yaml, but the realized width increase (rather than decrease) implies V_smc/V_total well below
+    0.07 even, so this condition is NOT TRIGGERED (DA''s strongest_argument empirical decomposition is corroborated, not refuted). Condition #6 (Q1A''s CI wider than Q1B''s, overturning DA''s joint-stratification
+    subdivision argument) is not testable from Q1B'' alone; DA''s argument survives by absence of evidence against it.
+
+
+    NET DA SCORING: Outcome category correct (mechanical R-B1B'' match). CI-width magnitude direction wrong (predicted narrowing, realized widening) but residual smaller than proponent''s (87 vs 168 chi^2).
+    Cumulative-reduction point CORRECT (residual only 5 chi^2 from realized; tightest single forecast surface). Point-stability sub-criterion correct. Near-tie shape correct (and structurally close to realized
+    SE 38.73; DA forecast 32). Reproduction-check direction-of-asymmetry correct (Z_c-stratified more sensitive than no-Z pooled); magnitude undershot on zc_only drift. Pre-registered falsification conditions
+    NONE TRIGGERED — DA''s direction-of-dominance reading (eval-window-noise dominates) is empirically corroborated even though DA''s within-band point forecast magnitude was wrong. Aggregate: DA wins the
+    mechanical / outcome-category register AND the direction-of-dominance read; loses on CI-width point magnitude direction (predicted narrowing); wins on cumulative-reduction point, point-shift, near-tie
+    shape, and reproduction-check asymmetry direction.'
+  notes: 'SEVENTH NAMED-FAILURE-MODE INSTANCE in the workflow''s history (after Q1 R-D-vs-R-C, eigenmodes-v1 O2-vs-O3, pit-calendar P1 tautology, Q2B mech_2/mech_3 negative shares, resolution-paths P1 hour_of_week-not-season,
+    Q1A near-tie with exact DA point forecast, Q1B mixed scoring decomposition). NEW SHAPE: BOTH FORECASTERS DIRECTIONALLY FALSIFIED ON CENTRAL TENDENCY OF VERDICT-METRIC. Both proponent (s ~ 0.99 strong
+    SMC-dominance) and DA (s ~ 0.07 modest SMC variance) had NARROWING-direction forecasts on the verdict-metric (CI width change under N doubling). Realized direction is OPPOSITE BOTH FORECASTS: WIDENING
+    (+6.3%, +29.84 chi^2). The mechanical R-B1B'' band fires because the band is wide enough to absorb the disagreement; the band itself is the unfalsifiability zone for direction errors on this metric.
+    New shape variant label: "OUTCOME-CATEGORY MATCHES ONE SIDE (DA), BUT BOTH SIDES FALSIFIED ON DIRECTION-OF-MAGNITUDE OF VERDICT-METRIC; REGISTERED CATEGORY BAND ITSELF IS THE UNFALSIFIABILITY ZONE FOR
+    DIRECTION ERRORS."
+
+
+    FORECASTER CALIBRATION DATA POINTS:
+
+
+    - proponent: SMC-particle-noise-dominates-CI-width premise (V_smc/V_total ~ 0.99) was the pre-registered bet. The premise''s STRONG FORM (R-A1B'' fires; CI narrows to ≤ 357.27) is empirically REFUTED
+    by realized widening to 506.198. Proponent''s own pre-registered numeric condition (width > 400 → strong-form falsified) is TRIGGERED. The asymmetric-payoff structure (PASS asserts → primary verdict
+    in proponent''s favor; FAIL → side-channel confirms SMC dominance) did not deliver: asserts PASSED with informative drift asymmetry that corroborates DA''s reading, not proponent''s. Future SMC-tightening
+    forecasts in this regime should pre-register with sharply lower priors on V_smc dominance (≤ 0.10) and wider CIs on direction-of-magnitude of CI change. Proponent confidence 0.55 (with explicit "wide-CI
+    honesty" calibration to Q1A''s warning) was correctly directed but still substantially over-confident on the central forecast.
+
+
+    - devils_advocate: eval-window-noise-dominates-CI-width premise (V_smc/V_total ~ 0.07) was the pre-registered bet. The premise''s DIRECTION (eval-window dominates; SMC contributes but is bounded) is
+    empirically CORROBORATED — eval-window-noise is the dominant variance component (otherwise SMC doubling would have narrowed the CI), and SMC contribution at the parent layer is non-trivial but bounded
+    (8.5x drift asymmetry at Z_c-stratified parent fit is the side-channel signature). The premise''s MAGNITUDE (DA implied ~98% width retention; realized 106.3% retention = slight widening) was off by
+    ~8% on the magnitude direction. DA''s strongest_argument empirical decomposition (chi2_diff paired SE 44.71 as eval-window-noise floor proxy) is qualitatively corroborated but quantitatively conservative
+    (the implied 8% widening direction-of-change suggests V_eval is even more dominant than DA''s 93% estimate; perhaps V_smc is ~3% rather than 7%, which would predict a near-zero change in CI width).
+    DA''s outcome-category bet wins; DA''s within-band magnitude is closer than proponent''s but also wrong; DA''s structural reasoning survives the magnitude error because the direction-of-dominance is
+    what mattered substantively. Future eval-window-dominance forecasts should pre-register MORE conservative width-change predictions (closer to no-change-or-slight-widening rather than 12% narrowing).
+
+
+    - PATTERN: when prior evidence (S9+S10+S11+S12+S13) points at joint within-data lever boundedness, methodological-side tightening levers (like SMC particle count) inherit the boundedness — there is
+    no within-data lever to find that closes the residual gap (because the gap is in eval-window noise, which is intrinsic to data). Q1B'' is the workflow''s first methodological-side tightening experiment
+    to fire NEGATIVELY on its own metric; future methodological-tightening forecasts should pre-register with the prior that within-data methodological levers are also bounded (consistent with the within-data
+    sigma-algebra-enrichment boundedness picture).
+
+
+    FORECASTERS'' WHAT_WOULD_CHANGE_MY_MIND CONDITIONS:
+
+
+    - proponent condition #1 (realized width > 400) TRIGGERED at 506.198; proponent''s strong-form SMC-dominance forecast REFUTED by proponent''s own pre-registered numeric.
+
+    - proponent point-shift correct: realized 16.905 inside [2, 38].
+
+    - proponent near-tie shape correct: chi2_diff point and SE both close to proponent''s forecast.
+
+    - DA condition #1 NOT triggered (no R-A1B''); DA''s eval-window-dominance reading survives.
+
+    - DA condition #2 NOT triggered (no point-stability R-C1B'').
+
+    - DA condition #3 NOT triggered (width < 524.0, close call at 96.6%).
+
+    - DA condition #4 NOT triggered (both reproduction drifts within tol=50; informative asymmetry but no assert fired).
+
+    - DA condition #5 NOT triggered (post-hoc V_smc/V_total still empirically modest).
+
+    - DA condition #6 not testable from Q1B'' alone; survives by absence.
+
+
+    The pre-registration discipline worked correctly: both forecasters'' explicit numeric falsification conditions were checked against the realized data, and proponent''s condition #1 fired, providing
+    a clean numeric refutation. The arbiter pattern handles the symmetric direction-of-magnitude failure cleanly — the mechanical verdict is the registered category, the substantive verdict is band-neutral
+    (no _FAVORABLE / _UNFAVORABLE suffix), and the framework-level reading sharpens to "SMC-tightening lever is empirically negative; CI is intrinsic to data; (a)/(b)/(c) adjudication proceeds on substantive
+    grounds as the proponent''s phase_a §ambiguous_region.action pre-flagged."'
+  topic_difficulty: moderate
+  proponent_forecast:
+    outcome: R-A1B'
+    confidence: 0.55
+    cumulative_ci95_width_point: 338.0
+    cumulative_ci95_width_ci95:
+    - 290.0
+    - 395.0
+    point_shift_point: 15.0
+    point_shift_ci95:
+    - 2.0
+    - 38.0
+    chi2_diff_point_N400: 25.0
+    chi2_diff_paired_se_N400: 32.0
+    near_tie_predicted: true
+    rationale_summary: SMC particle-count noise is the dominant variance component in Q1B's 476.358 CI width; doubling N_PARTICLES halves V_smc and tightens the CI to ≤ 357.27 (V_smc/V_total ≥ 0.875 required).
+      Strong-form prior; honored calibration warnings with wide CI [290, 395] straddling the R-A1B'/R-B1B' boundary at upper bound.
+  devils_advocate_forecast:
+    outcome: R-B1B'
+    confidence: 0.55
+    cumulative_ci95_width_point: 419.0
+    cumulative_ci95_width_ci95:
+    - 370.0
+    - 480.0
+    point_shift_point: 22.0
+    point_shift_ci95:
+    - 5.0
+    - 47.0
+    chi2_diff_point_N400: 30.0
+    chi2_diff_paired_se_N400: 42.0
+    near_tie_predicted: true
+    cumulative_chi2_improvement_point_N400: 268.0
+    cumulative_chi2_improvement_ci95_N400:
+    - 17.0
+    - 514.0
+    rationale_summary: Eval-window-noise (fixed 12,000-row post-cutoff window + paired-day bootstrap) is dominant variance source; V_smc/V_total ~ 0.07 at N=200 per chi2_diff paired-SE decomposition; doubling
+      N tightens CI by only ~12% to 419 chi^2. Joint S9+S10+S11+S12+S13 establishes within-data lever boundedness; SMC-tightening inherits.
+  proponent_distance_from_result:
+    cumulative_ci95_width_forecast_point: 338.0
+    cumulative_ci95_width_forecast_ci95:
+    - 290.0
+    - 395.0
+    cumulative_ci95_width_realized_point: 506.197666666666
+    cumulative_ci95_width_residual: 168.197666666666
+    cumulative_ci95_width_overshoot_from_upper: 111.197666666666
+    cumulative_ci95_width_inside_forecast_ci: false
+    cumulative_ci95_width_direction_match: false
+    cumulative_ci95_width_direction_match_note: Proponent predicted NARROWING (width forecast 338 < Q1B's 476.358); realized WIDENING (width 506.198 > Q1B's 476.358). Direction-of-magnitude FALSIFIED at
+      95% — proponent CI [290, 395] entirely below Q1B's anchor 476.358, so even proponent's upper bound was a narrowing prediction.
+    point_shift_forecast_point: 15.0
+    point_shift_forecast_ci95:
+    - 2.0
+    - 38.0
+    point_shift_realized: 16.90533333333329
+    point_shift_residual: 1.905333333333288
+    point_shift_inside_forecast_ci: true
+    outcome_category_match: false
+    outcome_residual: R-A1B' forecast vs R-B1B' realized
+    what_would_change_my_mind_triggered:
+      condition_1_triggered: 'realized width > 400 → SMC-dominance forecast falsified at strong form: TRIGGERED at 506.198 (>> 400).'
+    proponent_correct_summary: Outcome category WRONG (R-A1B'' vs R-B1B''). CI-width magnitude WRONG by 168 chi^2 at point; forecast CI [290, 395] entirely below realized lower CI bound (480.895). Direction-of-magnitude
+      on CI change WRONG (predicted narrowing; realized widening). Point-shift CORRECT (residual 1.905 within CI). Pre-registered condition
+  devils_advocate_distance_from_result:
+    cumulative_ci95_width_forecast_point: 419.0
+    cumulative_ci95_width_forecast_ci95:
+    - 370.0
+    - 480.0
+    cumulative_ci95_width_realized_point: 506.197666666666
+    cumulative_ci95_width_residual: 87.197666666666
+    cumulative_ci95_width_overshoot_from_upper: 26.197666666666
+    cumulative_ci95_width_inside_forecast_ci: false
+    cumulative_ci95_width_direction_match: false
+    cumulative_ci95_width_direction_match_note: DA predicted NARROWING (width forecast 419 < Q1B's 476.358); realized WIDENING (width 506.198 > Q1B's 476.358). Direction-of-magnitude FALSIFIED at 95% —
+      DA CI [370, 480] entirely below Q1B's anchor 476.358, so even DA's upper bound was a narrowing prediction (1.4% narrowing at the upper edge).
+    point_shift_forecast_point: 22.0
+    point_shift_forecast_ci95:
+    - 5.0
+    - 47.0
+    point_shift_realized: 16.90533333333329
+    point_shift_residual: -5.094666666666712
+    point_shift_inside_forecast_ci: true
+    cumulative_chi2_improvement_forecast_point: 268.0
+    cumulative_chi2_improvement_realized_point: 273.3883666666667
+    cumulative_chi2_improvement_residual: 5.388366666666693
+    cumulative_chi2_improvement_inside_forecast_ci: true
+    cumulative_chi2_improvement_inside_forecast_ci_note: 'DA cumulative CI [17, 514] CONTAINS realized 273.388. DA''s cumulative-CI bracket also OVERLAPS realized CI [-34.576, +471.622] substantially: DA''s
+      [17, 514] covers ~80% of realized CI.'
+    chi2_diff_forecast_point_N400: 30.0
+    chi2_diff_realized_point_N400: 24.106666666666683
+    chi2_diff_residual: -5.893333333333317
+    chi2_diff_paired_se_forecast_N400: 42.0
+    chi2_diff_paired_se_realized_N400: 38.7311118
+    chi2_diff_paired_se_residual: -3.2688882
+    near_tie_shape_match: true
+    near_tie_shape_match_note: DA predicted NEAR-TIE preserved at N=400 with paired SE narrowing from 44.71 to ~32; realized paired SE 38.73 (between Q1B''s anchor and DA''s forecast). NEAR-TIE structural
+      property preserved (|diff|/SE = 0.622).
+    repro_check_no_z_drift_forecast: 5.0
+    repro_check_no_z_drift_realized: 5.225
+    repro_check_no_z_drift_residual: 0.225
+    repro_check_no_z_drift_inside_forecast_ci: true
+    repro_check_zc_drift_forecast: 5.0
+    repro_check_zc_drift_realized: 44.595
+    repro_check_zc_drift_residual: 39.595
+    repro_check_zc_drift_inside_forecast_ci: false
+    repro_check_zc_drift_inside_forecast_ci_note: 'DA forecast 5 chi^2 [0, 35]; realized 44.595 is 9.595 chi^2 above DA''s CI upper bound 35 — DA undershot on the zc_only drift magnitude by ~9x. However
+      the DIRECTION (Z_c-stratified parent fit IS more SMC-noise-sensitive than no-Z pooled fit) is corroborated: DA argued this is per-cell finite-sample noise from Z_c partition reducing per-cell N; realized
+      8.5x asymmetry confirms the direction-of-effect.'
+    outcome_category_match: true
+    outcome_residual: R-B1B' matches
+    what_would_change_my_mind_triggered:
+      none_triggered: None of DA's 6 pre-registered conditions fired. DA's direction-of-dominance reading (eval-window-noise dominates SMC) is empirically corroborated by the realized widening (which implies
+        V_smc/V_total even smaller than DA's 7% estimate).
+    devils_advocate_correct_summary: Outcome category CORRECT (R-B1B''). CI-width magnitude DIRECTION wrong (predicted narrowing, realized widening) but residual smaller than proponent''s (87 vs 168 chi^2).
+      Cumulative-reduction point CORRECT (residual only 5.4 chi^2 = tightest forecast surface DA hit). Point-stability sub-criterion CORRECT. Near-tie shape CORRECT. Repro-check direction-of-asymmetry CORRECT;
+      magnitude undershot on zc drift. Pre-registered conditions NONE TRIGGERED — DA''s direction-of-dominance reading empirically corroborated.
+key_findings:
+- finding: R-B1B' fires mechanically unambiguously. Realized CI width = 506.198 chi^2 ∈ (357.27, 524.0]; point-shift = 16.905 ≤ 50. Both verdict cuts cleared.
+- finding: 'BAND POSITION NEAR R-C1B'' BOUNDARY: realized width sits at 89.3% of the R-B1B'' band, 17.80 chi^2 below R-C1B'' cut (524.0) and 148.93 chi^2 above R-A1B'' cut (357.27). Structurally different
+    R-B1B'' shape than Q1B''s settled R-B1B (which sat interior to its band on both sides by >2x). Q1B'' R-B1B'' is closer to a widening-anomaly threshold than to a narrowing-success threshold.'
+- finding: 'CENTRAL NEW FINDING: THE CI WIDENED, NOT NARROWED. Q1B width 476.358 → Q1B'' width 506.198 = +29.84 chi^2 (+6.26% WIDENING). Both proponent (R-A1B'' forecast: ≥ 25% narrowing) and DA (R-B1B''
+    forecast: 12% narrowing) had NARROWING-direction forecasts; realized DIRECTION-OF-MAGNITUDE is OPPOSITE BOTH. The mechanical R-B1B'' band absorbs the disagreement because it is wide enough to span both
+    NARROWING-to-419 and WIDENING-to-506; the registered band itself is the unfalsifiability zone for direction errors on this verdict-metric.'
+- finding: 'CUMULATIVE-REDUCTION POINT DECREASED: Q1B 290.293 → Q1B'' 273.388 = -16.905 chi^2 (-5.82%). SMC doubling slightly REDUCED the realized closure on top of widening the CI. Consistent with DA''s
+    SMC-bias-correction reading (DA cumulative forecast 268; residual +5.4 = tightest DA forecast surface).'
+- finding: 'PROPONENT''S OWN PRE-REGISTERED FALSIFICATION CONDITION #1 TRIGGERED. Condition: "realized width > 400 → SMC-dominance forecast falsified at strong form, V_smc/V_total < ~0.60." Realized 506.198
+    >> 400. Proponent''s strong-form bet refuted by proponent''s own numeric, without arbiter judgment.'
+- finding: 'REPRODUCTION-CHECK DRIFT ASYMMETRY (informative side-channel per phase_a.baselines.secondary): no_z drift 5.225 vs zc_only drift 44.595 = 8.54x asymmetry. Z_c-stratified parent fit IS materially
+    more SMC-noise-sensitive at N=200 than no-Z pooled fit (by ~8.5x); corroborates DA''s "modest SMC variance" reading at the parent layer; refutes proponent''s strong-form "SMC dominates" reading (if
+    SMC truly dominated, no_z drift would also be material at N=400, not the observed 5.2 chi^2 ≈ 0).'
+- finding: POINT-SHIFT FORECASTS BOTH SUCCEED. Realized |better_chi2 - 662.223| = 16.905; inside both proponent's [2, 38] and DA's [5, 47] CIs. SMC doubling did not destabilize the realized point estimate;
+    R-C1B' point-stability disjunct does NOT fire; seed-dependence and library-fit drift empirically ruled out.
+- finding: NEAR-TIE BETWEEN Z2_b AND Z2_c PRESERVED AT N=400. chi2_diff = +24.107 with paired SE ≈ 38.73; |diff|/SE = 0.622; CI [-48.154, +103.672] straddles zero. Z2_c remains parsimony-preferred winner;
+    near-tie structural property holds; SMC doubling did not resolve the head-to-head ranking. Q1B chi2_diff distribution moved slightly toward zero (-9.67 chi^2 at point) and paired SE narrowed by ~13.4%,
+    consistent with marginal SMC contribution to within-pair variance.
+- finding: 'SEVENTH NAMED-FAILURE-MODE INSTANCE (NEW SHAPE VARIANT). BOTH FORECASTERS DIRECTIONALLY FALSIFIED ON CENTRAL TENDENCY OF VERDICT-METRIC. Proponent (s ~ 0.99) and DA (s ~ 0.07) both predicted
+    NARROWING on opposite strong-form priors; realized: WIDENING (+6.3%). Mechanical R-B1B'' fires because band is wide enough to absorb the disagreement. New shape: "outcome-category matches one side (DA),
+    but BOTH SIDES falsified on direction-of-magnitude of verdict-metric; registered category band is the unfalsifiability zone for direction errors."'
+- finding: 'FRAMEWORK-LEVEL READING (binding): Q1B'' confirms the user''s locked decision (d) framing — Q1B''s wide CI [+8.06, +484.4] is INTRINSIC TO THE DATA, NOT TO THE ESTIMATOR. Eval-window-noise dominates;
+    SMC-tightening (the methodological-side lever Q1B'' was registered to test) does not narrow the CI. Joint S9+S10+S11+S12+S13 corpus EXTENDS: within-data tightening levers are bounded both SUBSTANTIVELY
+    (per S13) and METHODOLOGICALLY (per Q1B''). The (a)/(b)/(c) adjudication proceeds on substantive grounds; within-data SMC-tightening is empirically EXHAUSTED as a CI-narrowing mechanism. This is the
+    workflow-level result Q1B'' was registered to produce.'
+- finding: 'GRADE NOTE: result.yaml is PROVENANCE-GRADE INSPECTION-ONLY (see result_artifact_pin.grade_note). Verdict renders against same numerics as if claim-grade; downstream citation MUST carry the
+    INSPECTION-ONLY caveat per result.yaml.grade_demotion_reason. Registry-housekeeping caveat, not scientific.'
+finding_status: SETTLED
+finding_status_note: 'SETTLED with INSPECTION-ONLY grade. The verdict and the substantive findings are settled (registered numerics + production-path code + check-R PASS); downstream CITATION must include
+  the INSPECTION-ONLY designation per the grade_demotion_reason. Both qualifiers are durable: the verdict is non-revisable (SETTLED), and the citation caveat is non-removable (INSPECTION-ONLY) absent a
+  future re-emission of Q1B'' with a CLAIM-GRADE .txt artifact.'
+follow_up:
+  required: true
+  reasoning: 'Two parallel follow-up items:
+
+
+    1. THREAD ADVANCEMENT (required for state machine):
+
+    thread-coordinator dispatch advances resolution-paths-thread per Q1B'' SETTLED R-B1B''.
+
+    Q1B''.status: planned → settled; Q1B''.result: set to R-B1B''.
+
+    branching_rules.Q1B'' = {R-A1B'': null, R-B1B'': null, R-C1B'': null} (non-gating sibling per amendment A2).
+
+    No auto-advancement; current_node_id transition = none (remains null per S4, awaiting user adjudication of three-way amendment decision for the main Q1B branch).
+
+    sibling_branches_closed: []. Q1A'' (parallel non-state-machine sibling per amendment A1) unaffected. P2 reachable via Q1C.R-C1C; unchanged.
+
+    thread_state_transition: node_settled_no_advance.
+
+    Q1B''s S4 thread state-history advance (Q1B SETTLED R-B1B; current_node_id=null; (a)/(b)/(c) user adjudication pending) is unchanged by Q1B''''s settlement — Q1B'' is a non-state-machine sibling that
+    informs but does not advance the main branch.
+
+
+    2. MEMORY UPDATE (no blocker, recommended): SETTLED finding warrants a new memory file mitacs-q1b-prime-smc-tightening.md capturing:
+
+    - Numeric record: cumulative CI width 506.198 (Q1B 476.358 → +29.84 chi^2 = +6.3% WIDENING); cumulative reduction at point 273.388 (Q1B 290.293 → -16.9 chi^2 = -5.8%); chi2_Z2_b 703.235 [504, 1019];
+    chi2_Z2_c 679.128 [484, 992]; better_chi2 679.128 [481, 987]; chi2_diff +24.107 [-48, +104] near-tie preserved; reproduction-check drifts no_z 5.225 / zc_only 44.595 (8.54x asymmetry).
+
+    - Substantive finding #1: R-B1B'' fires mechanically; near-R-C1B''-boundary band position (89.3% of way through band, 17.80 chi^2 from widening-anomaly threshold).
+
+    - Substantive finding #2: CI WIDENED rather than narrowed; both forecasters directionally falsified on verdict-metric central tendency. Proponent''s own pre-registered falsification condition #1 (width
+    > 400) TRIGGERED.
+
+    - Substantive finding #3: Eval-window-noise dominates SMC variance; reproduction-check drift asymmetry corroborates DA''s "modest SMC variance" reading; proponent''s strong-form SMC-dominance reading
+    refuted.
+
+    - Substantive finding #4: 7th named-failure-mode instance, new shape variant (both forecasts directionally falsified on verdict-metric central tendency; registered band itself is the unfalsifiability
+    zone for direction errors).
+
+    - Substantive finding #5: Framework-level — Q1B''s wide CI is INTRINSIC TO DATA, NOT ESTIMATOR; SMC-tightening lever empirically NEGATIVE as CI-narrowing mechanism; joint S9+S10+S11+S12+S13 extends
+    to within-data tightening levers bounded both substantively AND methodologically; (a)/(b)/(c) adjudication proceeds on substantive grounds.
+
+    - Cross-link to mitacs-q1b-z2-conditioning (S13) as predecessor; mitacs-q1a-z-conditioning (S12), mitacs-p1-patra-sen-localization (S11), mitacs-q2a-richer-family (S9), mitacs-q2b-non-distributional
+    (S10), mitacs-clim-gap-nonstationary (temperature prior survives as exogenous-content candidate for full closure beyond within-data lever space).
+
+    - Cross-link to ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md — methodological-side tightening lever inherits the within-data boundedness from substantive-side
+    levers; the identifiability obstruction picture is now corroborated from THREE independent layers (S9+S10 distributional-class; S11+S12+S13 sigma-algebra-enrichment; Q1B'' SMC-particle-count).
+
+    - Add (S14) to CLAUDE.md "Settled findings since 2026-05-21" with the headline numerics, the WIDENING-instead-of-narrowing reading, the 7th-named-failure-mode-instance notation, the framework-level
+    extension, and the INSPECTION-ONLY grade caveat.
+
+
+    Per workflow rules, memory update is performed by the user after settled findings; the arbiter declares memory_update_required = true and identifies the target file but does not write it.'
+  proposed_phase_a: null
+memory_update_required: true
+memory_update_target: '~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md
+
+  + add mitacs-q1b-prime-smc-tightening.md SETTLED R-B1B'' INSPECTION-ONLY with headline numerics (cumulative CI width 506.198 vs Q1B 476.358 = +6.3% WIDENING; cumulative reduction point 273.388 vs Q1B
+  290.293 = -5.8% at point; both forecasters directionally falsified on verdict-metric central tendency) and the substantive findings #1-#5 (band position near R-C1B''; widening refutes proponent strong-form;
+  reproduction-check drift asymmetry corroborates DA modest-SMC reading; 7th named-failure-mode instance new shape variant; framework-level confirmation that wide Q1B CI is intrinsic to data not estimator).
+
+  + cross-link from mitacs-q1b-z2-conditioning (S13) as predecessor; mitacs-q1a-z-conditioning (S12), mitacs-p1-patra-sen-localization (S11), mitacs-q2a-richer-family (S9), mitacs-q2b-non-distributional
+  (S10), mitacs-clim-gap-nonstationary (temperature prior survives for path (c)).
+
+  + flag for CLAUDE.md ''Settled findings since 2026-05-21'' section: add (S14) Q1B'' R-B1B'' INSPECTION-ONLY with summary, CI widened by 6.3% under SMC doubling (BOTH forecasters predicted narrowing),
+  reproduction-check drift asymmetry 8.5x at Z_c-stratified parent, 7th named-failure-mode instance new shape variant (both forecasts directionally falsified on verdict-metric central tendency), framework
+  reading: within-data SMC-tightening lever empirically negative; eval-window-noise dominates; user-locked decision (d) framing confirmed; (a)/(b)/(c) adjudication proceeds on substantive grounds.
+
+  + workflow note: 7th named-failure-mode instance, new shape variant (outcome-category matches one side BUT both sides falsified on direction-of-magnitude of verdict-metric; registered band itself is the
+  unfalsifiability zone for direction errors). Distinct from S13''s mixed-scoring-decomposition shape: S13 had direction-matched-one-side, magnitude-matched-neither; Q1B'' has direction-matched-NEITHER,
+  magnitude-matched-neither, outcome-category-matched-one-side. The pattern adds a new axis to the failure-mode taxonomy: direction-of-magnitude can be falsified for BOTH forecasters simultaneously when
+  the registered category band is wide enough to absorb both narrowing-prediction and widening-realization.
+
+  + grade note: result.yaml is PROVENANCE-GRADE INSPECTION-ONLY (per grade_demotion_reason; .txt collision with Q1B''s CLAIM-GRADE artifact). Memory file should explicitly carry the INSPECTION-ONLY caveat
+  in citation; verdict numerics are settled and non-revisable; citation grade is non-removable absent re-emission.'
+thread_state_update:
+  thread_topic: resolution-paths-thread
+  node_id: Q1B'
+  branch_fired: R-B1B'
+  next_node_id: null
+  next_node_id_note: Per thread branching_rules.Q1B'.R-B1B' = null. No auto-advancement. Q1B' is the non-state-machine sibling added by amendment A2 (parent_branch R-A under Q1B); per the amendment intent,
+    settlement does NOT advance current_node_id (which remains null per S4 thread state-history, awaiting user adjudication of three-way amendment decision for the main Q1B branch). Q1B' is a parallel methodological-side
+    tightening sibling; its settlement informs the user adjudication but does not advance the main state machine.
+  sibling_branches_closed: []
+  sibling_branches_closed_note: 'branching_rules.Q1B'' keys: R-A1B'' (null; no sibling to close), R-B1B'' (null; no sibling to close), R-C1B'' (null; no sibling to close). All three Q1B'' outcomes map to
+    null per amendment A2''s non-gating-sibling design. P2 remains reachable via Q1C.R-C1C in branching_rules — P2 is NOT closed by Q1B''''s firing. Q1A'' (parallel non-state-machine sibling per amendment
+    A1) is unaffected by Q1B''''s advancement; its eventual arbiter fires on its own outcome categories independently. Q1C (closed per S2) remains closed.'
+  thread_state_transition: node_settled_no_advance
+  thread_state_transition_note: 'Q1B''.status: planned → settled. Q1B''.result: R-B1B''. current_node_id: null → null (unchanged per S4). The main Q1B branch state-history reading is UNCHANGED by Q1B''''s
+    settlement; the user adjudication of the three-way amendment decision ((a) third within-data Z axis / (b) cross-axis joint stratification thread / (c) temperature/exogenous-Z arm) is now INFORMED by
+    Q1B''''s empirical confirmation that within-data SMC-tightening cannot narrow the CI but is NOT auto-decided by Q1B''''s settlement. The coordinator records the realized state + framework-reading extension
+    (within-data tightening levers bounded both substantively and methodologically); the user adjudicates the (a)/(b)/(c) decision in a separate dispatch.'
+  notes_for_thread_coordinator: 'Q1B''.status: planned → settled. Q1B''.result: set to R-B1B''.
+
+    current_node_id: null → null (UNCHANGED; Q1B'' is non-state-machine sibling per amendment A2).
+
+
+    NO SIBLINGS CLOSED at thread level. All three Q1B'' outcome branches map to null per amendment A2''s non-gating-sibling design. P2 remains reachable via Q1C.R-C1C in branching_rules — P2 is NOT closed
+    by Q1B''''s firing. Q1A'' (parallel non-state-machine sibling per amendment A1) is unaffected by Q1B''''s advancement.
+
+
+    NO TREE-LEVEL DECISION POINT TRIGGERED. Q1B'' is the methodological-side sibling of Q1B; its firing does NOT advance or alter the main Q1B branch state machine, which remains at current_node_id=null
+    per S4 (awaiting user adjudication of the (a)/(b)/(c) three-way amendment decision). The coordinator records Q1B''''s settlement as an S-numbered state-history entry (likely S5) noting the non-state-machine-advancement
+    transition and the framework-reading extension.
+
+
+    FRAMEWORK-READING EXTENSION (for the coordinator''s S-numbered entry):
+
+    Q1B'' provides METHODOLOGICAL-SIDE corroboration of S13''s substantive finding: within-data tightening levers are bounded. S13 established this at the substantive level (single-axis vs joint multi-axis
+    sigma-algebra enrichment); Q1B'' establishes it at the methodological level (SMC particle-count doubling does not narrow the realized CI; eval-window-noise dominates). Joint S9+S10+S11+S12+S13+Q1B''
+    is now a three-layer corroboration (distributional-class via S9+S10; sigma-algebra-enrichment via S11+S12+S13; methodological tightening via Q1B'') of the identifiability obstruction picture from disintegration_diagnostic.md.
+
+
+    SUBSTANTIVE INPUT TO USER ADJUDICATION OF (a)/(b)/(c):
+
+    Q1B'' confirms the user''s locked decision (d) framing — Q1B''s wide CI is intrinsic to data, not estimator. The (a)/(b)/(c) decision must proceed on substantive grounds:
+
+    (a) Third within-data Z axis: P1''s remaining axes (season 0.135, demand_quantile 0.075) are weaker-prior-support than Q1B''s time_of_day 0.485; given Q1B''s 40% closure and Q1B''''s confirmation that
+    the CI is intrinsic, third-axis adds diminishing returns. NEWLY VALIDATED prior support: the joint multi-axis hypothesis works (S13''s 40% closure); the cross-axis joint generalization is a within-data
+    extension.
+
+    (b) Cross-axis joint stratification thread: framework-reading-driven option; pre-registers what is the cumulative limit of within-data joint conditioning across all P1 axes? Most systematic of the three
+    options.
+
+    (c) Temperature/exogenous-Z arm: framework-prescribed full-closure path per disintegration_diagnostic.md; Q1B''''s methodological confirmation that within-data levers are bounded sharpens the prior
+    that exogenous Z is required for full closure. Q1B''''s finding upgrades the priority of (c) relative to within-data options (the within-data lever space is now bounded both substantively AND methodologically;
+    auxiliary information beyond the time index is the only remaining direction).
+
+
+    The arbiter does NOT pre-judge which path the coordinator records as the user''s decision; the (a)/(b)/(c) decision remains a user dispatch.
+
+
+    TEMPERATURE PRIOR STATUS: still candidate for full closure beyond within-data joint conditioning. Q1B''s 40%-of-gap closure leaves 60% unexplained; Q1B'' confirms the SMC-tightening lever cannot recover
+    within-data variance further; clim-gap-nonstationary prior continues to be the strongest a-priori candidate for the residual.
+
+
+    P2 STATUS: still reachable (from Q1C.R-C1C); not affected by Q1B''.R-B1B'' firing.
+
+
+    Q1A'' STATUS: parallel non-state-machine sibling per amendment A1; phase_a not yet filled per registry. Independent of Q1B''''s state advancement; its eventual arbiter will fire on its own outcome categories
+    independently of the resolution-paths-thread state machine.
+
+
+    Q1B'' STATUS: settled per this arbiter. No further Q1B'' tightening runs per phase_a.stopping_criterion (a Q1B'''' at N=800 would be a NEW pre-registration, not a continuation of Q1B'').'
+recommendations:
+- recommendation: 'Dispatch thread-coordinator to advance resolution-paths-thread per S5 (proposed): Q1B'' SETTLED R-B1B''; current_node_id unchanged (Q1B'' is non-state-machine sibling); thread_state_transition
+    = node_settled_no_advance. The coordinator records the realized state + framework-reading extension (within-data SMC-tightening lever empirically negative; joint S9+S10+S11+S12+S13+Q1B'' three-layer
+    corroboration of identifiability obstruction); the user adjudication of (a)/(b)/(c) for the main Q1B branch remains a separate dispatch.'
+- recommendation: 'Memory update: create memory/mitacs-q1b-prime-smc-tightening.md capturing the SETTLED R-B1B'' INSPECTION-ONLY finding + the substantive framework-reading extension (within-data tightening
+    levers bounded both substantively per S13 AND methodologically per Q1B''). Cross-link to mitacs-q1b-z2-conditioning (S13) as predecessor; cross-link to mitacs-clim-gap-nonstationary as the surviving
+    temperature prior for full closure. Update MEMORY.md index and add (S14) entry to CLAUDE.md "Settled findings since 2026-05-21" section. The "wide CI is intrinsic to data, not estimator" reading + the
+    7th-named-failure-mode-instance new-shape-variant notation are the headline substantive content. INSPECTION-ONLY grade caveat must travel with the citation.'
+- recommendation: 'Framework-reading extension in writeup/tex/missing_content_memo.tex (kernel-family-agnostic theory memo, 18pp): the memo predates (S11)-(S13); add (S14) when next refreshed. The boundedness-of-within-data-levers
+    reading should be extended from "single-axis bounded near zero; joint multi-axis bounded at higher magnitude but full closure requires auxiliary information beyond the time index" (S13''s reading) to
+    "single-axis bounded near zero; joint multi-axis bounded at higher magnitude; methodological tightening (SMC particle count) cannot narrow the CI further; full closure requires auxiliary information
+    beyond the time index" (S14''s extension). This is the durable framework correction Q1B'' delivered on the methodological side.'
+- recommendation: 'Workflow refinement (advisory, non-blocking): the .txt collision that demoted Q1B'' to INSPECTION-ONLY is a Check-P scope gap. Future pre-registrations that re-use a SETTLED-predecessor''s
+    script via inline-edit parameterization should explicitly include the .txt artifact path string in the parameterization substitution set; Check P should add an L1 item "result-artifact-path uniqueness"
+    that grep-verifies the script will not overwrite a SETTLED-predecessor''s CLAIM-GRADE .txt. This is a workflow-design improvement, not a Q1B''-specific blocker; Q1B''''s verdict is unaffected.'
+if_provisional_what_to_reaudit: []
+git_sha: a94e016d4e3b90126b5eb667a866900a5b509023
+git_clean: false
+body_sha256: 1ee09afaa86c597b6ccd93465bbf97b993e75e6247997a9447fd3ef6dcbfb4ac
