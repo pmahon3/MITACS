@@ -1,0 +1,72 @@
+# Devil's-advocate counter-prediction — written SIMULTANEOUSLY with
+# phase_a.yaml, BEFORE any data is touched.
+#
+# Required by .claude/agents/devils-advocate.md. The counter-prediction
+# is itself testable; /audit arbiter grades both this and the
+# proponent's forecast. An adversary that is unfalsifiable (no numeric
+# commitment) is noise.
+
+schema: devils_advocate
+written_at: <ISO 8601>
+git_sha: <REQUIRED>
+git_clean: <REQUIRED>
+body_sha256: <REQUIRED — auto-filled>
+references:
+  - file: phase_a.yaml
+    body_sha256: <REQUIRED — hash of phase_a.yaml>
+
+# ------------------------------------------------------------------
+# Strongest argument against
+# ------------------------------------------------------------------
+
+strongest_argument: <REQUIRED — one paragraph; specific "fails if..."
+                                not vague "might not work">
+
+# Failure modes ranked by lab history. Cite memory files.
+specific_failure_modes:
+  - rank: 1
+    mode: <e.g. cosmetic-via-sigma-shrinkage>
+    memory_ref: <e.g. mitacs-clim-gap-nonstationary>
+    likelihood: <0-1>
+
+  - rank: 2
+    mode: <e.g. argmin-without-variance>
+    memory_ref: <e.g. mitacs-theta-rail-pinning>
+    likelihood: <0-1>
+
+  - rank: 3
+    mode: <e.g. diagnostic-reimplements-production>
+    memory_ref: <e.g. mitacs-dayanchor-seam>
+    likelihood: <0-1>
+
+severity: <REQUIRED — fatal | serious | manageable>
+# Fatal: the experiment cannot answer the question as posed.
+# Serious: the answer will be confounded; results need heavy caveat.
+# Manageable: there's risk but the experiment is still worth running.
+
+# ------------------------------------------------------------------
+# The counter-prediction
+# ------------------------------------------------------------------
+
+counter_prediction:
+  value: <REQUIRED — numeric, in same units as phase_a.metric>
+  units: <REQUIRED>
+  reasoning: <REQUIRED — one sentence>
+
+# ------------------------------------------------------------------
+# What would change my mind
+# ------------------------------------------------------------------
+
+what_would_change_my_mind:
+  - <REQUIRED — concrete numeric outcome that would force retraction
+                of this objection>
+  # E.g. "if the per-HE bias shape across direct h-step factors is
+  # genuinely flat (max |signed_err_HE| < 100 MW), I retract."
+
+# ------------------------------------------------------------------
+# Opportunity cost
+# ------------------------------------------------------------------
+
+opportunity_cost:
+  alternative: <what else could be done with this time>
+  ranking: <does the experiment beat the alternative — yes | no | unclear>

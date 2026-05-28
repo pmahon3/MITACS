@@ -1,0 +1,52 @@
+# Proponent forecast — written SIMULTANEOUSLY with phase_a.yaml.
+#
+# The analyst's own numeric prediction of what the experiment will
+# show, BEFORE any data is touched. Kahneman's "what would change my
+# mind" rule operationalized. Without it, post-hoc rationalisation is
+# silent.
+#
+# Graded by /audit arbiter against devils_advocate.yaml after the
+# result is in.
+
+schema: proponent
+written_at: <ISO 8601>
+git_sha: <REQUIRED>
+git_clean: <REQUIRED>
+body_sha256: <REQUIRED — auto-filled>
+references:
+  - file: phase_a.yaml
+    body_sha256: <REQUIRED — hash of phase_a.yaml>
+
+# ------------------------------------------------------------------
+# The forecast
+# ------------------------------------------------------------------
+
+forecast:
+  value: <REQUIRED — numeric, in same units as phase_a.metric>
+  units: <REQUIRED — e.g. MW, percentage points, dimensionless>
+  reasoning: <REQUIRED — one sentence; why this number, not another>
+
+# Optional: a CI on the forecast itself. If the proponent is highly
+# uncertain, this widens the SE in the arbiter's distance metric.
+forecast_ci:
+  width: <optional — e.g. 95%>
+  low: <numeric>
+  high: <numeric>
+
+# ------------------------------------------------------------------
+# What would change the analyst's mind
+# ------------------------------------------------------------------
+
+what_would_change_my_mind:
+  - <REQUIRED — concrete numeric outcome that would force a retraction>
+  # E.g. "if MAE_mw exceeds 720, I retract the claim that direct h-step
+  # factor estimation flattens the per-HE bias shape."
+
+# ------------------------------------------------------------------
+# Confidence
+# ------------------------------------------------------------------
+
+confidence: <REQUIRED — 0-1, the analyst's subjective probability that
+                       the forecast lands within the corroboration region>
+# This is recorded for calibration tracking across topics; not used by
+# the arbiter directly.
