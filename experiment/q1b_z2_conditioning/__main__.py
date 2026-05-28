@@ -1,12 +1,20 @@
-"""Q1B runner — Z2-conditioning head-to-head between Z2_b (binary
+"""Q1B / Q1B' runner — Z2-conditioning head-to-head between Z2_b (binary
 overnight indicator) and Z2_c (4-level categorical per P1 production
 binning) on the M3 (mix-2 Gaussian) residual law, with Q1A's settled
 Z_c (8-level hour_of_week) carried forward as Z1.
 
+Originally written for Q1B (head-to-head verdict against better_chi2
+cuts (228, 2284]); now also serves Q1B' (single-arm tightening variant
+at N_PARTICLES=400; verdict on cumulative_chi2_improvement_above_Z_c
+CI width). The computational pipeline is identical; the artifact-pinning
+strings below (phase_a hash + prereg-dir + thread hash) point at Q1B''s
+preregistration since 2026-05-29 commit (this commit) per the inline
+substitution; Check P + code-path audit ratified the substitution.
+
 Implements phase_a body_sha256
-``0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10``
+``7ed3eea35553b9c5cd3e03d0003603ed4d56337d151362d4a11c2d1955b75e78``
 in directory
-``notes/preregistrations/2026-05-27_q1b-z2-conditioning-second-axis/``.
+``notes/preregistrations/2026-05-29_q1b-prime-smc-tightening/``.
 Cuts inherited from the resolution-paths-thread skeleton (Q1B node);
 the integer values 228 and 2284 are the rounded forms of Q2A's
 gate-validated cuts (R-A2_cut = 228.44 / R-C2_cut = 2284.44).
@@ -894,9 +902,9 @@ def _render_body(
     L.append("=" * 78)
     L.append("")
     L.append("Pre-registration: notes/preregistrations/")
-    L.append("  2026-05-27_q1b-z2-conditioning-second-axis/phase_a.yaml")
+    L.append("  2026-05-29_q1b-prime-smc-tightening/phase_a.yaml")
     L.append(f"  phase_a body_sha256: "
-             f"0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10")
+             f"7ed3eea35553b9c5cd3e03d0003603ed4d56337d151362d4a11c2d1955b75e78")
     L.append("Cuts from thread skeleton (integer-rounded forms of Q2A cuts):")
     L.append(f"  R-A1B (corroboration):    better_chi2 <= {R_A1B_CUT}")
     L.append(f"  R-C1B (falsification):    better_chi2  > {R_C1B_CUT}")
@@ -1101,7 +1109,7 @@ def _render_result_yaml(
         "references": [{
             "file": "phase_a.yaml",
             "body_sha256":
-                "0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10",
+                "7ed3eea35553b9c5cd3e03d0003603ed4d56337d151362d4a11c2d1955b75e78",
         }],
         "artifact": {
             "primary_txt": str(artifact_txt_path),
@@ -1329,7 +1337,7 @@ def main(argv: list[str] | None = None) -> int:
         help="write the CLAIM-GRADE provenanced artifact via "
              "experiment.provenance.make_result (refuses a dirty tree) "
              "PLUS the registry result.yaml under notes/preregistrations/"
-             "2026-05-27_q1b-z2-conditioning-second-axis/"
+             "2026-05-29_q1b-prime-smc-tightening/"
     )
     args = p.parse_args(argv)
 
@@ -1641,7 +1649,7 @@ def main(argv: list[str] | None = None) -> int:
             "R_C1B_cut": R_C1B_CUT,
             "min_cell_size": MIN_CELL_SIZE,
             "phase_a_body_sha256":
-                "0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10",
+                "7ed3eea35553b9c5cd3e03d0003603ed4d56337d151362d4a11c2d1955b75e78",
         },
     }
     with out_pkl.open("wb") as f:
@@ -1690,9 +1698,9 @@ def main(argv: list[str] | None = None) -> int:
                 "anchor_h": anchor_h,
                 "embedding_dims": dict(dims),
                 "phase_a_body_sha256":
-                    "0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10",
+                    "7ed3eea35553b9c5cd3e03d0003603ed4d56337d151362d4a11c2d1955b75e78",
                 "thread_body_sha256":
-                    "173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9",
+                    "5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9",
                 "q2a_settled_chi2": Q2A_M3_CHI2_SETTLED,
                 "q1a_settled_zc_chi2": Q1A_M3_Z_c_CHI2_SETTLED,
                 "q1b_repro_no_z_chi2": float(repro_chi2_no_z),
@@ -1749,7 +1757,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         out_yaml = (
             PROJECT_ROOT / "notes" / "preregistrations"
-            / "2026-05-27_q1b-z2-conditioning-second-axis"
+            / "2026-05-29_q1b-prime-smc-tightening"
             / "result.yaml"
         )
         with out_yaml.open("w") as f:
