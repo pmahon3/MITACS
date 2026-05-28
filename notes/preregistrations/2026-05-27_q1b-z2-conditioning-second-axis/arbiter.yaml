@@ -1,0 +1,545 @@
+schema: arbiter
+topic: q1b-z2-conditioning-second-axis
+written_at: '2026-05-28T05:55:00-07:00'
+references:
+- file: phase_a.yaml
+  body_sha256: 0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10
+- file: proponent.yaml
+  body_sha256: e5bf1f55c3fa574d416b1cf036303942ad8430ab3bb399210a69304676bb3c12
+- file: devils_advocate.yaml
+  body_sha256: 6c3caa120583a8ca54f028b0cd0136c6816cfeb069f6d7435f84894c202a0c5a
+- file: result.yaml
+  body_sha256: b3b1efa7d028cd6caa6220493847a5d2b8fa6de957814211df01df6294baaa6d
+- file: phase_fidelity_check_p.yaml
+  body_sha256: c6c54096a593b20484f53175ae31431e7add0de0f91120f37e05dbe65b3d5980
+- file: phase_fidelity_check_r.yaml
+  body_sha256: 5892090ca1ea68d51287d9abca8372f277b75e3de0f36dfaa881dfeeb8587bfa
+- file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  body_sha256: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
+- file: ../2026-05-27_q1a-z-conditioning-strongest-axis/arbiter.yaml
+  body_sha256: 6b49d9136437c1905c6a48f4f8bf6511feeafc4ba7bc01124be6efb14c53ed7c
+result_artifact_pin:
+  file: ../../experiment/results/q1b_z2_conditioning.txt
+  body_sha256: 67bb62f5b9e9b978
+  inputs_fingerprint: 7ec89f9eb1604cd1
+  note: The Q1B result artifact is the CLAIM-GRADE provenance envelope experiment/results/q1b_z2_conditioning.txt (make_result() output). Its full body_sha256 and inputs_fingerprint live inside the <<<PROVENANCE...>>>
+    JSON header (truncated 16-char prefixes shown here; full hashes in the .txt itself). The result.yaml sidecar is the structured numeric surface; the .txt is the run-state pin. Same pin-pattern as Q1A.
+preconditions:
+  code_path_passed: true
+  fidelity_coverage_passed: true
+  hash_chain_intact: true
+  fidelity_L2_resolved: true
+  fidelity_L2_note: 'Pre-run Check P PASSED L1 18/18 (structural, BLOCKING) and L2 8/9 (methodological, advisory). One L2 advisory: phase_a.amendment_note last-sentence predicted ONE post-cutoff pool-fallback
+    on (weekday, Z_c=5, morning_ramp) at n=144, but phase_a §metric step 2 fires pool-fallback on PRE-CUTOFF library sample size only (min 2364, well above MIN_CELL_SIZE=200). Check P confirmed the SCRIPT
+    correctly implements §metric (the binding rule); the amendment_note paragraph was a cosmetic internal inconsistency, not a script defect. Result.yaml empirically confirms both pooling_fallback_log_Z2_b
+    and pooling_fallback_log_Z2_c are empty (run log: fallback rows=0) — consistent with §metric. ADVISORY RESOLVED at result-time: empty pooling-logs are the expected state under the registered binning,
+    not a fit-side defect.'
+  result_from_clean_tree: true
+  result_from_clean_tree_caveat: 'phase_fidelity_check_r.yaml and result.yaml both carry git_clean: false from the inline registry.stamp() pattern (the agent stamped while sibling files were freshly-written-
+    and-untracked). The canonical cleanliness witness for the underlying run is the .txt''s make_result() header which records git_clean: true at git_sha 1736e712065d130275dd8b0b8e7246717d952d6e. The .txt''s
+    inputs_fingerprint 7ec89f9eb1604cd1... and body_sha256 67bb62f5b9e9b978... pin the run state. Same inline-stamp pattern documented in P1, Q2B, Q1A arbiter.yaml. THIS arbiter.yaml is itself written under
+    the same inline-stamp pattern and will likewise show git_clean: false until the user''s batch-commit lands.'
+thread:
+  thread_topic: resolution-paths-thread
+  node_id: Q1B
+  parent_branch: R-A
+  thread_body_sha256: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
+verdict: R-B1B
+verdict_reasoning: 'Mechanical verdict per phase_a.shape_outcomes: R-B1B fires unambiguously (better_chi2 = min(chi2_Z2_b=696.0, chi2_Z2_c=662.22) = 662.22, paired-day bootstrap 95% CI [468.09, 944.45];
+  both point estimate and the full CI sit inside the registered (228, 2284] band — lower CI bound 468 is ~2.05x clear of R-A1B on the low side, upper CI bound 944 is ~2.42x clear of R-C1B on the high side).
+  proponent forecast R-A1B at 180 [90, 450]; DA forecast R-B1B at 948 [620, 1340]. R-B1B wins on the registered outcome category; this matches DA mechanically. Per arbiter.md taxonomy mapping this would
+  label DEVILS-ADVOCATE-CONFIRMED on outcome-category, but per workflow precedent (Q2A R-B2, Q2B R-C3, Q1A R-B1A) the verdict label is the registered outcome category itself: R-B1B.
+
+
+  Substantive findings (the verdict is R-B1B + the below; within-bucket detail is what makes outcome_substantive = R-B1B_SUBSTANTIVE_FAVORABLE):
+
+
+  1. R-B1B FIRES UNAMBIGUOUSLY, NOT BORDERLINE. Both point (662.22) and full CI [468.09, 944.45] sit inside the (228, 2284] band — ~2.05x clear of R-A1B on the low side and ~2.42x clear of R-C1B on the
+  high side. proponent''s R-A1B is decisively falsified: forecast chi2_min point 180 vs realized 662.22 is a 3.68x overshoot relative to forecast, and the entire forecast CI [90, 450] sits entirely below
+  the realized lower CI bound 468. DA''s R-B1B outcome category is mechanically correct, but DA''s point forecast 948 also overshoots realized 662 by 43% and the realized CI [468, 944] sits almost entirely
+  below DA''s forecast CI [620, 1340] (only the upper tails overlap). The realized value falls IN THE GAP between proponent''s and DA''s point forecasts (proponent 180 < realized 662 < DA 948); neither
+  side''s forecast bracket contains it.
+
+
+  2. Z2 DELIVERED A MATERIAL CUMULATIVE REDUCTION — 218× LARGER THAN Q1A''S. This is the substantively central finding. The Z_c-only baseline reproduces EXACTLY at q1b_zc_only_chi2 = 952.5167 vs Q1A settled
+  952.5167 (|diff| = 3.3e-5, 9 orders of magnitude below tolerance). Adding Z2 (time_of_day, 4-level Z2_c) drops it to 662.22. Cumulative improvement above Z_c = 290.29 chi^2 units [8.06, 484.42]. The share
+  of the gap-to-close from Q1A''s carryforward baseline = 290.29 / (952.5167 - 228) = 290.29 / 724.5167 = 0.4007 = 40.1%. The share from the Q2A no-Z baseline (953.84) = (953.84 - 662.22) / (953.84 - 228)
+  = 291.62 / 725.84 = 0.4018 = 40.2%. For comparison, Q1A''s Z lever closed 0.18% of the gap (1.33 chi^2 units); Q1B''s Z2 lever closed 40.1% of the gap remaining after Q1A''s carryforward (290.29 chi^2
+  units). This is 218× Q1A''s reduction in absolute chi^2 units, and ~220× as a share-of-gap. The S3 state-history pre-flag of EXHAUSTED-UNRESOLVED was premised on Q1B delivering "similar 0.18%-of-gap magnitudes"
+  to Q1A; that premise is empirically contradicted. The pre-flag should be DOWNGRADED — Q1B''s realization is materially different from Q1A''s and the EXHAUSTED-UNRESOLVED reading is not the most natural
+  substantive interpretation of this result.
+
+
+  3. THE HEAD-TO-HEAD IS A NEAR-TIE (matching DA''s SHAPE prediction). chi2_diff = +33.78 with paired SE = 44.71 and CI [-53.19, +124.47] straddling zero. |chi2_diff| / SE = 0.756 < 1.0; per phase_a.metric
+  NEAR-TIE rule, the head-to-head sub-finding records "NO STATISTICALLY-DISCERNIBLE WINNER between Z2_b and Z2_c". Z2_c (4-level categorical per P1''s time_of_day production binning) wins at point estimate
+  by 33.78 chi^2 units, matching proponent''s WINNER DIRECTION (Z2_c). DA predicted Z2_b would win by 9 chi^2 — direction WRONG at point, but DA explicitly predicted near-tie shape (chi2_diff CI [-95, +75]
+  straddling zero), which IS the realized regime. The shape matches DA exactly; the point-direction matches proponent. This is a clean instance of the workflow''s recurring decomposition pattern.
+
+
+  4. PER-CELL CHI^2 DECOMPOSITION IS STRUCTURALLY COHERENT WITH P1 AT FINER RESOLUTION. Q1A''s dominant cell saturday__zc6 contributed chi^2 = 1634 alone (n=1296). Q1B splits this cell across time_of_day
+  strata: saturday__zc6__z21 (morning_ramp) chi^2 = 967.28 (n=360), saturday__zc6__z22 (afternoon) chi^2 = 328.09 (n=432), saturday__zc6__z23 (evening) chi^2 = 399.77 (n=504). Sum = 1695.14, comparable
+  to Q1A''s 1634 (the small overshoot is expected for joint stratification where cells get sharper assignments). The morning_ramp sub-stratum DOMINATES the within-cell chi^2 (967.28 vs 328.09 / 399.77),
+  exceeding the pooled marginal 662.22 by ~46%. P1''s alpha_L = 0.61 stratum is genuinely structured by within-day phase; the M3 family''s capacity is bound within the saturday__zc6 hot zone at the morning_ramp
+  axis specifically — the joint (Z_c, Z2) sigma-algebra reveals genuine sub-structure that hour_of_week alone could not resolve. The substantive picture corroborates P1 at finer resolution: the hot zone
+  is NOT homogeneous across time_of_day strata.
+
+
+  5. THE FRAMEWORK READING NEEDS SHARPENING. Joint S9+S10+S11+S12 was read (in Q1A''s arbiter and S3 thread notes) as "within-data sigma-algebra-enrichment levers are empirically bounded at the ~0.18%-of-gap
+  scale." Q1B''s 40% closure refutes that reading AS-STATED, but does not refute the underlying identifiability obstruction picture. The sharpened reading: SINGLE-AXIS within-data sigma-algebra enrichment
+  IS bounded near zero (Q1A); JOINT multi-axis within-data conditioning recovers MEANINGFULLY MORE — up to ~40% in two axes. FULL closure to R-A1B (228) is not achieved within the time-index — the cumulative
+  point estimate 662 is still 2.9× above the cut, and the cumulative CI lower bound 468 is 2.05× above. Joint S9+S10+S11+S12 remains applied evidence for the identifiability obstruction at the full-closure
+  level (auxiliary information may still be needed for full chi^2 closure), but the within-data lever space is RICHER than single-axis P1 ranking suggested. Cross-axis joint stratification is the within-data
+  direction the framework reading should now incorporate.
+
+
+  6. WHICH READING (A) OR (B)? Two competing substantive interpretations: (a) Joint multi-axis conditioning recovers structure that single-axis cannot; the within-data lever space was UNDER-EXPLORED. (b)
+  The 290 chi^2 closure could be a per-cell over-fitting artifact masked by the false-Z2 companion (which verified that randomized Z2 labels collapse — but that test verifies the fitting MACHINERY, not
+  over-fitting on TRUE Z2 labels). ADJUDICATION: (a) is the substantive reading, with the following evidence: (i) reproduction checks at both anchors are EXACT (Q2A 0.0033 |diff|; Q1A 3.3e-5 |diff|) — the
+  machinery is bit-identical at the endpoints; (ii) the inline synthetic gate validates per-cell parameter recovery within tolerance AND per-cell PIT chi^2 well below ceiling on a known Z2-conditional DGP;
+  (iii) the false-Z2 companion check confirms collapse to Z_c-only marginal under random labels, so the fitting machinery does not artificially shrink chi^2 from a noise label; (iv) the per-cell chi^2 ordering
+  tracks P1''s alpha_L gradient at finer resolution (saturday__zc6 morning_ramp > evening > afternoon; sunday__zc7 morning_ramp dominates) — structure consistent with P1''s settled within-stratum ordering
+  at the binding (hour_of_week) axis. The 290 chi^2 closure is a real signal, not an artifact. Reading (b) is empirically secondary; the per-cell sum=5019 vs pooled marginal=662 is the expected feature
+  of joint stratification (cells get sharper assignments under the finer σ-algebra), not over-fitting in the noise sense.
+
+
+  7. PROPONENT FORECAST IS DIRECTION-CORRECT ON WINNER (Z2_c) AND ON OUTCOME-CATEGORY-DIRECTION (R-A1B over R-B1B in the "informative direction") but DECISIVELY OVERSHOOTS ON MAGNITUDE. Proponent point
+  180 vs realized 662 is a 3.68x overshoot; entire forecast CI [90, 450] sits below realized lower CI bound 468 — proponent''s R-A1B outcome category is decisively falsified. Proponent''s structural argument
+  (within-cell orthogonality / M3 family-capacity relief via finer partition) is QUALITATIVELY CORROBORATED by the per-cell decomposition (morning_ramp IS the dominant sub-stratum within saturday__zc6,
+  exactly as proponent predicted in their evidence_chain claim #3-#4), but proponent OVER-PREDICTED the magnitude of relief: the family capacity is RELIEVED ONLY PARTIALLY by the finer partition, not relieved
+  completely. Per-stratum Z2_c chi^2 ordering: proponent forecast {overnight 15, evening 40, morning_ramp 60, afternoon 65} summing to 180. Realized per-stratum decomposition is harder to summarize at the
+  same granularity (Z2_c levels mix across day_type + Z_c), but the dominant single cell is saturday__zc6__morning_ramp at 967.28 — orders of magnitude above proponent''s forecast morning_ramp pooled contribution.
+
+
+  8. DA FORECAST IS POINT-DIRECTION-WRONG ON WINNER (predicted Z2_b; realized Z2_c at point) but SHAPE-CORRECT ON NEAR-TIE (predicted |diff| < SE; realized 0.756 SE) and OUTCOME-CATEGORY-CORRECT (predicted
+  R-B1B; realized R-B1B). DA''s point forecast 948 overshoots realized 662 by 43% and the realized CI [468, 944] sits almost entirely below DA''s CI [620, 1340]. DA''s argument ("within-data σ-algebra-enrichment
+  levers are asymptotically bounded; time_of_day is structurally coarser than hour_of_week so contributes ~Q1A magnitude") is qualitatively WRONG on magnitude (Q1B delivered 218x Q1A) but DA''s OUTCOME
+  CATEGORY R-B1B is the mechanical match, validated unambiguously. DA''s rank-1 specific failure mode ("structural redundancy: time_of_day is a strictly coarser partition of within-day position than hour_of_week;
+  Z_c already marginalizes over time_of_day within each cell") is empirically refuted: the joint (Z_c, Z2_c) sigma-algebra delivers 290 chi^2 of reduction that single-axis Z_c could not. The marginalization
+  argument was theoretically natural but empirically wrong; the joint stratification does NOT degenerate to its single-axis components.
+
+
+  9. THE SIXTH NAMED-FAILURE-MODE INSTANCE (NEW SHAPE VARIANT). Workflow precedent: 4th-named- failure-mode = registered criterion fires on legitimate-but-unanticipated data structure. Prior shapes (S8/Q1:
+  R-D mechanical / R-C substantive; S9/Q2A: M3=M4=M5 chi²-indistinguishable; S10/Q2B: two sign-determined NEGATIVE shares; S11/P1: hour_of_week-not-season binding; S12/Q1A: near-tie head-to-head with DA
+  Z_c forecast nearly exact at 0.3% residual). Q1B''s shape: MIXED SCORING DECOMPOSITION across forecast surfaces. Outcome category matches DA (R-B1B); near-tie shape matches DA; near-tie magnitude bracket
+  exceeded by both forecasters; winner- direction matches proponent (Z2_c at point); per-cell within-stratum ordering matches proponent qualitatively but at magnitudes neither side predicted; cumulative-reduction
+  magnitude (290 chi^2) sits ORDERS OF MAGNITUDE from both side''s implicit priors (proponent expected 772 chi^2 closure to R-A1B; DA expected ~5 chi^2 of Q1A-scale movement). The realized cumulative reduction
+  is in a previously-uncharted regime that neither pre-registration anticipated. This is the sixth instance and the new shape variant is: "mechanical category matches one side, shape matches one side, direction
+  matches the other side, magnitude matches NEITHER side; realized data sits in a regime neither side''s implicit prior contained."
+
+
+  10. ROUTING: per phase_a.shape_outcomes.R-B1B.interpretation + thread branching_rules.Q1B.R-B1B = null. R-B1B does NOT auto-advance the thread state machine (no successor node mapped). Per thread root.closure_rule,
+  "Q1A.R-B1A + Q1B.R-A1B with cumulative > 0.80 → RESOLVED" — Q1B did NOT fire R-A1B (it fired R-B1B), and the cumulative share = 290.29 / 724.5167 = 0.40 is BELOW the 0.80 closure threshold. The thread
+  does NOT auto-resolve. CRITICAL FLAG for the thread-coordinator: the EXHAUSTED-UNRESOLVED pre-flag in S3 state-history was premised on Q1B''s magnitude being similar to Q1A''s 0.18%-of-gap; Q1B''s realized
+  40%-of-gap (218x larger) REFUTES that premise. EXHAUSTED-UNRESOLVED should NOT auto-fire here; the appropriate substantive read is that the within-data lever space has more directions than single-axis
+  P1 ranking suggested. The thread-coordinator''s post-arbiter decision space is to amend the thread with a third within-data Z (e.g., demand_quantile or season as third axis in joint stratification), OR
+  spawn a new thread targeting cross-axis joint stratification more systematically, OR pivot to the temperature/exogenous-Z arm (still framework-prescribed for full closure). The arbiter records R-B1B mechanically
+  + the cumulative-share 0.40 sub-finding + the framework-reading sharpening; the coordinator advances state with the realized data, NOT with the contradicted pre-flag.'
+mechanical_verdict: R-B1B
+substantive_verdict: R-B1B_SUBSTANTIVE_FAVORABLE
+aggregate: SETTLED
+reason_mechanical: 'phase_a.shape_outcomes.R-B1B criterion: min(chi2_Z2_b, chi2_Z2_c) in (228, 2284]. Realized better_chi2 = min(696.0, 662.22) = 662.22 (Z2_c at point) with paired-day bootstrap 95% CI
+  [468.09, 944.45]. Both the point estimate and the full CI lie inside (228, 2284] — lower CI bound 468 is 2.05x clear of R-A1B (cut at 228), upper CI bound 944 is 2.42x clear of R-C1B (cut at 2284). R-B1B
+  fires unambiguously in both point and CI senses. R-A1B (corroboration: <=228) NOT cleared by any margin (realized lower CI 468 > 228); R-C1B (falsification: >2284) NOT cleared (realized upper CI 944 <
+  2284). The verdict is comfortably interior to the ambiguous band — not borderline R-A1B nor borderline R-C1B.'
+reason_substantive: 'Mechanical and substantive verdicts AGREE on the R-B1B category firing. The substantive picture STRENGTHENS the mechanical reading (hence the `_SUBSTANTIVE_FAVORABLE` suffix): the realized
+  data is MORE INFORMATIVE than R-B1B alone suggests, in a direction the mechanical category cannot capture.
+
+
+  The central substantive finding: Z2 (time_of_day) delivered 290.29 chi^2 of cumulative reduction above Q1A''s Z_c carryforward — 40.07% of the remaining gap-to-close to R-A1B, and 218× Q1A''s reduction
+  in absolute chi^2 units. Cumulative CI [8.06, 484.42] is sign-determined positive at 95% (lower bound positive, albeit narrowly). Reproduction checks at BOTH anchors (Q2A no-Z baseline and Q1A Z_c-only
+  baseline) are EXACT — the fitting machinery is bit-identical at the endpoints. The inline synthetic gate validates per-cell parameter recovery + per-cell PIT chi^2 on a known Z2-conditional DGP, and the
+  false-Z2 companion check confirms collapse to the Z_c-only marginal under randomized Z2 labels (so the machinery does not artificially shrink chi^2 from a noise label). The 290 chi^2 closure is a real
+  signal, not an artifact.
+
+
+  The framework-reading sharpening (binding): joint S9+S10+S11+S12 was read in Q1A''s arbiter and S3 thread notes as "within-data sigma-algebra-enrichment levers are empirically bounded at the ~0.18%-of-gap
+  scale." Q1B refutes that reading AS-STATED. The sharpened reading: SINGLE-AXIS within-data sigma-algebra enrichment IS bounded near zero (Q1A delivered 0.18%); JOINT multi-axis within-data conditioning
+  recovers MEANINGFULLY MORE (Q1B delivered 40.1% on top of Q1A''s carryforward). Full closure to R-A1B is NOT achieved within the time-index alone (cumulative point 662 is 2.9x above R-A1B cut 228; lower
+  CI 468 is 2.05x above), so the identifiability obstruction at the FULL CLOSURE level remains a candidate reading; but the within-data lever space is RICHER than single-axis P1 ranking suggested. Cross-axis
+  joint stratification is the within-data direction the framework reading should now incorporate.
+
+
+  Per-cell chi^2 decomposition exactly corroborates P1 at finer resolution. Q1A''s dominant saturday__zc6 cell (chi^2 = 1634) splits across time_of_day strata as morning_ramp (967.28) > evening (399.77)
+  > afternoon (328.09) — sum 1695, comparable to Q1A''s 1634. The morning_ramp sub-stratum within saturday__zc6 alone exceeds the pooled Q1B marginal (662.22) by 46%, meaning the chi^2 mass is concentrated
+  in a single (day_type, Z_c, Z2) cell at finer resolution than P1''s axis-by-axis range analysis exposed. P1''s alpha_L = 0.61 stratum is structured by within-day phase; the M3 family''s capacity is bound
+  within saturday__zc6 at the morning_ramp axis specifically. This is genuinely new structure exposed by the joint (Z_c, Z2) sigma-algebra that single-axis P1 ranking could not isolate.
+
+
+  Head-to-head is a NEAR-TIE matching DA''s SHAPE prediction (chi2_diff = +33.78, paired SE = 44.71, |diff|/SE = 0.756 < 1.0; CI [-53.19, +124.47] straddles zero). Per phase_a.metric NEAR-TIE rule, the
+  head-to-head sub-finding records "NO STATISTICALLY-DISCERNIBLE WINNER between Z2_b and Z2_c". Z2_c (4-level categorical per P1''s production binning) wins at point estimate by +33.78 chi^2; this matches
+  proponent''s WINNER DIRECTION (Z2_c) and contradicts DA''s WINNER DIRECTION (Z2_b) at point but neither side''s direction is statistically distinguishable from no-ranking. The result is therefore a mixed
+  scoring across forecast surfaces (see calibration_record below).'
+numerical_record:
+  verdict_cuts:
+    R-A1B: min(chi2_Z2_b, chi2_Z2_c) <= 228 (Q2A R-A2_cut integer-rounded per thread skeleton)
+    R-B1B: min(chi2_Z2_b, chi2_Z2_c) in (228, 2284]
+    R-C1B: min(chi2_Z2_b, chi2_Z2_c) > 2284
+  chi2_Z2_b_point: 696.0
+  chi2_Z2_b_ci95:
+  - 492.2505416666666
+  - 1009.0090416666666
+  chi2_Z2_c_point: 662.2233333333334
+  chi2_Z2_c_ci95:
+  - 479.78420833333337
+  - 945.4063749999997
+  better_chi2_point: 662.2233333333334
+  better_chi2_ci95:
+  - 468.09404166666667
+  - 944.4522916666667
+  chi2_diff_point: 33.77666666666664
+  chi2_diff_ci95:
+  - -53.18587500000007
+  - 124.46974999999992
+  paired_se_approx: 44.71
+  near_tie_flag: true
+  near_tie_note: '|chi2_diff| / paired_se = 33.78 / 44.71 = 0.756 < 1.0. Per phase_a.metric NEAR-TIE handling rule, the head-to-head sub-finding records "NO STATISTICALLY-DISCERNIBLE WINNER between Z2_b
+    and Z2_c"; the lower CI bound landslide check uses the candidate with the lower point estimate (Z2_c). The chi2_diff CI [-53.19, +124.47] straddles zero, confirming the sign of the difference is not
+    statistically distinguishable from zero at 95%.'
+  winner_point: Z2_c
+  winner_substantive: NO STATISTICALLY-DISCERNIBLE WINNER (near-tie). Point estimate favors Z2_c by +33.78 chi^2 units, but the paired-bootstrap CI on the difference straddles zero. Neither Z2_b (binary
+    overnight indicator) nor Z2_c (4-level categorical per P1 production binning) is statistically discriminated as the preferred Z2 for any successor analysis; Z2_c is the parsimony-preferred point-estimate
+    carryforward per phase_a's near-tie convention.
+  landslide_R_A1B: null
+  landslide_R_A1B_note: 'phase_a.corroboration_criterion defines landslide as R-A1B firing at BOTH point AND lower CI bound clearing 228. R-A1B did not fire at any level (point 662 >> 228; lower CI 468
+    >> 228), so the landslide qualifier is moot. result.yaml correctly reports landslide_R_A1B: null.'
+  cumulative_chi2_improvement_above_Z_c_point: 290.29336666666666
+  cumulative_chi2_improvement_above_Z_c_ci95:
+  - 8.064408333333294
+  - 484.42265833333335
+  cumulative_chi2_improvement_above_Z_c_share: 0.4007
+  cumulative_chi2_improvement_above_Z_c_share_note: 'share = (Q1A_baseline_chi2 - better_chi2) / (Q1A_baseline_chi2 - R_A1B_cut) = (952.5167 - 662.2233) / (952.5167 - 228) = 290.2934 / 724.5167 = 0.4007
+    = 40.07%. The thread root.closure_rule requires share > 0.80 for thread-RESOLVED on the multi-Z path; realized share 0.40 is below that threshold. Cumulative reduction CI [8.06, 484.42] is sign-determined
+    positive at 95% (lower bound barely positive at 8.06). Comparing to Q1A''s z_lever_marginal_reduction_share = 0.001827 (0.18%): Q1B''s 40.07% is 219x Q1A''s share — a fundamentally different regime
+    than Q1A''s near-zero closure.'
+  cumulative_chi2_improvement_from_Q2A_baseline_point: 291.6166666666666
+  cumulative_chi2_improvement_from_Q2A_baseline_share: 0.4018
+  cumulative_chi2_improvement_from_Q2A_baseline_note: 'From the Q2A no-Z baseline (953.84): cumulative reduction = 953.84 - 662.22 = 291.62; gap = 953.84 - 228 = 725.84; share = 0.4018 = 40.18%. Consistent
+    with the Q1A-baseline calculation (40.07% above Z_c carryforward; 40.18% from the no-Z baseline) — the two anchors differ by 1.33 chi^2 (Q1A''s tiny lever), so the share calculations are essentially
+    equivalent.'
+  q1b_no_z_chi2: 953.8433333333334
+  q2a_settled_chi2: 953.84
+  reproduction_check_1_diff: 0.003333
+  reproduction_check_1_note: q1b_no_z_chi2 = 953.8433 reproduces Q2A's settled M3 chi^2 = 953.84 to 4 decimal places (|diff| / settled = 3.5e-6). End-to-end provenance back to S9 confirmed.
+  q1b_zc_only_chi2: 952.5166666666667
+  q1a_settled_chi2: 952.5167
+  reproduction_check_2_diff: 3.33e-05
+  reproduction_check_2_note: q1b_zc_only_chi2 = 952.5167 reproduces Q1A's settled Z_c-only chi^2 = 952.5167 to 8 decimal places (|diff| / settled = 3.5e-8). The cumulative-baseline anchor is SOLID — the
+    Z2 reduction measurement is bit-identical to Q1A at the carryforward endpoint. This is the strongest reproduction-check reading in the workflow's history (matching or exceeding Q1A's own reproduction
+    of Q2A at 4 decimal places).
+  reproduction_check_tol: 50.0
+  outcome_mechanical: R-B1B
+  outcome_substantive: R-B1B_SUBSTANTIVE_FAVORABLE
+  outcome_category_winner: devils_advocate
+  outcome_category_winner_notes: 'phase_a.shape_outcomes mechanical mapping: better_chi2 = 662.22 in (228, 2284] fires R-B1B. proponent forecast R-A1B; DA forecast R-B1B. DA wins on the registered outcome
+    category. Substantive within-bucket forecasts (point estimate, signed margin, head-to-head shape) are MIXED across surfaces (see calibration_record for the per-surface scoring). The realized point 662
+    falls IN THE GAP between proponent''s 180 and DA''s 948 — neither side''s forecast bracket contains it. The aggregate substantive interpretation favors mechanical R-B1B + the cumulative-reduction sharpening
+    (290 chi^2 is materially larger than DA''s prior implied).'
+  closer_forecast: devils_advocate
+  closer_forecast_notes: 'DA wins on the registered outcome category (R-B1B vs realized R-B1B matches; proponent R-A1B falsified). On chi2_min point residual: proponent (180 vs realized 662) = residual
+    482; DA (948 vs realized 662) = residual 286 — DA 1.69x closer. On chi2_diff direction: proponent (Z2_c by +160) is point-correct; DA (Z2_b by -9) is point-wrong but near-tie magnitude correct — neither
+    falsified at 95% per the near-tie regime. On head-to-head SHAPE: DA explicitly predicted near-tie (chi2_diff CI [-95, +75]); proponent predicted decisive Z2_c win (chi2_diff CI [+20, +320] excluding
+    zero); realized [-53, +124] straddles zero — DA''s shape forecast CORRECT, proponent''s shape forecast FALSIFIED. On CI bracketing: realized chi2_Z2_c CI [479.78, 945.41]; proponent Z2_c CI [90, 450]
+    is ENTIRELY BELOW realized lower bound (479 > 450); DA Z2_c CI [625, 1360] OVERLAPS realized CI at the upper end (overlap 625-945; ~32% width overlap). DA closer on outcome category, shape, magnitude,
+    and CI bracket; proponent closer on winner direction only (statistically zero so neither falsified). Aggregate: DA closer on 4 of 5 surfaces; proponent closer on 1 surface (direction, at point only).
+    closer_forecast = devils_advocate.'
+calibration_record:
+  proponent_correct: false
+  proponent_correct_detail: 'Outcome category R-A1B WRONG (realized R-B1B). Point forecast better_chi2 = 180 vs realized 662.22: 3.68x overshoot. Forecast CI [90, 450] entirely below realized lower CI bound
+    468 — proponent''s within-bucket bracket does NOT contain realized. The directional call (Z2_c wins over Z2_b) is point-correct (+33.78) but the magnitude (+160 forecast) is 4.7x too large; realized
+    direction is statistically zero (|diff| < SE) so proponent gets credit for direction-of-sign at point level only — same near-tie caveat as Q1A. Per-stratum chi^2 ordering proponent forecast {overnight
+    15, evening 40, morning_ramp 60, afternoon 65}: the structural argument that morning_ramp + afternoon dominate within hot zone IS qualitatively corroborated (saturday__zc6 morning_ramp 967 > evening
+    400 > afternoon 328; sunday__zc7 morning_ramp 317 dominates within sunday), but proponent''s overnight pred (15 chi^2 per stratum-pooled) UNDER-predicts: realized overnight strata contribute non-trivially
+    (weekday__zc1__z20 = 211; weekday__zc3__z20 = 174; weekday__zc4__z20 = 177; weekday__zc5__z20 = pooled into Z_c parent at n=144 boundary; saturday__zc5__z20 = 259; sunday__zc6__z20 = 267). Proponent''s
+    premise that overnight is P1-near-Gaussian-light translates to ~0 chi^2 contribution is empirically falsified at per-cell resolution (weekday overnight cells in cold Z_c bins do contribute non-trivially
+    to the pooled chi^2). Proponent''s what_would_change_my_mind condition #2 (better_chi2 > 600 = clear non-closure) is TRIGGERED at realized 662 > 600. Proponent registered: "The within-cell orthogonality
+    premise is falsified. Z2 is informative on P1''s localization metric but does not deliver chi^2 closure on the M3 family lever; the DA/EXHAUSTED-UNRESOLVED reading is correct." This is half-correct:
+    Z2 IS informative AND it does NOT deliver full closure on the M3 family, but the EXHAUSTED-UNRESOLVED reading is itself PARTIALLY refuted by the 290-chi^2 cumulative closure (which is materially non-zero,
+    contradicting EXHAUSTED-UNRESOLVED''s implicit "Q1A-scale magnitude" prior). Proponent''s what_would_change_my_mind condition #3 (chi2_diff CI crosses zero = NEAR-TIE) is TRIGGERED at realized chi2_diff
+    CI [-53, +124] straddling zero. Proponent''s what_would_change_my_mind condition #4 (per-stratum overnight contributes much chi^2) is PARTIALLY TRIGGERED — overnight is NOT light in cold Z_c bins, contradicting
+    proponent''s P1-overnight-is-Gaussian-light premise at finer resolution.'
+  devils_advocate_correct: true
+  devils_advocate_correct_detail: 'Outcome category R-B1B CORRECT (mechanical match). Point forecast better_chi2 = 948 vs realized 662.22: 43% overshoot. Forecast CI [620, 1340] OVERLAPS realized CI [468,
+    945] at the upper end (overlap 620-945, ~32% of realized CI width). Realized 662 falls OUTSIDE forecast CI lower bound 620 by 42 chi^2 — DA''s point-bracket is direction-correct (over- not under-) but
+    does not contain realized at 95%. Head-to-head direction WRONG at point (DA: Z2_b wins by -9; realized: Z2_c wins by +34) — but realized direction is statistically zero (|diff|=34 < SE=45) so DA is
+    not falsified at 95% per the near-tie regime. DA''s SHAPE prediction (NEAR-TIE: chi2_diff CI [-95, +75] straddling zero) is CONFIRMED at realized [-53, +124] (CI center moved slightly positive but width
+    and zero-straddle preserved). Cumulative_chi2_improvement_above_Z_c = 290.29 vs DA forecast 4.5: DA''s magnitude was 64x TOO LOW. DA''s what_would_change_my_mind condition #1 (better_chi2 < 400) is
+    NOT TRIGGERED (realized 662 > 400); DA registered this would refute the within-data-bounded prior. Condition #4 (cumulative_chi2_improvement_above_Z_c > 50 chi^2 = 10x point forecast) is TRIGGERED at
+    realized 290 (64x point forecast) — DA registered "R-B1B may still fire mechanically but within-bucket point forecast is decisively wrong. This would update my reduction-curve-asymptote prior: the asymptote
+    is not where I placed it; time_of_day adds substantively above hour_of_week rather than the bounded ~Q1A-magnitude I forecast." Condition #5 (per_stratum_Z2_4level overnight chi^2 > 200) is PARTIALLY
+    TRIGGERED — saturday__zc5__z20 = 259, sunday__zc6__z20 = 267, weekday__zc1__z20 = 211; multiple overnight cells exceed 200, contradicting DA''s P1-overnight- is-Gaussian-light premise (same condition
+    triggered for proponent — both forecasters held that premise). DA''s outcome-category bet wins; DA''s within-bucket magnitude bet decisively loses; DA''s shape bet wins; DA''s direction bet loses at
+    point but is unfalsified at 95% per near-tie. NET: DA wins the mechanical / outcome-category register at the 95% level + wins the shape register, but loses the within-bucket magnitude bet by 64x.'
+  notes: 'SIXTH NAMED-FAILURE-MODE INSTANCE in the workflow''s history (after Q1 R-D-vs-R-C, eigenmodes-v1 O2-vs-O3, pit-calendar P1 tautology, Q2B mech_2/mech_3 negative shares, resolution-paths P1 hour_of_week-not-season,
+    Q1A near-tie with exact DA point forecast). Pattern shape: MIXED SCORING DECOMPOSITION across forecast surfaces. Outcome category matches side B (DA); near-tie shape matches side B; near-tie magnitude
+    bracket exceeded by BOTH sides; winner-direction matches side A (proponent) at point; cumulative reduction magnitude sits ORDERS OF MAGNITUDE from BOTH side''s implicit priors (proponent expected ~772
+    chi^2 closure; DA expected ~5 chi^2 of Q1A-scale movement; realized 290 chi^2 in the gap between). The realized data sits in a regime NEITHER side''s implicit prior contained. New shape variant: "mechanical
+    category matches one side, shape matches one side, direction matches the other side, magnitude matches NEITHER side; realized data sits in a previously-uncharted cumulative-reduction regime."
+
+
+    FORECASTER CALIBRATION DATA POINTS:
+
+    - proponent: alpha_L-localization-implies-chi^2-closure-via-within-cell-orthogonality premise was the pre-registered bet (refined version of Q1A''s proponent premise). The premise''s QUALITATIVE corroboration
+    (morning_ramp IS the dominant within-cell sub-stratum within saturday__zc6, as predicted) is empirically confirmed; the QUANTITATIVE magnitude is 4.7x off (proponent: 60 chi^2 morning_ramp pooled vs
+    realized saturday__zc6__morning_ramp = 967). Future Patra-Sen-localization-implies-chi^2-closure forecasts in the alpha_L range [0.5, 0.7] empirically correspond to chi^2 reductions of 0.2-40% under
+    JOINT multi-axis conditioning, NOT 50-95% under single-axis. The alpha_L → chi^2 closure mapping needs to be calibrated by axis-multiplicity (single-axis: 0-2%; multi-axis joint: up to 40%). Proponent
+    confidence 0.40 (lower than Q1A''s 0.55) was correctly calibrated TOWARD the realized outcome category in direction (acknowledged the Q1A warning) but the central forecast was still too aggressive.
+
+
+    - devils_advocate: within-data-σ-algebra-enrichment-is-asymptotically-bounded premise was the pre-registered bet. The premise''s SINGLE-AXIS reading is empirically corroborated by Q1A (0.18%); the MULTI-AXIS
+    reading is empirically refuted by Q1B (40.07% above carryforward). DA''s rank-1 specific failure mode ("structural redundancy: time_of_day is a strictly coarser partition of within-day position than
+    hour_of_week; Z_c already marginalizes over time_of_day within each cell") is empirically WRONG — joint stratification does NOT degenerate to its single-axis components on the chi^2 metric. The reduction-curve-asymptote
+    argument (M0→M1=16x, M1→M3=1.44x, M3→M3+Z_c=1.001x) extrapolated to M3+Z_c→M3+Z_c+Z2=1.001x but realized as 1.44x — the asymptote inverts at the multi-axis cumulative-conditioning step. Future forecasts
+    of within-data sigma-algebra enrichment should distinguish single-axis (bounded near zero) from multi-axis joint (bounded somewhere higher, with Q1B as the new calibration anchor). DA''s outcome-category
+    forecast won; DA''s magnitude forecast lost by 64x.
+
+
+    - PATTERN: when prior evidence (S10, S11, S12) points at within-data lever boundedness, the distinction between SINGLE-AXIS and JOINT-MULTI-AXIS sigma-algebra enrichment is the operative lever — single-axis
+    IS bounded (Q1A 0.18%), JOINT is bounded HIGHER (Q1B 40% over Q1A carryforward). Future thread design should pre-register cross-axis joint conditioning as a distinct lever class from single-axis sigma-algebra
+    enrichment.
+
+
+    FORECASTERS'' WHAT_WOULD_CHANGE_MY_MIND CONDITIONS:
+
+    - proponent condition #2 (better_chi2 > 600 = clear non-closure) TRIGGERED at 662; proponent''s within-cell-orthogonality-delivers-full-closure premise REFUTED.
+
+    - proponent condition #3 (chi2_diff CI crosses zero = NEAR-TIE) TRIGGERED at realized chi2_diff CI [-53, +124] straddling zero.
+
+    - proponent condition #4 (per-stratum overnight contributes much chi^2) PARTIALLY TRIGGERED — overnight is non-trivial in cold weekday Z_c cells.
+
+    - DA condition #4 (cumulative_chi2_improvement_above_Z_c > 50 chi^2) TRIGGERED at realized 290 (64x DA''s forecast 4.5); DA registered this would update the reduction-curve-asymptote prior.
+
+    - DA condition #5 (per_stratum overnight chi^2 > 200) PARTIALLY TRIGGERED — multiple overnight cells exceed 200.
+
+    Both forecasters explicitly registered contingencies that the data now confirms. Pre-registration discipline working as intended; the realized data falls in the gap between two well-registered forecasts
+    and the arbiter pattern handles the mixed scoring cleanly.'
+  topic_difficulty: moderate
+  proponent_forecast:
+    outcome: R-A1B
+    confidence: 0.4
+    better_chi2_point: 180.0
+    better_chi2_ci95:
+    - 90.0
+    - 450.0
+    chi2_diff_point: 160.0
+    chi2_diff_ci95:
+    - 20.0
+    - 320.0
+    head_to_head_winner: Z2_c
+    landslide_R_A1B_predicted: false
+    rationale_summary: Within-cell orthogonality / M3 family-capacity relief from finer partition; saturday__zc6 splits cleanly across the 4 time_of_day strata; Z2_c's 4-level partition isolates overnight
+      (P1 alpha_L 0.1125 Gaussian) from morning_ramp/afternoon/evening (heavy-tailed but within-sub-cell homogeneous).
+  devils_advocate_forecast:
+    outcome: R-B1B
+    confidence: 0.68
+    better_chi2_point: 948.0
+    better_chi2_ci95:
+    - 620.0
+    - 1340.0
+    chi2_diff_point: -9.0
+    chi2_diff_ci95:
+    - -95.0
+    - 75.0
+    head_to_head_winner: Z2_b
+    near_tie_predicted: true
+    rationale_summary: 'Joint S9+S10+S11+S12 already corroborates within-data-σ-algebra-enrichment asymptotic boundedness; time_of_day is structurally coarser than hour_of_week so Z2''s orthogonal information
+      above Z_c is bounded by the overnight-vs-rest contrast (alpha_L 0.1125 vs 0.475-0.598). Reduction-curve asymptote: M0→M1=16x, M1→M3=1.44x, M3→M3+Z_c=1.001x; M3+Z_c→M3+Z_c+Z2 step bounded above by
+      the same envelope.'
+  proponent_distance_from_result:
+    better_chi2_forecast_point: 180.0
+    better_chi2_forecast_ci95:
+    - 90.0
+    - 450.0
+    better_chi2_realized_point: 662.2233333333334
+    better_chi2_residual: 482.22
+    better_chi2_overshoot: 212.22
+    better_chi2_inside_forecast_ci: false
+    chi2_diff_forecast_point: 160.0
+    chi2_diff_realized_point: 33.78
+    chi2_diff_residual: -126.22
+    chi2_diff_inside_forecast_ci: false
+    head_to_head_direction_match: true
+    head_to_head_direction_match_note: Both predict Z2_c wins at point. Realized direction is within 1 paired SE of zero so no statistical discrimination; proponent gets direction-of-sign credit at point
+      only.
+    outcome_category_match: false
+    outcome_residual: R-A1B forecast vs R-B1B realized
+    what_would_change_my_mind_triggered:
+      condition_2_triggered: 'better_chi2 > 600 = clear non-closure: TRIGGERED at 662.'
+      condition_3_triggered: 'chi2_diff CI crosses zero = NEAR-TIE: TRIGGERED at [-53.19, +124.47].'
+      condition_4_partially_triggered: 'per_stratum overnight contributes much chi^2: PARTIALLY TRIGGERED — overnight non-trivial in cold weekday Z_c cells.'
+    proponent_correct_summary: Outcome category WRONG (R-A1B vs R-B1B). Magnitude WRONG (better_chi2 180 forecast vs 662 realized; 3.68x overshoot). Direction-of-sign right at point but statistically zero.
+      Three of proponent's own pre-registered what_would_change_my_mind conditions TRIGGERED.
+  devils_advocate_distance_from_result:
+    better_chi2_forecast_point: 948.0
+    better_chi2_forecast_ci95:
+    - 620.0
+    - 1340.0
+    better_chi2_realized_point: 662.2233333333334
+    better_chi2_residual: -285.78
+    better_chi2_overshoot: 42.22
+    better_chi2_inside_forecast_ci: false
+    better_chi2_ci_overlap_realized_ci: true
+    better_chi2_ci_overlap_note: DA's CI [620, 1340] overlaps realized CI [468, 945] at the upper end (overlap range 620-945, ~32% of realized CI width). Realized 662 falls 42 chi^2 below DA's CI lower
+      bound — DA's bracket is direction-correct (over- rather than under-) but does not contain realized at 95%.
+    chi2_diff_forecast_point: -9.0
+    chi2_diff_realized_point: 33.78
+    chi2_diff_residual: 42.78
+    chi2_diff_inside_forecast_ci: true
+    chi2_diff_inside_forecast_ci_note: DA's chi2_diff CI [-95, +75] CONTAINS realized [-53, +124] partially (DA's CI contains realized point 33.78; realized CI overlaps DA's CI at [-53, +75]). Near-tie
+      SHAPE forecast CONFIRMED.
+    head_to_head_direction_match: false
+    head_to_head_direction_match_note: DA predicted Z2_b wins; realized Z2_c wins at point. But realized direction is statistically zero (|diff|=34 < paired SE=45), so DA is not falsified on direction at
+      95% per the near-tie regime.
+    near_tie_shape_match: true
+    near_tie_shape_match_note: DA explicitly predicted NEAR-TIE shape (chi2_diff CI [-95, +75] straddling zero); realized [-53, +124] straddles zero. Shape forecast CORRECT.
+    cumulative_chi2_improvement_forecast_point: 4.5
+    cumulative_chi2_improvement_realized_point: 290.29
+    cumulative_chi2_improvement_residual: 285.79
+    cumulative_chi2_improvement_residual_note: DA's within-data-bounded prior predicted 4.5 chi^2 cumulative improvement; realized 290.29 is 64x DA's point forecast. DA's magnitude bet decisively loses
+      by 64x; DA's outcome-category bet wins on the registered R-B1B match.
+    outcome_category_match: true
+    outcome_residual: R-B1B matches
+    what_would_change_my_mind_triggered:
+      condition_4_triggered: 'cumulative_chi2_improvement_above_Z_c > 50 chi^2 (10x DA''s point forecast 4.5): TRIGGERED at realized 290.29 (64x DA''s forecast). DA registered this would update the reduction-curve-asymptote
+        prior.'
+      condition_5_partially_triggered: 'per_stratum_Z2_4level overnight chi^2 > 200: PARTIALLY TRIGGERED — saturday__zc5__z20=259, sunday__zc6__z20=267, weekday__zc1__z20=211; multiple cells exceed 200.'
+    devils_advocate_correct_summary: Outcome category CORRECT (R-B1B). Near-tie SHAPE CORRECT. Magnitude WRONG by 64x (cumulative improvement). Direction wrong at point but statistically zero. Two of DA's
+      own pre-registered what_would_change_my_mind conditions TRIGGERED. Outcome-category + shape correct; magnitude + direction wrong on different surfaces.
+key_findings:
+- finding: R-B1B fires unambiguously at point (662.22) AND in the full CI [468, 944] — both bounds interior to the (228, 2284] band by >2x on both sides. NOT borderline R-A1B nor borderline R-C1B.
+- finding: Z2 (time_of_day) delivered cumulative reduction = 290.29 chi^2 above Q1A's Z_c carryforward = 40.07% of the remaining gap-to-close; 40.18% from the Q2A no-Z baseline. 218x Q1A's reduction in
+    absolute chi^2 units. This refutes the S3 EXHAUSTED-UNRESOLVED pre-flag's premise that Q1B would deliver "similar 0.18%-of-gap magnitudes" to Q1A. The cumulative-reduction CI [8.06, 484.42] is sign-determined
+    positive at 95%.
+- finding: 'FRAMEWORK READING SHARPENING (binding): joint S9+S10+S11+S12 was read as "within-data sigma-algebra-enrichment levers empirically bounded at the ~0.18%-of-gap scale." Q1B refutes that reading
+    AS-STATED. Sharpened reading: SINGLE-AXIS within-data sigma-algebra enrichment IS bounded near zero (Q1A 0.18%); JOINT multi-axis within-data conditioning recovers MEANINGFULLY MORE (Q1B 40.07%). Full
+    closure to R-A1B is NOT achieved within the time-index (cumulative point 662 still 2.9x above R-A1B cut). Identifiability obstruction picture is preserved at the FULL CLOSURE level; the within-data
+    lever space has more directions than single-axis P1 ranking suggested.'
+- finding: Per-cell chi^2 corroborates P1 at FINER RESOLUTION. Q1A's dominant saturday__zc6 cell (chi^2 = 1634) splits as morning_ramp 967.28 > evening 399.77 > afternoon 328.09; the morning_ramp sub-stratum
+    within the hot zone alone exceeds the pooled Q1B marginal 662.22 by 46%. The contamination IS where P1 said (hour_of_week binding axis) AND has internal time_of_day structure that hour_of_week alone
+    could not resolve. Joint (Z_c, Z2) reveals genuine sub-structure.
+- finding: 'Head-to-head is a NEAR-TIE: chi2_diff = +33.78, paired SE = 44.71, |diff|/SE = 0.756 < 1.0; CI [-53.19, +124.47] straddles zero. Per phase_a.metric, head-to-head sub-finding records "NO STATISTICALLY-DISCERNIBLE
+    WINNER between Z2_b and Z2_c". Z2_c wins at point (matching proponent''s direction); near-tie SHAPE matches DA''s explicit prediction. Z2_c carryforward by parsimony break-tie convention.'
+- finding: 'SIXTH NAMED-FAILURE-MODE INSTANCE (new shape variant): MIXED SCORING DECOMPOSITION across forecast surfaces. Outcome category matches DA; near-tie shape matches DA; winner direction matches
+    proponent at point; cumulative-reduction magnitude sits ORDERS OF MAGNITUDE from both side''s implicit priors (proponent expected ~772 chi^2 closure; DA expected ~5). Realized 290 chi^2 sits in the
+    gap between them. Realized data in a previously-uncharted cumulative-reduction regime.'
+- finding: Reproduction checks at BOTH anchors are EXACT. q1b_no_z_chi2 = 953.8433 reproduces Q2A's settled 953.84 to 4 decimals (3.5e-6 relative); q1b_zc_only_chi2 = 952.5167 reproduces Q1A's settled 952.5167
+    to 8 decimals (3.5e-8 relative). Bit-identical machinery at both endpoints — the 290 chi^2 cumulative closure is a real signal, not a pipeline drift artifact. Strongest dual-anchor reproduction in the
+    workflow's history.
+finding_status: SETTLED
+follow_up:
+  required: true
+  reasoning: "Two parallel follow-up items:\n\n1. THREAD ADVANCEMENT (required for state machine):\nthread-coordinator dispatch advances resolution-paths-thread per Q1B SETTLED R-B1B.\nQ1B.status: active\
+    \ → settled; Q1B.result: set to R-B1B.\nbranching_rules.Q1B.R-B1B = null (no auto-advancement). current_node_id transition\ndepends on thread-coordinator decision: the thread does NOT auto-resolve (cumulative\n\
+    share 0.40 < closure_rule 0.80) and does NOT auto-exhaust (Z2 delivered material\nreduction contradicting the EXHAUSTED-UNRESOLVED pre-flag premise). Coordinator's\npost-arbiter decision space:\n  (a)\
+    \ Amend thread with a third within-data Z (e.g., demand_quantile or season as third\n  axis in joint stratification — P1 ranked these 5th and 4th respectively at ranges\n  0.075 and 0.135; weaker prior\
+    \ support but the cross-axis joint hypothesis is\n  newly-validated by Q1B);\n  (b) Spawn a new thread targeting cross-axis joint stratification more systematically\n  (e.g., (day_type, Z_c, Z2_c, demand_quantile)\
+    \ 4-tuple cell key with adjusted MIN_CELL_SIZE);\n  (c) Pivot to the temperature/exogenous-Z arm (Q1C reopening amendment or new thread)\n  given full closure to R-A1B is not achieved within the time-index\
+    \ alone.\nThe arbiter does NOT pre-judge which path the coordinator takes; all three are\nframework-supported and the realized data does not statistically rank them.\nThe CRITICAL FLAG the arbiter records:\
+    \ the EXHAUSTED-UNRESOLVED pre-flag should\nNOT be auto-fired — Q1B's 218x-Q1A realization refutes its premise.\n\n2. MEMORY UPDATE (no blocker, recommended): SETTLED finding warrants a new memory\n\
+    file mitacs-q1b-z2-conditioning.md capturing:\n  - Numeric record: better_chi2 = 662.22 [468, 945]; chi2_Z2_b = 696 [492, 1009]; chi2_Z2_c = 662.22 [480, 945];\n    chi2_diff = +33.78 [-53, +124] (near-tie);\
+    \ winner Z2_c (point) but no statistically-discernible head-to-head.\n  - Substantive finding #1: Z2 lever delivered 40.07% of gap-to-close, 218x Q1A's reduction.\n    R-B1B fires unambiguously but\
+    \ the realization sits below the closure_rule 0.80 share threshold.\n  - Substantive finding #2: Framework reading sharpening — SINGLE-AXIS within-data sigma-algebra\n    enrichment IS bounded near\
+    \ zero (Q1A); JOINT multi-axis within-data conditioning recovers\n    MEANINGFULLY MORE. Identifiability obstruction picture preserved at FULL-CLOSURE level; the\n    within-data lever space has more\
+    \ directions than single-axis P1 ranking suggested.\n  - Substantive finding #3: Per-cell chi^2 corroborates P1 at finer resolution. saturday__zc6\n    splits as morning_ramp 967 > evening 400 > afternoon\
+    \ 328; morning_ramp alone exceeds the pooled\n    Q1B marginal by 46%. Joint (Z_c, Z2) reveals genuine sub-structure.\n  - Substantive finding #4: 6th named-failure-mode instance, new shape variant:\
+    \ mixed scoring\n    decomposition across forecast surfaces (outcome matches DA; shape matches DA; direction\n    matches proponent at point; magnitude matches neither).\n  - Substantive finding #5:\
+    \ Reproduction checks at both anchors EXACT (Q2A 3.5e-6; Q1A 3.5e-8).\n    The 290 chi^2 closure is a real signal, not artifact.\n  - Cross-link to mitacs-q2a-richer-family (S9), mitacs-q2b-non-distributional\
+    \ (S10),\n    mitacs-p1-patra-sen-localization (S11), mitacs-q1a-z-conditioning (S12),\n    mitacs-clim-gap-nonstationary (temperature prior remains candidate for full closure beyond\n    the within-data\
+    \ lever space).\n  - Cross-link to ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/\n    disintegration_diagnostic.md — within-data lever bounded for FULL closure remains; the\n    boundedness\
+    \ reading is sharpened to single-axis-vs-joint-multi-axis.\n  - Add (S13) to CLAUDE.md 'Settled findings since 2026-05-21' with the headline numerics, the\n    40.07%-of-gap reading, the framework-reading\
+    \ sharpening, and the 6th-named-failure-mode-instance\n    notation.\n\nPer workflow rules, memory update is performed by the user after settled findings;\nthe arbiter declares memory_update_required\
+    \ = true and identifies the target file but does\nnot write it. The coordinator advances state; the memory writer captures the finding."
+  proposed_phase_a: null
+memory_update_required: true
+memory_update_target: '~/.claude/projects/-Users-pmahon-Research-Dynamics-MITACS/memory/MEMORY.md
+
+  + add mitacs-q1b-z2-conditioning.md SETTLED R-B1B with the headline numerics (better_chi2 = 662.22 [468, 945]; chi2_diff = +33.78 [-53, +124] near-tie; Z2 lever = 40.07% of gap-to-close above Z_c carryforward;
+  cumulative two-Z share 40.18% from Q2A no-Z baseline) and the substantive findings #1-#5 (framework-reading sharpening to single-axis-vs-joint-multi-axis; per-cell P1 corroboration at finer resolution;
+  6th named-failure-mode instance new shape variant; dual-anchor exact reproduction).
+
+  + cross-link from mitacs-q2a-richer-family (S9), mitacs-q2b-non-distributional (S10), mitacs-p1-patra-sen-localization (S11), mitacs-q1a-z-conditioning (S12), mitacs-clim-gap-nonstationary (temperature
+  prior survives as exogenous-content candidate for full closure beyond within-data lever space).
+
+  + flag for CLAUDE.md ''Settled findings since 2026-05-21'' section: add (S13) Q1B R-B1B with summary, Z2 lever 40.07% of gap (218x Q1A), joint S9+S10+S11+S12 framework-reading sharpening, per-cell P1
+  corroboration at finer resolution, thread does NOT auto-resolve nor auto-exhaust — coordinator decision space includes (a) third within-data Z axis, (b) cross-axis joint stratification, (c) temperature/exogenous-Z
+  arm. EXHAUSTED-UNRESOLVED pre-flag SHOULD BE DOWNGRADED (premise refuted by 218x-magnitude realization).
+
+  + workflow note: 6th named-failure-mode instance, new shape variant (mixed scoring decomposition; realized data in a previously-uncharted cumulative-reduction regime; outcome+shape match DA, direction
+  matches proponent at point, magnitude matches neither).'
+thread_state_update:
+  thread_topic: resolution-paths-thread
+  node_id: Q1B
+  branch_fired: R-B1B
+  next_node_id: null
+  next_node_id_note: Per thread branching_rules.Q1B.R-B1B = null. No auto-advancement. The thread DOES NOT auto-resolve (cumulative share 0.40 < closure_rule 0.80) and DOES NOT auto-exhaust (the EXHAUSTED-UNRESOLVED
+    pre-flag's premise of "Q1A-scale magnitude" is refuted by Q1B's 218x-Q1A realization). State advancement decision deferred to thread-coordinator (see notes_for_thread_coordinator).
+  sibling_branches_closed: []
+  sibling_branches_closed_note: 'branching_rules.Q1B keys: R-A1B (null, would have routed to thread RESOLVED), R-B1B (null, no auto-advancement), R-C1B (P2 synthetic Gaussian-DGP calibration). R-A1B did
+    not fire (mapped to null anyway, no sibling to close). R-C1B did not fire, but P2 remains reachable via Q1C.R-C1C — so P2 is NOT closed at thread level. Q1A'' (parallel non-state-machine sibling per
+    amendment A1) is unaffected by Q1B''s advancement; its eventual arbiter fires on its own outcome categories independently.'
+  thread_state_transition: node_settled_no_auto_advance
+  thread_state_transition_note: 'Q1B.status: active → settled. Q1B.result: R-B1B. current_node_id advancement deferred to thread-coordinator. The realized 40.07%-of-gap closure is materially different from
+    both forecasters'' implicit priors and the registered EXHAUSTED-UNRESOLVED pre-flag; the thread state machine''s registered branching at R-B1B (null successor) is consistent with the realized data and
+    does NOT prescribe a specific next-state. The coordinator decides whether to amend (third within-data Z, cross-axis joint stratification, or temperature/exogenous-Z arm) or declare the thread at a soft-exhaustion
+    state pending further amendment. The arbiter records the realized data and the framework-reading sharpening; the coordinator''s scope is the tree-shape decision.'
+  notes_for_thread_coordinator: 'Q1B.status: active -> settled. Q1B.result: set to R-B1B.
+
+    current_node_id: Q1B -> deferred (no auto-advancement; coordinator decides).
+
+
+    NO SIBLINGS CLOSED at thread level. branching_rules.Q1B.R-A1B (null successor; would have routed to thread RESOLVED if Q1A.R-B1A + Q1B.R-A1B cumulative > 0.80) did not fire — but R-A1B would have mapped
+    to null anyway, so no sibling to close. branching_rules.Q1B.R-C1B = P2 did not fire; P2 remains reachable via Q1C.R-C1C in branching_rules — P2 is NOT closed. Q1A'' is a parallel non-state-machine sibling
+    per amendment A1; not affected by Q1B''s advancement.
+
+
+    CRITICAL: EXHAUSTED-UNRESOLVED PRE-FLAG SHOULD BE DOWNGRADED, NOT AUTO-FIRED.
+
+    The S3 state-history pre-flag (advisory) anticipated that Q1B would deliver "similar 0.18%-of-gap magnitudes" to Q1A, in which case the thread would approach EXHAUSTED-UNRESOLVED. Q1B''s realized 40.07%-of-gap
+    (290.29 chi^2 cumulative reduction, 218x Q1A''s magnitude) REFUTES that premise. The EXHAUSTED-UNRESOLVED reading is NOT the most natural substantive interpretation of this result. The coordinator should
+    NOT auto-fire EXHAUSTED-UNRESOLVED at S4; the realized data is materially different from the pre-flag''s implicit prior.
+
+
+    CLOSURE_RULE CHECK: root.closure_rule fires thread-RESOLVED when cumulative explained share > 0.80. Q1B''s cumulative share = (Q1A_baseline - better_chi2) / (Q1A_baseline - R_A1B_cut) = 290.29 / 724.5167
+    = 0.4007 = 40.07%. Below the 0.80 threshold. The thread does NOT auto-resolve.
+
+
+    COORDINATOR DECISION SPACE (all three are framework-supported; the realized data does not statistically rank them):
+
+    (a) Thread amendment adding a third within-data Z axis. P1''s remaining axes ranked by range: time_of_day (0.485, used in Q1B as Z2), day_type (0.345, already in Z conditioning as factor), season (0.135),
+    demand_quantile (0.075). Either season or demand_quantile is the next P1-supported axis; weaker prior support than Q1B''s time_of_day but the cross-axis joint hypothesis is newly-validated by Q1B''s
+    realization. Could register Q1D (third within- data Z axis added to (Z_c, Z2_c) carryforward) with appropriately adjusted MIN_CELL_SIZE given the finer cell partition.
+
+    (b) Spawn a new thread targeting cross-axis joint stratification more systematically. The framework-reading sharpening Q1B delivered (single-axis vs joint multi-axis as distinct lever classes) suggests
+    a new line of inquiry: what is the cumulative limit of within-data joint conditioning? Multi-axis sweeps could be pre-registered as a thread rather than single-axis amendments.
+
+    (c) Pivot to the temperature/exogenous-Z arm (Q1C reopening amendment or new thread per the framework-prescribed resolution paths in disintegration_diagnostic.md). Full closure to R-A1B is NOT achieved
+    within the time-index (cumulative point 662 still 2.9x above R-A1B cut; lower CI 468 still 2.05x above). The clim-gap-nonstationary memory continues to point at temperature as the strongest a-priori
+    candidate for the residual non-distributional content. Within-data joint conditioning may approach but not reach full closure.
+
+
+    The arbiter does NOT pre-judge which path the coordinator takes. The arbiter records the realized state and the framework-reading sharpening; the coordinator advances state with that realized data,
+    NOT with the contradicted pre-flag premise.
+
+
+    TEMPERATURE PRIOR STATUS: still candidate for full closure beyond within-data joint conditioning. Q1B''s 40%-of-gap closure leaves 60% unexplained; the clim-gap-nonstationary prior continues to be the
+    strongest a-priori candidate for the residual. Coordinator''s decision (a)-(c) above implicitly ranks the order of arms — within-data axes first vs exogenous Z first.
+
+
+    P2 STATUS: still reachable (from Q1C.R-C1C); not affected by Q1B.R-B1B firing.
+
+
+    Q1A'' STATUS: parallel non-state-machine sibling per amendment A1; phase_a not yet filled per registry. Independent of Q1B''s state advancement; its eventual arbiter will fire on its own outcome categories
+    independently of the resolution-paths-thread state machine.'
+recommendations:
+- recommendation: 'Dispatch thread-coordinator to advance resolution-paths-thread per S4: Q1B SETTLED R-B1B; current_node_id transition deferred. The coordinator must decide between the three options laid
+    out in thread_state_update.notes_for_thread_coordinator: (a) third within-data Z axis amendment, (b) new cross-axis joint stratification thread, (c) pivot to temperature/exogenous-Z arm. CRITICAL: the
+    EXHAUSTED-UNRESOLVED pre-flag should be downgraded, not auto-fired — Q1B''s realization refutes its premise.'
+- recommendation: 'Memory update: create memory/mitacs-q1b-z2-conditioning.md capturing the SETTLED R-B1B finding + the substantive sharpening of joint S9+S10+S11+S12. Cross-link to mitacs-q1a-z-conditioning
+    (S12) as the predecessor; cross-link to mitacs-clim-gap-nonstationary as the surviving temperature prior for full closure beyond within-data joint conditioning. Update MEMORY.md index and add (S13)
+    entry to CLAUDE.md "Settled findings since 2026-05-21" section. The 40.07%-of-gap reading + the framework-reading sharpening to single-axis-vs-joint-multi-axis are the headline substantive content.'
+- recommendation: 'Framework-reading sharpening in writeup/tex/missing_content_memo.tex (kernel-family-agnostic theory memo, 18pp): the memo predates (S11)-(S13); when the memo''s /audit pure is run, fold
+    (S11)-(S13) into the within-data-lever-boundedness section. The boundedness reading should be sharpened from "single-axis bounded" to "single-axis bounded near zero; joint multi-axis bounded at higher
+    magnitude but full closure requires auxiliary information beyond the time index." This is the durable framework correction Q1B delivered and should land in the memo''s revision when next refreshed.'
+if_provisional_what_to_reaudit: []
+git_sha: 1736e712065d130275dd8b0b8e7246717d952d6e
+git_clean: false
+body_sha256: d8650cb75f9c1cfcc9c5fa74ff76e8cfab0e99fca5f532ffe6c9a21e1034c1c4

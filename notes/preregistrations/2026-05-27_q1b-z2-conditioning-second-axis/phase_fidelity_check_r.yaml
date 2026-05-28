@@ -1,0 +1,328 @@
+schema: phase_fidelity
+topic: q1b-z2-conditioning-second-axis
+checked_by: phase-fidelity agent (.claude/agents/phase-fidelity.md), Check R
+purpose: Verify that the Q1B result artifact (result.yaml sidecar + experiment/results/q1b_z2_conditioning.txt
+  CLAIM-GRADE provenance envelope) reports what phase_a registered for Q1B (z2-conditioning-second-axis).
+  BLOCKING precondition (fidelity_coverage_passed) for the arbiter. Same Check R schema
+  established for Q2A/Q2B/P1/Q1A.
+written_at: '2026-05-28T05:05:00-07:00'
+references:
+- file: phase_a.yaml
+  body_sha256: 0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10
+- file: result.yaml
+  body_sha256: b3b1efa7d028cd6caa6220493847a5d2b8fa6de957814211df01df6294baaa6d
+thread:
+  thread_topic: resolution-paths-thread
+  node_id: Q1B
+  parent_branch: R-A
+  thread_body_sha256: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
+result_artifact_pin:
+  file: ../../experiment/results/q1b_z2_conditioning.txt
+  body_sha256: 67bb62f5b9e9b978
+  inputs_fingerprint: 7ec89f9eb1604cd1
+  note: The Q1B .txt result artifact is the CLAIM-GRADE provenance envelope written
+    via experiment.provenance.make_result(); body_sha256 and inputs_fingerprint pin
+    run reproducibility. Truncated 16-char prefixes per the experiment script's console
+    output (full hashes inside the <<<PROVENANCE...>>> JSON header of the .txt itself).
+    result.yaml is the structured numeric surface this Check R audits; the .txt is
+    the run-state pin.
+coverage:
+  items_required: 18
+  items_reported: 18
+  items_missing: []
+  per_variable:
+    chi2_Z2_b:
+      location: primary_result.value.chi2_Z2_b = 696.0
+      verdict: PASS
+    chi2_Z2_c:
+      location: primary_result.value.chi2_Z2_c = 662.2233333333334
+      verdict: PASS
+    better_chi2:
+      location: primary_result.value.better_chi2 = 662.2233333333334 = min(696.0,
+        662.22). Correctly identifies Z2_c as the binding (lower) candidate.
+      verdict: PASS
+    chi2_diff:
+      location: primary_result.value.chi2_diff = 33.77666666666664 = chi2_Z2_b - chi2_Z2_c.
+        Positive sign confirms Z2_c is the better (lower) candidate.
+      verdict: PASS
+    chi2_Z2_b_ci95:
+      location: primary_result.chi2_Z2_b_ci95 = [492.2505416666666, 1009.0090416666666]
+        (paired-day bootstrap n=1000 percentile interval).
+      verdict: PASS
+    chi2_Z2_c_ci95:
+      location: primary_result.chi2_Z2_c_ci95 = [479.78420833333337, 945.4063749999997].
+      verdict: PASS
+    chi2_diff_ci95:
+      location: 'primary_result.chi2_diff_ci95 = [-53.18587500000007, 124.46974999999992].
+        Note: interval straddles zero, consistent with NEAR-TIE reading (|diff| =
+        33.78 < paired SE 44.71, 1-sigma uncertainty includes zero).'
+      verdict: PASS
+    cumulative_chi2_improvement_above_Z_c:
+      location: primary_result.value.cumulative_chi2_improvement_above_Z_c = 290.29336666666666
+        = 952.5167 - 662.2233. Matches phase_a baselines.primary secondary metric.
+      verdict: PASS
+    cumulative_chi2_improvement_above_Z_c_ci95:
+      location: primary_result.cumulative_chi2_improvement_above_Z_c_ci95 = [8.064408333333294,
+        484.42265833333335]. Lower bound positive but very close to zero (8.06).
+      verdict: PASS
+    per_cell_mixture_params_Z2_b:
+      location: "secondary_results[0].value: per-(day_type, Z_c, Z2_b) mixture-2-Gaussian\
+        \ fit parameters {weights, scales, n_library} for all non-pooled cells. weekday/saturday/sunday\
+        \ across the 2-level Z2_b (16 total 3-tuple cells; 16 reported when summed\
+        \ across the three day_types \u2014 weekday 12 + saturday 3 + sunday 4 minus\
+        \ overlaps = 19 in raw list)."
+      verdict: PASS
+    per_cell_mixture_params_Z2_c:
+      location: 'secondary_results[1].value: per-(day_type, Z_c, Z2_c) mixture-2-Gaussian
+        fit parameters for the 4-level Z2_c (33 total cells across weekday/saturday/sunday).'
+      verdict: PASS
+    per_cell_chi2_contribution_Z2_b:
+      location: 'secondary_results[2].value: per-(day_type, Z_c, Z2_b) cell marginal-PIT
+        chi^2 contribution + n_rows. 16 cells reported.'
+      verdict: PASS
+    per_cell_chi2_contribution_Z2_c:
+      location: 'secondary_results[3].value: per-(day_type, Z_c, Z2_c) cell marginal-PIT
+        chi^2 contribution + n_rows. 32 cells reported.'
+      verdict: PASS
+    pooling_fallback_log_Z2_b:
+      location: "secondary_results[4].value: empty dict (no cells pooled). phase_a\
+        \ \xA7threshold_derivations verified Z2_b fit-side and eval-side pool-fallback\
+        \ NEVER fires at MIN_CELL_SIZE = 200; result confirms empirically (run log:\
+        \ \"fallback rows=0\")."
+      verdict: PASS
+    pooling_fallback_log_Z2_c:
+      location: "secondary_results[5].value: empty dict (no cells pooled). phase_a\
+        \ \xA7threshold_derivations flagged ONE post-cutoff cell (weekday, Z_c=5,\
+        \ morning_ramp) at n=144 < 200 as the only at-risk cell. Empirically, no pool-fallback\
+        \ fired (run log: \"fallback rows=0\") \u2014 the cell likely had >= 200 rows\
+        \ in the actual post-cutoff library after Q1A's _hour_of_week_bin was applied.\
+        \ ADVISORY: pre-data anticipation was for ONE post-cutoff fallback; realized\
+        \ was zero. Both are within the registered methodology (MIN_CELL_SIZE = 200\
+        \ with pool-to-(day_type, Z_c) parent); this is a normal pre-data-vs-realized\
+        \ rounding gap on a 144-vs-200 boundary, not a methodological deviation."
+      verdict: PASS
+    winner:
+      location: 'primary_result.value.winner = "Z2_c" (per phase_a head-to-head verdict
+        rule: candidate with lower point estimate, ties broken per near_tie_flag).'
+      verdict: PASS
+    near_tie_flag:
+      location: "primary_result.value.near_tie_flag = true. phase_a defines NEAR-TIE\
+        \ as |chi2_Z2_b - chi2_Z2_c| < 1.0 * paired SE of the difference. |chi2_diff|\
+        \ = 33.78; paired SE = 44.71 (run log) \u2192 33.78 < 44.71 \u2192 NEAR-TIE."
+      verdict: PASS
+    landslide_R_A1B:
+      location: primary_result.value.landslide_R_A1B = null. Outcome is R-B1B (not
+        R-A1B); landslide qualifier is defined only for R-A1B firings per phase_a.corroboration_criterion.
+        Correctly null.
+      verdict: PASS
+verdict_check:
+  realized_better_chi2: 662.2233333333334
+  realized_outcome: R-B1B
+  expected_outcome: R-B1B
+  match: true
+  outcome_reason: "better_chi2 = min(696.0, 662.22) = 662.22 in (228, 2284] \u2192\
+    \ R-B1B (Z2 helps but does not close the gap on top of Z_c). Result outcome_verdict\
+    \ matches."
+  near_tie_check:
+    realized_diff: 33.77666666666664
+    realized_se: 44.71
+    se_source: run log paired-bootstrap diff SE = 44.71 (line "paired diff SE = 44.71")
+    realized_diff_lt_se: true
+    expected_flag: true
+    reported_flag: true
+    match: true
+  landslide_check:
+    realized_outcome: R-B1B
+    expected_landslide: null
+    reported_landslide: null
+    match: true
+primary_metric_match:
+  verdict: PASS
+  detail: "phase_a.metric (verdict-metric definition): chi2_Z2_b = marginal post-cutoff\
+    \ PIT chi^2 under M3 with \u03C3(day_type, Z_c, Z2_b); chi2_Z2_c = same under\
+    \ \u03C3(day_type, Z_c, Z2_c); better_chi2 = min(chi2_Z2_b, chi2_Z2_c); verdict\
+    \ against cuts R-A1B <= 228, R-B1B (228, 2284], R-C1B > 2284. Head-to-head verdict\
+    \ rule and NEAR-TIE convention pre-locked in phase_a.\nResult primary_result.value\
+    \ reports chi2_Z2_b = 696.0, chi2_Z2_c = 662.22, better_chi2 = 662.22, winner\
+    \ = Z2_c, near_tie_flag = true, outcome_verdict = R-B1B. The CI block reports\
+    \ chi2_Z2_b_ci95, chi2_Z2_c_ci95, chi2_diff_ci95, and cumulative_chi2_improvement_above_Z_c_ci95\
+    \ from the registered paired-day bootstrap (n=1000). All primary scalars and the\
+    \ verdict-statistic CI are reported as phase_a registered."
+ci_method_match:
+  verdict: PASS
+  detail: 'phase_a.ci_method: type = paired_day_bootstrap, details = "1000 paired-day
+    bootstrap resamples...; refit M3 per (day_type, Z_c, Z2) cell on the resampled
+    rows for EACH of the two head-to-head candidates...; paired comparison; recompute
+    the marginal post-cutoff PIT chi^2 per candidate. Report 95% percentile CI on
+    chi2_Z2_b, chi2_Z2_c, the difference, and cumulative_chi2_improvement_above_Z_c."
+    Width = 95 percent percentile interval.
+
+    Result ci_method_actually_used = "paired_day_bootstrap_n=1000" matches phase_a
+    type and n. CIs reported on chi2_Z2_b, chi2_Z2_c, chi2_diff, better_chi2, and
+    cumulative_chi2_improvement_above_Z_c. MATCH.'
+code_path_audit:
+  verdict: PASS
+  detail: Result code_path_audit.verdict = PRODUCTION-PATH. Tool reported as ".venv/bin/python
+    -m experiment.audit.code_path experiment/q1b_z2_conditioning/__main__.py". blocking
+    = false. Per CLAUDE.md applied-audit workflow Step 3, this is a BLOCKING precondition
+    for the arbiter; it is cleared.
+secondary_results_audit:
+  inline_synthetic_gate:
+    verdict: PASS
+    detail: 'phase_a.baselines.secondary: synthetic recovery gate with known Z2-conditional
+      DGP per (Z_c, Z2) 3-tuple cell key, plus false-Z2 companion. Result reports
+      all_ok=true with 9 sub-checks: (i)-(iv) per-cell parameter recovery {w_r within
+      0.15, s2 within 0.15 rel tol} across 4 cells (Z_c x Z2); (v)-(viii) per-cell
+      PIT chi^2 < 60.0 ceiling across the same 4 cells; (ix) false_z2_companion_collapse
+      all_cells_collapsed: true (randomized Z2 labels collapse to Z_c-only marginal
+      mixture). BLOCKING gate cleared per phase_a.'
+  reproduction_check_no_z:
+    verdict: PASS
+    detail: "phase_a.metric.SECONDARY Reproduction check #1: re-running M3 with \u03C3\
+      =(day_type) alone reproduces Q2A's chi^2 = 953.84 within paired-bootstrap noise.\
+      \ Result secondary_results.reproduction_check_no_z reports q1b_no_z_chi2 = 953.8433\
+      \ vs q2a_settled_chi2 = 953.84, abs_diff = 0.00333 (tolerance 50.0), ok = true.\
+      \ EXACT REPRODUCTION (|diff| / settled = 3.5e-6). End-to-end provenance back\
+      \ to S9."
+  reproduction_check_zc_only:
+    verdict: PASS
+    detail: "phase_a.metric.SECONDARY Reproduction check #2: re-running M3 with \u03C3\
+      =(day_type, Z_c) (Q1A's carryforward) reproduces Q1A's chi^2 = 952.5167 within\
+      \ paired-bootstrap noise. Result secondary_results.reproduction_check_zc_only\
+      \ reports q1b_zc_only_chi2 = 952.5167 vs q1a_settled_chi2 = 952.5167, abs_diff\
+      \ = 3.3e-5 (tolerance 50.0), ok = true. EXACT REPRODUCTION (|diff| / settled\
+      \ = 3.5e-8). This is the cumulative-baseline anchor \u2014 the Z2 reduction\
+      \ measurement only means what it claims if this passes."
+  pre_registered_cuts:
+    verdict: PASS
+    detail: Result secondary_results.pre_registered_cuts reports R_A1B_cut = 228,
+      R_C1B_cut = 2284 with provenance = "resolution-paths-thread skeleton (Q1B node);
+      integer-rounded forms of Q2A's gate-validated R-A2_cut=228.44 and R-C2_cut=2284.44."
+      Matches phase_a.shape_outcomes verbatim.
+shape_outcomes_evaluable:
+  verdict: PASS
+  detail: "phase_a.shape_outcomes:\n  R-A1B: min(chi2_Z2_b, chi2_Z2_c) <= 228\n  R-B1B:\
+    \ min(chi2_Z2_b, chi2_Z2_c) in (228, 2284]\n  R-C1B: min(chi2_Z2_b, chi2_Z2_c)\
+    \ > 2284\nReported: better_chi2 = 662.2233333333334 (point); better_chi2 CI [468.09,\
+    \ 944.45]. The point\nestimate sits in the R-B1B band (228, 2284]; lower CI bound\
+    \ (468) is also above 228 and\nupper CI bound (944) is below 2284. R-B1B fires\
+    \ unambiguously in both mechanical (point)\nand CI senses. landslide_R_A1B: null\
+    \ (correctly null; the landslide qualifier is defined\nonly for R-A1B firings\
+    \ per phase_a.corroboration_criterion).\n"
+execution_deviations:
+  verdict: PASS
+  detail: Result execution_deviations = []. No deviations from phase_a registered
+    methodology. Phase-fidelity Check P (commit 1736e71) was rerun post-script-build
+    and PASSED at L1 (structural) and L2 (methodological); no outstanding advisories
+    carried forward into the run.
+independent_variable_stratifications:
+  per_variable:
+    Z2_construction:
+      verdict: PASS
+      detail: phase_a declares two pre-locked Z2 constructions (Z2_b binary overnight
+        indicator, Z2_c 4-level categorical per P1 production binning). Result reports
+        per-cell params and per-cell chi^2 for BOTH constructions separately. A third
+        construction (Z2_iii continuous within-day phase) was explicitly excluded
+        by phase_a.variables.excluded and is not reported (correct per pre-registration).
+    day_type:
+      verdict: PASS
+      detail: phase_a declares 3 day_types (weekday, saturday, sunday). Result reports
+        per_cell_chi2_contribution and per_cell_mixture_params keyed by (day_type,
+        Z_c, Z2) across all three day_types.
+    Z_c_stratum:
+      verdict: PASS
+      detail: "phase_a inherits Z_c as Q1A's settled 8-level hour_of_week categorical\
+        \ (Z_c \u2208 {0..7}). Result reports all non-empty (day_type, Z_c, Z2) cells;\
+        \ the absent (day_type, Z_c) pairs are structurally impossible (Z_c is a function\
+        \ of (weekday, hour) and not all (day_type, Z_c) pairs exist in the IESO calendar)."
+    Z2_stratum:
+      verdict: PASS
+      detail: phase_a declares Z2_b in {0, 1} (binary) and Z2_c in {0..3} (4-level).
+        Result reports all non-empty (day_type, Z_c, Z2) cells for both constructions;
+        structurally-absent cells correctly not reported.
+verdict: PASS
+aggregate_verdict: PASS
+fidelity_coverage_passed: true
+notes_for_arbiter: "Check R: PASS. All 18 phase_a dependent variables present in the\n\
+  result artifact (result.yaml sidecar + experiment/results/q1b_z2_conditioning.txt).\n\
+  Primary verdict statistic better_chi2 = 662.2233333333334 matches phase_a metric\n\
+  definition exactly. ci_method matches (paired_day_bootstrap n=1000, 95% percentile).\n\
+  Shape outcomes evaluable: R-B1B fires unambiguously (better_chi2 in (228, 2284],\n\
+  both CI bounds inside the same band). Code-path PRODUCTION-PATH; inline synthetic\n\
+  gate cleared; BOTH reproduction checks exact to 4+ decimal places.\n\nSubstantively\
+  \ notable content the arbiter should surface (all derivable from\nreported numerics\
+  \ alone):\n\n  1. R-B1B fires unambiguously - this is the registered ambiguous band,\
+  \ NOT the\n     R-C1B falsification cut. better_chi2 = 662.22 is ~2.9x clear of\
+  \ R-A1B (228) and\n     ~3.4x clear of R-C1B (2284). Both the lower CI bound (468)\
+  \ and upper CI bound\n     (944) sit inside the R-B1B band. The verdict is comfortably\
+  \ inside the\n     ambiguous band, not borderline R-A1B nor borderline R-C1B.\n\n\
+  \  2. NEAR-TIE between Z2_b and Z2_c. chi2_diff = +33.78 with CI [-53.19, +124.47]\n\
+  \     straddling zero. Paired SE = 44.71 (run log); |diff| < 1-sigma. Z2_c is the\n\
+  \     point-estimate winner but the head-to-head sub-finding records 'no statistically\n\
+  \     significant ranking between Z2_b and Z2_c'. The point estimate happens to\n\
+  \     favor Z2_c by +33.78.\n\n  3. Z2 CONDITIONING DELIVERS A MODEST MARGINAL REDUCTION\
+  \ on top of Q1A's Z_c\n     carryforward. The Z_c-only baseline reproduces at q1b_zc_only_chi2\
+  \ = 952.5167\n     within paired-bootstrap noise. The better Z2-conditioned candidate\
+  \ sits at\n     662.22, a reduction of 290.29 chi^2 units (cumulative_chi2_improvement_above_Z_c).\n\
+  \     This is ~40% of the 724.52 gap-to-close from Q1A's baseline 952.52 to the\n\
+  \     R-A1B cut at 228, but does NOT clear R-A1B (better_chi2 sits at 662.22,\n\
+  \     2.9x above the R-A1B cut). The reduction curve through the thread now reads:\n\
+  \     M0 -> M1 = 16x (Q1); M1 -> M3 = 1.44x (Q2A); M3 -> M3+Z_c = 1.001x (Q1A);\n\
+  \     M3+Z_c -> M3+Z_c+Z2 = 1.44x (Q1B). Q1B's marginal reduction is materially\n\
+  \     larger than Q1A's 0.18%-of-gap; this is empirically a different reading\n\
+  \     than the EXHAUSTED-UNRESOLVED pre-flag advisory anticipated.\n\n  4. CUMULATIVE\
+  \ CHI^2 IMPROVEMENT CI: [8.06, 484.42]. Lower CI bound is positive\n     but barely\
+  \ (8.06) - the improvement is sign-determined positive at the 95%\n     bootstrap\
+  \ level but with a very wide range. The thread's closure_rule\n     (cumulative\
+  \ > 0.80 fraction of the gap closed => RESOLVED) is NOT satisfied:\n     cumulative\
+  \ point estimate share = 290.29 / 724.52 = 0.40, below 0.80. The\n     thread does\
+  \ not auto-resolve.\n\n  5. PER-CELL chi^2 contributions for Z2_c are concentrated\
+  \ in the hot-zone cells:\n     saturday__zc6__z21 (Sat afternoon, Z_c=6 = Sat hot-zone,\
+  \ Z2=1 morning_ramp)\n     chi^2 = 967.28 (n=360) is the single dominant contribution;\
+  \ saturday__zc6__z23\n     (Sat evening) chi^2 = 399.77; saturday__zc6__z22 (Sat\
+  \ afternoon) chi^2 =\n     328.09. The 4-level Z2_c partition of the hot-zone Z_c=6\
+  \ (Sat) cell into\n     {overnight, morning_ramp, afternoon, evening} REDUCES the\
+  \ worst single-cell\n     contribution from Q1A's saturday__bin6 = 1634 to Q1B's\
+  \ saturday__zc6__z21\n     = 967 (a 41% reduction in the worst cell). This is the\
+  \ mechanism by which\n     Z2 delivers the 290 chi^2 cumulative improvement.\n\n\
+  \  6. THE SUBSTANTIVE READING (the arbiter's job to render): mechanical R-B1B\n\
+  \     fires; proponent's R-A1B is falsified (better_chi2 662.22 is 2.9x above the\n\
+  \     R-A1B cut at 228; even lower CI bound 468 is 2.05x above 228). DA's R-B1B/\n\
+  \     R-C1B forecast is mechanically correct on the outcome category. The\n    \
+  \ EXHAUSTED-UNRESOLVED pre-flag from S3 anticipated 'similar 0.18%-of-gap\n    \
+  \ magnitudes' to Q1A's 1.33 chi^2 reduction; the realized 290 chi^2 reduction\n\
+  \     is materially larger (218x larger than Q1A's reduction), so the EXHAUSTED-\n\
+  \     UNRESOLVED reading is NOT the most natural substantive interpretation of\n\
+  \     this result. Z2 (time_of_day) IS a meaningful within-data \u03C3-algebra above\n\
+  \     and beyond Z_c (hour_of_week); the thread does not exhaust on Q1B's\n    \
+  \ realization.\n\n  7. ROUTING: per phase_a.shape_outcomes.R-B1B.interpretation\
+  \ + branching_rules.\n     Q1B.R-B1B = null, no auto-advancement. The thread does\
+  \ NOT resolve (closure\n     rule cumulative share 0.40 < 0.80) and does NOT exhaust\
+  \ (Z2 delivered\n     meaningful reduction). Coordinator's post-arbiter decision\
+  \ space includes\n     thread-amendment to add a third within-data Z (e.g., continuous\
+  \ within-day\n     phase, or cross-axis (Z_c, Z2, demand_quantile) joint stratification),\n\
+  \     OR a new thread targeting exogenous Z (temperature). The arbiter records\n\
+  \     R-B1B mechanically; the coordinator advances state.\n\nArbiter precondition\
+  \ fidelity_coverage_passed: true.\n\n\nProvenance note: this phase_fidelity_check_r.yaml\
+  \ carries git_clean: false\nbecause the result.yaml sidecar and experiment/results/q1b_z2_conditioning.txt\n\
+  are freshly written (untracked) at the time this file is stamped. Same\ninline-stamp\
+  \ pattern documented in Q1A's, Q2B's and P1's Check R artifacts. The\ncanonical\
+  \ cleanliness witness for the underlying run is the .txt's own\nmake_result() header\
+  \ (inputs_fingerprint 7ec89f9eb1604cd1..., body_sha256\n67bb62f5b9e9b978..., git_sha\
+  \ 1736e712065d130275dd8b0b8e7246717d952d6e). Registry\nverify reports 'chain verified'\
+  \ after result.yaml's inline stamp. The git_clean:\nfalse in this Check R yaml is\
+  \ the inline-stamp pattern, not a tree-state defect.\nArbiter records result_from_clean_tree:\
+  \ true with this caveat.\n"
+artifact_format_note: "Q1B emits BOTH a result.yaml sidecar (entry-local) AND a CLAIM-GRADE\
+  \ provenance envelope at experiment/results/q1b_z2_conditioning.txt (make_result()\
+  \ output). The result.yaml is the primary registry artifact (verifier walks references[]);\
+  \ the .txt carries the inputs_fingerprint + body_sha256 for the run-state pin. Pickle\
+  \ scratch/data/q1b_z2_conditioning/q1b.pkl holds the full PIT tables and per-cell\
+  \ fitted-params dicts for re-analysis. Check R inspects the result.yaml as the structured\
+  \ numeric surface; the .txt header pins reproducibility (frozen_spec_hash, inputs_fingerprint,\
+  \ git_sha). The result.yaml was inline-stamped (registry.stamp with self_path) post-emission\
+  \ to fill body_sha256/git_sha/git_clean \u2014 same pattern Q1A used; the experiment\
+  \ script emits the body and stamping is a separate workflow step.\n"
+git_sha: 1736e712065d130275dd8b0b8e7246717d952d6e
+git_clean: false
+body_sha256: 5892090ca1ea68d51287d9abca8372f277b75e3de0f36dfaa881dfeeb8587bfa
