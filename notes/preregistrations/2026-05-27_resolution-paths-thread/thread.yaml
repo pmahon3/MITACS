@@ -20,7 +20,34 @@ amendments:
 
     '
   written_at: '2026-05-27T16:04:06-07:00'
-body_sha256: 91d529c9273698689cd7e6bc2340feec7e93e0ae79b0056c2904e5759c5ba8ed
+- amendment_id: A2
+  changes:
+  - 'Add node Q1B'' (parent_branch: R-A, parent_id: Q1B, status: planned)'
+  - Add branching_rules.Q1B' with all three outcomes mapped to null (non-gating w.r.t.
+    thread state machine)
+  - current_node_id unchanged (remains null; Q1B' is out-of-state-machine sibling)
+  - branching_rules.Q1B.R-A1B / R-B1B / R-C1B unchanged (settled-node immutability
+    rule)
+  - Q1B node entry unchanged (settled-node immutability rule)
+  git_sha: 9ee4ac20b6abb79b419cf90ea71186933b3e40e2
+  prior_tree_hash: 91d529c9273698689cd7e6bc2340feec7e93e0ae79b0056c2904e5759c5ba8ed
+  reason: 'A2 adds Q1B'' as a non-gating sibling of Q1B under parent_branch=R-A. Per
+    user decision (d) locked end of session 2026-05-29-a, the tightening run brackets
+    whether Q1B''s wide CI [+8.06, +484.4] on cumulative chi^2 improvement (width
+    476.358 chi^2, spans ~60x at point 290.3) narrows under denser SMC (N_PARTICLES
+    200->400) or is dominated by eval-window-noise. Empirical CI-tightening experiment;
+    not a head-to-head; outcome informs the user adjudication of the (a)/(b)/(c) amendment
+    paths surfaced in Q1B''s S4 advance. This matters because (a) further within-data
+    Z axes, (b) cross-axis joint stratification thread spawn, and (c) temperature/exogenous-Z
+    arm are each ranked differently depending on whether the Q1B effect is near the
+    lower CI bound (8.06 chi^2; essentially Q1A-scale; (c) becomes dominant) or near
+    the upper CI bound (484.4 chi^2; ~67% closure; (a)/(b) become attractive). Q1B''
+    tightens the CI before the user picks. Non-gating w.r.t. thread state machine;
+    current_node_id remains null; Q1B'' settlement does NOT advance the tree.
+
+    '
+  written_at: '2026-05-29T22:00:00-07:00'
+body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
 branching_rules:
   P1:
     R-A: Q1A
@@ -40,13 +67,17 @@ branching_rules:
     R-A1B: null
     R-B1B: null
     R-C1B: P2
+  Q1B':
+    R-A1B': null
+    R-B1B': null
+    R-C1B': null
   Q1C:
     R-A1C: null
     R-B1C: null
     R-C1C: P2
 current_node_id: null
 git_clean: false
-git_sha: 1736e712065d130275dd8b0b8e7246717d952d6e
+git_sha: 9ee4ac20b6abb79b419cf90ea71186933b3e40e2
 nodes:
   P1:
     id: P1
@@ -214,6 +245,75 @@ nodes:
         source: P1.result AND Q1A.result
     result: R-B1B
     status: settled
+  Q1B':
+    id: Q1B'
+    name: q1b-prime-smc-tightening
+    notes: 'Q1B'' is a non-gating empirical CI-tightening run on Q1B''s winning (day_type,
+      Z_c, Z2_c) configuration. Single arm: re-run `experiment/q1b_z2_conditioning/__main__.py`
+      with `--n-particles 400` (vs Q1B''s 200). All other code paths identical (same
+      library, same fitter, same SMC seed convention, same paired-day bootstrap convention,
+      same MIN_CELL_SIZE pool-fallback rule, same dual reproduction-check anchors
+      Q2A 953.84 + Q1A 952.5167).
+
+
+      Verdict is on the cumulative_chi2_improvement_above_Z_c CI WIDTH, not the point
+      estimate. R-A1B'' fires if width narrows to <= 75% of Q1B''s realized 476.358
+      chi^2 width (i.e., <= 357.27). R-B1B'' = mixed. R-C1B'' = widens OR point shift
+      > 50 chi^2.
+
+
+      Reproduction-check semantics at N=400: the existing BLOCKING assertions in `__main__.py`
+      lines 1424/1454 call SMC with M=args.n_particles. At N=400 the SMC trajectories
+      diverge from the seed-exact N=200 path; drift could be within the existing tol=50
+      chi^2 or above it. Phase_a treats drift as part of the measurement: if repro
+      passes within 50, the dual-anchor framing survives; if it FAILS, that itself
+      is empirical evidence that SMC variance at N=200 was non-trivial in the parent
+      fits -- informative side-channel, not a failed gate. The script''s existing
+      assert will halt execution if drift > 50; phase_a may carve out a catch-and-report
+      rather than carve out the assert itself (preregister''s call when filling phase_a).
+
+
+      Non-gating: branching_rules.Q1B'' = {R-A1B'': null, R-B1B'': null, R-C1B'':
+      null}. Q1B''''s settlement does NOT advance current_node_id. Q1B'' informs the
+      user adjudication of the (a)/(b)/(c) paths surfaced by Q1B''s S4 advance but
+      does not itself pick one.
+
+      '
+    parent_branch: R-A
+    parent_id: Q1B
+    phase_a_path: null
+    phase_a_skeleton:
+      candidate_set:
+      - SMC_particle_count_change
+      metric_class: 'Empirical CI-tightening on Q1B''s settled cumulative_chi2_improvement_above_Z_c
+        statistic. Single arm: re-run Q1B''s winning (day_type, Z_c, Z2_c) configuration
+        with N_PARTICLES=400 (vs Q1B''s 200). All other methodology identical (library,
+        fitter, SMC seed convention, paired-day bootstrap convention, dual reproduction-check
+        anchors). Verdict metric is the realized 95% CI WIDTH on cumulative_chi2_improvement_above_Z_c.
+        Q1B''s realized width was 476.358 chi^2 ([+8.064, +484.423]).
+
+        '
+      outcome_categories:
+      - R-A1B': CI width <= 357.27 (<= 75% of Q1B's 476.358; SMC noise IS the dominant
+          variance component -- tightening lever works; user can adjudicate (a)/(b)/(c)
+          on the narrower CI)
+      - R-B1B': CI width in (357.27, 524.0] (mixed; SMC noise contributes but eval-window-noise
+          is non-trivial; user accepts wide CI and adjudicates (a)/(b)/(c) on substantive
+          grounds)
+      - R-C1B': 'CI width > 524.0 OR |better_chi2 point shift| > 50 chi^2 (widens,
+          OR SMC point estimate shifts more than Monte-Carlo noise allows -- anomaly:
+          SMC seed dependence or methodological issue worth diagnosing before any
+          further amendment)'
+      skeleton_thresholds_depend_on:
+      - field: ci_width_cuts
+        rule: 'R-A1B'' / R-B1B'' / R-C1B'' cuts are derived from Q1B''s realized better_chi2
+          CI95 width (476.358 chi^2 from result.yaml). 75%-cut (357.27) discriminates
+          V_smc/V_total >= 0.875 from below; 110%-cut (524.0) admits bootstrap noise
+          without making R-C1B'' trivially unfireable.
+
+          '
+        source: Q1B.result (primary_result.chi2_Z2_c_ci95 width)
+    status: planned
   Q1C:
     id: Q1C
     name: temperature-fallback-prior-supported-Z
@@ -422,13 +522,12 @@ state_history:
     sits unambiguously interior to the registered (228, 2284] band (lower CI bound
     ~2.05x clear of R-A1B; upper CI bound ~2.42x clear of R-C1B). chi2_Z2_b = 696.0
     [492.25, 1009.01]; chi2_Z2_c = 662.22 [479.78, 945.41]; chi2_diff = +33.78 [-53.19,
-    +124.47] with paired SE = 44.71 → |diff|/SE = 0.756 < 1.0 NEAR-TIE. Z2_c
-    (4-level categorical per P1''s production binning) wins at point estimate by
-    +33.78 chi^2 but no statistically-discernible head-to-head ranking.
+    +124.47] with paired SE = 44.71 → |diff|/SE = 0.756 < 1.0 NEAR-TIE. Z2_c (4-level
+    categorical per P1''s production binning) wins at point estimate by +33.78 chi^2
+    but no statistically-discernible head-to-head ranking.
 
 
-    Q1B.status: active -> settled; Q1B.result: R-B1B; Q1B.phase_a_path filled
-    (2026-05-27_q1b-z2-conditioning-second-axis/phase_a.yaml).
+    Q1B.status: active -> settled; Q1B.result: R-B1B; Q1B.phase_a_path filled (2026-05-27_q1b-z2-conditioning-second-axis/phase_a.yaml).
     current_node_id: Q1B -> null. THREAD PAUSED PENDING USER DECISION ON AMENDMENT
     DIRECTION (see "coordinator decision space" in this note); no auto-advancement
     under branching_rules.Q1B.R-B1B = null per the registered tree.
@@ -436,154 +535,141 @@ state_history:
 
     NO SIBLINGS CLOSED at thread level. branching_rules.Q1B.R-A1B maps to null (would
     have triggered thread-RESOLVED if cumulative share > 0.80 per root.closure_rule;
-    realized share 0.40 < 0.80, did not fire). branching_rules.Q1B.R-C1B maps to
-    P2 (synthetic Gaussian-DGP calibration; did not fire). P2 remains reachable via
-    Q1C.R-C1C and is NOT closed at thread level. Q1A'' (parallel non-state-machine
-    sibling per amendment A1; phase_a deferred per "Q1A'' deferred" in CLAUDE.md
-    pending FastICA selection-rule design refresh) is unaffected by Q1B''s state
-    advancement; its eventual arbiter fires on its own outcome categories
-    independently.
+    realized share 0.40 < 0.80, did not fire). branching_rules.Q1B.R-C1B maps to P2
+    (synthetic Gaussian-DGP calibration; did not fire). P2 remains reachable via Q1C.R-C1C
+    and is NOT closed at thread level. Q1A'' (parallel non-state-machine sibling per
+    amendment A1; phase_a deferred per "Q1A'' deferred" in CLAUDE.md pending FastICA
+    selection-rule design refresh) is unaffected by Q1B''s state advancement; its
+    eventual arbiter fires on its own outcome categories independently.
 
 
     SUBSTANTIVE CENTRAL FINDING (the verdict label R-B1B understates the realized
-    informativeness; the arbiter suffix _SUBSTANTIVE_FAVORABLE marks this). Z2
-    (time_of_day) delivered a CUMULATIVE REDUCTION of 290.29 chi^2 above Q1A''s Z_c
-    carryforward [8.06, 484.42] = 40.07% of the remaining gap-to-close to R-A1B
-    (725.84 chi^2 between Q1A baseline 952.5167 and R-A1B cut 228). From the Q2A
-    no-Z baseline 953.84, the cumulative share is 40.18%. By comparison, Q1A''s Z
-    lever closed 0.18% of the gap (1.33 chi^2 units). Q1B''s Z2 lever is 218x Q1A''s
-    in absolute chi^2 units and ~220x as a share-of-gap. The cumulative CI lower
-    bound (8.06) is sign-determined positive at 95% (barely).
+    informativeness; the arbiter suffix _SUBSTANTIVE_FAVORABLE marks this). Z2 (time_of_day)
+    delivered a CUMULATIVE REDUCTION of 290.29 chi^2 above Q1A''s Z_c carryforward
+    [8.06, 484.42] = 40.07% of the remaining gap-to-close to R-A1B (725.84 chi^2 between
+    Q1A baseline 952.5167 and R-A1B cut 228). From the Q2A no-Z baseline 953.84, the
+    cumulative share is 40.18%. By comparison, Q1A''s Z lever closed 0.18% of the
+    gap (1.33 chi^2 units). Q1B''s Z2 lever is 218x Q1A''s in absolute chi^2 units
+    and ~220x as a share-of-gap. The cumulative CI lower bound (8.06) is sign-determined
+    positive at 95% (barely).
 
 
-    CRITICAL S3 PRE-FLAG DOWNGRADE: the S3 state-history advisory pre-flagged
-    EXHAUSTED-UNRESOLVED as a plausible Q1B trajectory if Q1B delivered "similar
-    0.18%-of-gap magnitudes" to Q1A. That premise is EMPIRICALLY REFUTED by Q1B''s
-    218x-Q1A realization. EXHAUSTED-UNRESOLVED is NOT auto-fired at S4 and is NOT
-    the most natural substantive interpretation of this result. The S3 pre-flag is
-    superseded by realized data; the prior S3 entry remains historical (the
-    pre-flag was advisory at the time, registered against the trajectory premise
-    that the data has now refuted) but the operative state-history reading is this
-    S4 note. The thread does NOT auto-resolve either: the realized cumulative
-    share 0.40 is below root.closure_rule''s 0.80 threshold for thread-RESOLVED
-    via the multi-Z path. The thread is in a state the registered tree did not
-    pre-anticipate: substantively informative + neither RESOLVED nor EXHAUSTED.
-    The workflow shape mirrors Q2A''s "first arbiter without mechanical/substantive
-    gap" — a tree-shape-first observation that the realized data sits in a
-    previously-uncharted regime relative to both forecasters'' priors and the
-    pre-registered closure logic.
+    CRITICAL S3 PRE-FLAG DOWNGRADE: the S3 state-history advisory pre-flagged EXHAUSTED-UNRESOLVED
+    as a plausible Q1B trajectory if Q1B delivered "similar 0.18%-of-gap magnitudes"
+    to Q1A. That premise is EMPIRICALLY REFUTED by Q1B''s 218x-Q1A realization. EXHAUSTED-UNRESOLVED
+    is NOT auto-fired at S4 and is NOT the most natural substantive interpretation
+    of this result. The S3 pre-flag is superseded by realized data; the prior S3 entry
+    remains historical (the pre-flag was advisory at the time, registered against
+    the trajectory premise that the data has now refuted) but the operative state-history
+    reading is this S4 note. The thread does NOT auto-resolve either: the realized
+    cumulative share 0.40 is below root.closure_rule''s 0.80 threshold for thread-RESOLVED
+    via the multi-Z path. The thread is in a state the registered tree did not pre-anticipate:
+    substantively informative + neither RESOLVED nor EXHAUSTED. The workflow shape
+    mirrors Q2A''s "first arbiter without mechanical/substantive gap" — a tree-shape-first
+    observation that the realized data sits in a previously-uncharted regime relative
+    to both forecasters'' priors and the pre-registered closure logic.
 
 
-    FRAMEWORK READING SHARPENING (binding for the kernel-family-agnostic theory
-    memo + CLAUDE.md framework section at next refresh). Joint S9+S10+S11+S12 was
-    read in Q1A''s arbiter and the S3 thread notes as "within-data
-    sigma-algebra-enrichment levers are empirically bounded at the ~0.18%-of-gap
-    scale." Q1B refutes that reading AS-STATED. The sharpened reading: SINGLE-AXIS
-    within-data sigma-algebra enrichment IS bounded near zero (Q1A delivered
-    0.18%); JOINT multi-axis within-data conditioning recovers MEANINGFULLY MORE
-    (Q1B delivered 40.07% on top of Q1A''s carryforward). FULL closure to R-A1B is
-    NOT achieved within the time-index alone (cumulative point 662 is 2.9x above
-    R-A1B cut; lower CI 468 is 2.05x above), so the identifiability obstruction at
-    the FULL-CLOSURE level remains a candidate reading — but the within-data lever
-    space has more directions than single-axis P1 ranking suggested. Cross-axis
+    FRAMEWORK READING SHARPENING (binding for the kernel-family-agnostic theory memo
+    + CLAUDE.md framework section at next refresh). Joint S9+S10+S11+S12 was read
+    in Q1A''s arbiter and the S3 thread notes as "within-data sigma-algebra-enrichment
+    levers are empirically bounded at the ~0.18%-of-gap scale." Q1B refutes that reading
+    AS-STATED. The sharpened reading: SINGLE-AXIS within-data sigma-algebra enrichment
+    IS bounded near zero (Q1A delivered 0.18%); JOINT multi-axis within-data conditioning
+    recovers MEANINGFULLY MORE (Q1B delivered 40.07% on top of Q1A''s carryforward).
+    FULL closure to R-A1B is NOT achieved within the time-index alone (cumulative
+    point 662 is 2.9x above R-A1B cut; lower CI 468 is 2.05x above), so the identifiability
+    obstruction at the FULL-CLOSURE level remains a candidate reading — but the within-data
+    lever space has more directions than single-axis P1 ranking suggested. Cross-axis
     joint stratification is the within-data direction the framework reading should
     now incorporate.
 
 
-    PER-CELL CORROBORATION OF P1 AT FINER RESOLUTION. Q1A''s dominant
-    saturday__zc6 cell (chi^2 = 1634; alpha_L = 0.61 stratum per P1) splits across
-    time_of_day strata as morning_ramp (967.28) > evening (399.77) > afternoon
-    (328.09). Sum 1695, comparable to Q1A''s 1634 (small overshoot expected under
-    finer sigma-algebra). The morning_ramp sub-stratum within saturday__zc6 alone
-    exceeds the pooled Q1B marginal 662.22 by 46%. The contamination IS where P1
-    said it would be AND has internal time_of_day structure that hour_of_week
-    alone could not resolve. The joint (Z_c, Z2) sigma-algebra reveals genuine
-    sub-structure the single-axis P1 ranking could not isolate.
+    PER-CELL CORROBORATION OF P1 AT FINER RESOLUTION. Q1A''s dominant saturday__zc6
+    cell (chi^2 = 1634; alpha_L = 0.61 stratum per P1) splits across time_of_day strata
+    as morning_ramp (967.28) > evening (399.77) > afternoon (328.09). Sum 1695, comparable
+    to Q1A''s 1634 (small overshoot expected under finer sigma-algebra). The morning_ramp
+    sub-stratum within saturday__zc6 alone exceeds the pooled Q1B marginal 662.22
+    by 46%. The contamination IS where P1 said it would be AND has internal time_of_day
+    structure that hour_of_week alone could not resolve. The joint (Z_c, Z2) sigma-algebra
+    reveals genuine sub-structure the single-axis P1 ranking could not isolate.
 
 
     REPRODUCTION CHECKS AT BOTH ANCHORS EXACT. q1b_no_z_chi2 = 953.8433 reproduces
-    Q2A''s settled M3 chi^2 = 953.84 to 4 decimals (|diff|/settled = 3.5e-6).
-    q1b_zc_only_chi2 = 952.5167 reproduces Q1A''s settled Z_c-only chi^2 =
-    952.5167 to 8 decimals (|diff|/settled = 3.5e-8). The fitting machinery is
-    bit-identical at both endpoints — the 290 chi^2 cumulative closure is a real
-    signal, not a pipeline drift artifact. Strongest dual-anchor reproduction in
-    the workflow''s history.
+    Q2A''s settled M3 chi^2 = 953.84 to 4 decimals (|diff|/settled = 3.5e-6). q1b_zc_only_chi2
+    = 952.5167 reproduces Q1A''s settled Z_c-only chi^2 = 952.5167 to 8 decimals (|diff|/settled
+    = 3.5e-8). The fitting machinery is bit-identical at both endpoints — the 290
+    chi^2 cumulative closure is a real signal, not a pipeline drift artifact. Strongest
+    dual-anchor reproduction in the workflow''s history.
 
 
-    SIXTH NAMED-FAILURE-MODE INSTANCE (new shape variant). Pattern shape: MIXED
-    SCORING DECOMPOSITION across forecast surfaces. Outcome category matches DA
-    (R-B1B); near-tie shape matches DA; near-tie magnitude bracket exceeded by
-    both forecasters; winner-direction matches proponent (Z2_c at point);
-    cumulative-reduction magnitude (290 chi^2) sits ORDERS OF MAGNITUDE from both
-    sides'' implicit priors (proponent expected ~772 chi^2 closure to R-A1B; DA
-    expected ~5 chi^2 of Q1A-scale movement). Realized data in a previously-
-    uncharted cumulative-reduction regime that neither pre-registration
+    SIXTH NAMED-FAILURE-MODE INSTANCE (new shape variant). Pattern shape: MIXED SCORING
+    DECOMPOSITION across forecast surfaces. Outcome category matches DA (R-B1B); near-tie
+    shape matches DA; near-tie magnitude bracket exceeded by both forecasters; winner-direction
+    matches proponent (Z2_c at point); cumulative-reduction magnitude (290 chi^2)
+    sits ORDERS OF MAGNITUDE from both sides'' implicit priors (proponent expected
+    ~772 chi^2 closure to R-A1B; DA expected ~5 chi^2 of Q1A-scale movement). Realized
+    data in a previously- uncharted cumulative-reduction regime that neither pre-registration
     anticipated. closer_forecast = devils_advocate (4 of 5 surfaces).
 
 
-    COORDINATOR DECISION SPACE (deferred to user; surfaced here per arbiter''s
-    notes_for_thread_coordinator). All three are framework-supported; the
-    realized data does not statistically rank them. The thread-coordinator does
-    NOT pre-commit the tree — this is an amendment-direction decision for the
-    user (and benefits from advisor input). The three options:
+    COORDINATOR DECISION SPACE (deferred to user; surfaced here per arbiter''s notes_for_thread_coordinator).
+    All three are framework-supported; the realized data does not statistically rank
+    them. The thread-coordinator does NOT pre-commit the tree — this is an amendment-direction
+    decision for the user (and benefits from advisor input). The three options:
 
-    (a) Thread amendment adding a third within-data Z axis. P1''s remaining axes
-    ranked by range: season (0.135), demand_quantile (0.075) — weaker prior
-    support than time_of_day (0.485, used as Z2) but the cross-axis joint
-    hypothesis is newly-validated by Q1B''s realization. Could register Q1D (third
-    within-data Z axis added to (Z_c, Z2_c) carryforward) with adjusted
-    MIN_CELL_SIZE for the finer cell partition.
+    (a) Thread amendment adding a third within-data Z axis. P1''s remaining axes ranked
+    by range: season (0.135), demand_quantile (0.075) — weaker prior support than
+    time_of_day (0.485, used as Z2) but the cross-axis joint hypothesis is newly-validated
+    by Q1B''s realization. Could register Q1D (third within-data Z axis added to (Z_c,
+    Z2_c) carryforward) with adjusted MIN_CELL_SIZE for the finer cell partition.
 
-    (b) Spawn a new thread targeting cross-axis joint stratification more
-    systematically. The framework-reading sharpening Q1B delivered (single-axis
-    vs joint multi-axis as distinct lever classes) suggests a new line of inquiry:
-    what is the cumulative limit of within-data joint conditioning? Multi-axis
-    sweeps could be pre-registered as a thread root rather than as single-axis
-    amendments to this thread.
+    (b) Spawn a new thread targeting cross-axis joint stratification more systematically.
+    The framework-reading sharpening Q1B delivered (single-axis vs joint multi-axis
+    as distinct lever classes) suggests a new line of inquiry: what is the cumulative
+    limit of within-data joint conditioning? Multi-axis sweeps could be pre-registered
+    as a thread root rather than as single-axis amendments to this thread.
 
-    (c) Pivot to the temperature/exogenous-Z arm (Q1C reopening amendment or new
-    thread per the framework-prescribed resolution paths in
-    disintegration_diagnostic.md). Full closure to R-A1B is NOT achieved within
-    the time-index (cumulative point 662 still 2.9x above R-A1B cut; lower CI 468
-    still 2.05x above). The clim-gap-nonstationary memory continues to point at
-    temperature as the strongest a-priori candidate for the residual 60% of the
-    gap.
+    (c) Pivot to the temperature/exogenous-Z arm (Q1C reopening amendment or new thread
+    per the framework-prescribed resolution paths in disintegration_diagnostic.md).
+    Full closure to R-A1B is NOT achieved within the time-index (cumulative point
+    662 still 2.9x above R-A1B cut; lower CI 468 still 2.05x above). The clim-gap-nonstationary
+    memory continues to point at temperature as the strongest a-priori candidate for
+    the residual 60% of the gap.
 
 
-    The arbiter explicitly does NOT pre-judge which path the coordinator takes;
-    the coordinator records the realized state + framework-reading sharpening +
-    the three-way decision space. The user adjudicates the amendment direction
-    in a separate dispatch.
+    The arbiter explicitly does NOT pre-judge which path the coordinator takes; the
+    coordinator records the realized state + framework-reading sharpening + the three-way
+    decision space. The user adjudicates the amendment direction in a separate dispatch.
 
 
-    FRAMEWORK-SIDE AUDIT BACKLOG (advisory; not coordinator scope). The
-    kernel-family-agnostic theory memo (writeup/tex/missing_content_memo.tex)
-    already predates (S11) and (S12); (S13) (this entry) compounds the backlog.
-    When the memo''s /audit pure is next run, fold (S11)-(S13) into the
-    within-data-lever-boundedness section: the boundedness reading should be
-    sharpened from "single-axis bounded" to "single-axis bounded near zero;
-    joint multi-axis bounded at higher magnitude but full closure requires
-    auxiliary information beyond the time index." CLAUDE.md''s "Settled findings
-    since 2026-05-21" section also needs (S13) added with the headline numerics,
-    the 40.07%-of-gap reading, the framework-reading sharpening, and the 6th-
-    named-failure-mode-instance notation.
+    FRAMEWORK-SIDE AUDIT BACKLOG (advisory; not coordinator scope). The kernel-family-agnostic
+    theory memo (writeup/tex/missing_content_memo.tex) already predates (S11) and
+    (S12); (S13) (this entry) compounds the backlog. When the memo''s /audit pure
+    is next run, fold (S11)-(S13) into the within-data-lever-boundedness section:
+    the boundedness reading should be sharpened from "single-axis bounded" to "single-axis
+    bounded near zero; joint multi-axis bounded at higher magnitude but full closure
+    requires auxiliary information beyond the time index." CLAUDE.md''s "Settled findings
+    since 2026-05-21" section also needs (S13) added with the headline numerics, the
+    40.07%-of-gap reading, the framework-reading sharpening, and the 6th- named-failure-mode-instance
+    notation.
 
 
     TEMPERATURE PRIOR STATUS: still candidate for full closure beyond within-data
-    joint conditioning. Q1B''s 40%-of-gap closure leaves 60% unexplained; the
-    clim-gap-nonstationary prior continues to be the strongest a-priori candidate
-    for the residual. Coordinator''s decision (a)-(c) above implicitly ranks the
-    order of arms — within-data axes first vs exogenous Z first.
+    joint conditioning. Q1B''s 40%-of-gap closure leaves 60% unexplained; the clim-gap-nonstationary
+    prior continues to be the strongest a-priori candidate for the residual. Coordinator''s
+    decision (a)-(c) above implicitly ranks the order of arms — within-data axes first
+    vs exogenous Z first.
 
 
     P2 STATUS: still reachable (from Q1C.R-C1C). Not affected by Q1B.R-B1B firing.
 
 
-    Q1A'' STATUS: parallel non-state-machine sibling per amendment A1; phase_a
-    not yet filled (deferred per "Q1A'' deferred" in CLAUDE.md pending FastICA
-    selection-rule design refresh). Independent of Q1B''s state advancement; its
-    eventual arbiter will fire on its own outcome categories independently of
-    the resolution-paths-thread state machine.
+    Q1A'' STATUS: parallel non-state-machine sibling per amendment A1; phase_a not
+    yet filled (deferred per "Q1A'' deferred" in CLAUDE.md pending FastICA selection-rule
+    design refresh). Independent of Q1B''s state advancement; its eventual arbiter
+    will fire on its own outcome categories independently of the resolution-paths-thread
+    state machine.
 
     '
   prior_hash: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
