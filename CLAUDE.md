@@ -215,7 +215,8 @@ result.
   claims are superseded). Intra-day conditioning required (full-process Σ singular);
   scalar one-step innovation strongly non-Gaussian (excess kurtosis ≈24–33).
 - ✅ Applied-audit workflow operational (see "Applied-audit workflow" section
-  above). Eleven registered entries (three threads, eight experiments). Run
+  above). Thirteen registered entries (three threads, ten experiments;
+  Q1A SETTLED 2026-05-27, Q1A' AWAITING-B). Run
   `python -m experiment.audit.registry list` for current state.
 
 ### Two writeups under active development (do not conflate)
@@ -230,10 +231,10 @@ result.
   internal memo that documents the framework + Q1/Q2A/Q2B results.
 
 ### Settled findings since 2026-05-21 (chronological)
-The applied-audit workflow has produced eight settled / arbitered findings.
+The applied-audit workflow has produced nine settled / arbitered findings.
 Authoritative source is the memo's (S1)–(S10) numbering + the per-experiment
-memory files; (S11) is registered and memo'd but not yet folded into the
-kernel-family-agnostic theory memo (the memo predates it).
+memory files; (S11) and (S12) are registered and memo'd but not yet folded into the
+kernel-family-agnostic theory memo (the memo predates them).
 
 - (S1, S6) **v2 multiscale-direct-h-step SETTLED**:
   D_RATIO = 28.96 [26.82, 31.43] at headline cell; strict-semigroup
@@ -322,6 +323,46 @@ kernel-family-agnostic theory memo (the memo predates it).
   sibling-not-fired (temperature prior survives as candidate for
   marginal pathology but is no longer the prior-supported
   localizing axis).
+- (S12) **Q1A Z-conditioning head-to-head SETTLED R-B1A**
+  (DA-CONFIRMED on outcome category with exact point forecast;
+  fifth named-failure-mode instance, new shape variant): First
+  applied chi^2-side test of P1's binding-axis result on the
+  M3 residual law. Production-path `mixture_2_gaussian_mle_fit`
+  per (day_type, Z) cell, head-to-head Z_b (binary weekend
+  indicator, hour_of_week bin ≥ 5) vs Z_c (8-level categorical
+  bin 0..7). Reproduction-check EXACT (Q1A no-Z chi^2 = 953.84
+  reproduces Q2A settled 953.84; |diff| = 0.0). Inline synthetic
+  gate PASS (known Z-conditional DGP recovery + per-cell test
+  chi^2 well below ceiling; false-Z companion collapses to
+  marginal). **chi2_Z_b = 986.0 [678, 1382]; chi2_Z_c = 952.5
+  [627, 1374]; better_chi2 = 952.5** in (228, 2284] → R-B1A.
+  **chi2_diff = +33.5 [-93, +143]** with paired SE = 56.84 →
+  TRUE NEAR-TIE (|diff| < 1σ). Z_c wins at point estimate but
+  no statistical ranking. **Z conditioning shaved only 1.33
+  chi^2 off Q2A's 953.84 baseline — 0.18% of the 725.84 gap
+  to R-A1A.** The substantive finding is stronger than the
+  R-B1A category: hour_of_week σ-algebra enrichment delivers
+  essentially NO marginal reduction beyond bootstrap noise.
+  **Per-cell decomposition exactly corroborates P1**:
+  saturday__bin6 contributes chi^2 = 1634 (single cell exceeds
+  pooled marginal 952.5 by 70%); P1 had reported α̂_L = 0.61
+  in this stratum. **The contamination IS where P1 said it
+  would be — but the mixture-2-Gaussian family is at capacity
+  within strata.** DA's Z_c point forecast (950 vs realized
+  952.52, 0.3% residual) is the strongest pre-registered point
+  forecast in the workflow's history; proponent's R-A1A (200
+  [130, 320]) decisively falsified (4.8× overshoot of realized
+  lower CI 625). **Joint S9+S10+S11+S12** is now applied
+  chi^2-side corroboration of the identifiability obstruction —
+  three within-data levers (richer distributional families,
+  mechanism ablation, hour_of_week stratification) all
+  empirically bounded. Resolution requires **auxiliary
+  information beyond the time index** (temperature / exogenous
+  Z). **Routing:** R-B1A routes to Q1B (time_of_day) with Z_c
+  carryforward (near-tie caveat); EXHAUSTED-UNRESOLVED
+  trajectory pre-flagged in the S3 state-history (Q1B's
+  time_of_day range 0.485 < hour_of_week's 0.575 — weaker prior
+  support for the same skepticism).
 
 ### Lines of inquiry
 - `2026-05-26_missing-content-thread`: **exhausted** under registered
@@ -333,21 +374,26 @@ kernel-family-agnostic theory memo (the memo predates it).
   R-C3 (S10) → thread-coordinator closed the thread per Q2B
   arbiter recommendation; scope ("predictive-distribution class
   axis only") is empirically bounded in both directions.
-- `2026-05-27_resolution-paths-thread`: **active, current_node = Q1A**.
+- `2026-05-27_resolution-paths-thread`: **active, current_node = Q1B**.
   Successor to the distributional-class thread, targets the three
   framework-prescribed resolution paths for the joint S9+S10
   identifiability obstruction (candidate Z testing, stratified
   Patra-Sen, synthetic Gaussian-DGP calibration). State so far:
-  P1 SETTLED R-A (S11; landslide on `hour_of_week`) → Q1A.status
-  planning → active per S2 thread advancement (commit 1775873).
-  Q1C closed as sibling-not-fired. Q1A's phase_a (not yet filled)
-  must construct Z from `hour_of_week` stratification per the P1
-  arbiter's binding-axis pin; the three pre-flagged Z candidates
-  are (i) binary indicator of bin ≥ 5 (weekend window),
-  (ii) 8-level categorical (preserving hour_of_week granularity),
-  (iii) continuous hour-of-week-mod-168 phase variable. R-A1A
-  fires if marginal PIT χ² ≤ 228 (Q2A's R-A2 gate-derived cut)
-  and would RESOLVE the thread.
+  P1 SETTLED R-A (S11; landslide on `hour_of_week`) → Q1A SETTLED
+  R-B1A (S12; Z conditioning closes 0.18% of gap, NEAR-TIE)
+  → Q1B.status planning → active per S3 thread advancement
+  (current thread body_sha256 173b3d58...). Carryforward = Z_c
+  (parsimony-preferred near-tie point winner). Q1B's phase_a
+  (not yet filled) must construct Z2 from `time_of_day`
+  (P1's second-strongest axis, range 0.485) — weaker prior
+  support than Q1A's hour_of_week (range 0.575). **EXHAUSTED-
+  UNRESOLVED trajectory pre-flagged** in S3 notes: if Q1B fires
+  R-B1B/R-C1B at similar 0.18%-of-gap magnitudes, time-indexed
+  σ-algebra resolution paths are empirically exhausted and the
+  thread requires a new arm for temperature/exogenous Z. Q1A'
+  (SDR/ICA sibling, non-gating) is parallel-active per amendment
+  A1, but its FastICA-side gate is itself under amendment — see
+  "Q1A' deferred" below. Q1C closed.
 
 ### Frozen forward experiment (separate from the above)
 - ✅ **IESO retrospective head-to-head shown infeasible** from public archives.
@@ -366,19 +412,40 @@ kernel-family-agnostic theory memo (the memo predates it).
 ### Open
 - Web dashboard.
 - Forward-experiment results accrue with calendar time.
-- `resolution-paths-thread` at Q1A: fill phase_a (Z from
-  `hour_of_week` per P1 arbiter pin), run, audit, arbiter. R-A1A
-  RESOLVES the thread; R-B1A branches into Q1B (temperature
-  fallback), R-C1A branches into P2 (synthetic Gaussian-DGP
-  calibration).
-- The Goal-4 paper's abstract (written last). With S11 in hand,
-  the resolution-paths arc is citable as a fourth substantial
-  thread; consider whether the writeup needs a new section or if
-  (S11) just joins the appendix table.
-- The kernel-family-agnostic theory memo's `/audit pure` audit in the
-  theory-side `Resolvent_Framework` programme (not yet run; the memo
-  is currently lab-only). The memo also predates (S11) — if the audit
-  triggers a refresh, fold S11 in then rather than mid-stream now.
+- `resolution-paths-thread` at Q1B (current_node, active): fill
+  phase_a with Z2 from `time_of_day` (P1's second-strongest axis;
+  cumulative chi^2 computed against Q1A's Z_c-conditioned baseline
+  per S3 carryforward). R-A1B (cumulative chi^2 ≤ 228) would
+  RESOLVE the thread; R-B1B / R-C1B branch into P2 (synthetic
+  Gaussian-DGP calibration) given joint S9+S10+S11+S12 exhaust
+  the within-data lever question. Weaker prior support than Q1A
+  (time_of_day P1 range 0.485 vs hour_of_week 0.575) — given
+  Q1A's 0.18%-of-gap reading, EXHAUSTED-UNRESOLVED is the
+  baseline-expected trajectory.
+- **Q1A' deferred** (per user direction during S12 session):
+  empirical Q1A' synthetic-gate-build discovered that phase_a
+  §metric's FastICA selection rule (max |excess_kurtosis|) does
+  not compose with the cyclic-ρ verdict statistic. Multi-seed
+  on amended synthetic showed FastICA picks the saturday/sunday
+  binary-indicator columns (signal/null top |kurt| ratio ~1.0),
+  giving bimodal rho_signal {~0.65, ~0.01} and rho_null at the
+  X-cyclic-loading floor 0.55-0.71 — the 0.70/0.30 cuts
+  unsatisfiable. SIR side amendment landed (signal/null
+  eigenvalue ratio ≥ 50× replaces null-ρ cut); FastICA side needs
+  a fresh design decision (advisor options: amend selection rule
+  to max-|ρ|-vs-Y, drop FastICA from head-to-head, or extend
+  Q1A' window with a different selection criterion). Defer
+  until empirical FastICA findings can inform clean re-design.
+- The Goal-4 paper's abstract (written last). With S11 + S12
+  in hand, the resolution-paths arc has settled-to-negative
+  on the most-promising within-data Z lever; the writeup now
+  carries an honest "auxiliary information beyond time index is
+  required" reading as a publication-grade conclusion.
+- The kernel-family-agnostic theory memo's `/audit pure` audit in
+  the theory-side `Resolvent_Framework` programme (not yet run;
+  the memo is currently lab-only). The memo also predates (S11)
+  and (S12) — if the audit triggers a refresh, fold S11 + S12
+  in then rather than mid-stream now.
 
 ## Data files
 
