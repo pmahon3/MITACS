@@ -1400,6 +1400,658 @@ being a mechanism-redesign amendment); the framework reframe
 favours the spawn-new-thread move because the three resolution
 paths are not mechanism-redesign within the same lever.
 
+\section{P1 of the resolution-paths thread: settled (R-A landslide)}
+\label{sec:p1-settled}
+
+(S9) and (S10) jointly bound the distributional-class lever and map
+its boundary to the disintegration-as-diagnostic identifiability
+obstruction. The natural next move follows the framework's three
+prescribed resolution paths (\S\ref{sec:q2b-settled}, last paragraph):
+(i) candidate-$Z$ testing, (ii) stratified covariate-dependent
+two-component mixture decomposition via NPMLEmix per Deb et al.\
+(2022), (iii) synthetic Gaussian-DGP calibration. A new pre-registered
+thread (\texttt{resolution-paths-thread}) was opened 2026-05-27 to
+test these. Its root node P1 is the diagnostic that does \emph{not}
+require auxiliary data: a per-stratum application of the
+Patra--Sen (2016) two-component non-Gaussian mixture estimator
+$\hat\alpha_L$ to Q1's M1 PIT residuals, stratified along five
+candidate axes. If $\hat\alpha_L$ varies materially across strata
+on any axis, that axis names where in the existing time-indexed
+$\sigma$-algebra the missing-$Z$ structure is concentrated. The
+experiment ran 2026-05-27; this section reports the result.
+
+\paragraph{P1: candidate set (five conditioning axes).}
+\begin{itemize}[leftmargin=2em]
+\item \texttt{hour\_of\_week}: 8 bins of 21 hours, indexed
+\(\lfloor (\mathrm{weekday}\cdot 24 + (h{-}1))/21 \rfloor\),
+\(\mathrm{weekday}\in\{0,\ldots,6\}\), \(h\in\{1,\ldots,24\}\).
+\item \texttt{time\_of\_day}: 4 bins (overnight, morning ramp,
+afternoon, evening), per
+\path{experiment/p1_patra_sen/__main__.py:81-96}.
+\item \texttt{season}: 3 bins (winter Nov--Mar, summer Jun--Aug,
+shoulder Apr--May+Sep--Oct).
+\item \texttt{day\_type}: 3 bins (weekday, saturday, sunday).
+\item \texttt{demand\_quantile}: terciles of the post-cutoff
+demand distribution.
+\end{itemize}
+
+\paragraph{P1: pre-registered outcomes.}
+The verdict statistic is
+\(\mathrm{range}_{\mathrm{axis}} = \max_{s\in\mathrm{axis}}\hat\alpha_L(s) -
+\min_{s\in\mathrm{axis}}\hat\alpha_L(s)\), maximised over the five
+axes, with $1000$-paired-day bootstrap CIs:
+\begin{itemize}[leftmargin=2em]
+\item \textbf{R-A:} $\max_{\mathrm{axis}}\mathrm{range} > 0.20$. Missing
+$Z$ detectable from current data; the binding axis names where
+$Z$ is concentrated.
+\item \textbf{R-B:} $\max_{\mathrm{axis}}\mathrm{range} \in (0.10, 0.20]$.
+Marginal variation; $Z$ hint present but not localised.
+\item \textbf{R-C:} $\max_{\mathrm{axis}}\mathrm{range} < 0.10$.
+Constant across all strata; $Z$ orthogonal to current
+time-indexed conditioning.
+\end{itemize}
+
+\paragraph{P1: methodology amendment (pre-data, carve-out).}
+The original phase~A specified $F_b = N(0, 1)$ on standardised
+residuals $u_{\mathrm{std}} = (z_{\mathrm{actual}} -
+z_{\mathrm{iter}})/s_{\mathrm{iter}}$. This was wrong: M1 is a
+Student-$t$ kernel, so under correct calibration $u_{\mathrm{std}}$
+is Student-$t(\nu)$, not standard normal. Patra--Sen with
+$F_b = N(0, 1)$ on a correctly-calibrated Student-$t$ sample returns
+a large positive $\hat\alpha_L$ by construction --- not a missing-$Z$
+signal. Caught at the orient step before any Ontario data was
+touched; re-stamped under the preregister agent's
+\emph{pre-run methodology amendment} carve-out (commit
+\texttt{99a8122}). Corrected: $F_b = \mathrm{Uniform}[0,1]$ on
+$u_{\mathrm{PIT}}$ (Q1's already-emitted PIT values). Patra--Sen
+2016 Theorem~1 (monotone invariance of $\alpha_0$) gives the
+equivalence; this matches Q1's measurement convention. The
+range-shape forecasts are preserved under monotone reparameterisation,
+so proponent/DA forecasts stayed forecast-consistent.
+
+\paragraph{P1: result.}
+With $1000$-paired-day bootstrap CIs, per-axis ranges (point [CI]),
+ordered:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+axis & point & CI low & CI high \\
+\midrule
+\texttt{hour\_of\_week}    & $0.5750$ & $0.4475$ & $0.6475$ \\
+\texttt{time\_of\_day}     & $0.4850$ & $0.3850$ & $0.5775$ \\
+\texttt{day\_type}         & $0.3450$ & $0.2500$ & $0.4300$ \\
+\texttt{season}            & $0.1350$ & $0.0550$ & $0.2400$ \\
+\texttt{demand\_quantile}  & $0.0750$ & $0.0225$ & $0.1725$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Only \texttt{demand\_quantile} has a CI overlapping the R-C cut at
+$0.10$; the other four carry localising signal. The binding axis
+(\texttt{hour\_of\_week}) splits into a clear hot/cold pattern:
+hot zone (bins 5/6/7, Fri 10:00 -- Sun 23:00) at
+$\hat\alpha_L \in \{0.55, 0.61, 0.55\}$; cold zone (bin 0, Mon
+01:00 -- Mon 21:00) at $\hat\alpha_L = 0.035$ (essentially Gaussian).
+
+\paragraph{P1: verdict.}
+The mechanical verdict is \textbf{R-A at landslide strength}
+($\max_{\mathrm{axis}}\mathrm{range} = 0.575$, lower CI bound
+$0.4475$ clears the R-A cut $0.20$ by more than $2\times$). The
+substantive verdict agrees on category and adds: the missing-$Z$
+structure is \emph{cyclical/social-weekly, not seasonal/
+climatological}. Season ranks fourth of five axes at $0.135$,
+barely above the R-A cut; the prior-supported temperature candidate
+(\path{mitacs-clim-gap-nonstationary}) takes a substantive downward
+update on its localising-axis claim (temperature remains candidate
+for the marginal pathology, but in post-cutoff PIT residuals the
+localising signal sits on a weekly/social grid, not climatology).
+
+\paragraph{(S11) The P1 findings, three sub-claims.}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{(S11a) The missing-$Z$ structure is cyclical/social-
+weekly, NOT seasonal/climatological.} Hot zone is the weekend window
+(Fri evening through Sunday); cold zone is Monday morning.
+\texttt{hour\_of\_week} range $0.575$ binds; \texttt{season} range
+$0.135$ is fourth of five. Temperature prior takes a substantive
+hit on the localising-axis claim.
+
+\item \textbf{(S11b) Day-type ranking corroborates two distinct
+prior estimators.} Saturday $\hat\alpha_L = 0.6475 >$ sunday
+$0.4850 >$ weekday $0.3025$. The Saturday-$4\times$-weekday
+asymmetry from Q2A Finding~$2$ (S9) and the weekday/weekend
+structural asymmetry from eigenmodes-v1 (S2, S3) are corroborated
+from a distinct estimator family ($\hat\alpha_L$ rather than
+$\chi^2$).
+
+\item \textbf{(S11c) Patra--Sen \emph{per-stratum} application is
+a useful applied diagnostic for $\sigma$-algebra adequacy.} On
+post-cutoff data, four of five axes carry detectable localising
+signal at $95\%$. The diagnostic does not require auxiliary data
+and does not assume a parametric mixture; it tests whether the
+$\sigma$-algebra of the predictor is fine enough to absorb the
+local non-Gaussian fraction the data carry.
+\end{itemize}
+
+\paragraph{Forecaster calibration.}
+Proponent forecast R-A with binding axis \texttt{season}, range
+$0.30$ (CI $[0.18, 0.45]$). Mechanical category correct
+(\textbf{PROPONENT-CONFIRMED} on outcome); within-bucket
+substantive forecasts $95\%$-CI-falsified on three of four
+sub-quantities (binding axis is \texttt{hour\_of\_week} not
+\texttt{season}; range $0.575$ overshoots upper CI $0.45$ by
+$0.125$; $\hat\alpha_L$ marginal $0.4125$ undershoots lower CI).
+Devil's advocate R-C decisively falsified ($4$ of $5$ per-axis
+CIs above the $0.10$ R-C cut); DA's own ``what would change my
+mind'' condition $\#2$ (R-A for \texttt{hour\_of\_week} with range
+$> 0.25$) materialised verbatim at $0.575$. P1 is the fourth
+named-failure-mode instance (criterion-vs-legitimate-data-structure)
+in a new orthogonal shape: mechanical matches proponent's category,
+within-bucket detail matches neither side.
+
+\paragraph{Thread state after P1.}
+P1.status $\to$ \texttt{settled} R-A; thread branching rule
+routes R-A to Q1A (re-fit M3 with the binding-axis $Z$ added) and
+closes Q1C (the temperature-fallback sibling, since R-A fired).
+Thread state \texttt{active}, current\_node = Q1A.
+
+\section{Q1A of the resolution-paths thread: settled (R-B1A, NEAR-TIE)}
+\label{sec:q1a-settled}
+
+P1 named \texttt{hour\_of\_week} as the binding localising axis;
+Q1A is the registered $\chi^2$-side test of whether enriching M3's
+conditioning $\sigma$-algebra with that $Z$ closes the marginal-PIT
+gap. The experiment ran 2026-05-27; this section reports the result.
+
+\paragraph{Q1A: candidate set (head-to-head $Z$ constructions).}
+\begin{itemize}[leftmargin=2em]
+\item $Z_b$: binary weekend indicator ($\mathbb{1}[\mathrm{hour\_of\_
+week\_bin} \ge 5]$). Parsimony baseline; the simplest construction
+that captures the hot-zone/cold-zone split P1 found.
+\item $Z_c$: $8$-level categorical (the full \texttt{hour\_of\_week}
+bin index $\in \{0, \ldots, 7\}$). Maximum $\sigma$-algebra
+refinement on the axis.
+\end{itemize}
+Both refit M3 (mixture-$2$ Gaussian) per $(\mathrm{day\_type}, Z)$
+cell on the same pre-cutoff library Q2A used; SMC particle
+propagation per cell.
+
+\paragraph{Q1A: pre-registered outcomes.}
+The verdict statistic is
+$\mathrm{better}\_\chi^2 = \min(\chi^2_{Z_b}, \chi^2_{Z_c})$ on
+post-cutoff marginal PIT, with the Q2A-derived cuts:
+\begin{itemize}[leftmargin=2em]
+\item \textbf{R-A1A:} $\mathrm{better}\_\chi^2 \le 228$ (Q2A's
+R-A2 corroboration cut). $Z$ closes the gap; the specific $Z$ is
+identified.
+\item \textbf{R-B1A:} $\mathrm{better}\_\chi^2 \in (228, 2284]$
+(Q2A's R-B2 band). $Z$ helps but does not close; multi-$Z$ needed.
+\item \textbf{R-C1A:} $\mathrm{better}\_\chi^2 > 2284$. $Z$
+doesn't help; P1's signal was a false positive or the
+localisation missed the actual $Z$.
+\end{itemize}
+
+\paragraph{Q1A: result.}
+With $1000$-paired-day bootstrap CIs:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& point & CI low & CI high \\
+\midrule
+$\chi^2_{Z_b}$ (binary)              & $986.02$ & $678.23$ & $1{,}381.66$ \\
+$\chi^2_{Z_c}$ ($8$-level)           & $952.52$ & $626.97$ & $1{,}373.91$ \\
+$\mathrm{better}\_\chi^2$            & $952.52$ & $625.34$ & $1{,}342.33$ \\
+$\chi^2_{\mathrm{diff}} = Z_b - Z_c$ & $+33.50$ & $-93.16$ & $+142.64$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Paired SE on the difference: $56.84$; $|\chi^2_{\mathrm{diff}}|/
+\mathrm{SE} = 0.59 < 1$, so the two $Z$ constructions are
+statistically indistinguishable on the verdict-metric (TRUE NEAR-TIE;
+$Z_c$ wins at the point estimate but not at $95\%$). The
+reproduction check (M3 no-$Z$ vs Q2A's settled M3) is EXACT:
+$\chi^2_{\mathrm{no\text{-}Z}} = 953.84$, Q2A settled $= 953.84$,
+$|\mathrm{diff}| = 0.0$. The seed-equality clause holds end-to-end;
+$Z$-conditioning $\chi^2$ values are directly comparable to Q2A's
+baseline.
+
+\paragraph{Q1A: verdict.}
+Mechanical: \textbf{R-B1A} (better $952.52$ in $(228, 2284]$),
+with NEAR-TIE sub-finding ($Z_c$ wins at point, indistinguishable
+at $95\%$). Substantively the result is stronger than the
+mechanical category suggests: $Z$ conditioning shaved $1.33$
+$\chi^2$ units off Q2A's M3 = $953.84$ baseline, which is
+$\mathbf{0.18\%}$ of the $725.84$ gap-to-close to R-A1A = $228$.
+The \texttt{hour\_of\_week} $\sigma$-algebra enrichment delivers
+essentially no marginal reduction beyond bootstrap noise.
+
+\paragraph{(S12) The Q1A findings, three sub-claims.}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{(S12a) Per-cell decomposition exactly corroborates
+P1.} The saturday $\mathrm{bin}_6$ cell ($Z_c = 6$, the
+\texttt{hour\_of\_week} hot zone of Sat 17:00 -- Sun 13:00)
+contributes $\chi^2 = 1634$, single cell exceeding the pooled
+marginal $952.5$ by $70\%$. This is exactly the P1 stratum at
+$\hat\alpha_L = 0.61$. \textbf{The contamination is real and
+localised where P1 said it would be.}
+
+\item \textbf{(S12b) The mixture-$2$ Gaussian family is at
+capacity within strata.} Per-cell stratification cannot reduce
+saturday $\mathrm{bin}_6$'s $\chi^2 = 1634$ below $228$ because
+M3's mixture-$2$ Gaussian is not flexible enough to absorb the
+residual law there. Combined with (S9)'s finding that M3/M4/M5
+distributional flexibility is $\chi^2$-indistinguishable, no
+amount of within-$Z$ same-class substitution closes this cell.
+The hot-zone non-Gaussianity P1 detected is a family-capacity
+bound on Q1A's mechanism, not a $Z$-identification failure.
+
+\item \textbf{(S12c) Three within-data levers are now empirically
+bounded.} Joint (S9) + (S10) + (S11) + (S12) maps:
+distributional-class (Q2A: $1.44\times$ marginal, asymptotes),
+same-$Q$ mechanism ablation (Q2B: all three below null floor;
+two sign-determined negative), \texttt{hour\_of\_week} stratification
+(Q1A: $0.18\%$ of gap). All three are bounded. Resolution requires
+\emph{auxiliary information beyond the time index}; the
+identifiability obstruction (Bergna et al.\ 2026 Prop.~1;
+Heckman--Singer 1984; Allahverdyan 2020) is now corroborated from
+the $\chi^2$ side in addition to the Patra--Sen $\hat\alpha_L$
+side.
+\end{itemize}
+
+\paragraph{Forecaster calibration.}
+Devil's advocate forecast R-B1A with $Z_c$ point chi$^2 = 950$
+(CI $[800, 1100]$, modelled on Q2A's M3 carryforward at $953.84$
+minus a few $\chi^2$). Realised $Z_c = 952.52$, residual
+$\mathbf{0.3\%}$ on the within-bucket point forecast --- the
+strongest single calibration data point in the workflow's history.
+Proponent forecast R-A1A with $\mathrm{min}\_\chi^2 = 200$ (CI
+$[130, 320]$), decisively falsified ($4.8\times$ overshoot of
+realised lower CI $625$). Within-bucket detail: DA predicted $Z_b$
+wins by $-150$ (realised $Z_c$ wins by $+33.5$, sign reversed but
+magnitude $\sim 1\sigma$-of-diff scale correct); proponent
+predicted $Z_c$ wins by $+220$ (realised $+33.5$, one-sixth of
+proponent's magnitude). Fifth named-failure-mode instance in a
+new shape: \textbf{DA-CONFIRMED} on outcome category with
+essentially exact within-bucket point forecast but wrong
+within-bucket winner direction; proponent fully wrong on category.
+The mechanical verdict and substantive verdict align on R-B1A;
+the substantive content sharpens the framework reading (within-data
+levers exhausted) rather than pulling the verdict toward a
+neighbouring category.
+
+\paragraph{Thread state after Q1A.}
+Q1A.status $\to$ \texttt{settled} R-B1A; thread branching rule
+routes R-B1A to Q1B (re-fit M3 with a second $Z$ added on top of
+$Z_c$, drawn from P1's second-strongest axis \texttt{time\_of\_day}).
+Carryforward to Q1B: $Z_c$ is the parsimony-preferred point-estimate
+winner with the explicit NEAR-TIE caveat that $Z_b$ vs $Z_c$ is
+not statistically discernible. Thread state \texttt{active},
+current\_node = Q1B. An advisory pre-flag is logged on the thread's
+state history: given Q1A's $0.18\%$-of-gap reading on the
+\emph{binding} axis, Q1B (\texttt{time\_of\_day}, P1 range $0.485$
+vs \texttt{hour\_of\_week} $0.575$) faces the same skepticism with
+weaker prior support; if Q1B also fires R-B1B/R-C1B at similar
+magnitudes, time-indexed $\sigma$-algebra resolution paths are
+empirically exhausted and the thread requires an amendment for
+temperature/exogenous-$Z$. The advisory is background; Q1B's
+verdict is not pre-judged.
+
+\section{Q1B of the resolution-paths thread: settled (R-B1B, substantive FAVORABLE)}
+\label{sec:q1b-settled}
+
+Q1A's single-axis test left the residual $\chi^2 \approx 952$
+essentially unmoved. Q1B is the registered joint multi-axis test
+of whether stratifying further on a second $Z$ atop $Z_c$ closes
+the gap. The experiment ran 2026-05-27; this section reports the
+result.
+
+\paragraph{Q1B: candidate set (head-to-head second $Z$ on top of
+$Z_c$).}
+With the cumulative baseline = Q1A's M3 with $\sigma$-algebra
+$(\mathrm{day\_type}, Z_c) = 952.5167$ (NEAR-TIE caveat carryforward):
+\begin{itemize}[leftmargin=2em]
+\item $Z_{2,b}$: binary overnight indicator
+$(\mathbb{1}[h \notin \{1, \ldots, 6\}])$. Captures the
+overnight-vs-rest split with no within-day granularity.
+\item $Z_{2,c}$: $4$-level categorical per P1's production
+\verb|_time_of_day_label| at
+\path{experiment/p1_patra_sen/__main__.py:81-96}: overnight
+$h \in \{1, \ldots, 6\}$, morning ramp $h \in \{7, \ldots, 11\}$,
+afternoon $h \in \{12, \ldots, 17\}$, evening $h \in \{18, \ldots, 24\}$.
+\end{itemize}
+Both refit M3 per
+$(\mathrm{day\_type}, Z_c, Z_2)$ cell, $32$ cells for $Z_{2,c}$
+and $16$ for $Z_{2,b}$. SMC particle propagation per cell;
+pool-to-$(\mathrm{day\_type}, Z_c)$-parent fallback for cells with
+fewer than $200$ pre-cutoff library rows (\textbf{not} pool to
+$\mathrm{day\_type}$-only; pooling further would silently undo
+Q1A's $Z_c$ carryforward and contaminate the cumulative $\chi^2$).
+$32$ pre-cutoff cells with $n \ge 2364$; pool-fallback fires zero
+events. \emph{Two} BLOCKING reproduction-check assertions: M3
+no-$Z$ vs Q2A $953.84$ at tol $50$; M3 $\sigma = (\mathrm{day\_type},
+Z_c)$ vs Q1A $952.5167$ at tol $50$ --- the cumulative-baseline
+anchor.
+
+\paragraph{Q1B: pre-registered outcomes.}
+Same cuts as Q1A (inherited from the thread skeleton).
+$\mathrm{better}\_\chi^2 = \min(\chi^2_{Z_{2,b}}, \chi^2_{Z_{2,c}})$
+on post-cutoff marginal PIT, with R-A1B $\le 228$ / R-B1B $\in
+(228, 2284]$ / R-C1B $> 2284$. Substantive secondary:
+$\Delta\chi^2_{\mathrm{cum}} = 952.5167 - \mathrm{better}\_\chi^2$
+measures cumulative reduction above Q1A's $Z_c$ carryforward.
+
+\paragraph{Q1B: result.}
+With $1000$-paired-day bootstrap CIs:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& point & CI low & CI high \\
+\midrule
+$\chi^2_{Z_{2,b}}$ (binary)         & $696.0$ & $492.3$ & $1{,}009.0$ \\
+$\chi^2_{Z_{2,c}}$ ($4$-level)      & $662.2$ & $479.8$ & $945.4$ \\
+$\mathrm{better}\_\chi^2$           & $662.2$ & $468.1$ & $944.5$ \\
+$\chi^2_{\mathrm{diff}}$            & $+33.8$ & $-53.2$ & $+124.5$ \\
+$\Delta\chi^2_{\mathrm{cum}}$       & $+290.3$ & $+8.06$ & $+484.4$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Both reproduction checks EXACT}: M3 no-$Z$ $\to$ Q2A
+$|\mathrm{diff}| = 0.003$; M3 $Z_c$-only $\to$ Q1A $|\mathrm{diff}| =
+0.0000$. The strongest dual-anchor reproduction in the workflow's
+history. Synthetic gate PASS including the false-$Z_2$ companion
+(collapse to the $Z_c$-only marginal mixture under randomised
+$Z_2$ labels).
+
+\paragraph{Q1B: verdict (with explicit CI caveat).}
+Mechanical: \textbf{R-B1B} ($\mathrm{better}\_\chi^2 = 662.2 \in
+(228, 2284]$), winner $Z_{2,c}$ at NEAR-TIE strength
+($|\chi^2_{\mathrm{diff}}|/\mathrm{SE} < 1$). The substantive
+secondary $\Delta\chi^2_{\mathrm{cum}} = +290.3$ at the point
+estimate is \emph{$40\%$ of the remaining gap}, equivalent to
+$218\times$ the closure Q1A delivered single-axis. \textbf{Substantive
+verdict: R-B1B substantive FAVORABLE} on category, but with a
+load-bearing caveat: the bootstrap CI $[+8.06, +484.4]$ on
+$\Delta\chi^2_{\mathrm{cum}}$ spans a factor of roughly $60\times$.
+The lower bound $+8.06$ is barely above Q1A's $+1.33$; the upper
+bound $+484.4$ would close $67\%$ of the gap. The point estimate
+is genuinely informative (it is positive and clear of zero at
+$95\%$), but its magnitude is not. The framework reading
+\emph{sharpens}, not refutes, S9+S10+S11+S12: single-axis bounded
+near zero; \emph{joint} multi-axis bounded above zero with wide CI;
+full closure to R-A1B does not fire even at upper CI ($662 - 484 =
+178$ vs cut $228$ at upper-bound point projection, with the bootstrap
+distribution itself wide). \emph{The identifiability obstruction
+at full-closure level is preserved.}
+
+\paragraph{(S13) The Q1B findings, three sub-claims.}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{(S13a) Joint multi-axis within-data conditioning
+recovers signal that single-axis could not, with wide CI.} The
+$+290.3$ cumulative reduction at point exceeds Q1A's $+1.33$ by
+$218\times$; lower-CI $+8.06$ still exceeds Q1A's reading. Joint
+stratification is doing something single stratification was not.
+The framework picture is sharpened: the $\sigma$-algebra
+$\sigma(Z_c)$ left structure unabsorbed that
+$\sigma(Z_c) \vee \sigma(Z_{2,c})$ partially captures. \emph{Magnitude
+is genuinely uncertain across $60\times$.}
+
+\item \textbf{(S13b) Per-cell decomposition exactly corroborates
+P1, and the splits are heterogeneous within the P1 hot stratum.}
+The saturday $Z_c = 6$ cell (Q1A $\chi^2 = 1634$; P1
+$\hat\alpha_L = 0.61$) splits across $Z_{2,c}$ as
+morning\_ramp $967 >$ evening $400 >$ afternoon $328$. The within-
+P1-cell heterogeneity is large; the joint $\sigma$-algebra picks
+up structure that \texttt{hour\_of\_week} alone could not resolve.
+
+\item \textbf{(S13c) Methodologically: axis-level $\hat\alpha_L$
+does NOT cleanly predict cell-level $\chi^2$ contribution under
+joint stratification.} P1's axis-level $\hat\alpha_L = 0.11$ for
+overnight predicted ``essentially Gaussian''; yet overnight
+$(Z_{2,c} = 0)$ cells contribute substantially per cell
+(sunday $Z_c = 6$ overnight $= 267$, saturday $Z_c = 5$
+overnight $= 259$, weekday $Z_c \in \{1, \ldots, 4\}$ overnight
+$= 174$--$211$). The axis $\to$ cell $\to$ $\chi^2$ mapping is
+non-trivial under joint stratification. The proponent's ``P1
+gradient explains per-cell ordering'' story failed structurally,
+not just on magnitude. (S13c) is a methodological caveat for any
+future per-cell $\chi^2$ interpretation derived from per-axis
+$\hat\alpha_L$.
+\end{itemize}
+
+\paragraph{Forecaster calibration.}
+Proponent (R-A1B, $\mathrm{better}\_\chi^2 = 180$, CI $[90, 450]$)
+decisively falsified (realised $662$ is $1.47\times$ above CI
+upper). Devil's advocate (R-B1B, $\mathrm{better}\_\chi^2 = 948$,
+CI $[620, 1340]$) confirmed on outcome category but the realised
+$662$ falls in the gap between proponent's CI upper ($450$) and
+DA's CI lower ($620$). \textbf{Mixed scoring decomposition} ---
+outcome and shape (NEAR-TIE preserved) from DA, direction
+($Z_{2,c}$ wins) from proponent, magnitude from neither. Sixth
+named-failure-mode instance, new shape variant.
+
+\paragraph{Thread state after Q1B.}
+Q1B.status $\to$ \texttt{settled} R-B1B; the thread's branching
+rule for R-B1B is \texttt{null}, so mechanical state advancement
+is unavailable. The advisory EXHAUSTED-UNRESOLVED pre-flag logged
+at Q1A's settlement is \emph{downgraded}: Q1B's point-estimate
+$+290.3$ refutes the pre-flag's premise (``single-axis $0.18\%$ at
+binding axis $\Rightarrow$ multi-axis at weaker axis also $\sim 0\%$'').
+The actual finding --- joint multi-axis recovers signal with wide
+CI --- changes the next-decision shape: a three-way amendment-
+direction decision is surfaced for user adjudication, with no
+direction pre-committed by the coordinator: (a)~third within-data
+$Z$ axis (\texttt{season} or \texttt{demand\_quantile}; weaker
+prior than $Z_2$ was), (b)~new thread targeting cross-axis joint
+stratification systematically, or (c)~temperature/exogenous-$Z$
+arm (Q1C reopen or new thread per the framework-prescribed
+resolution paths). Thread state \texttt{active}, current\_node =
+\texttt{null} (paused). The right (a)/(b)/(c) call depends on
+whether tightening Q1B's wide CI matters more than exploring the
+next axis --- an advisor question. The CI lower bound $+8.06$ is
+consistent with (a)/(b)/(c) all being roughly equipriotised; the
+upper bound $+484.4$ would strongly favour (b) (the joint axis is
+doing real work); neither extreme has prior empirical support
+within the registered thread.
+
+\section{Q1B' of the resolution-paths thread: settled (R-B1B', INSPECTION-ONLY, CI widened)}
+\label{sec:q1b-prime-settled}
+
+Q1B left a wide CI on the substantive secondary statistic
+$\Delta\chi^2_{\mathrm{cum}}$. The user locked decision~(d) at
+the end of session 2026-05-29-a: bracket-check the CI's source
+before adjudicating the three-way amendment. The (a)/(b)/(c)
+value depends on which CI endpoint is closer to truth, so tighten
+first. Q1B' is the registered tightening run that asks whether
+Q1B's wide CI is methodological (SMC particle-count sampling noise
+at $N_{\mathrm{particles}} = 200$) or substantive (eval-window noise
+on the $\sim 12{,}000$-row post-cutoff window plus paired-day
+bootstrap finite-sample noise on a $\chi^2$ statistic of this
+construction). Thread amendment A2 added Q1B' as a non-gating
+sibling of Q1B under \verb|parent_branch = R-A| (mirroring the
+A1 Q1A' pattern). The experiment ran 2026-05-29; this section
+reports the result.
+
+\paragraph{Q1B$'$: candidate set (single arm, parameter-only
+variation).}
+A single arm: re-run Q1B's winning $(\mathrm{day\_type}, Z_c,
+Z_{2,c})$ configuration with $N_{\mathrm{particles}} = 400$ (vs
+Q1B's $200$). All other methodology held bit-identical: same
+pre-cutoff library, same \verb|mixture_2_gaussian_mle_fit|, same
+SMC seed convention, same paired-day bootstrap convention (same
+\verb|_Z2_BOOT_OFFSET = 8013|, $1000$ resamples), same
+\verb|MIN_CELL_SIZE = 200| pool-fallback rule, same dual
+reproduction-check anchors at Q2A $953.84$ and Q1A $952.5167$.
+\textbf{Not} a head-to-head; \textbf{not} a methodology change;
+the only knob is the SMC particle count.
+
+\paragraph{Q1B$'$: pre-registered outcomes (verdict on CI WIDTH).}
+The verdict statistic is the realised $95\%$ CI WIDTH on
+$\Delta\chi^2_{\mathrm{cum}}$, with Q1B's settled width $476.358$
+$\chi^2$ as the comparison baseline:
+\begin{itemize}[leftmargin=2em]
+\item \textbf{R-A1B$'$:} CI width $\le 357.27$ $\chi^2$
+($\le 75\%$ of $476.358$), AND $|\mathrm{better}\_\chi^2_{\mathrm{point}}
+- 662.223| \le 50$ $\chi^2$. SMC noise dominates the variance
+(corresponds to $V_{\mathrm{smc}}/V_{\mathrm{total}} \ge 0.875$
+under the bias-variance decomposition with
+$V_{\mathrm{smc}} \to V_{\mathrm{smc}}/2$ at $N: 200 \to 400$);
+the tightening lever works, user can adjudicate (a)/(b)/(c) on
+the narrower CI.
+\item \textbf{R-B1B$'$:} CI width $\in (357.27, 524.0]$ AND
+point-shift $\le 50$. Mixed; SMC contributes but eval-window-
+noise is non-trivial; the wide CI is partly intrinsic.
+\item \textbf{R-C1B$'$:} CI width $> 524.0$ OR
+$|\mathrm{point\text{-}shift}| > 50$. Widens or anomaly; SMC seed
+dependence or methodological issue worth diagnosing before any
+further amendment.
+\end{itemize}
+
+\paragraph{Q1B$'$: result.}
+With $1000$-paired-day bootstrap CIs:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+& point & CI low & CI high \\
+\midrule
+$\chi^2_{Z_{2,b}}$                              & $703.235$ & $504.4$ & $1{,}019.1$ \\
+$\chi^2_{Z_{2,c}}$                              & $679.128$ & $484.3$ & $991.9$ \\
+$\mathrm{better}\_\chi^2$                       & $679.128$ & $480.9$ & $987.1$ \\
+$\chi^2_{\mathrm{diff}}$ (paired SE $38.81$)    & $+24.107$ & $-48.2$ & $+103.7$ \\
+$\Delta\chi^2_{\mathrm{cum}}$                   & $+273.388$ & $-34.576$ & $+471.622$ \\
+\midrule
+\textbf{CI WIDTH on $\Delta\chi^2_{\mathrm{cum}}$} & \multicolumn{3}{c}{$\mathbf{506.198}$} \\
+\textbf{Q1B baseline width}                        & \multicolumn{3}{c}{$476.358$} \\
+\textbf{Width change}                              & \multicolumn{3}{c}{$+29.84\ (+6.26\%)$} \\
+$|\mathrm{better}\_\chi^2_{\mathrm{point}} - 662.223|$ & \multicolumn{3}{c}{$16.905$} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Reproduction checks both within tol $50$: M3 no-$Z$ vs Q2A,
+$|\mathrm{diff}| = 5.225$; M3 $Z_c$-only vs Q1A, $|\mathrm{diff}|
+= 44.595$. Asymmetry ratio $8.54\times$.
+
+\paragraph{Q1B$'$: verdict.}
+Mechanical: \textbf{R-B1B$'$} (width $506.198 \in (357.27, 524.0]$
+AND point-shift $16.905 \le 50$). Headroom above R-A1B$'$ cut:
+$148.93$ $\chi^2$ (the corroboration is far from cleared); headroom
+below R-C1B$'$ cut: $17.80$ $\chi^2$ (the falsification narrowly
+avoided). The realised width sits at $89.3\%$ of the way through
+the R-B1B$'$ band, $8.4\times$ closer to R-C1B$'$ than to R-A1B$'$;
+a structurally different R-B1B$'$ shape than Q1B's settled R-B1B
+which sat $\sim 2\times$ clear of both bounds.
+
+Substantive verdict: \textbf{the CI WIDENED, did not narrow.}
+Q1B$'$'s mechanical R-B1B$'$ category absorbs the realisation
+because the band is wide enough to absorb both forecasters'
+narrowing-direction forecasts and the realised widening; the band
+is the unfalsifiability zone for direction errors. The substantive
+reading is sharper than the mechanical category: SMC particle
+doubling does \emph{not} tighten Q1B's CI, so the CI is
+\emph{intrinsic to the data}, not to the SMC estimator. Q1B's wide
+$[+8.06, +484.4]$ on $\Delta\chi^2_{\mathrm{cum}}$ reflects
+eval-window noise on a $\chi^2$ statistic of this construction, not
+SMC sampling noise.
+
+\paragraph{(S14) The Q1B$'$ findings, three sub-claims.}
+\begin{itemize}[leftmargin=2em]
+\item \textbf{(S14a) SMC particle doubling does NOT tighten Q1B's
+CI.} Width $476.358 \to 506.198$ (+$6.3\%$); point-shift
+$16.9$ within tol. The proponent's strong-form SMC-dominance
+forecast (width $338$ $[290, 395]$ requiring $V_{\mathrm{smc}}/
+V_{\mathrm{total}} \ge 0.875$) is falsified $111$ $\chi^2$ above
+its CI upper. The proponent's \emph{own} pre-registered
+falsification condition (\#1: ``width $> 400 \Rightarrow$ strong-
+form SMC-dominance refuted'') was triggered by the realisation.
+The DA's modest-narrowing forecast (width $419$ $[370, 480]$,
+requiring $V_{\mathrm{smc}}/V_{\mathrm{total}} \sim 0.07$) is
+also falsified $26$ $\chi^2$ above its CI upper. Realised direction
+implies $V_{\mathrm{smc}}/V_{\mathrm{total}} \ll 0.07$:
+\textbf{eval-window noise dominates} Q1B's wide CI.
+
+\item \textbf{(S14b) The reproduction-check side-channel
+corroborates per-stratum SMC variance but refutes pooled-layer
+SMC dominance.} No-$Z$ pooled drift $|\mathrm{diff}| = 5.2$; $Z_c$-
+stratified parent drift $|\mathrm{diff}| = 44.6$ (ratio $8.54\times$).
+SMC variance IS non-trivial at the $Z_c$-stratified parent layer
+(doubling $N$ revealed it) but NOT at the no-$Z$ pooled layer.
+This is a finite-sample per-stratum effect: $Z_c$ partitions
+reduce per-cell $n$ from the full library to $\sim 1000$--$7000$
+rows where SMC noise bites harder. DA's modest-SMC-variance
+qualitative reading is corroborated; proponent's strong-form
+SMC-dominance is refuted (if SMC truly dominated the CI, no-$Z$
+drift would also be material at $N = 400$). (S14b) is also a
+methodological caveat for (S10)'s per-$(h, \mathrm{day\_type})$
+ablation analysis: the per-stratum SMC contribution that did not
+surface at the $\sigma = (h, \mathrm{day\_type})$ granularity may
+have biased (S10)'s share estimates inward.
+
+\item \textbf{(S14c) Within-data tightening is empirically
+impossible on this dataset.} Joint S9+S10+S11+S12+S13+S14 now
+spans \emph{three independent layers} of identifiability-
+obstruction evidence on the same residual $\chi^2$:
+distributional-class (S9+S10 bounded), $\sigma$-algebra-enrichment
+(S11+S12+S13 bounded with wide CI), methodological-tightening
+(S14 SMC particle count cannot narrow the realised CI).
+\textbf{Resolution requires auxiliary information beyond the
+time index.} This is now a publication-grade conclusion, not a
+hypothesis. The three-way (a)/(b)/(c) decision Q1B left for user
+adjudication takes a S14-weighted prior: (c) temperature/exogenous-
+$Z$ arm is the only direction not empirically refuted within the
+registered thread.
+\end{itemize}
+
+\paragraph{Forecaster calibration.}
+The seventh named-failure-mode instance, in a new shape variant:
+both forecasters directionally falsified on the verdict-metric
+central tendency. Mechanical R-B1B$'$ band absorbs the disagreement
+because the band itself is wide enough; the registered band is
+the unfalsifiability zone for direction errors. Proponent fails
+outcome and falsifies its own pre-registered condition $\#1$; DA
+passes outcome category but fails width point and direction.
+Point-shift forecasts both succeed (realised $16.905$ inside
+proponent $[2, 38]$ AND DA $[5, 47]$); DA's bias-correction
+prediction of $\Delta\chi^2_{\mathrm{cum,point}} = +268$ (residual
+$+5.4$) was the tightest single forecast surface. Distinct from
+Q1B's mixed-scoring shape (direction-matched-one-side, magnitude-
+matched-neither); Q1B$'$ has direction-matched-\emph{neither}.
+
+\paragraph{Provenance grade.}
+PROVENANCE-GRADE \textbf{INSPECTION-ONLY} per result.yaml
+\verb|grade_demotion_reason|: the script's hardcoded
+\path{experiment/results/q1b_z2_conditioning.txt} output path
+collided with Q1B's CLAIM-GRADE artifact (Check P's substitution
+audit set covered phase\_a hash + thread hash + prereg-dir but
+missed the literal \texttt{.txt} filename at script line $1684$).
+The run overwrote Q1B's committed CLAIM-GRADE artifact in-place;
+restored from \texttt{HEAD} per user adjudication; demoted Q1B$'$
+to INSPECTION-ONLY rather than launch a third script-edit + re-
+audit cycle. The result.yaml and pickle ARE the durable record
+(production-path code with all BLOCKING gates passed); downstream
+citation must read ``inspection-only diagnostic.'' This is a
+registry-housekeeping caveat, not a scientific one. A workflow-
+design improvement is logged for the next-session retro: future
+inline-edit parameterisations should grep-verify the result-
+artifact \texttt{.txt} path string is in the substitution set
+(suggested L1 item for Check P).
+
+\paragraph{Thread state after Q1B$'$.}
+Q1B$'$.status $\to$ \texttt{settled} R-B1B$'$; the thread's
+\verb|branching_rules.Q1B'| has all three outcomes mapped to
+\texttt{null} (non-gating per amendment A2), so mechanical state
+advancement is unavailable and current\_node remains \texttt{null}
+(unchanged from the S4 advance). Thread state \texttt{active};
+the three-way (a)/(b)/(c) adjudication originally surfaced at
+Q1B's S4 advance now proceeds on substantive grounds, with
+(c)~temperature/exogenous-$Z$ arm priority upgraded by (S14c)
+(only direction not empirically refuted within the registered
+thread).
+
 \section{What is settled at each level of generality}
 \label{sec:settled-levels}
 
@@ -1527,6 +2179,87 @@ The under-dispersion signature ($\sigma^{2}_{\mathrm{iter}} <
 \sigma^{2}_{\mathrm{empirical}}$ at virtually every cell)
 independently points at missing exogenous content. \\
 \addlinespace
+Where in the existing time-indexed $\sigma$-algebra the missing-$Z$
+structure is concentrated (per-stratum Patra--Sen diagnostic)
+& \textbf{Empirically localised} by (S11). The per-stratum
+$\hat\alpha_L$ diagnostic on Q1's M1 PIT residuals fires R-A at
+landslide strength: $\max_{\mathrm{axis}} \mathrm{range}(\hat\alpha_L)
+= 0.575$ $[0.4475, 0.6475]$, lower CI clearing the $0.20$ cut by
+more than $2\times$. The binding axis is \texttt{hour\_of\_week},
+not \texttt{season} (which ranks fourth of five at $0.135$). The
+missing-$Z$ structure is \emph{cyclical/social-weekly, not
+seasonal/climatological}: hot zone is the weekend window (Fri
+10:00 -- Sun 23:00) at $\hat\alpha_L \in \{0.55, 0.61, 0.55\}$;
+cold zone is Monday morning at $\hat\alpha_L = 0.035$ (essentially
+Gaussian). The temperature prior from
+\path{mitacs-clim-gap-nonstationary} takes a substantive downward
+update on its localising-axis claim. Day-type ranking (saturday
+$0.6475 >$ sunday $0.4850 >$ weekday $0.3025$) corroborates Q2A
+Finding~$2$ and eigenmodes-v1 (S2, S3) from a distinct estimator
+family. \\
+\addlinespace
+How far $\sigma$-algebra enrichment on the localised axis can
+go on this empirical process
+& \textbf{Empirically bounded near zero at single-axis} by (S12),
+\textbf{bounded above zero with wide CI at joint multi-axis} by
+(S13), and \textbf{empirically un-tightenable from the SMC
+estimator side} by (S14). (S12) re-fits M3 with the binding axis
+(\texttt{hour\_of\_week}) $Z$ added at $\sigma = (\mathrm{day\_type},
+Z_c)$ and shaves $1.33$ $\chi^2$ off Q2A's baseline $953.84$: $0.18\%$
+of the $725.84$ gap-to-close. The contamination is real and
+localised where P1 said it would be (saturday $\mathrm{bin}_6$
+contributes $\chi^2 = 1634$ pre-stratification, exactly the
+$\hat\alpha_L = 0.61$ stratum), but the M3 mixture-$2$ Gaussian
+family is at capacity within strata --- combined with (S9)'s
+$\chi^2$-indistinguishability of M3/M4/M5, no within-$Z$ same-class
+substitution closes this cell. (S13) re-fits at $\sigma =
+(\mathrm{day\_type}, Z_c, Z_{2,c})$ with $Z_{2,c}$ from P1's
+second-strongest axis (\texttt{time\_of\_day}): point reduction
+$+290.3$ $\chi^2$ ($40\%$ of remaining gap) but CI $[+8.06, +484.4]$
+spans a factor of roughly $60\times$; full closure to R-A1B does
+not fire even at upper CI. (S14) brackets the CI's source by
+doubling SMC particle count from $N = 200$ to $N = 400$: the CI
+width is $506.198$ vs Q1B's $476.358$ ($+6.3\%$, slightly wider),
+proponent's strong-form SMC-dominance forecast is falsified by
+its own pre-registered condition, eval-window noise dominates
+the realised CI. Joint S9+S10+S11+S12+S13+S14 = three independent
+layers of identifiability-obstruction evidence (distributional-
+class, $\sigma$-algebra-enrichment, methodological-tightening).
+\textbf{Resolution requires auxiliary information beyond the time
+index}; this is now a publication-grade conclusion. The within-
+data lever space is empirically exhausted on this dataset; the
+next move is the (a)/(b)/(c) adjudication described in
+\S\ref{sec:q1b-prime-settled}'s thread-state paragraph, with
+S14-weighted prior on (c) (temperature/exogenous-$Z$ arm). \\
+\addlinespace
+Methodological caveat: axis-level $\hat\alpha_L$ as a predictor
+of cell-level $\chi^2$ contribution under joint stratification
+& \textbf{Newly settled (negative) by (S13c)}. Per-cell
+decomposition of Q1B shows overnight ($Z_{2,c} = 0$) cells
+contribute substantially per cell ($174$--$267$ $\chi^2$ per cell
+across day-types) despite P1's axis-level $\hat\alpha_L = 0.11$
+for overnight predicting ``essentially Gaussian.'' The axis
+$\to$ cell $\to$ $\chi^2$ mapping is non-trivial under joint
+stratification. Any future per-cell $\chi^2$ interpretation
+derived from per-axis $\hat\alpha_L$ requires explicit
+within-stratum verification. \\
+\addlinespace
+Per-stratum SMC variance contribution to per-cell $\chi^2$
+estimates
+& \textbf{Newly surfaced by (S14b)}. The reproduction-check
+asymmetry at $N = 400$ (no-$Z$ pooled drift $5.2$ vs $Z_c$-
+stratified parent drift $44.6$; ratio $8.54\times$) shows SMC
+variance is non-trivial at the per-stratum layer where per-cell
+$n$ is $1000$--$7000$ rows, but not at the no-$Z$ pooled layer.
+This is a methodological caveat for (S10)'s per-$(h,
+\mathrm{day\_type})$ ablation share estimates: the per-stratum
+SMC contribution that did not surface at that granularity may
+have biased the share estimates inward. Not a sign-flip on
+(S10) (mechanism shares are bounded by the per-stratum SMC
+contribution only in magnitude); but a flag for future
+within-stratum analyses to budget for per-cell SMC noise
+explicitly. \\
+\addlinespace
 Test methodology (synthetic-calibrated divergence test) as a
 generic discipline
 & \textbf{Settled} across five cycles. Generalises to non-Gaussian
@@ -1534,12 +2267,43 @@ families with no structural change to the discipline; only the
 divergence and family change. \\
 \addlinespace
 Workflow (pre-register, code-path-audit, phase-fidelity, arbiter, thread)
-& \textbf{Settled} across two full threads plus three earlier
-single-experiment cycles. Catches the named retraction modes
-reliably; recognises pre-registered-criterion-vs-legitimate-data-
-structure as the fourth named failure mode (now three instances:
-eigenmodes-v1, P1, Q1) for which the arbiter pattern IS the
-prevention. \\
+& \textbf{Settled} across two full threads plus four single-
+experiment cycles and one non-gating sibling under amendment.
+Catches the named retraction modes reliably; recognises
+pre-registered-criterion-vs-legitimate-data-structure as the
+fourth named failure mode (now \emph{seven} instances spanning
+multiple shape variants: eigenmodes-v1 O2-vs-O3 near-tie,
+PIT-calendar-fingerprint P1 tautology, Q1 R-D-vs-R-C MLE
+saturation, Q2B mech\_2/mech\_3 sign-determined negative shares,
+P1 mechanical-matches-category-with-within-bucket-detail-matching-
+neither, Q1A DA-CONFIRMED-with-exact-within-bucket-point-but-
+wrong-direction, Q1B mixed-scoring decomposition, Q1B$'$
+both-forecasters-directionally-falsified-on-width-band-absorbs-
+disagreement). The arbiter pattern IS the prevention; no
+engineering fix attempted across the seven instances. \\
+\addlinespace
+Workflow lab-discipline cost shape: ratio of reactive cascades
+to intended end-to-end steps
+& \textbf{Newly characterised by Q1B$'$ session retro
+(2026-05-29)}. Q1B$'$'s six-step end-to-end accumulated four
+reactive cascades (cosmetic \texttt{>=} $\to$ \texttt{>}
+amendment in $5$ re-stamps; script parameterisation $10$-string
+substitution; gitignore for sibling pickle; Check P substitution-
+audit miss on the result-artifact \texttt{.txt} filename leading
+to in-place overwrite of Q1B's CLAIM-GRADE artifact and
+user-adjudicated demote to INSPECTION-ONLY). Two patterns logged
+for future workflow-rule refinement: (i) cosmetic-amendment-
+cost-asymmetry --- the carve-out's per-cascade cost exceeds the
+realised benefit when the underlying defect has probability-zero
+realised impact (proposed rule: cosmetic typos with PASS\_WITH\_
+ADVISORY-grade Check T outcomes may stay ADVISORY-only); (ii)
+the script's artifact-pinning strings (prereg-dir, phase\_a
+hash, thread hash, output-artifact \texttt{.txt} filename) need
+a single source of truth (proposed refactor: \texttt{--prereg-dir}
+CLI flag $\to$ derive paths/hashes mechanically). Neither has
+been retracted as a result; both are workflow-design
+optimisations whose absence accumulates session-time cost
+linearly with sibling-experiment count. \\
 \end{longtable}
 
 The framework's general formulation in \S\ref{sec:framework} is
