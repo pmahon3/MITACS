@@ -364,6 +364,85 @@ kernel-family-agnostic theory memo (the memo predates them).
   trajectory given joint S9+S10+S11+S12, but Q1B's verdict is
   not prejudged — its phase_a must register cuts and forecasts
   on Q1B's own merits.
+- (S13) **Q1B Z2 conditioning SETTLED R-B1B substantive
+  FAVORABLE** (2026-05-27; 6th named-failure-mode instance,
+  mixed-scoring shape): First applied chi^2-side test of JOINT
+  multi-axis Z conditioning on M3. Production-path
+  `mixture_2_gaussian_mle_fit` per (day_type, Z_c, Z2_4level) cell
+  with Z_c = Q1A's settled hour_of_week carryforward (NEAR-TIE
+  caveat preserved) and Z2 = head-to-head between Z2_b (binary
+  overnight) and Z2_c (4-level per P1 production `_time_of_day_label`
+  binning). Reproduction-checks BOTH EXACT (Q2A 953.84 → |diff|=0.003;
+  Q1A 952.5167 → |diff|=0.0000 — strongest dual-anchor in workflow
+  history). Synthetic gate + false-Z2 collapse PASS. **chi2_Z2_b
+  = 696.0 [492, 1009]; chi2_Z2_c = 662.2 [480, 945]; better_chi2
+  = 662.2** in (228, 2284] → R-B1B; winner Z2_c (NEAR-TIE: chi2_diff
+  +33.8 [-53, +124] paired SE 44.71 → |diff|<1σ). **Cumulative
+  improvement above Z_c carryforward = +290.3 [+8.06, +484.4]** =
+  40% of remaining gap AT POINT, but **CI spans 60×**: lower bound
+  +8.06 is "barely above Q1A's 1.33"; upper bound +484.4 is "67%
+  closure within data." Framework reading SHARPENED, not refuted:
+  single-axis bounded near zero (Q1A 0.18%); joint multi-axis
+  bounded above zero with wide CI; full closure to R-A1B doesn't
+  fire even at upper CI. Per-cell decomposition exactly corroborates
+  P1: saturday__zc6 (P1 α̂_L=0.61 stratum, Q1A chi²=1634) splits
+  across Z2 as morning_ramp 967 > evening 400 > afternoon 328.
+  Methodologically: overnight z20 cells contribute substantially
+  per-cell despite P1 axis-level α̂_L=0.11 → **axis-level α̂_L does
+  NOT predict cell-level chi^2 contribution under joint
+  stratification.** Proponent (R-A1B, 180 [90, 450]) decisively
+  falsified; DA (R-B1B, 948 [620, 1340]) confirmed on outcome
+  category but realized 662 falls in the gap between proponent's
+  CI upper 450 and DA's CI lower 620 (mixed scoring: outcome+shape
+  DA, direction proponent, magnitude neither). Thread paused at
+  current_node=null (no auto-advance under branching_rules.Q1B.R-B1B
+  = null); S3 EXHAUSTED-UNRESOLVED pre-flag DOWNGRADED per
+  premise-refuted-by-+290-realization; three-way amendment
+  decision space surfaced for user adjudication: (a) third within-data
+  Z axis, (b) cross-axis joint thread, (c) temperature/exogenous-Z
+  arm.
+- (S14) **Q1B' SMC tightening SETTLED R-B1B' INSPECTION-ONLY**
+  (2026-05-29; 7th named-failure-mode instance, new shape variant
+  where BOTH forecasters directionally falsified on width central
+  tendency): Non-gating sibling under thread amendment A2,
+  re-runs Q1B's winning (day_type, Z_c, Z2_c) configuration at
+  N_PARTICLES=400 (vs Q1B's 200) to bracket whether Q1B's wide CI
+  is methodological (SMC sampling noise) or substantive (eval-window
+  noise on 12,000-row post-cutoff window + paired-day bootstrap).
+  Pre-registered verdict on `cumulative_chi2_improvement_above_Z_c`
+  CI95 WIDTH with cuts at 357.27 (≤75% of Q1B's realized 476.358,
+  implying V_smc/V_total ≥ 0.875) and 524.0 (>110% triggers R-C1B').
+  Plus point-shift sub-criterion |better_chi2 - 662.223| ≤ 50.
+  ALL BLOCKING GATES PASS (code-path PRODUCTION-PATH; Check P PASS;
+  Check T CONSISTENT; Check R 5/5; reproduction checks within tol).
+  **CI WIDENED, did NOT narrow**: width 506.198 vs Q1B's 476.358
+  (+6.3%). Point-shift 16.905 (within tol). Mechanically: R-B1B'
+  (width in (357.27, 524.0]; 89.3% through band, 17.80 chi²
+  headroom below R-C1B'). **Substantive reading sharpens
+  framework picture: eval-window noise dominates Q1B's wide CI;
+  within-data tightening empirically impossible.** Proponent's OWN
+  pre-registered falsification condition #1 (`width > 400 →
+  strong-form SMC-dominance refuted`) TRIGGERED. **Reproduction-
+  check side-channel**: no-Z drift |diff|=5.2 vs Z_c-stratified
+  drift |diff|=44.6 (8.5× ratio) — SMC variance non-trivial at
+  per-stratum layer but NOT at no-Z pooled layer; corroborates
+  DA's modest-SMC-variance reading, refutes proponent's strong-form
+  SMC-dominance. **Joint S9+S10+S11+S12+S13+S14 = THREE INDEPENDENT
+  LAYERS of identifiability-obstruction evidence**: distributional-
+  class layer (S9+S10 bounded), σ-algebra-enrichment layer
+  (S11+S12+S13 bounded with wide CI), methodological-tightening
+  layer (S14 SMC particle count cannot narrow). **Resolution
+  requires auxiliary information beyond the time index — now a
+  publication-grade conclusion.** GRADE: PROVENANCE-GRADE
+  INSPECTION-ONLY per .txt-artifact gap (script's hardcoded `.txt`
+  output path collided with Q1B's CLAIM-GRADE artifact; Check P
+  enumeration missed this string; .txt restored from HEAD; user
+  adjudicated demote rather than re-emit). Downstream citation
+  must read "inspection-only diagnostic." Thread paused at
+  current_node=null (no auto-advance; Q1B' non-gating per A2).
+  (a)/(b)/(c) adjudication PRIORITY UPGRADE: (c) temperature/
+  exogenous-Z arm is the only direction not empirically refuted
+  within the registered thread.
 
 ### Lines of inquiry
 - `2026-05-26_missing-content-thread`: **exhausted** under registered
@@ -375,26 +454,45 @@ kernel-family-agnostic theory memo (the memo predates them).
   R-C3 (S10) → thread-coordinator closed the thread per Q2B
   arbiter recommendation; scope ("predictive-distribution class
   axis only") is empirically bounded in both directions.
-- `2026-05-27_resolution-paths-thread`: **active, current_node = Q1B**.
-  Successor to the distributional-class thread, targets the three
-  framework-prescribed resolution paths for the joint S9+S10
-  identifiability obstruction (candidate Z testing, stratified
-  Patra-Sen, synthetic Gaussian-DGP calibration). State so far:
+- `2026-05-27_resolution-paths-thread`: **active, current_node =
+  null (paused awaiting user adjudication)**. Successor to the
+  distributional-class thread, targets the three framework-prescribed
+  resolution paths for the joint S9+S10 identifiability obstruction
+  (candidate Z testing, stratified Patra-Sen, synthetic Gaussian-DGP
+  calibration). State (S1→S5; current thread body_sha256 164f8bb9...):
   P1 SETTLED R-A (S11; landslide on `hour_of_week`) → Q1A SETTLED
-  R-B1A (S12; Z conditioning closes 0.18% of gap, NEAR-TIE)
-  → Q1B.status planning → active per S3 thread advancement
-  (current thread body_sha256 173b3d58...). Carryforward = Z_c
-  (parsimony-preferred near-tie point winner). Q1B's phase_a
-  (not yet filled) must construct Z2 from `time_of_day`
-  (P1's second-strongest axis, range 0.485) — weaker prior
-  support than Q1A's hour_of_week (range 0.575). **EXHAUSTED-
-  UNRESOLVED trajectory pre-flagged** in S3 notes: if Q1B fires
-  R-B1B/R-C1B at similar 0.18%-of-gap magnitudes, time-indexed
-  σ-algebra resolution paths are empirically exhausted and the
-  thread requires a new arm for temperature/exogenous Z. Q1A'
-  (SDR/ICA sibling, non-gating) is parallel-active per amendment
-  A1, but its FastICA-side gate is itself under amendment — see
-  "Q1A' deferred" below. Q1C closed.
+  R-B1A (S12; 0.18% of gap, NEAR-TIE) → Q1B SETTLED R-B1B substantive
+  FAVORABLE (S13; cumulative +290 [+8, +484] = 40% AT POINT, CI 60×)
+  → amendment A2 added Q1B' as non-gating tightening sibling
+  (2026-05-29) → Q1B' SETTLED R-B1B' INSPECTION-ONLY (S14; CI WIDENED
+  6.3% under SMC particle doubling; within-data tightening
+  empirically impossible). Settled nodes: P1, Q1A, Q1B, Q1B'.
+  Closed: Q1C (S2 sibling-not-fired). Planned: P2 (synthetic
+  Gaussian-DGP calibration; reachable only via amendment).
+  Parallel-active: Q1A' (SDR/ICA sibling, registry AWAITING-B per
+  FastICA design defect — see "Q1A' deferred" below).
+
+  **Joint S9+S10+S11+S12+S13+S14 = three independent layers of
+  identifiability-obstruction evidence**: distributional-class
+  (S9+S10), σ-algebra-enrichment (S11+S12+S13), methodological-
+  tightening (S14). **Resolution requires auxiliary information
+  beyond the time index — publication-grade conclusion.** Thread
+  paused; three-way amendment decision in front of user, with
+  S14-weighted priors:
+
+  - (a) Third within-data Z axis (season range 0.135 / demand_quantile
+    range 0.075 — both weaker than Z2's 0.485). **DIMINISHING RETURNS
+    prior STRENGTHENED by S14** (within-data lever space bounded
+    methodologically as well as substantively).
+  - (b) Cross-axis joint stratification thread. Still possible but
+    Q1B's wide CI now demonstrated intrinsic; cross-axis thread
+    would inherit the same eval-window noise floor unless it also
+    addresses sample-size-per-cell.
+  - (c) **Temperature / exogenous-Z arm. PRIORITY UPGRADED by S14**:
+    auxiliary information beyond time index is the only direction
+    that has NOT been empirically refuted within the registered
+    thread. Pre-requisite is ECCC hourly weather acquisition (still
+    on background list per `mitacs-clim-gap-nonstationary`).
 
 ### Frozen forward experiment (separate from the above)
 - ✅ **IESO retrospective head-to-head shown infeasible** from public archives.
@@ -413,20 +511,24 @@ kernel-family-agnostic theory memo (the memo predates them).
 ### Open
 - Web dashboard.
 - Forward-experiment results accrue with calendar time.
-- `resolution-paths-thread` at Q1B (current_node, active): fill
-  phase_a with Z2 from `time_of_day` (P1's second-strongest axis;
-  cumulative chi^2 computed against Q1A's Z_c-conditioned baseline
-  per S3 carryforward). R-A1B (cumulative chi^2 ≤ 228) would
-  RESOLVE the thread; R-B1B / R-C1B branch into P2 (synthetic
-  Gaussian-DGP calibration) given joint S9+S10+S11+S12 exhaust
-  the within-data lever question. Weaker prior support than Q1A
-  (time_of_day P1 range 0.485 vs hour_of_week 0.575). The joint
-  S9+S10+S11+S12 picture makes EXHAUSTED-UNRESOLVED a plausible
-  Q1B trajectory — but this is background context for thread
-  planning, NOT a prejudgment of Q1B's verdict. The proponent
-  must still argue R-A1B on its merits and the arbiter must
-  render against pre-registered cuts; pre-judging a negative
-  result is the same workflow risk as pre-judging a positive one.
+- `resolution-paths-thread` paused at current_node=null awaiting
+  user adjudication of three-way amendment decision (a)/(b)/(c)
+  with S14-weighted priors above. Q1B' confirmed within-data
+  tightening empirically impossible (S14); the (a)/(b)/(c) choice
+  is now a strategic-pivot decision (continue mining within-data
+  vs. open the temperature arm) rather than an experimental
+  selection question. Advisor input warranted; pre-judging a
+  positive temperature result is the same workflow risk as
+  pre-judging the negative within-data results were before they
+  arrived.
+- **Goal-4 writeup integration in progress** (2026-05-29): per
+  user "Position 2" decision (write up the within-data exhaustion
+  story before opening the temperature arm). Memory file S14
+  shipped (this commit); memo additions §9-§12 + status table
+  update + framework synthesis (next commit); draft additions
+  §5 narrative + Conclusion sharpening (next commit). Once the
+  publication-grade artifact is in place, (a)/(b)/(c) adjudication
+  proceeds.
 - **Q1A' deferred** (per user direction during S12 session):
   empirical Q1A' synthetic-gate-build discovered that phase_a
   §metric's FastICA selection rule (max |excess_kurtosis|) does
