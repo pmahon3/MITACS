@@ -57,6 +57,15 @@ experiment/distributional_class_q2a/*.log
 scratch/data/distributional_class_q2b/
 experiment/distributional_class_q2b/*.log
 
+# Q1B' sibling-variant pickle (Q1B's tracked q1b.pkl is grandfathered
+# from before --emit-result was the canonical path; Q1B' uses
+# --emit-result and follows the Q2A/Q2B gitignore-the-scratch-pickle
+# convention so the tree stays clean for the provenance refuse-on-
+# dirty check). Only the prime variant pkl is gitignored; q1b.pkl
+# stays tracked at its committed state.
+scratch/data/q1b_z2_conditioning/q1b_prime_*.pkl
+experiment/q1b_z2_conditioning/*.log
+
 # Experiment ledger: gitignored UNTIL a live collect run produces genuine
 # accrued forecasts/actuals. Current/offline-test contents are regenerable
 # placeholder rows, NOT the experiment record. Track it (remove this rule)
