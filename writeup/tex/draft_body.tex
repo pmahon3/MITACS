@@ -516,6 +516,140 @@ uniform density of perfect calibration.}
 \label{fig:pit}
 \end{figure}
 
+\subsection{From the marginal pathology to a publication-grade
+negative result: the resolution-paths arc}
+\label{sec:resolution-paths}
+
+The PIT shape (Figure~\ref{fig:pit}) flags a marginal calibration
+problem that the multi-sigma coverage diagonal of the empirical-
+residual predictors (4, 6) hides. A registered six-experiment thread
+mapped the boundary of what is achievable on this problem from
+within-data information alone. The arc is recorded in detail in the
+companion memo and per-experiment artifacts under
+\path{notes/preregistrations/}; this subsection states what landed
+and gives the framework-level reading.
+
+\paragraph{The distributional-class lever (Q1, Q2A, Q2B).} The first
+thread tested whether the marginal pathology yields to a richer
+predictive distribution at fixed conditioning $\sigma$-algebra. The
+root experiment (Q1, 2026-05-26) replaces the Gaussian kernel with
+a Student-$t$ kernel at one global $\nu$ per day-type; the marginal
+PIT $\chi^{2}_{10}$ drops from $22{,}328$ to $1{,}371$ --- a $16\times$
+reduction but a substantive R-C (not R-A) reading: the kernel family
+is wrong, but fixing it does not absorb the marginal pathology.
+Empirical $\hat\nu \in \{4.19, 4.62, 4.61\}$ per day-type, with the
+heavy tail living in the conditional residual on recent state, not
+in the seasonal climatology (M1 outperforms M2). Q2A (2026-05-26)
+tested three richer-than-Student-$t$ families (mixture-of-$2$ and
+mixture-of-$3$ Gaussians, kernel density estimator); all three are
+$\chi^{2}$-indistinguishable at $\chi^{2}_{20} \approx 954$ and the
+marginal-return curve asymptotes (M0$\to$M1 $=16\times$, M1$\to$best $=
+1.44\times$). Q2B (2026-05-26) tested three pre-registered same-
+$\sigma$-algebra non-distributional mechanism candidates (iterated
+mean-bias, one-sided variance cap, day-anchor seam exclusion); all
+three explained-shares fell below the $0.15$ null floor with two
+sign-determined negative at $95\%$, i.e.\ the mechanism ablations
+\emph{actively degraded} calibration. The distributional-class lever
+is empirically bounded; the residual $\chi^{2} \sim 954$ is not
+distributional in form. Together with the Patra--Sen-side evidence
+below this is applied evidence for the identifiability obstruction
+of Bergna et al.\ (\texttt{arXiv:2605.06413}, 2026, Prop.~1), Heckman--
+Singer (\emph{Econometrica}, 1984), and Allahverdyan
+(\texttt{arXiv:2002.07884}, 2020): the conditional law $\kappa_Q$
+is observationally consistent with both intrinsic heavy-tailedness
+and a latent-$Z$ mixture artefact.
+
+\paragraph{The $\sigma$-algebra-enrichment lever (P1, Q1A, Q1B).} A
+successor thread (\texttt{resolution-paths-thread}, 2026-05-27)
+tested the framework-prescribed alternative: $\sigma$-algebra
+enrichment with stratification on candidate $Z$ axes. P1 (2026-05-27)
+applies the per-stratum Patra--Sen non-Gaussian mixture estimator
+$\hat\alpha_L$ to Q1's M1 PIT residuals across five candidate
+conditioning axes; the verdict statistic
+$\max_{\mathrm{axis}}\mathrm{range}(\hat\alpha_L) = 0.575$
+$[0.4475, 0.6475]$ clears the R-A cut $0.20$ by more than $2\times$
+at the lower CI bound, with the binding axis \texttt{hour\_of\_week}.
+The missing-$Z$ structure is \emph{cyclical/social-weekly}, not
+seasonal/climatological: hot zone is the weekend window (Fri 10:00
+-- Sun 23:00, $\hat\alpha_L \in [0.55, 0.61]$); cold zone is Monday
+morning ($\hat\alpha_L = 0.035$, essentially Gaussian). Q1A
+(2026-05-27) is the registered $\chi^{2}$-side test of whether
+enriching M3's conditioning $\sigma$-algebra with the binding axis
+closes the marginal-PIT gap: with $Z_c$ the $8$-level
+\texttt{hour\_of\_week} bin index and $Z_b$ the binary weekend
+indicator, the head-to-head delivers $\chi^{2}_{Z_b} = 986.0$,
+$\chi^{2}_{Z_c} = 952.5$, $\chi^{2}_{\mathrm{diff}} = +33.5$ with
+paired SE $56.84$ (true NEAR-TIE; $Z_c$ wins at the point estimate,
+indistinguishable at $95\%$). The binding-axis $\sigma$-algebra
+enrichment shaves $1.33$ $\chi^{2}$ off Q2A's M3 baseline of
+$953.84$ --- $0.18\%$ of the $725.84$ gap-to-close to R-A1A
+($\le 228$). Per-cell decomposition is the strong corroborating
+finding: saturday $\mathrm{bin}_6$ contributes $\chi^{2} = 1634$
+(single cell exceeds the pooled marginal $952.5$ by $70\%$) at
+exactly the P1 stratum at $\hat\alpha_L = 0.61$. The contamination
+is real and localised where P1 said it would be; the M3 mixture-$2$
+Gaussian family is at capacity within strata. Q1B (2026-05-27) added
+a second-axis (\texttt{time\_of\_day}, $Z_2$) on top of $Z_c$:
+joint stratification at $\sigma = (\mathrm{day\_type}, Z_c, Z_2)$
+delivers a head-to-head $\mathrm{better}\_\chi^{2} = 662.2$, $40\%$
+of the remaining gap at the point estimate --- but a paired-day
+bootstrap CI of $[+8.06, +484.4]$ on the cumulative-reduction
+statistic. The CI spans a factor of roughly $60\times$; the lower
+bound is barely above Q1A's $+1.33$, the upper bound would close
+$67\%$ of the gap. The framework reading is \emph{sharpened, not
+refuted}: single-axis bounded near zero, joint multi-axis bounded
+above zero with wide CI, full closure to R-A1B does not fire even
+at upper CI.
+
+\paragraph{The methodological-tightening lever (Q1B$'$).} Q1B$'$
+(2026-05-29) is the registered tightening run that asks whether
+Q1B's wide CI is sampling noise from the SMC particle count
+($N_{\mathrm{particles}} = 200$) or eval-window noise from the
+$\sim 12{,}000$-row post-cutoff window with paired-day bootstrap.
+A single arm: re-run Q1B's winning configuration with
+$N_{\mathrm{particles}} = 400$, all other methodology held bit-
+identical. The verdict is on the realised CI WIDTH on the cumulative-
+reduction statistic. The pre-registered cut at $75\%$ of Q1B's
+$476.358$ $\chi^{2}$ width corresponds to the strong-form
+SMC-dominance prior $V_{\mathrm{smc}}/V_{\mathrm{total}} \ge 0.875$.
+The realised width is $506.198$ $\chi^{2}$ ($+6.3\%$ vs.\ Q1B,
+slightly wider, well inside paired-bootstrap noise on the width
+measurement itself), with point-shift $16.9$ within tolerance.
+Both forecasters had narrowing-direction forecasts; the proponent's
+\emph{own} pre-registered falsification condition $\#1$ (\textit{width
+$> 400 \Rightarrow$ strong-form SMC-dominance refuted}) was
+triggered by the realisation. Reading: SMC particle doubling does
+not narrow the realised CI; the wide CI on Q1B's cumulative-
+reduction statistic is intrinsic to the data (eval-window noise on
+a $\chi^{2}$ statistic of this construction), not to the SMC
+estimator. Within-data tightening is empirically impossible on this
+dataset.
+
+\paragraph{Joint reading: auxiliary information beyond the time
+index is required.} The six experiments span three independent
+lever spaces: (i) the predictive-distribution class at fixed $Q$
+(Q1+Q2A+Q2B), (ii) the conditioning $\sigma$-algebra refined on
+time-derived axes (P1+Q1A+Q1B), and (iii) the SMC particle count
+that drives the estimator's sampling variance (Q1B$'$). All three
+are empirically bounded on this dataset. The richer-than-Student-$t$
+distributional families plateau at marginal $\chi^{2} \sim 954$;
+single-axis $\sigma$-algebra enrichment shaves $0.18\%$ of the
+remaining gap; joint multi-axis enrichment shaves $40\%$ at the
+point estimate but with $60\times$-wide CI; doubling the SMC
+particle count does not narrow that CI. \textbf{The residual
+$\chi^{2} \sim 950$ cannot be reduced from within-data information
+alone}; closure requires conditioning on auxiliary information
+beyond the time index, with the prior-supported candidates being
+hourly temperature (per the clim-gap-nonstationary record;
+\path{ECCC} hourly weather is the natural data source) and refined
+day-type partitioning beyond the production three-class label. The
+identifiability obstruction at $\kappa_Q$ alone (Bergna et al.\
+2026 Prop.~1; Heckman--Singer 1984; Allahverdyan 2020) is
+corroborated from three independent lever directions; the
+publication-grade reading on this dataset is that the within-data
+lever space is exhausted. Section~\ref{sec:conclusion} states this
+as the paper's main negative result.
+
 \subsection{Registered forward prediction experiment}
 \label{sec:registered}
 
@@ -672,6 +806,47 @@ out-of-sample backtest (Section~\ref{sec:backtest}) and the
 distributional diagnostics on the SMC predictive law
 (Section~\ref{sec:distributional}) are reported as observations
 over the full \(500\)-day post-cutoff population.
+
+The paper's main scientific result is the negative one of
+Section~\ref{sec:resolution-paths}. Six pre-registered experiments
+spanning three independent lever spaces --- predictive-distribution
+class at fixed conditioning $\sigma$-algebra, $\sigma$-algebra
+enrichment on time-derived axes, and SMC particle count driving
+estimator sampling variance --- bound the marginal-PIT residual
+$\chi^{2} \sim 950$ from each direction. Richer-than-Student-$t$
+distributional families plateau ($1.44\times$ marginal return after
+Q1's $16\times$); single-axis stratification on the localised
+\texttt{hour\_of\_week} axis shaves $0.18\%$ of the remaining gap
+($1.33$ $\chi^{2}$ out of $725.84$); joint two-axis stratification
+shaves $40\%$ at the point estimate but with a paired-day bootstrap
+CI spanning a factor of roughly $60\times$ on the cumulative
+reduction; doubling the SMC particle count does not narrow that CI
+(the realised width is $+6.3\%$ wider, refuting the strong-form
+SMC-dominance forecast by its own pre-registered condition). The
+within-data lever space is empirically exhausted on this dataset;
+the residual $\chi^{2}$ cannot be reduced without conditioning on
+auxiliary information beyond the time index. This is the applied
+$\chi^{2}$-side and Patra--Sen-$\hat\alpha_L$-side corroboration of
+the identifiability obstruction recorded as Bergna et al.\
+(\texttt{arXiv:2605.06413}, 2026, Prop.~1), Heckman--Singer
+(\emph{Econometrica}, 1984), and Allahverdyan
+(\texttt{arXiv:2002.07884}, 2020): the conditional law $\kappa_Q$
+is observationally consistent with both intrinsic heavy-tailedness
+and a latent-$Z$ mixture artefact; only auxiliary information can
+discriminate. The prior-supported candidate for the auxiliary $Z$
+is hourly temperature, with ECCC the natural data source; that
+direction is opened for follow-up and not pursued in this paper.
+
+The pre-registration / audit / arbiter / thread workflow that
+produced these six experiments is itself part of the deliverable.
+The workflow caught seven instances of the criterion-vs-legitimate-
+data-structure failure mode without retraction; in each case the
+arbiter pattern handled the mechanical-vs-substantive distinction
+without engineering changes. The workflow is described in the
+companion memo and is registered with reproducible artifacts at
+\path{notes/preregistrations/<date>_<topic>/}; the
+\verb|registry verify| chain over all $14$ entries resolves clean
+at the time of writing.
 
 \appendix
 
