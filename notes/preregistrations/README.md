@@ -210,3 +210,12 @@ current state. Notable threaded entries:
   proponent + devils_advocate stamped. Node P1 of resolution-paths-thread.
   Plain Patra-Sen (2016) per stratum on Q1 M1 residuals; 5 stratification
   axes; verdict on max-axis range vs 0.20 / 0.10 thresholds.
+- `2026-05-29_q1b-prime-smc-tightening/` — phase_a stamped. Non-gating
+  sibling node Q1B' under resolution-paths-thread (parent_branch=R-A,
+  parent_id=Q1B, per amendment A2). Single-arm empirical CI-tightening
+  re-run of Q1B's winning (day_type, Z_c, Z2_c) configuration at
+  N_PARTICLES=400 (vs Q1B's 200). Verdict on the realized CI95 width of
+  `cumulative_chi2_improvement_above_Z_c`: R-A1B' <= 357.27 (<= 75% of
+  Q1B's realized 476.358), R-B1B' in (357.27, 524.0], R-C1B' > 524.0 OR
+  |point shift| > 50. Tests whether Q1B's wide CI is SMC-particle-noise
+  dominated (R-A1B') or eval-window-noise dominated (R-B1B').
