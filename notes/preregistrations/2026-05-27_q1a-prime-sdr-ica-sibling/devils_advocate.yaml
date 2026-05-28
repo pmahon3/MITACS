@@ -1,4 +1,4 @@
-body_sha256: 483477a5508a439cc8dee26f201d655373cdf2c5d31c6fe60af3c15d9fdc5235
+body_sha256: 444b94a51bdf90494d715f13f438d3cfaa9173298d760710b9903476a7e3a215
 confidence: 0.5
 counter_prediction:
   head_to_head_winner: SIR
@@ -46,7 +46,7 @@ forecast:
   - 0.54
   rho_max_point: 0.42
 git_clean: false
-git_sha: 769d854ff21e92fe16d230c037f6daf647133d28
+git_sha: cb318fda6b0ad94479d103ab890704e25c397e1c
 opportunity_cost: "If R-B1A' fires as forecast, the Q1A' verdict is INDEPENDENT and NON-GATING\nper thread.branching_rules\
   \ \u2014 no thread state transition is triggered \u2014 but\nthe substantive sub-finding (head-to-head SIR vs FastICA, top-component\n\
   loadings on X) is methodologically valuable for the writeup section on\ndata-driven Z-recovery in the kappa_Q diagnostic\
@@ -71,8 +71,12 @@ rationale_summary: "P1's social-weekly signal lives in alpha_L space (a stratum-
   \ statistic lands in R-B1A's [0.3, 0.5) band; substantive picture is that\nP1's discretized-axis approach finds signal that\
   \ linear/non-Gaussianity-maximizing\ndata-driven tools cannot cleanly recover as a SINGLE top component, which is a\nmethodologically\
   \ important null for the \"validates P1's axis via independent\nmethods\" reading.\n"
+ref_amendment_note: "2026-05-28: phase_a.yaml reference hash bumped from b14d09cb... to 610b5600... per phase_a \xA7baselines.secondary\
+  \ methodology amendment (SIR synthetic-gate cuts; pre-run carve-out, precedent P1 commit 99a8122). Forecast content UNTOUCHED\
+  \ \u2014 this artifact's verdicts apply to Ontario data and the Ontario verdict cuts (R-A1A'/R-B1A'/R-C1A' at 0.5/0.3) are\
+  \ unchanged."
 references:
-- body_sha256: b14d09cbec08207179e8cffca584de04a7855ff359888a8a0e4c8e30ce8b0806
+- body_sha256: 610b5600df56659f8abe23dfd7d4a2c65e8530b31a8b025ca18632f256ac7c8f
   file: phase_a.yaml
   relation: phase_a
 - body_sha256: 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6

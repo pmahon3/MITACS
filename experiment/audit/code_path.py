@@ -70,6 +70,7 @@ PRODUCTION_SYMBOLS: set[str] = {
     "processing.innovations.estimator.mixture_3_gaussian_mle_fit",
     "processing.innovations.estimator.kde_residual_fit",
     "processing.innovations.estimator.patra_sen_fit",
+    "processing.innovations.estimator.sliced_inverse_regression_fit",
     # processing.innovations.validation
     "processing.innovations.validation.synthetic",
     "processing.innovations.validation.rebaseline",

@@ -952,6 +952,175 @@ def patra_sen_fit(
     }
 
 
+# Default slice count for SIR (Li 1991 §4 recommendation; chosen
+# pre-data in phase_a and not tunable post-data). 10 is the
+# convention for n in the low-1e4 range with d_X ~ 10.
+_SIR_DEFAULT_N_SLICES = 10
+
+# Ridge stabilizer on Σ_x for the generalized eigenproblem. Small
+# multiple of the average diagonal — preserves the basis when Σ_x
+# is well-conditioned (post-standardization Σ_x ≈ correlation matrix
+# of X, ~unit eigenvalues), kicks in only when a column collapses.
+_SIR_SIGMA_X_RIDGE = 1e-8
+
+
+def sliced_inverse_regression_fit(
+    X: np.ndarray,
+    Y: np.ndarray,
+    *,
+    n_slices: int = _SIR_DEFAULT_N_SLICES,
+) -> dict:
+    """Sliced Inverse Regression (Li 1991) for the central subspace.
+
+    Estimates an ordered set of dimension-reducing directions
+    ``β_1, …, β_{d_X}`` such that the conditional law of ``Y`` given
+    ``X`` depends on ``X`` only through projections ``β_k^T X``.
+    The top ``β_1`` is the direction maximizing the slice-mean variance
+    of ``X`` against the slices of ``Y``.
+
+    Production-grade fitter for the resolution-paths line of inquiry's
+    Q1A' node ("q1a-prime-sdr-ica-sibling";
+    notes/preregistrations/2026-05-27_q1a-prime-sdr-ica-sibling/).
+    Without it, SIR would be reimplemented inline in the Q1A' script
+    and trigger /audit code-path REIMPLEMENTED.
+
+    Reference: Li, K.-C. (1991), "Sliced Inverse Regression for
+    Dimension Reduction", *JASA* **86**(414), 316–327.
+
+    Algorithm (eq. (3.3)–(3.6) of Li 1991)
+    --------------------------------------
+    1. Center: ``X̃ = X − X̄``.
+    2. Sort rows by ``Y``; partition into ``H = n_slices`` slices of
+       equal count ``p_h = n_h / n``.
+    3. Slice means ``m_h = mean of X̃ over slice h``; weighted between-
+       slice covariance ``Σ_b = Σ_h p_h m_h m_h^T``.
+    4. Solve the generalized eigenproblem
+       ``Σ_b β = λ Σ_x β``   (with ``Σ_x = cov(X)``)
+       via ``scipy.linalg.eigh(Σ_b, Σ_x_ridge)``.
+
+    The generalized form is necessary, NOT a plain eigendecomposition
+    of ``Σ_b``: with z-scored inputs ``Σ_x`` is the correlation matrix
+    of ``X`` (cyclic columns and lag-1/lag-24 demand correlate by
+    construction); ``eigh(Σ_b)`` would land on a different basis whose
+    projections are not the central-subspace directions.
+
+    A small ridge ``_SIR_SIGMA_X_RIDGE * mean(diag(Σ_x)) * I`` is added
+    to ``Σ_x`` for numerical stability — preserves the basis when
+    ``Σ_x`` is well-conditioned, kicks in only against rank deficiency.
+
+    Eigenvalues / directions are returned in DESCENDING order of
+    eigenvalue. ``directions`` is in the SAME basis as the input ``X``
+    (i.e. ``scores = X @ directions[:, 0]`` gives the top-component
+    projection of each row); the directions are NOT orthonormal under
+    the Euclidean inner product, but ARE ``Σ_x``-orthonormal
+    (``β_j^T Σ_x β_k = δ_{jk}``), which is the natural inner product
+    for SIR.
+
+    Parameters
+    ----------
+    X
+        ``(n, d_X)`` design matrix. The caller is responsible for
+        column-wise standardization; we centre internally for
+        ``Σ_b`` but do NOT re-standardize so that the returned
+        directions live in the basis the caller passed in.
+    Y
+        ``(n,)`` response vector. Real-valued (continuous or
+        ordinal). SIR is invariant to monotone transforms of ``Y``
+        — only the slice-membership ordering matters.
+    n_slices
+        ``H`` in Li 1991. Default 10 (the SIR convention for
+        moderate ``n`` and ``d_X ~ 10``).
+
+    Returns
+    -------
+    dict with keys:
+        directions : ndarray of shape ``(d_X, d_X)``
+            Columns are the SIR directions in the basis of ``X``,
+            sorted by descending eigenvalue (``directions[:, 0]``
+            is the top component).
+        eigenvalues : ndarray of shape ``(d_X,)``
+            Generalized eigenvalues, sorted descending.
+        slice_means : ndarray of shape ``(H, d_X)``
+            ``m_h`` for each slice (centred). Diagnostic-only.
+        slice_counts : ndarray of shape ``(H,)``
+            ``n_h`` for each slice. Diagnostic-only.
+        n : int
+            Sample size.
+        n_slices : int
+            ``H``.
+    """
+    X = np.asarray(X, dtype=float)
+    Y = np.asarray(Y, dtype=float).ravel()
+    if X.ndim != 2:
+        raise ValueError(f"sliced_inverse_regression_fit: X must be 2-D; got shape {X.shape}")
+    n, d_X = X.shape
+    if Y.shape != (n,):
+        raise ValueError(
+            f"sliced_inverse_regression_fit: Y shape {Y.shape} does not match X rows {n}"
+        )
+    if n_slices < 2:
+        raise ValueError(f"sliced_inverse_regression_fit: n_slices >= 2 required; got {n_slices}")
+    if n < n_slices * 2:
+        raise ValueError(
+            f"sliced_inverse_regression_fit: n={n} too small for {n_slices} slices "
+            "(need n >= 2 H); halve n_slices or pool data."
+        )
+    if not (np.all(np.isfinite(X)) and np.all(np.isfinite(Y))):
+        raise ValueError(
+            "sliced_inverse_regression_fit: X or Y contains non-finite "
+            "entries. Drop or impute before calling."
+        )
+
+    # Centre X for Σ_b; Σ_x computed on the un-centred input (np.cov
+    # subtracts the mean internally).
+    X_mean = X.mean(axis=0)
+    X_c = X - X_mean
+
+    # Σ_x over all of X. rowvar=False so np.cov treats columns as variables.
+    Sigma_x = np.cov(X_c, rowvar=False)
+    # Ridge for numerical stability; tiny when Σ_x is well-conditioned.
+    ridge = _SIR_SIGMA_X_RIDGE * float(np.mean(np.diag(Sigma_x)))
+    Sigma_x_ridge = Sigma_x + ridge * np.eye(d_X)
+
+    # Slice by sorted Y; equal-count partition. Use np.argsort + np.array_split
+    # so the slice count is honoured even when n is not divisible by n_slices.
+    order = np.argsort(Y, kind="stable")
+    slice_idx_lists = np.array_split(order, n_slices)
+
+    slice_means = np.zeros((n_slices, d_X))
+    slice_counts = np.zeros(n_slices, dtype=np.int64)
+    Sigma_b = np.zeros((d_X, d_X))
+    for h, idx_h in enumerate(slice_idx_lists):
+        n_h = len(idx_h)
+        if n_h == 0:
+            continue
+        m_h = X_c[idx_h].mean(axis=0)
+        slice_means[h] = m_h
+        slice_counts[h] = n_h
+        p_h = n_h / n
+        Sigma_b += p_h * np.outer(m_h, m_h)
+
+    # Generalized eigenproblem: Σ_b β = λ Σ_x β. scipy.linalg.eigh
+    # solves the symmetric generalized form and returns eigenvalues in
+    # ASCENDING order; flip to descending so the top component is index 0.
+    from scipy.linalg import eigh  # noqa: PLC0415
+
+    eigvals, eigvecs = eigh(Sigma_b, Sigma_x_ridge)
+    # Reverse to descending; .copy() so the returned arrays are contiguous.
+    order_desc = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[order_desc].copy()
+    directions = eigvecs[:, order_desc].copy()
+
+    return {
+        "directions": directions,
+        "eigenvalues": eigvals,
+        "slice_means": slice_means,
+        "slice_counts": slice_counts,
+        "n": int(n),
+        "n_slices": int(n_slices),
+    }
+
+
 def innovation_diagnostics(
     *,
     embedding: Embedding,
