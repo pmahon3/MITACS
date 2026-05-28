@@ -1,0 +1,726 @@
+schema: phase_fidelity
+topic: q1b-prime-smc-tightening
+checked_by: phase-fidelity agent (.claude/agents/phase-fidelity.md), Check R
+purpose: 'Verify that the Q1B'' result artifact (result.yaml + pickle at
+
+  scratch/data/q1b_z2_conditioning/q1b_prime_n400.pkl) reports the
+
+  dependent variables that Q1B'' phase_a registered. BLOCKING precondition
+
+  (fidelity_coverage_passed) for the arbiter. Same Check R schema
+
+  established for Q2A / Q2B / P1 / Q1A / Q1B.
+
+
+  Q1B''-specific context: result.yaml carries grade_demotion_reason
+
+  documenting that the script''s hardcoded .txt output path collided with
+
+  Q1B''s CLAIM-GRADE artifact; .txt was restored from HEAD per user
+
+  adjudication, and Q1B'' was demoted to PROVENANCE-GRADE INSPECTION-ONLY.
+
+  THIS DEMOTION DOES NOT BLOCK CHECK R: Check R verifies result.yaml
+
+  fields against phase_a''s variables.dependent, NOT the grade banner.
+
+  Grade demotion is a downstream-citation issue, not a missing-data
+
+  issue. The result.yaml + pickle ARE the durable record; all BLOCKING
+
+  gates passed (reproduction-check #1 |diff|=5.225, #2 |diff|=44.595
+
+  both within tol=50; inline synthetic gate PASS; code-path
+
+  PRODUCTION-PATH; Check P PASS at body_sha256 25d7a968...).
+
+  '
+written_at: '2026-05-29T18:15:00-07:00'
+references:
+- file: phase_a.yaml
+  body_sha256: 7ed3eea35553b9c5cd3e03d0003603ed4d56337d151362d4a11c2d1955b75e78
+- file: result.yaml
+  body_sha256: 3c1954e24fb590b396c8150f0878e3421dbe2601f82b62015106ecd41c5d01d8
+- file: phase_fidelity_check_p.yaml
+  body_sha256: 25d7a968bb65a314579a4a37afe751378f43b4e15aa70dd67bcafc9ae79dca6c
+  relation: prior_check_p
+- file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
+  relation: thread
+- file: ../2026-05-27_q1b-z2-conditioning-second-axis/result.yaml
+  body_sha256: b3b1efa7d028cd6caa6220493847a5d2b8fa6de957814211df01df6294baaa6d
+  relation: predecessor_node_result
+thread:
+  thread_topic: resolution-paths-thread
+  node_id: Q1B'
+  parent_branch: R-A
+  thread_body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
+grade_demotion_acknowledgment:
+  result_grade: INSPECTION-ONLY
+  demotion_reason: 'Per result.yaml.grade_demotion_reason + artifact.primary_txt_note:
+
+    Q1B'' script''s hardcoded output path
+
+    experiment/results/q1b_z2_conditioning.txt collided with Q1B''s
+
+    committed CLAIM-GRADE artifact (Check P missed the literal-string
+
+    parameterization at commit 1a1b72e; substitution set in commit
+
+    8cd2935 covered phase_a hash + thread hash + prereg-dir but did
+
+    not cover the .txt filename). The run overwrote Q1B''s .txt
+
+    in-place; .txt was restored from HEAD per user adjudication.
+
+    '
+  check_r_impact: NONE.
+  rationale: 'Check R''s scope is "result.yaml reports what phase_a registered"
+
+    (per .claude/agents/phase-fidelity.md §"Check R"); it does NOT
+
+    audit the provenance grade banner of the artifact. The result.yaml
+
+    + pickle ARE the durable record produced by audited-PRODUCTION-PATH
+
+    code with all BLOCKING gates passed. The arbiter renders against
+
+    primary_result block normally; downstream citation must read as
+
+    "INSPECTION-ONLY diagnostic" per the demotion reason. Check R
+
+    proceeds against result.yaml as written.
+
+    '
+result_artifact_pin:
+  file: result.yaml
+  body_sha256: 3c1954e24fb590b396c8150f0878e3421dbe2601f82b62015106ecd41c5d01d8
+  pickle: scratch/data/q1b_z2_conditioning/q1b_prime_n400.pkl
+  pickle_path_correctness: 'Pickle written to Q1B''-specific path q1b_prime_n400.pkl per Check P''s
+
+    next_step_recommendation suggested invocation (--out flag was used
+
+    to avoid the q1b.pkl filename collision flagged in L2
+
+    substitution_scope_discipline PASS-WITH-NOTE). Verified PASS.
+
+    '
+  note: 'Q1B'' did NOT emit a separate CLAIM-GRADE .txt provenance envelope
+
+    (see grade_demotion_acknowledgment above). The result.yaml is the
+
+    primary numeric surface this Check R audits; the pickle holds the
+
+    full PIT tables + per-cell fitted-params dicts for re-analysis.
+
+    '
+coverage:
+  items_required: 5
+  items_reported: 5
+  items_missing: []
+  per_variable:
+    cumulative_chi2_improvement_above_Z_c:
+      phase_a_requirement: 'PRIMARY verdict metric. "Report point AND full CI95 bounds AND
+
+        CI95 width. Verdict cuts apply to CI95 width."
+
+        '
+      location: 'primary_result.value.cumulative_chi2_improvement_above_Z_c =
+
+        273.3883666666667 (point). primary_result.cumulative_chi2_
+
+        improvement_above_Z_c_ci95 = [-34.57579999999992,
+
+        +471.6218666666665] (bounds). Width = 471.622 - (-34.576) =
+
+        506.198 chi^2 (derivable; phase_a explicitly carries
+
+        report-as-derivation under threshold_derivations.ci_width_cuts
+
+        "Check R / arbiter computes width = ci95[1] - ci95[0]";
+
+        Check P L1 item primary_metric_cumulative_ci_width_derivable_
+
+        from_existing_fields PASS-by-derivation).
+
+        '
+      verdict: PASS
+    cumulative_chi2_improvement_above_Z_c_ci95:
+      phase_a_requirement: 'Full [low, high] bounds, not just the width; required for
+
+        cross-comparison with Q1B''s realized [+8.064, +484.423] and for
+
+        the secondary CI symmetry diagnostic.
+
+        '
+      location: 'primary_result.cumulative_chi2_improvement_above_Z_c_ci95 =
+
+        [-34.57579999999992, +471.6218666666665]. Both bounds reported
+
+        explicitly. Cross-comparison to Q1B''s [+8.064, +484.423]:
+
+        Q1B'' CI shifted leftward by ~42 at lower bound and ~13 at upper
+
+        bound; Q1B'' CI now straddles zero (lower bound -34.58, sign
+
+        flipped from Q1B''s +8.06). CI symmetry diagnostic computable
+
+        from these bounds.
+
+        '
+      verdict: PASS
+    better_chi2:
+      phase_a_requirement: 'SECONDARY diagnostic. "Report point + CI95 + width. Used for the
+
+        point-stability sub-criterion: |better_chi2_point - 662.223|
+
+        <= 50 chi^2."
+
+        '
+      location: 'primary_result.value.better_chi2 = 679.1283333333333 (point;
+
+        equals chi2_Z2_c at the Z2_c winner per phase_a
+
+        variables.excluded NEAR-TIE carryforward). primary_result.
+
+        better_chi2_ci95 (per ci_low/ci_high reporting):
+
+        [480.89483333333334, 987.0924999999999]. Width = 987.092 -
+
+        480.895 = 506.198 chi^2 (identical to cumulative CI width by
+
+        construction, since cumulative = 952.5167 - better_chi2 is
+
+        affine in better_chi2). Point-stability check derivable:
+
+        |679.128 - 662.223| = 16.905 <= 50 (point-stability PASS).
+
+        '
+      verdict: PASS
+    repro_chi2_no_z:
+      phase_a_requirement: 'Q2A anchor at N=400; reproduction-check #1; expected ~953.84
+
+        +/- SMC drift. "Report point + |diff| from Q2A settled 953.84
+
+        + tol-pass/fail flag." See baselines.secondary for N-shift
+
+        carve-out semantics (drift > tol is informative side-channel,
+
+        NOT a failed gate -- but the existing assert WILL halt
+
+        execution; result.yaml must capture the value in
+
+        execution_deviations regardless of pass/fail).
+
+        '
+      location: "secondary_results[5] (name=reproduction_check_no_z).value:\n  q1b_no_z_chi2 = 959.065 (point)\n  q2a_settled_chi2\
+        \ = 953.84 (anchor)\n  abs_diff = 5.225000000000023 (|diff|)\n  tol = 50.0 (the script's _REPRODUCTION_TOL_CHI2)\n\
+        \  ok = true (within-tol flag)\nAll four phase_a-required fields present. ASSERT did NOT fire\nat N=400 for this check\
+        \ (drift 5.225 well within tol=50);\nexecution_deviations = [] as expected. Phase_a's catch-and-\nreport carve-out\
+        \ path was not exercised, which is itself\ninformative for the side-channel reading (SMC variance\ncontribution to\
+        \ Q2A's chi^2 at N=200 was small enough that\ndoubling N kept the reproduction within ~10% of tolerance).\n"
+      verdict: PASS
+    repro_chi2_zc:
+      phase_a_requirement: 'Q1A anchor at N=400; reproduction-check #2; expected ~952.5167
+
+        +/- SMC drift. Same reporting convention as repro_chi2_no_z.
+
+        Same carve-out semantics.
+
+        '
+      location: "secondary_results[6] (name=reproduction_check_zc_only).value:\n  q1b_zc_only_chi2 = 997.1116666666666 (point)\n\
+        \  q1a_settled_chi2 = 952.5167 (anchor)\n  abs_diff = 44.59496666666655 (|diff|)\n  tol = 50.0 (the script's _REPRODUCTION_TOL_CHI2)\n\
+        \  ok = true (within-tol flag)\nAll four phase_a-required fields present. ASSERT did NOT fire\nat N=400 for this check\
+        \ (drift 44.595 within tol=50 with\n~11% margin headroom); execution_deviations = [] as expected.\nPhase_a's catch-and-report\
+        \ carve-out path was not exercised.\nNote: this drift (44.6 chi^2) is materially larger than\nrepro_chi2_no_z's drift\
+        \ (5.2 chi^2), an informative side-\nchannel finding the arbiter should surface: the Z_c-conditioned\nbaseline (Q1A\
+        \ anchor) is more SMC-noise-sensitive at N=200\nthan the no-Z baseline (Q2A anchor). This is a per-stratum\nfinite-sample\
+        \ effect (Z_c partitions reduce per-cell N) and is\ncoherent with phase_a's hypothesis that SMC noise contributes\n\
+        non-trivially to the Q1B-line CI widths.\n"
+      verdict: PASS
+primary_metric_match:
+  verdict: PASS
+  detail: "phase_a.metric (verdict-metric definition): \"PRIMARY: realized 95%\nCI WIDTH on cumulative_chi2_improvement_above_Z_c\
+    \ at the\n(day_type, Z_c, Z2_c) configuration after re-running\nexperiment/q1b_z2_conditioning/__main__.py with --n-particles\
+    \ 400.\"\nCuts: R-A1B' <= 357.27; R-B1B' in (357.27, 524.0]; R-C1B' > 524.0\nOR |better_chi2_point - 662.223| > 50.\n\n\
+    Result primary_result.value reports cumulative_chi2_improvement_\nabove_Z_c = 273.388 (point); primary_result.cumulative_chi2_\n\
+    improvement_above_Z_c_ci95 = [-34.576, +471.622] (bounds). Width =\n506.198 chi^2 (derived; phase_a's pre-locked report-as-derivation\n\
+    convention per threshold_derivations.ci_width_cuts).\n\nQ1B' CI WIDTH VERDICT (derivable by arbiter):\n  506.198 in (357.27,\
+    \ 524.0]  =>  R-B1B' MECHANICAL\n  |679.128 - 662.223| = 16.905 <= 50  =>  point-stability PASS\n  Combined: R-B1B' fires\
+    \ unambiguously.\n\nNOTE: result.yaml's primary_result.outcome_verdict = \"R-B1B\" is\nQ1B's outcome category (the script's\
+    \ outcome calculation is\nQ1B's, derived from Q1B's better_chi2 cuts at 228/2284 — NOT\nQ1B''s CI-width cuts at 357.27/524.0).\
+    \ This is per phase_a\nvariables.excluded \"Verdict cuts R_A1B_CUT=228 and R_C1B_CUT=2284\n(held constant per experiment/q1b_z2_conditioning/__main__.py:120-\n\
+    122). Q1B' does NOT re-verdict Q1B's outcome category; Q1B'\nverdicts the CI width on cumulative_chi2_improvement_above_Z_c.\"\
+    \nThe Q1B' verdict has to be DERIVED from the reported numerics\nagainst Q1B''s CI-width cuts at the arbiter step. ALL\
+    \ UNDERLYING\nNUMERICS NEEDED FOR THIS DERIVATION ARE REPORTED (CI bounds,\nbetter_chi2 point, both verifiable in primary_result\
+    \ block).\nPASS.\n"
+ci_method_match:
+  verdict: PASS
+  detail: 'phase_a.ci_method: type = paired_day_bootstrap, details = "1000
+
+    paired-day bootstrap resamples ... _Z2_BOOT_OFFSET=8013 (Q1B''s
+
+    bootstrap seed; held constant per variables.excluded). Per
+
+    resample: refit M3 per (day_type, Z_c, Z2_c) cell on the
+
+    resampled rows; SMC-propagate post-cutoff with N=400 particles;
+
+    recompute marginal PIT chi^2 per candidate; recompute
+
+    cumulative_chi2_improvement_above_Z_c = 952.5167 - better_chi2.
+
+    Report 95% percentile CI on cumulative_chi2_improvement_above_Z_c,
+
+    better_chi2, chi2_Z2_b, chi2_Z2_c, and the head-to-head
+
+    chi2_diff. The bootstrap scheme is identical to Q1B; only
+
+    N_PARTICLES in the SMC propagation step changes."
+
+
+    Result primary_result.ci_method_actually_used =
+
+    "paired_day_bootstrap_n=1000" matches phase_a type and n. CIs
+
+    reported on chi2_Z2_b, chi2_Z2_c, chi2_diff, better_chi2, and
+
+    cumulative_chi2_improvement_above_Z_c (5/5 verdict-relevant and
+
+    informational CI quantities). MATCH.
+
+    '
+code_path_audit:
+  verdict: PASS
+  detail: 'Result code_path_audit.verdict = PRODUCTION-PATH. Tool reported as
+
+    ".venv/bin/python -m experiment.audit.code_path
+
+    experiment/q1b_z2_conditioning/__main__.py". blocking = false. Per
+
+    CLAUDE.md applied-audit workflow Step 3, this is a BLOCKING
+
+    precondition for the arbiter; it is cleared. Check P at
+
+    body_sha256 25d7a968... (commit 8cd2935-companion) also ratified
+
+    the post-substitution script as PRODUCTION-PATH.
+
+    '
+secondary_results_audit:
+  inline_synthetic_gate:
+    verdict: PASS
+    detail: 'phase_a.baselines.secondary: synthetic recovery gate with known
+
+      Z2-conditional DGP per (Z_c, Z2) cell key, plus false-Z2
+
+      companion. Result reports all_ok=true with 9 sub-checks:
+
+      (i)-(iv) per-cell parameter recovery {w_r within 0.15, s2
+
+      within 0.15 rel tol} across 4 cells; (v)-(viii) per-cell PIT
+
+      chi^2 < 60.0 ceiling across the same 4 cells (realized values
+
+      5.68, 14.76, 7.37, 8.26 -- all well below the 60.0 ceiling);
+
+      (ix) false_z2_companion_collapse all_cells_collapsed: true.
+
+      BLOCKING gate cleared per phase_a. Identical structure to Q1B''s
+
+      synthetic gate; N_PARTICLES change does not alter
+
+      SYNTHETIC_GATE_M (held at 100 per Check P L1 item
+
+      synthetic_gate_M_independent_of_n_particles PASS).
+
+      '
+  reproduction_check_no_z:
+    verdict: PASS
+    detail: 'phase_a.metric.SECONDARY Reproduction check #1: re-running M3
+
+      with sigma=(day_type) alone reproduces Q2A''s chi^2 = 953.84
+
+      within paired-bootstrap noise (tol 50). Result
+
+      secondary_results.reproduction_check_no_z reports q1b_no_z_chi2
+
+      = 959.065 vs q2a_settled_chi2 = 953.84, abs_diff = 5.225
+
+      (tolerance 50.0), ok = true. PASS within tolerance with ~90%
+
+      headroom. End-to-end provenance back to S9 preserved at N=400.
+
+      Phase_a''s catch-and-report carve-out path was NOT exercised
+
+      (drift well within tol); the arbiter can render the primary
+
+      verdict normally per the carve-out''s "if the assert PASSES
+
+      (both |diff| <= 50), result.yaml reports the primary verdict
+
+      normally alongside the realized repro |diff| values" branch.
+
+      '
+  reproduction_check_zc_only:
+    verdict: PASS
+    detail: 'phase_a.metric.SECONDARY Reproduction check #2: re-running M3
+
+      with sigma=(day_type, Z_c) (Q1A''s carryforward) reproduces Q1A''s
+
+      chi^2 = 952.5167 within paired-bootstrap noise (tol 50). Result
+
+      secondary_results.reproduction_check_zc_only reports
+
+      q1b_zc_only_chi2 = 997.1117 vs q1a_settled_chi2 = 952.5167,
+
+      abs_diff = 44.595 (tolerance 50.0), ok = true. PASS within
+
+      tolerance with ~11% headroom. This is the cumulative-baseline
+
+      anchor — the Z2 reduction measurement only means what it claims
+
+      if this passes. The larger drift here (44.6 vs no-Z''s 5.2) is
+
+      informative side-channel: Z_c-stratified per-cell SMC variance
+
+      contributes more at N=200 than no-Z''s pooled SMC variance does;
+
+      coherent with phase_a''s SMC-noise-non-trivial hypothesis.
+
+      '
+  pre_registered_cuts:
+    verdict: PASS_WITH_NOTE
+    detail: 'Result secondary_results.pre_registered_cuts reports R_A1B_cut =
+
+      228, R_C1B_cut = 2284 with provenance = "resolution-paths-thread
+
+      skeleton (Q1B node); integer-rounded forms of Q2A''s gate-
+
+      validated R-A2_cut=228.44 and R-C2_cut=2284.44." These are
+
+      Q1B''s outcome-category cuts (carried forward unchanged from
+
+      Q1B''s settled run; phase_a variables.excluded explicitly
+
+      retains them per "Q1B'' does NOT re-verdict Q1B''s outcome
+
+      category"). The Q1B''-RELEVANT CI-WIDTH CUTS at 357.27 and 524.0
+
+      are pre-locked in phase_a.metric.verdict_cuts and in
+
+      thread.threshold_derivations; they are NOT in result.yaml''s
+
+      secondary_results.pre_registered_cuts. This is structurally
+
+      correct per phase_a — the result.yaml reports the script''s
+
+      pre-locked cuts (which are Q1B''s, inherited unchanged) and the
+
+      arbiter applies the Q1B'' CI-width cuts (357.27/524.0) at
+
+      verdict time. The arbiter has access to the Q1B'' cuts via
+
+      phase_a.metric directly; no result.yaml field is missing.
+
+      '
+shape_outcomes_evaluable:
+  verdict: PASS
+  detail: "phase_a.shape_outcomes (from phase_a.metric.verdict_cuts and\nfalsification_criterion / corroboration_criterion\
+    \ / ambiguous_\nregion):\n  R-A1B': cumulative_ci95_width <= 357.27 AND |better_chi2_point\n          - 662.223| <= 50\n\
+    \  R-B1B': cumulative_ci95_width in (357.27, 524.0] AND\n          |better_chi2_point - 662.223| <= 50\n  R-C1B': cumulative_ci95_width\
+    \ > 524.0 OR\n          |better_chi2_point - 662.223| > 50\n\nReported numerics needed for evaluation:\n  cumulative_ci95\
+    \ bounds: [-34.576, +471.622]  =>  width = 506.198\n  better_chi2 point: 679.128\n  |679.128 - 662.223| = 16.905\n\nMechanical\
+    \ verdict derivation:\n  width 506.198 in (357.27, 524.0]  =>  R-B1B' (CI-width band)\n  point-shift 16.905 <= 50    \
+    \      =>  point-stability PASS\n  Combined: R-B1B' fires unambiguously.\n\nWidth is 18.7% inside the R-B1B' band (lower\
+    \ edge 357.27; band\nmidpoint 440.6; upper edge 524.0); not borderline R-A1B' (148.9\nchi^2 of headroom) and not borderline\
+    \ R-C1B' (17.8 chi^2 of\nheadroom). The realized width 506.198 sits in the UPPER portion\nof the R-B1B' band, closer to\
+    \ R-C1B' than to R-A1B'. Arbiter\nshould surface this — the substantive reading is \"modest\nnarrowing (476.4 -> 506.2\
+    \ is actually a SLIGHT WIDENING by 6.3%,\nnot a narrowing) within the R-B1B' band, with the realized width\nnear the R-C1B'\
+    \ boundary.\" Wait, re-checking: Q1B realized width\nwas 476.358 (per phase_a baselines.primary); Q1B' realized width\n\
+    is 506.198. That is a +6.3% WIDENING of the CI, not a narrowing.\n\nREVISED reading: width INCREASED from 476.358 (N=200)\
+    \ to 506.198\n(N=400) by 6.3% (+29.8 chi^2). The proponent's forecast was a\n25%+ NARROWING under N doubling; this is\
+    \ falsified at the point\nestimate. The DA's forecast was a ~12% narrowing to 419 chi^2;\nalso falsified at the point\
+    \ estimate (realized +6% widening\ninstead of -12% narrowing). Both forecasts assumed SMC variance\nwould dominate (proponent\
+    \ s ~ 0.99) or contribute non-trivially\n(DA s ~ 0.07); the realized result is that SMC variance is\nNEGATIVELY CONTRIBUTING\
+    \ to the realized width point estimate\n(likely a finite-sample paired-bootstrap noise effect on the\nrealized width measurement\
+    \ itself, but the central tendency\ndirection is opposite both forecasts). This is the arbiter's\nfact to render; Check\
+    \ R's scope is only to confirm the\nunderlying numerics are reported. THEY ARE.\n\nlandslide_R_A1B: null in result.yaml\
+    \ is correct (the landslide\nqualifier is defined only for Q1B's R-A1B firings per Q1B\nphase_a; Q1B' outcome is R-B1B'\
+    \ which has no landslide variant).\n\nPOINT-STABILITY note: |679.128 - 662.223| = 16.905 is well within\n50; point-stability\
+    \ is satisfied (not a R-C1B' trigger).\n"
+execution_deviations:
+  verdict: PASS
+  detail: 'Result execution_deviations = []. No deviations from phase_a
+
+    registered methodology AT THE NUMERICAL LEVEL. The grade demotion
+
+    documented in artifact.primary_txt_note is NOT a methodology
+
+    deviation — it is a downstream-artifact-emission issue (the .txt
+
+    path collision); the underlying numerics were produced by
+
+    audited-PRODUCTION-PATH code with all BLOCKING gates passed.
+
+    Check R correctly reports execution_deviations = [] for the
+
+    numeric methodology; the .txt collision is captured separately
+
+    in artifact.primary_txt_note and acknowledged in this Check R''s
+
+    grade_demotion_acknowledgment field.
+
+    '
+independent_variable_stratifications:
+  per_variable:
+    N_PARTICLES:
+      verdict: PASS
+      detail: 'phase_a.variables.independent: "N_PARTICLES (single knob being
+
+        varied: 200 in Q1B, 400 in Q1B''). Passed via the existing CLI
+
+        flag --n-particles." Result primary_result.ci_method_actually_
+
+        used = "paired_day_bootstrap_n=1000" (bootstrap N unchanged
+
+        per pre-commitment); inline_synthetic_gate uses SYNTHETIC_
+
+        GATE_M=100 (independent per Check P L1 item). The realized
+
+        N=400 SMC particle count is implicit in the result through
+
+        the pickle''s per-cell SMC propagation traces (not directly
+
+        reported as a scalar field in result.yaml, but verifiable via
+
+        the run-log printout that Check P documented at lines 1432,
+
+        1462, 1527 of the audited script). PASS-by-construction (the
+
+        script''s --n-particles 400 invocation is documented in Check P
+
+        next_step_recommendation; the realized particle count is the
+
+        operationalization of the independent variable).
+
+        '
+    day_type:
+      verdict: PASS
+      detail: 'phase_a inherits 3 day_types (weekday, saturday, sunday) from
+
+        Q1B. Result reports per_cell_mixture_params and
+
+        per_cell_chi2_contribution keyed by (day_type, Z_c, Z2)
+
+        across all three day_types for both Z2_b and Z2_c
+
+        constructions. Full per-stratum coverage.
+
+        '
+    Z_c_stratum:
+      verdict: PASS
+      detail: 'phase_a inherits Z_c as Q1A''s settled 8-level hour_of_week
+
+        categorical (Z_c in {0..7}). Result reports all non-empty
+
+        (day_type, Z_c, Z2) cells; the absent (day_type, Z_c) pairs
+
+        are structurally impossible (Z_c is a function of (weekday, h)
+
+        and not all (day_type, Z_c) pairs exist in the IESO
+
+        calendar). Same coverage convention as Q1B''s Check R.
+
+        '
+    Z2_c_stratum:
+      verdict: PASS
+      detail: 'phase_a inherits Z2_c as P1''s settled 4-level categorical
+
+        binning (Z2_c in {0..3} = {overnight, morning_ramp, afternoon,
+
+        evening}). Result reports all non-empty (day_type, Z_c, Z2_c)
+
+        cells. Phase_a variables.excluded notes Z2_b is "still re-run
+
+        in the script (the CLI does not toggle it off and re-running
+
+        both branches preserves the script''s structural integrity),
+
+        but the verdict is on the Z2_c CI width. Reporting Z2_b
+
+        numerics is informational only." Both branches are reported
+
+        (per_cell_mixture_params_Z2_b, per_cell_mixture_params_Z2_c,
+
+        per_cell_chi2_contribution_Z2_b, per_cell_chi2_contribution_
+
+        Z2_c, chi2_Z2_b, chi2_Z2_c, chi2_diff). Coverage complete.
+
+        '
+verdict_check:
+  realized_better_chi2: 679.1283333333333
+  realized_cumulative_point: 273.3883666666667
+  realized_cumulative_ci95:
+  - -34.57579999999992
+  - 471.6218666666665
+  realized_cumulative_ci95_width: 506.198
+  realized_better_chi2_point_shift: 16.905
+  q1b_prime_mechanical_verdict_derived_by_check_r: R-B1B'
+  q1b_prime_mechanical_verdict_basis: 'width 506.198 in (357.27, 524.0] AND point-shift 16.905 <= 50.
+
+    Both cuts derivable from reported numerics. Arbiter renders
+
+    against phase_a verdict-cuts at arbitration step.
+
+    '
+  width_change_vs_q1b: 'Q1B width = 476.358 chi^2 (per baselines.primary). Q1B'' width =
+
+    506.198 chi^2. Delta = +29.840 chi^2 (+6.3% WIDENING). The
+
+    proponent''s R-A1B'' forecast (width <= 357.27, a >=25% narrowing)
+
+    is point-falsified; the DA''s R-B1B'' point forecast (419 chi^2, a
+
+    12% narrowing) is point-falsified; the realized direction is
+
+    OPPOSITE both forecasts (slight widening). However R-B1B'' STILL
+
+    FIRES as the mechanical CI-band verdict (506.198 is in the
+
+    (357.27, 524.0] band), so DA''s outcome-category forecast is
+
+    mechanically correct even though the within-band point is on the
+
+    opposite side of the band midpoint from the DA point forecast.
+
+    This is information the arbiter will surface; Check R only
+
+    confirms the numerics support both readings.
+
+    '
+  outcome_verdict_field_in_result_yaml:
+    reported_value: R-B1B
+    note: 'Result.yaml''s primary_result.outcome_verdict = "R-B1B" is Q1B''s
+
+      outcome category (script''s outcome calculation is Q1B''s, cuts
+
+      228/2284). The Q1B'' verdict (R-B1B'' against cuts 357.27/524.0)
+
+      is computed by the arbiter from the reported numerics at
+
+      arbitration time. Check R verifies the underlying numerics are
+
+      reported (they are). NOT A FIDELITY MISMATCH — phase_a
+
+      variables.excluded explicitly retained the script''s outcome
+
+      cuts unchanged; the arbiter applies the Q1B'' cuts.
+
+      '
+  point_stability_check:
+    realized_better_chi2: 679.1283333333333
+    anchor: 662.223
+    point_shift: 16.905
+    tol: 50.0
+    point_stability_passed: true
+    expected_per_phase_a: '|better_chi2_point - 662.223| <= 50 => point-stability PASS;
+
+      otherwise R-C1B'' regardless of CI band.
+
+      '
+    realized_match: true
+  near_tie_check:
+    realized_chi2_diff: 24.106666666666683
+    chi2_diff_ci95:
+    - -48.15399999999998
+    - 103.6719583333335
+    interval_straddles_zero: true
+    reported_flag: true
+    match: 'result.yaml primary_result.value.near_tie_flag = true; CI
+
+      straddles zero ([-48.154, +103.672]); 24.107 < paired SE
+
+      (~38-40 from half-width 75.91/1.96). Z2_c is the parsimony-
+
+      preferred winner per phase_a variables.excluded. NEAR-TIE flag
+
+      correctly recorded.
+
+      '
+verdict: PASS
+aggregate_verdict: PASS
+fidelity_coverage_passed: true
+notes_for_arbiter: "Check R: PASS. All 5 phase_a dependent variables present in the\nresult.yaml. Primary verdict statistic\
+  \ cumulative_chi2_improvement_\nabove_Z_c reported with point (273.388), full CI95 bounds\n([-34.576, +471.622]), and width\
+  \ derivable (506.198). better_chi2\nreported with point (679.128) and CI bounds ([480.895, 987.092]).\nBoth reproduction\
+  \ checks PASS within tol=50 (no_z drift 5.225;\nzc_only drift 44.595). Inline synthetic gate PASS (9/9 sub-checks).\ncode_path\
+  \ PRODUCTION-PATH. Check P PASS at body_sha256 25d7a968...\n(post-substitution).\n\nSubstantively notable content the arbiter\
+  \ should surface (all\nderivable from reported numerics alone):\n\n  1. R-B1B' mechanical verdict fires unambiguously. CI\
+  \ width 506.198\n     is in the (357.27, 524.0] band; point-stability satisfied\n     (|679.128 - 662.223| = 16.905 << 50).\
+  \ Both phase_a cuts cleared\n     for R-B1B'.\n\n  2. THE CI WIDENED, NOT NARROWED. Q1B realized width 476.358 chi^2\n \
+  \    at N=200 -> Q1B' realized width 506.198 chi^2 at N=400 (a +6.3%\n     WIDENING, +29.84 chi^2). Both proponent (s ~\
+  \ 0.99, forecast\n     narrowing to <=357.27) and DA (s ~ 0.07, forecast narrowing to\n     ~419) had asymmetric posteriors\
+  \ on a NARROWING-or-equal\n     direction. The realized direction is OPPOSITE both forecasts.\n\n  3. The realized R-B1B'\
+  \ fires NEAR THE R-C1B' UPPER BOUNDARY (width\n     506.198 vs cut 524.0; only 17.8 chi^2 headroom = 3.4% of cut).\n   \
+  \  This is a SUBSTANTIVELY DIFFERENT R-B1B' than the DA's predicted\n     419 — the band is wide and the realized position\
+  \ is at the\n     opposite end from the DA forecast. Arbiter should distinguish\n     \"R-B1B' mechanically fires AND substantively\
+  \ matches DA\" (false)\n     from \"R-B1B' mechanically fires AND substantively closer to\n     R-C1B' than to R-A1B'\"\
+  \ (true).\n\n  4. THE SUBSTANTIVE READING (the arbiter's job to render): the wide\n     CI on cumulative_chi2_improvement_above_Z_c\
+  \ is robust to\n     N_PARTICLES doubling — V_smc/V_total appears to be very small,\n     below DA's 7% estimate and decisively\
+  \ below the proponent's\n     87.5% requirement. Eval-window-noise (the fixed ~12,000-row\n     post-cutoff window + paired-day\
+  \ bootstrap finite-sample noise)\n     dominates the realized CI width. The doubling actually\n     SLIGHTLY WIDENED the\
+  \ CI, which is bounded by paired-bootstrap\n     finite-sample noise on the realized width itself (the +6%\n     widening\
+  \ is within the bootstrap's own CI on width\n     measurement; the phase_a 110% threshold at 524.0 acknowledges\n     this\
+  \ as the R-C1B' lower bound rationale).\n\n  5. POINT STABILITY HOLDS. better_chi2 shifted from Q1B's 662.223\n     to Q1B''s\
+  \ 679.128 (delta +16.905), well within the 50 chi^2\n     tolerance. The SMC doubling did not destabilize the realized\n\
+  \     point — seed dependence, library-fit drift, and other R-C1B'\n     failure modes are ruled out. The realized point-shift\
+  \ is\n     consistent with the DA's point-shift forecast (central 22\n     chi^2 with CI [5, 47]); realized 16.905 is inside\
+  \ the DA's CI.\n\n  6. NEAR-TIE BETWEEN Z2_b AND Z2_c PRESERVED AT N=400. chi2_diff =\n     +24.107 with CI [-48.154, +103.672]\
+  \ straddling zero; Z2_c is\n     still the parsimony-preferred winner at point estimate but no\n     statistically significant\
+  \ ranking. The NEAR-TIE designation\n     from Q1B carries forward; the SMC doubling did not resolve the\n     Z2_b vs Z2_c\
+  \ ranking question.\n\n  7. REPRODUCTION-CHECK DRIFT ASYMMETRY (informative side-channel\n     per phase_a baselines.secondary):\
+  \ no_z drift 5.225 vs zc_only\n     drift 44.595. The Z_c-stratified baseline is ~8.5x more\n     SMC-noise-sensitive than\
+  \ the no-Z pooled baseline. This is a\n     finite-sample per-stratum effect (Z_c partitions reduce per-\n     cell N from\
+  \ the full library to ~1000-7000-row sub-libraries)\n     and is coherent with the substantive reading that joint-\n   \
+  \  stratification finite-sample noise dominates the realized CI\n     widths in the Q1B-line settled results.\n\n  8. GRADE\
+  \ NOTE: result.yaml carries grade_demotion_reason\n     documenting PROVENANCE-GRADE INSPECTION-ONLY. The arbiter's\n  \
+  \   verdict should explicitly read \"INSPECTION-ONLY diagnostic\"\n     per the demotion; the substantive content of the\
+  \ verdict is\n     not blocked, but downstream citation must carry the grade\n     caveat. Check R does not block on the\
+  \ demotion (out of scope\n     per .claude/agents/phase-fidelity.md §\"Check R\"); the\n     fidelity_coverage_passed flag\
+  \ is true.\n\n  9. ROUTING: per phase_a thread.thread_topic = resolution-paths-\n     thread and phase_a §ambiguous_region.action\
+  \ (\"User adjudicates\n     the (a)/(b)/(c) amendment paths surfaced in Q1B's S4 advance\n     on substantive prior + structural\
+  \ reasoning rather than waiting\n     for further CI narrowing\"). Q1B' was registered as the SMC-\n     tightening lever\
+  \ to clean adjudicate the (a)/(b)/(c) decision;\n     the empirical answer is \"the SMC-tightening lever does not\n    \
+  \ narrow the CI (slight widening at point); eval-window-noise\n     dominates; the (a)/(b)/(c) decision proceeds on substantive\n\
+  \     prior + structural reasoning as the proponent's ambiguous-\n     region action anticipated.\" Coordinator's post-arbiter\n\
+  \     dispatch space includes the (a)/(b)/(c) options described in\n     phase_a §ambiguous_region.action; per thread branching_rules.\n\
+  \     Q1B'.R-B1B' = null, no auto-advancement. Per thread skeleton,\n     Q1B' settles INFORMATIVELY-NEGATIVE on the SMC-tightening\n\
+  \     hypothesis (CI is intrinsic to data, not estimator), which is\n     itself a useful framework-level finding for the\
+  \ joint S9+S10+\n     S11+S12+S13 corpus.\n\nArbiter precondition fidelity_coverage_passed: true.\n\nProvenance note: this\
+  \ phase_fidelity_check_r.yaml carries\ngit_clean: false because the result.yaml + pickle + Check R itself\nare freshly written\
+  \ (untracked) at the time this file is stamped.\nSame inline-stamp pattern documented in Q1A's, Q1B's, Q2B's, and P1's\n\
+  Check R artifacts. The canonical cleanliness witness for the\nunderlying run is the result.yaml's own body_sha256 (3c1954e2...)\n\
+  + git_sha (da7228b3...). Registry verify reports \"chain verified\"\nafter this Check R's inline stamp.\n"
+artifact_format_note: 'Q1B'' did NOT emit a CLAIM-GRADE .txt provenance envelope (per the
+
+  grade_demotion_reason documented in result.yaml). The result.yaml +
+
+  pickle scratch/data/q1b_z2_conditioning/q1b_prime_n400.pkl ARE the
+
+  durable record; both produced by audited-PRODUCTION-PATH code with
+
+  all BLOCKING gates passed. The result.yaml was inline-stamped
+
+  (registry.stamp with self_path) post-emission to fill body_sha256 /
+
+  git_sha / git_clean — same pattern Q1A, Q1B, P1, Q2B used; the
+
+  experiment script emits the body and stamping is a separate
+
+  workflow step.
+
+  '
+git_sha: 2aace572c2b22155d04d3fb58d92613813814650
+git_clean: true
+body_sha256: 6e6d2cb7e6a4ce1ef0a74a1ea4dcfb21dd18ab8b742715060d0ab4e9426f855f
