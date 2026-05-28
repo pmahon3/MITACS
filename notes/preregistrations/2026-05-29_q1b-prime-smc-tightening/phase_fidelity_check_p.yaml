@@ -1,0 +1,401 @@
+schema: phase_fidelity
+aggregate_verdict: PASS
+fidelity_coverage_passed: true
+purpose: "Check P (pre-run phase-fidelity audit) RE-RUN on Q1B's experiment\nscript\
+  \ (experiment/q1b_z2_conditioning/__main__.py) AFTER the inline-\nedit parameterization\
+  \ commit 8cd2935 that resolved the L2 advisory\nflagged by the prior Check P (body_sha256\
+  \ a24df219...; commit\ndd31839).\n\nThe prior advisory: script hardcoded Q1B's predecessor\
+  \ phase_a\nbody_sha256 (0602f0c0...) in 3 places (lines 1104/1644/1693) and\nhardcoded\
+  \ the result.yaml emit path to Q1B's registry directory\n(line 1752). Per the prior\
+  \ verdict's next_step_recommendation\noption 1 (minimal-edit + commit), the analyst\
+  \ applied a surgical\nsubstitution covering 10 string occurrences across 8 distinct\n\
+  lines (5x phase_a hash 0602f0c0... -> 7ed3eea3...; 1x thread hash\n173b3d58... ->\
+  \ 5c8f5e7d... post-A2; 4x prereg-dir\n2026-05-27_q1b-z2-conditioning-second-axis\
+  \ ->\n2026-05-29_q1b-prime-smc-tightening) plus a runtime-inert\ndocstring extension\
+  \ at lines 1-17 documenting the dual-purpose\nframing.\n\nTHIS RE-RUN VERDICT: all\
+  \ 10 substitutions landed at the expected\nloci (with +8 line shift from the docstring\
+  \ extension); the\nreproduction-check asserts (current lines 1442 and 1472; formerly\n\
+  1434 and 1464) are bit-identical and remain in force at tol=50\nper phase_a \xA7\
+  baselines.secondary; the substitution is L2\nconfiguration (artifact-pinning + docstring),\
+  \ not L1 methodology\n(no library / fitter / seed / bootstrap / MIN_CELL_SIZE /\
+  \ SMC-\nparticle-count edits); fresh code-path audit at body_sha256\n69ec2285...\
+  \ ratifies the post-substitution script as\nPRODUCTION-PATH. L1 10/10 PASS; L2 6/6\
+  \ PASS (including the\npreviously-advisory item now RESOLVED). Aggregate PASS (no\n\
+  advisory).\n"
+checked_by: phase-fidelity agent (.claude/agents/phase-fidelity.md), Check P
+topic: q1b-prime-smc-tightening
+written_at: '2026-05-29T16:30:00-07:00'
+script_audited: experiment/q1b_z2_conditioning/__main__.py
+script_lines: 1772
+script_commit: 8cd2935
+script_status_note: 'Q1B'' script is now parameterized for Q1B''''s preregistration
+
+  identity (phase_a hash, thread hash, prereg-dir) via the inline
+
+  substitution at commit 8cd2935. The 18 L1 items from Q1B''s
+
+  original Check P (commit 1736e71) carry forward unchanged
+
+  (substitution did not touch methodology surface). The N=400-
+
+  specific L1 items from the prior Q1B'' Check P (10 items; body
+
+  a24df219...) also carry forward unchanged. The substitution
+
+  itself adds 2 NEW L2 items: docstring extension (runtime-inert)
+
+  and substitution-scope discipline (the "left UNCHANGED" set is
+
+  correct). The previously-advisory L2 item on result.yaml
+
+  placement + phase_a-hash tagging is now RESOLVED.
+
+  '
+references:
+- file: phase_a.yaml
+  body_sha256: 7ed3eea35553b9c5cd3e03d0003603ed4d56337d151362d4a11c2d1955b75e78
+- file: ../2026-05-27_q1b-z2-conditioning-second-axis/phase_fidelity_check_p.yaml
+  body_sha256: c6c54096a593b20484f53175ae31431e7add0de0f91120f37e05dbe65b3d5980
+  relation: predecessor_check_p
+- file: phase_fidelity_check_t.yaml
+  body_sha256: eeae43ffdb90321f973bc20ae6ebbe673da8e1a51286e4401199433963228833
+  relation: companion_check_t
+- file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
+  relation: thread
+prior_verdict_superseded:
+  body_sha256: a24df219e9740f411cbd9f49e5187fbaf468f37cfa52b08148e5c3cbbfd998f8
+  recovery: git show dd31839:notes/preregistrations/2026-05-29_q1b-prime-smc-tightening/phase_fidelity_check_p.yaml
+  superseded_at_commit: 8cd2935
+  reason: Prior verdict was PASS_WITH_ADVISORY on hardcoded artifact-pinning strings;
+    this re-run after commit 8cd2935 (which applied the prior verdict's recommended
+    option-1 fix) renders fresh aggregate PASS with the advisory item RESOLVED. Not
+    in references{} because verify_file requires on-disk hash match and this file
+    overwrites the prior at the same path; the prior is recoverable via the git show
+    command above.
+companion_artifact_unstamped:
+  file: code_path_audit.md
+  recomputed_body_sha256: e6bca4255ee0e1762d41cd0708561b5019566d6eff3da7784efb032a6b410b00
+  note: 'Post-substitution code-path audit was written with body_sha256: null (the
+    code-path-auditor agent is responsible for stamping its own artifact). The audit
+    content is on disk; its recomputed hash is recorded here for Check R / arbiter
+    cross-reference. Not in references{} because the unstamped state would fail verify_file''s
+    on-disk hash check.'
+thread:
+  node_id: Q1B'
+  parent_branch: R-A
+  thread_topic: resolution-paths-thread
+  thread_body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
+code_path_audit:
+  verdict: PASS
+  tool: .venv/bin/python -m experiment.audit.code_path experiment/q1b_z2_conditioning/__main__.py
+  detail: 'Fresh code-path audit was dispatched post-substitution and
+
+    written to notes/preregistrations/2026-05-29_q1b-prime-smc-
+
+    tightening/code_path_audit.md (body_sha256 69ec2285...). All
+
+    dependent-variable provenance chains verdict PRODUCTION-PATH:
+
+    better_chi2, cumulative_chi2_improvement_above_Z_c, and its
+
+    _ci95 bootstrap form all feed from
+
+    mixture_2_gaussian_mle_fit (production) ->
+
+    _pit_for_zc_z2_candidate (M=args.n_particles=400) ->
+
+    _marginal_pit_chi2 (Q2A production helper). The substitution
+
+    did not introduce any new production-symbol references;
+
+    inherited PRODUCTION-PATH from Q1B''s audited script holds.
+
+    '
+l1_check:
+  pass: true
+  items_checked: 10
+  items_passed: 10
+  items_failed: []
+  notes: "The 10 L1 items audited at the prior Check P (Q1B'-specific N=400\nitems:\
+    \ --n-particles plumbing to all 3 SMC sites; synthetic-gate\nconstant independence;\
+    \ assert-unchangedness; primary-metric\nderivability; seed independence; bootstrap\
+    \ convention) all carry\nforward unchanged. The substitution touched ONLY:\n \
+    \ - the docstring (lines 1-17; runtime-inert)\n  - the rendered text-artifact\
+    \ header (lines 905, 907)\n  - the rendered result.yaml dict (lines 1112, 1340)\n\
+    \  - the pickle config_block (line 1652)\n  - the make_result inputs dict (lines\
+    \ 1701, 1703)\n  - the result.yaml emit path string (line 1760)\nNONE of these\
+    \ are L1 (computational methodology) surface. The\npre-locked constants (N_PARTICLES=200,\
+    \ SYNTHETIC_GATE_M=100,\nQ2A_M3_CHI2_SETTLED=953.84, Q1A_M3_Z_c_CHI2_SETTLED=952.5167,\n\
+    _REPRODUCTION_TOL_CHI2=50.0, MIN_CELL_SIZE=200, all SMC and\nbootstrap seeds at\
+    \ lines 103-124) are bit-identical to the\nprior Check P's audit. The --n-particles\
+    \ flag at current line\n1326 plumbs through to all three SMC call sites at current\n\
+    lines 1432, 1462, 1527 (verified by grep \"M=args.n_particles\").\nThe reproduction-check\
+    \ asserts at current lines 1442 and 1472\nare bit-identical (diff confirms zero\
+    \ edits in those line\nranges). L1 carries forward 10/10 PASS.\n"
+  items_audited:
+    n_particles_cli_flag_default_still_module_constant:
+      location: 'Line 1326: p.add_argument("--n-particles", type=int,
+
+        default=N_PARTICLES). Unchanged from prior audit (was
+
+        line 1318; +8 from docstring extension).
+
+        '
+      verdict: PASS
+    n_particles_plumbed_to_repro_check_1:
+      location: 'Line 1432: M=args.n_particles (was line 1424; +8). Function
+
+        signature unchanged (line 535; was 527). PASS.
+
+        '
+      verdict: PASS
+    n_particles_plumbed_to_repro_check_2:
+      location: 'Line 1462: M=args.n_particles (was line 1454; +8). Function
+
+        signature unchanged (line 566; was 558). PASS.
+
+        '
+      verdict: PASS
+    n_particles_plumbed_to_head_to_head_smc:
+      location: 'Line 1527: M=args.n_particles (was line 1519; +8). Function
+
+        signature unchanged (line 431; was 423). PASS.
+
+        '
+      verdict: PASS
+    synthetic_gate_M_independent_of_n_particles:
+      location: 'SYNTHETIC_GATE_M = 100 at line 155 (was 147; +8). Used at
+
+        lines 745 and 749 (were 737 and 741; +8). Not plumbed via
+
+        args.n_particles. PASS.
+
+        '
+      verdict: PASS
+    reproduction_check_1_assert_unchanged:
+      location: "Lines 1442-1450: assert repro_diff1 <= _REPRODUCTION_TOL_CHI2\n(was\
+        \ lines 1434-1442). Bit-identical to prior audit; diff\nconfirms zero edits\
+        \ in this line range. In force at tol=50\nper phase_a \xA7baselines.secondary.\
+        \ PASS.\n"
+      verdict: PASS
+    reproduction_check_2_assert_unchanged:
+      location: "Lines 1472-1480: assert repro_diff2 <= _REPRODUCTION_TOL_CHI2\n(was\
+        \ lines 1464-1472). Bit-identical to prior audit; diff\nconfirms zero edits\
+        \ in this line range. In force at tol=50\nper phase_a \xA7baselines.secondary.\
+        \ PASS.\n"
+      verdict: PASS
+    primary_metric_cumulative_ci_width_derivable_from_existing_fields:
+      location: 'primary_result.value.cumulative_chi2_improvement_above_Z_c
+
+        (point) and primary_result.cumulative_chi2_improvement_above_
+
+        Z_c_ci95 (bounds) both still present at current lines 1153
+
+        and 1175-1176 (were 1145 and 1167-1168). CI WIDTH is a
+
+        one-subtraction derivation. Check R / arbiter computes
+
+        width = ci95[1] - ci95[0] and verdicts the 357.27 / 524.0
+
+        cuts on that derived width. PASS-by-derivation.
+
+        '
+      verdict: PASS
+    smc_seeds_independent_of_n_particles:
+      location: "All SMC seeds (lines 103-124; were 95-116) are integer\nconstants.\
+        \ Seed derivation at lines 1427-1428 (was 1419-\n1420), 1457-1458 (was 1449-1450),\
+        \ 1521-1523 (was 1513-\n1515), 1572-1574 (was 1564-1566) \u2014 NONE reference\n\
+        args.n_particles or N_PARTICLES. Unchanged. PASS.\n"
+      verdict: PASS
+    bootstrap_paired_day_convention_unchanged:
+      location: 'N_BOOTSTRAP=1000 (line 101; was 93). Paired-day impl at
+
+        lines 1559-1605 (was 1551-1597). _Z2_BOOT_OFFSET=8013 at
+
+        line 124 (was 116). Unchanged. PASS.
+
+        '
+      verdict: PASS
+  pre_locked_constants_audited:
+    N_PARTICLES_module_constant:
+      location: 'Line 100; value 200. Unchanged from prior audit (was line
+
+        92; +8). Still serves as CLI default at line 1326 and
+
+        fallback in M=N_PARTICLES default parameter at lines 431,
+
+        535, 566. PASS.
+
+        '
+      verdict: PASS
+    Q1A_M3_Z_c_CHI2_SETTLED_cumulative_baseline_anchor:
+      location: 'Line 135; value 952.5167. Unchanged (was 127; +8). Used
+
+        in repro-check #2 assert (line 1472) and cumulative-
+
+        improvement computation. PASS.
+
+        '
+      verdict: PASS
+    Q2A_M3_CHI2_SETTLED_repro_anchor:
+      location: 'Line 134; value 953.84. Unchanged (was 126; +8). Used in
+
+        repro-check #1 assert (line 1442). PASS.
+
+        '
+      verdict: PASS
+    REPRODUCTION_TOL_CHI2:
+      location: 'Line 142; value 50.0. Unchanged (was 134; +8). Used at
+
+        lines 1442 and 1472. PASS.
+
+        '
+      verdict: PASS
+    MIN_CELL_SIZE:
+      location: 'Line 150; value 200. Unchanged (was 142; +8). Enforced at
+
+        lines 287 and 335 (were 279 and 327). PASS.
+
+        '
+      verdict: PASS
+l2_check:
+  pass: true
+  items_checked: 6
+  items_passed: 6
+  items_advisory: []
+  notes: "All 4 L2 items from the prior Check P (Q1B'-specific N=400)\nre-audit cleanly.\
+    \ The previously OPERATIONALLY_BLOCKING\nadvisory on result.yaml placement + phase_a-hash\
+    \ tagging is\nnow RESOLVED \u2014 the substitution at commit 8cd2935 implemented\n\
+    the prior verdict's option-1 recommendation faithfully. 2 NEW\nL2 items have been\
+    \ added to audit the substitution itself\n(docstring extension; substitution-scope\
+    \ discipline). All 6\nL2 items PASS. The pkl-default-collision PASS-with-NOTE\
+    \ is\ndocumented under the substitution-scope item so Check R can\nverify the\
+    \ analyst passed --out to a Q1B'-specific path at\ninvocation time (NON-BLOCKING;\
+    \ CLI-overridable).\n"
+  items_audited:
+    result_yaml_placement_and_phase_a_hash_tagging_RESOLVED:
+      detail: "PRIOR VERDICT: this item was OPERATIONALLY_BLOCKING for\n--emit-result.\
+        \ Prior advisory cited 3 hardcoded Q1B-\npredecessor phase_a hashes (lines\
+        \ 1104, 1644, 1693) and\n1 hardcoded result.yaml emit-path string (line 1752)\
+        \ that\nwould corrupt the registry if --emit-result ran.\n\nPOST-SUBSTITUTION\
+        \ VERIFICATION: commit 8cd2935 substituted\nall 10 string occurrences across\
+        \ 8 lines per the prior\nverdict's option-1 recommendation. Grep verification:\n\
+        \  - 0602f0c0... -> 7ed3eea3...: 5 occurrences, all replaced\n    (current\
+        \ lines 15, 907, 1112, 1652, 1701; previously\n    7, 899, 1104, 1644, 1693\
+        \ \u2014 shifted +8 by docstring)\n  - 173b3d58... -> 5c8f5e7d...: 1 occurrence\
+        \ replaced\n    (current line 1703; previously 1695)\n  - 2026-05-27_q1b-z2-conditioning-second-axis\
+        \ ->\n    2026-05-29_q1b-prime-smc-tightening: 4 occurrences,\n    all replaced\
+        \ (current lines 17, 905, 1340, 1760;\n    previously 9, 897, 1332, 1751-1754)\n\
+        Zero residual occurrences of any old string in the file\n(grep -c on each\
+        \ of the 3 old patterns returns 0).\nRunning --emit-result will now:\n  -\
+        \ write result.yaml to\n    notes/preregistrations/2026-05-29_q1b-prime-smc-\n\
+        \    tightening/result.yaml (Q1B''s directory, NOT Q1B's)\n  - reference phase_a\
+        \ body_sha256 7ed3eea3... (Q1B''s\n    phase_a, NOT Q1B's 0602f0c0...)\n \
+        \ - stamp the CLAIM-GRADE artifact's inputs_fingerprint\n    with Q1B''s phase_a\
+        \ hash AND the post-A2 thread hash\n    5c8f5e7d...\nQ1B's settled result.yaml\
+        \ at the predecessor directory\nis preserved. Registry chain integrity intact.\n\
+        \nSTATUS: RESOLVED. The prior advisory is FULLY ADDRESSED;\nno carryforward\
+        \ for arbiter at result time.\n"
+      verdict: MATCH_RESOLVED
+    n_particles_cli_mechanism:
+      detail: "Phase_a \xA7variables.independent: N_PARTICLES single knob 200\n->\
+        \ 400 via --n-particles CLI flag. Script implements\nverbatim: --n-particles\
+        \ flag at line 1326 with default\nN_PARTICLES=200; args.n_particles passed\
+        \ to all three SMC\nsites (1432, 1462, 1527). Synthetic gate's\nSYNTHETIC_GATE_M=100\
+        \ (line 155) is independent. MATCH.\nUnchanged from prior audit; substitution\
+        \ did not touch\nthe CLI or SMC plumbing.\n"
+      verdict: MATCH
+    catch_and_report_assert_semantics:
+      detail: "Phase_a \xA7baselines.secondary pre-registers catch-and-report\nsemantics\
+        \ for assert-halt at N=400 (SMC trajectories may\ndiverge from seed-exact\
+        \ N=200 path; assert-halt is\nINFORMATIVE SIDE-CHANNEL not failed gate; manual\
+        \ result.\nyaml construction + execution_deviations field if assert\nfires;\
+        \ primary verdict reported as MISSING). The\nsubstitution at commit 8cd2935\
+        \ did NOT touch the asserts\n(current lines 1442 and 1472; bit-identical to\
+        \ commit\n1736e71 audited version). Phase_a's \"Q1B' does NOT amend\nthe production\
+        \ script\" line at \xA7baselines.secondary\nremains semantically intact \u2014\
+        \ the substitution is L2\nconfiguration (artifact-pinning), not L1 methodology\n\
+        (the asserts are the methodology pre-commitment). The\nprior verdict's MATCH_WITH_ACKNOWLEDGMENT\
+        \ carries forward\nunchanged.\n"
+      verdict: MATCH_WITH_ACKNOWLEDGMENT
+    seeds_held_constant_at_n_400:
+      detail: 'SMC seed constants (lines 103-124; were 95-116) bit-
+
+        identical to prior audit. _Z2_SEED_OFFSET, _TAG_SEED_
+
+        OFFSET_M3, _Z2_BOOT_OFFSET, SEED_BASE_Q2A, SEED_BASE_Q1A,
+
+        _Z_SEED_OFFSET_Q1A_Z_c all unchanged. MATCH.
+
+        '
+      verdict: MATCH
+    docstring_extension_runtime_inert:
+      detail: "NEW item (the substitution itself extended the docstring at\nlines\
+        \ 1-17 from the prior 1-12 \u2014 added 8 lines documenting\nthe dual-purpose\
+        \ framing: Q1B vs Q1B'; the artifact-\npinning substitution rationale; the\
+        \ verdict-interpretation\ndifferences between Q1B (better_chi2 vs cuts 228/2284)\n\
+        and Q1B' (cumulative_chi2_improvement_above_Z_c CI WIDTH\nvs cuts 357.27/524.0)).\
+        \ This is RUNTIME-INERT \u2014 Python\ndocstrings are stored in __doc__ but\
+        \ do not execute. Does\nNOT affect the L1 computational surface. Phase_a is\
+        \ silent\non docstring content; matches phase_a's posture. MATCH.\n"
+      verdict: MATCH
+    substitution_scope_discipline_left_unchanged_set_correct:
+      detail: "NEW item (the substitution explicitly left a set of strings\nUNCHANGED\
+        \ that COULD have been substituted; verify the\nscoping is correct):\n\n \
+        \ - Line 1325 (pkl --out default\n    \"scratch/data/q1b_z2_conditioning/q1b.pkl\"\
+        ): LEFT\n    UNCHANGED per commit message rationale (\"passable via\n    --out\
+        \ CLI\"). Verified: argparse --out flag at line\n    1324 exists; analyst\
+        \ can override at invocation. PASS-\n    WITH-NOTE: this default collides\
+        \ at the filename level\n    with Q1B's prior pickle if --out is omitted.\
+        \ NOT\n    BLOCKING (CLI-overridable; phase_a does not mandate\n    output\
+        \ pkl path; Check R can verify the analyst\n    passed --out to a Q1B''-specific\
+        \ path at invocation\n    time via the result.yaml's artifact.primary_pkl\
+        \ field\n    and the registry's command-line-invocation\n    convention).\n\
+        \  - Line 1110 (emitted_by module path\n    \"experiment.q1b_z2_conditioning.__main__\"\
+        ): LEFT\n    UNCHANGED per commit message rationale (\"Q1B' uses\n    this\
+        \ module\"). Verified: structurally correct. Q1B'\n    runs from this same\
+        \ module file; emitted_by should\n    point to the executing module, NOT to\
+        \ a hypothetical\n    Q1B'-named module that does not exist. MATCH.\n  - Line\
+        \ 1121 (code-file reference): LEFT UNCHANGED per\n    commit message rationale\
+        \ (\"correct\"). Verified: the\n    file path reference at this line is the\
+        \ script's own\n    self-reference; both Q1B and Q1B' run from this same\n\
+        \    file. MATCH.\n  - Lines 1442/1472 (reproduction-check asserts): LEFT\n\
+        \    UNCHANGED per phase_a \xA7baselines.secondary pre-\n    commitment (\"\
+        Q1B' does NOT amend the production\n    script\"). Verified: bit-identical\
+        \ to commit 1736e71.\n    MATCH (this is the load-bearing pre-commitment item;\n\
+        \    its preservation is the entire L1 fidelity claim).\n\nThe \"left UNCHANGED\"\
+        \ set is correctly scoped. The\nsubstitution discipline observed phase_a's\
+        \ pre-\ncommitments (asserts intact) AND the architectural\ncorrectness of\
+        \ the unchanged self-references. MATCH-with-\nNOTE on pkl default for Check\
+        \ R carryforward.\n"
+      verdict: MATCH_WITH_NOTE
+verdict: PASS
+next_step_recommendation: "Q1B' is CLEARED for invocation with --emit-result and\n\
+  --n-particles 400. The prior advisory is RESOLVED; no\noperational blockers remain.\
+  \ L1 10/10 PASS; L2 6/6 PASS;\nfresh code-path audit PRODUCTION-PATH.\n\nRECOMMENDED\
+  \ INVOCATION:\n  .venv/bin/python -m experiment.q1b_z2_conditioning \\\n    --n-particles\
+  \ 400 \\\n    --out scratch/data/q1b_z2_conditioning/q1b_prime_n400.pkl \\\n   \
+  \ --emit-result\n\nThe --out path above is the suggested Q1B'-specific pkl name\n\
+  to avoid the filename collision with Q1B's settled run (which\nalso defaults to\
+  \ scratch/data/q1b_z2_conditioning/q1b.pkl).\nPhase_a does not mandate the pkl path;\
+  \ this is the L2 PASS-\nwith-NOTE on substitution_scope_discipline.\n\nARBITER-AT-RESULT-TIME\
+  \ CARRYFORWARD:\n  - The result.yaml emitted to\n    notes/preregistrations/2026-05-29_q1b-prime-smc-tightening/\n\
+  \    result.yaml will reference phase_a body_sha256\n    7ed3eea3... and thread\
+  \ body_sha256 5c8f5e7d... \u2014 both\n    correct.\n  - The CI WIDTH on cumulative_chi2_improvement_above_Z_c\
+  \ is\n    DERIVED by Check R / arbiter from\n    cumulative_chi2_improvement_above_Z_c_ci95[1]\
+  \ - [0]. The\n    realized width verdicts against phase_a's pre-locked cuts\n  \
+  \  at 357.27 / 524.0 chi^2 (NOT 228 / 2284 \u2014 those are Q1B's\n    outcome-category\
+  \ cuts inherited from the thread skeleton\n    and are not the verdict cuts for\
+  \ Q1B').\n  - The point-stability sub-criterion |better_chi2_point -\n    662.223|\
+  \ <= 50 chi^2 is verdict-relevant for Q1B''s\n    R-A1B'/R-B1B' vs R-C1B' fork;\
+  \ arbiter must compute\n    |chi2_Z2_c - 662.223| from result.yaml's\n    primary_result.value.chi2_Z2_c.\n\
+  \  - If either reproduction-check assert fires at N=400, the\n    pre-registered\
+  \ catch-and-report path (manual result.yaml\n    construction + execution_deviations\
+  \ field + primary\n    verdict MISSING; verdict on side-channel signal alone)\n\
+  \    applies per phase_a \xA7baselines.secondary.\n  - Check R should verify the\
+  \ analyst used --out to a Q1B'-\n    specific pickle path (PASS-with-NOTE from L2\n\
+  \    substitution_scope_discipline item).\n"
+git_sha: 8cd2935764da1daf24e06efc317f61a56054e1e4
+git_clean: false
+body_sha256: 25d7a968bb65a314579a4a37afe751378f43b4e15aa70dd67bcafc9ae79dca6c
