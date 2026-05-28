@@ -1,21 +1,17 @@
 aggregate_verdict: CONSISTENT
-body_sha256: c0571e3de3cafb46c42b5c3389d48cfa691c8785ca04f2946eae2dbebd54436f
+body_sha256: eeae43ffdb90321f973bc20ae6ebbe673da8e1a51286e4401199433963228833
 checked_by: phase-fidelity agent (.claude/agents/phase-fidelity.md), Check T
 fidelity_coverage_passed: true
 git_clean: false
-git_sha: 13649d8fb4fb7c4463bd981a3e0837b5da0df5a9
-next_step_recommendation: "Proceed to:\n  1. (Optional, non-blocking) Author normalizes phase_a\n     \xA7falsification_criterion\
-  \ line 104 \"CI95 width >= 524.0 chi^2\"\n     \u2192 \"CI95 width > 524.0 chi^2\" for internal consistency with\n     \xA7\
-  metric and \xA7ambiguous_region. Re-stamp body_sha256 after\n     edit. This is a clerical normalization; if the author\
-  \ prefers\n     to leave phase_a as-is and have the arbiter rely exclusively\n     on \xA7metric''s verdict cuts, that is\
-  \ also acceptable per\n     phase-fidelity ADVISORY rule.\n\n  2. Proponent + devils_advocate stamped simultaneously per\
-  \ the\n     pre-registration discipline (Q1B's proponent.yaml /\n     devils_advocate.yaml are the schema template).\n\n\
-  \  3. code-path-auditor verifies experiment/q1b_z2_conditioning/__main__.py\n     at the working-tree state called by --n-particles\
-  \ 400 (the\n     same script Q1B used; should re-verify PRODUCTION-PATH\n     since no script amendments are made).\n\n\
-  \  4. Check P (phase_a \u2192 script fidelity) on the existing Q1B\n     script under the N_PARTICLES=400 invocation; primarily\
-  \ a\n     confirmation that no script changes are needed (phase_a\n     explicitly excludes Q1B''s scripts, fitter, library,\
-  \ seeds,\n     bootstrap, and Z2 binning from amendment).\n\n  5. Run with --emit-result --n-particles 400.\n\n  6. Check\
-  \ R + arbiter on the resulting result.yaml.\n"
+git_sha: 8dff102331019aee1fc9f52eae6cdc380eead62f
+next_step_recommendation: "Proceed to:\n  1. Proponent + devils_advocate stamped simultaneously per the\n     pre-registration\
+  \ discipline (Q1B's proponent.yaml /\n     devils_advocate.yaml are the schema template).\n\n  2. code-path-auditor verifies\
+  \ experiment/q1b_z2_conditioning/__main__.py\n     at the working-tree state called by --n-particles 400 (the\n     same\
+  \ script Q1B used; should re-verify PRODUCTION-PATH\n     since no script amendments are made).\n\n  3. Check P (phase_a\
+  \ \u2192 script fidelity) on the existing Q1B\n     script under the N_PARTICLES=400 invocation; primarily a\n     confirmation\
+  \ that no script changes are needed (phase_a\n     explicitly excludes Q1B''s scripts, fitter, library, seeds,\n     bootstrap,\
+  \ and Z2 binning from amendment).\n\n  4. Run with --emit-result --n-particles 400.\n\n  5. Check R + arbiter on the resulting\
+  \ result.yaml.\n"
 purpose: "Check T (thread \u2192 phase_a fidelity audit) on Q1B''s phase_a. Verifies\nthat notes/preregistrations/2026-05-29_q1b-prime-smc-tightening/\n\
   phase_a.yaml is a valid specialization of nodes.\"Q1B''\".phase_a_skeleton\nin notes/preregistrations/2026-05-27_resolution-paths-thread/thread.yaml.\n\
   Check T is the structural-consistency check between a thread''s pre-\nregistered node skeleton and a downstream phase_a;\
@@ -24,7 +20,7 @@ purpose: "Check T (thread \u2192 phase_a fidelity audit) on Q1B''s phase_a. Veri
   \ also serves as the BLOCKING precondition\n``thread_membership_validated`` for the downstream code-path-auditor\nand Check\
   \ P invocations.\n"
 references:
-- body_sha256: 7e6b4882ac7092f8d01d5134107c1350636b8e3e657919bbfe9c69d6cbfcb45e
+- body_sha256: 7ed3eea35553b9c5cd3e03d0003603ed4d56337d151362d4a11c2d1955b75e78
   file: phase_a.yaml
 - body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
   file: ../2026-05-27_resolution-paths-thread/thread.yaml
@@ -37,14 +33,14 @@ rule_1_metric_class:
     cumulative_chi2_improvement_above_Z_c statistic. Single arm: re-run\nQ1B's winning (day_type, Z_c, Z2_c) configuration\
     \ with\nN_PARTICLES=400 (vs Q1B's 200). All other methodology identical\n(library, fitter, SMC seed convention, paired-day\
     \ bootstrap\nconvention, dual reproduction-check anchors). Verdict metric is the\nrealized 95% CI WIDTH on cumulative_chi2_improvement_above_Z_c.\n\
-    Q1B's realized width was 476.358 chi^2 ([+8.064, +484.423]).\"\n\nPhase_a.metric \xA7PRIMARY (lines 133-139) specifies\
+    Q1B's realized width was 476.358 chi^2 ([+8.064, +484.423]).\"\n\nPhase_a.metric \xA7PRIMARY (lines 127-139) specifies\
     \ \"realized 95% CI\nWIDTH on cumulative_chi2_improvement_above_Z_c at the\n(day_type, Z_c, Z2_c) configuration after\
     \ re-running\nexperiment/q1b_z2_conditioning/__main__.py with --n-particles 400\",\nwith the explicit metric formula\n\
     cumulative_chi2_improvement_above_Z_c = 952.5167 - better_chi2_Z2_c.\n\nMatch check:\n  - statistic: cumulative_chi2_improvement_above_Z_c\
     \ \u2713\n  - configuration: (day_type, Z_c, Z2_c) \u2713 (Q1B's settled winner)\n  - single arm: --n-particles 400 vs\
     \ Q1B's 200 \u2713\n  - bootstrap convention: paired-day, n=1000, same seed convention\n    per phase_a \xA7ci_method\
-    \ (lines 60-69) \u2713\n  - reproduction-check anchors: Q2A 953.84 + Q1A 952.5167 \u2713\n    (phase_a \xA7baselines.secondary\
-    \ lines 27-58)\n\nPhase_a adds verdict-relevant detail the skeleton sketched but did\nnot fully specify: a POINT-STABILITY\
+    \ (lines 65-71) \u2713\n  - reproduction-check anchors: Q2A 953.84 + Q1A 952.5167 \u2713\n    (phase_a \xA7baselines.secondary\
+    \ lines 37-63)\n\nPhase_a adds verdict-relevant detail the skeleton sketched but did\nnot fully specify: a POINT-STABILITY\
     \ sub-criterion\n(|better_chi2_point - 662.223| <= 50 chi^2) that qualifies R-A1B'\nand R-B1B' by mapping point shifts\
     \ > 50 to R-C1B'. The skeleton\nhas this in its outcome_categories description for R-C1B'\n(\"CI width > 524.0 OR |better_chi2\
     \ point shift| > 50 chi^2\") so\nthe sub-criterion is skeleton-derived, not a phase_a novelty. The\nadditional methodological\
@@ -64,11 +60,11 @@ rule_1_metric_class:
   verdict: PASS
 rule_2_candidate_set:
   detail: "Skeleton (nodes.\"Q1B'\".phase_a_skeleton.candidate_set):\n  - SMC_particle_count_change\n\nPhase_a.variables.independent\
-    \ (lines 389-393): single entry\n\"N_PARTICLES (single knob being varied: 200 in Q1B, 400 in Q1B').\nPassed via the existing\
+    \ (lines 364-367): single entry\n\"N_PARTICLES (single knob being varied: 200 in Q1B, 400 in Q1B').\nPassed via the existing\
     \ CLI flag --n-particles at\nexperiment/q1b_z2_conditioning/__main__.py:1318, which is already\nwired to args.n_particles\
     \ in both reproduction-check call sites\n(lines 1424, 1454) and in the head-to-head SMC propagation. NO\nother knob is\
     \ varied.\"\n\nMatch: \"N_PARTICLES\" is the specific knob; \"SMC_particle_count_change\"\nis the skeleton's class-level\
-    \ naming. Single-arm structure preserved.\n\nphase_a.variables.excluded (lines 356-388) explicitly holds the\nSMC seed\
+    \ naming. Single-arm structure preserved.\n\nphase_a.variables.excluded (lines 338-363) explicitly holds the\nSMC seed\
     \ convention, library construction, mixture fitter, paired-\nday bootstrap convention, Z2_c 4-level binning, and the integer\n\
     verdict cuts R_A1B_CUT/R_C1B_CUT constant \u2014 corroborating the\nsingle-arm specialization. The skeleton's \"all other\
     \ methodology\nidentical\" clause is enforced item-by-item in phase_a.variables.excluded.\n"
@@ -81,24 +77,18 @@ rule_2_candidate_set:
 rule_3_outcome_categories:
   detail: "Skeleton outcome_categories:\n  - R-A1B': CI width <= 357.27 (<= 75% of Q1B's 476.358; SMC noise\n    dominant)\n\
     \  - R-B1B': CI width in (357.27, 524.0] (mixed)\n  - R-C1B': CI width > 524.0 OR |better_chi2 point shift| > 50\n   \
-    \ chi^2 (widens or shifts)\n\nPhase_a \xA7corroboration_criterion (lines 71-85, R-A1B'):\n  \"CI95 width <= 357.27 chi^2\
+    \ chi^2 (widens or shifts)\n\nPhase_a \xA7corroboration_criterion (lines 74-86, R-A1B'):\n  \"CI95 width <= 357.27 chi^2\
     \ AND |better_chi2_point - 662.223|\n  <= 50 chi^2\" \u2713 matches skeleton's <= 357.27, adds point-stability\n  sub-criterion\
-    \ as conjunct (skeleton-derived, see Rule 1).\n\nPhase_a \xA7ambiguous_region (lines 2-16, R-B1B'):\n  \"CI95 width in\
+    \ as conjunct (skeleton-derived, see Rule 1).\n\nPhase_a \xA7ambiguous_region (lines 2-14, R-B1B'):\n  \"CI95 width in\
     \ (357.27, 524.0] chi^2 AND |better_chi2_point -\n  662.223| <= 50 chi^2\" \u2713 matches skeleton's (357.27, 524.0],\n\
-    \  adds point-stability conjunct.\n\nPhase_a \xA7metric verdict cuts (lines 141-146):\n  \"R-A1B' fires if: realized CI95\
-    \ width <= 357.27 chi^2\"\n  \"R-B1B' fires if: realized CI95 width in (357.27, 524.0] chi^2\"\n  \"R-C1B' fires if: realized\
-    \ CI95 width > 524.0 chi^2 OR\n                   |better_chi2_point - 662.223| > 50 chi^2\"\n  \u2713 matches skeleton\
-    \ verbatim.\n\nADVISORY (non-blocking, internal-clerical): phase_a\n\xA7falsification_criterion (line 104) states\n  \"\
-    CI95 width >= 524.0 chi^2 OR |better_chi2_point - 662.223|\n   > 50 chi^2 (R-C1B' fires)\"\nusing >= (non-strict) where\
-    \ \xA7metric verdict cuts (line 145) and\n\xA7ambiguous_region range (line 15) both use > (strict) consistent\nwith the\
-    \ skeleton's strict > at the R-C1B' lower bound. At width =\nexactly 524.0 with |point shift| <= 50, \xA7metric and \xA7\
-    ambiguous_region\nfire R-B1B'; \xA7falsification_criterion fires R-C1B'. The \xA7metric\nblock is the authoritative verdict-cuts\
-    \ statement (it is the\nfield the arbiter reads when rendering against pre-registered\ncriteria); \xA7falsification_criterion's\
-    \ >= is a clerical typo that\ndoes NOT relocate the skeleton's R-B1B' / R-C1B' boundary (skeleton\nis strict >). Probability-zero\
-    \ impact on any realized bootstrap\nwidth (continuous distribution), but the inconsistency is worth\na one-character normalization\
-    \ (>= \u2192 >) before arbiter reads\nphase_a as the binding spec. ADVISORY, not BLOCKING; the skeleton-\nfacing surfaces\
-    \ (\xA7metric, \xA7ambiguous_region) match the thread.\n\nNone of the skeleton's outcome categories are missing, redefined\n\
-    in scope, or extended (no new R-D, etc.). The (a)/(b)/(c)\namendment-path adjudication referenced in \xA7ambiguous_region\
+    \  adds point-stability conjunct.\n\nPhase_a \xA7falsification_criterion (lines 101-113, R-C1B'):\n  \"CI95 width > 524.0\
+    \ chi^2 OR |better_chi2_point - 662.223|\n   > 50 chi^2\" \u2713 matches skeleton's strict > 524.0 verbatim\n  and matches\
+    \ \xA7metric and \xA7ambiguous_region internally.\n\nPhase_a \xA7metric verdict cuts (lines 134-137):\n  \"R-A1B' fires\
+    \ if: realized CI95 width <= 357.27 chi^2\"\n  \"R-B1B' fires if: realized CI95 width in (357.27, 524.0] chi^2\"\n  \"\
+    R-C1B' fires if: realized CI95 width > 524.0 chi^2 OR\n                   |better_chi2_point - 662.223| > 50 chi^2\"\n\
+    \  \u2713 matches skeleton verbatim and internally consistent across\n  \xA7metric / \xA7ambiguous_region / \xA7corroboration_criterion\
+    \ /\n  \xA7falsification_criterion.\n\nAll three outcome categories specialized correctly. None are missing,\nredefined\
+    \ in scope, or extended (no new R-D, etc.). The (a)/(b)/(c)\namendment-path adjudication referenced in \xA7ambiguous_region\
     \ is\nexplicitly NOT a verdict path; it is post-settlement user dispatch\nwork informed by but not governed by Q1B''s\
     \ outcome. The skeleton's\nbranching_rules.Q1B' = {R-A1B': null, R-B1B': null, R-C1B': null}\ncorrectly carries through:\
     \ none of the three outcomes auto-advance\nthe thread state machine, consistent with the non-gating-sibling\nstructure\
@@ -114,13 +104,13 @@ rule_3_outcome_categories:
     from Q1B''s realized 476.358 chi^2 CI width.
 
     '
-  verdict: PASS_WITH_ADVISORY
+  verdict: PASS
 rule_4_threshold_derivations:
   detail: "Skeleton (nodes.\"Q1B'\".phase_a_skeleton.skeleton_thresholds_depend_on):\n  - field: ci_width_cuts\n    rule:\
     \ \"R-A1B' / R-B1B' / R-C1B' cuts are derived from Q1B's\n      realized better_chi2 CI95 width (476.358 chi^2 from\n\
     \      result.yaml). 75%-cut (357.27) discriminates V_smc/V_total\n      >= 0.875 from below; 110%-cut (524.0) admits\
     \ bootstrap\n      noise without making R-C1B' trivially unfireable.\"\n    source: Q1B.result (primary_result.chi2_Z2_c_ci95\
-    \ width)\n\nPhase_a \xA7thread.threshold_derivations (lines 227-337) has THREE\nentries; the first matches the skeleton\
+    \ width)\n\nPhase_a \xA7thread.threshold_derivations (lines 209-319) has THREE\nentries; the first matches the skeleton\
     \ requirement, the latter\ntwo are legitimate skeleton-permitted detail-additions:\n\n1. field: ci_width_cuts \u2713 (matches\
     \ skeleton requirement)\n   source_artifact: ../2026-05-27_q1b-z2-conditioning-second-axis/result.yaml \u2713\n   source_value:\
     \ 'primary_result.cumulative_chi2_improvement_above_Z_c_ci95\n     width 476.358 chi^2 (= 484.42265833333335 - 8.064408333333294;\n\
@@ -156,7 +146,7 @@ rule_4_threshold_derivations:
     '
   verdict: PASS
 rule_5_thread_block_consistency:
-  detail: "Phase_a \xA7thread (lines 222-227):\n  thread_topic: resolution-paths-thread\n  node_id: Q1B'\n  parent_branch:\
+  detail: "Phase_a \xA7thread (lines 204-208):\n  thread_topic: resolution-paths-thread\n  node_id: Q1B'\n  parent_branch:\
     \ R-A\n  thread_body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9\n\nThread.yaml field-by-field:\n\
     \  - thread.topic = \"resolution-paths-thread\" \u2713\n  - thread.body_sha256 = 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9\
     \ \u2713\n    (current hash; matches phase_a pin exactly)\n  - nodes.\"Q1B'\" exists with id \"Q1B'\", name \"q1b-prime-smc-tightening\"\
@@ -192,12 +182,9 @@ verdict_summary: "Q1B''s phase_a is a valid specialization of nodes.\"Q1B'\".\np
   \ at __main__.py:1434/1464, single-arm verdict\ncarve-out around the Z2_b vs Z2_c head-to-head) without contradicting\n\
   any skeleton element. The skeleton''s metric class, single-arm\ncandidate set, three outcome categories with their CI-width\
   \ cuts and\npoint-stability conditional, threshold derivation requirement (\nci_width_cuts derived from Q1B.result), and\
-  \ the parent-branch /\namendment-A2 / non-gating-sibling structure are all preserved.\n\nONE non-blocking advisory: phase_a\
-  \ \xA7falsification_criterion line 104\nuses \">=\" 524.0 chi^2 while \xA7metric line 145 and \xA7ambiguous_region\nline\
-  \ 15 use \">\" 524.0 chi^2 consistent with the skeleton. The\n\xA7metric block is the authoritative verdict-cuts statement;\
-  \ the\n\xA7falsification_criterion \">=\" is a one-character clerical typo with\nprobability-zero impact on any realized\
-  \ bootstrap width (continuous\ndistribution at exactly 524.0). Recommend the phase_a author\nnormalize \">=\" \u2192 \"\
-  >\" before arbiter reads phase_a as the binding\nspec, but does NOT block code-path-auditor / Check P / run.\n\nAggregate\
-  \ verdict: CONSISTENT (with ADVISORY).\nfidelity_coverage_passed: true (clears the thread-membership\nprecondition for downstream\
-  \ audits and the eventual arbiter).\n"
-written_at: '2026-05-29T23:45:00-07:00'
+  \ the parent-branch /\namendment-A2 / non-gating-sibling structure are all preserved.\n\nThe outcome-category cuts are internally\
+  \ consistent across \xA7metric,\n\xA7corroboration_criterion, \xA7ambiguous_region, and \xA7falsification_criterion\n(all\
+  \ four surfaces use strict > 524.0 at the R-B1B' / R-C1B' boundary,\nconsistent with the skeleton's half-open (357.27, 524.0]\
+  \ R-B1B' band).\n\nAggregate verdict: CONSISTENT.\nfidelity_coverage_passed: true (clears the thread-membership\nprecondition\
+  \ for downstream audits and the eventual arbiter).\n"
+written_at: '2026-05-30T00:15:00-07:00'

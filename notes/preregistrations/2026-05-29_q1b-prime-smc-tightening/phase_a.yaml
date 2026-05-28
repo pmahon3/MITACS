@@ -1,173 +1,160 @@
 affects_registered_spec: true
 ambiguous_region:
-  action: The user accepts the wide CI as substantively informative (SMC noise contributes but eval-window-noise
-    is non-trivial; the upper bound of the SMC-noise contribution is 25% of total variance, not the >=
-    87.5% that R-A1B' would imply). User adjudicates the (a)/(b)/(c) amendment paths surfaced in Q1B's
-    S4 advance on substantive prior + structural reasoning rather than waiting for further CI narrowing.
-    (a) = thread amendment adding a third within-data Z axis (P1's remaining axes season 0.135 / demand_quantile
-    0.075; weaker prior support than Q1B's time_of_day 0.485 but cross-axis joint hypothesis newly validated
-    by Q1B's 290 chi^2 cumulative reduction); (b) = spawn a new thread targeting cross-axis joint stratification
-    systematically; (c) = pivot to temperature / exogenous-Z arm (Q1C reopening amendment or new thread
-    per the framework-prescribed resolution paths in disintegration_diagnostic.md). Per thread branching_rules.Q1B'.R-B1B'
-    = null, no auto-advancement of the resolution-paths-thread state machine; Q1B''s settlement does NOT
-    advance current_node_id (which remains null, paused, per S4). The (a)/(b)/(c) choice is a user dispatch
-    decision informed by Q1B''s outcome, not by this phase_a.
-  range: cumulative_chi2_improvement_above_Z_c CI95 width in (357.27, 524.0] chi^2 AND |better_chi2_point
-    - 662.223| <= 50 chi^2 (R-B1B' fires).
+  action: The user accepts the wide CI as substantively informative (SMC noise contributes but eval-window-noise is non-trivial;
+    the upper bound of the SMC-noise contribution is 25% of total variance, not the >= 87.5% that R-A1B' would imply). User
+    adjudicates the (a)/(b)/(c) amendment paths surfaced in Q1B's S4 advance on substantive prior + structural reasoning rather
+    than waiting for further CI narrowing. (a) = thread amendment adding a third within-data Z axis (P1's remaining axes season
+    0.135 / demand_quantile 0.075; weaker prior support than Q1B's time_of_day 0.485 but cross-axis joint hypothesis newly
+    validated by Q1B's 290 chi^2 cumulative reduction); (b) = spawn a new thread targeting cross-axis joint stratification
+    systematically; (c) = pivot to temperature / exogenous-Z arm (Q1C reopening amendment or new thread per the framework-prescribed
+    resolution paths in disintegration_diagnostic.md). Per thread branching_rules.Q1B'.R-B1B' = null, no auto-advancement
+    of the resolution-paths-thread state machine; Q1B''s settlement does NOT advance current_node_id (which remains null,
+    paused, per S4). The (a)/(b)/(c) choice is a user dispatch decision informed by Q1B''s outcome, not by this phase_a.
+  range: cumulative_chi2_improvement_above_Z_c CI95 width in (357.27, 524.0] chi^2 AND |better_chi2_point - 662.223| <= 50
+    chi^2 (R-B1B' fires).
+amendment_note: '2026-05-29 pre-stamp-chain pre-data correction (post-proponent/DA-stamp variant): cosmetic one-character
+  fix on falsification_criterion.numeric. Initial stamp (body_sha256 7e6b4882ac7092f8d01d5134107c1350636b8e3e657919bbfe9c69d6cbfcb45e)
+  used `>=` 524.0 chi^2 on line 104 while metric.verdict_cuts and ambiguous_region.range both used strict `>` 524.0 consistent
+  with the thread skeleton''s nodes.Q1B''.phase_a_skeleton.outcome_categories.R-B1B'' ''(357.27, 524.0]'' (half-open interval;
+  524.0 itself falls in R-B1B'', not R-C1B''). Caught by Check T (phase_fidelity_check_t.yaml body_sha256 c0571e3de3cafb46c42b5c3389d48cfa691c8785ca04f2946eae2dbebd54436f)
+  as PASS_WITH_ADVISORY. Probability-zero impact on any realized bootstrap CI width (continuous distribution; realized width
+  = exactly 524.0 has measure zero). Verdict cuts, point-stability sub-criterion, baselines, reproduction-check semantics,
+  and pre-committed numeric thresholds UNCHANGED. Proponent (body_sha256 38ad4ce0e47f35e7e745205306e3d839148f1d8251c9fae8e2ed76476d1981dd)
+  and DA (body_sha256 174d38efd7da8da8864d51e40cbd726d27e93a75199a3258d3b29db8a70cc072) WERE STAMPED at the time of this amendment;
+  per pre-stamp-chain carve-out rule §4 (.claude/agents/preregister.md lines 149-153), both have their references[].body_sha256
+  updated to the new phase_a hash and are themselves re-stamped. Precedent for pre-data first amendments: P1 F_b switch 99a8122;
+  Q1A'' SIR null cut 78b5069; Q1B P1-binning correction a606ef9 (all pre-run, pre-data, in-place re-stamps). Q1B'' amendment
+  differs from those in scope (one-character clerical typo vs methodology correction) but the carve-out mechanism is identical.'
 baselines:
-  primary: 'Q1B''s settled realized 95% CI WIDTH on cumulative_chi2_improvement_above_Z_c = 476.358 chi^2
-    (CI [+8.064, +484.423], settled point +290.293). Source artifact: ../2026-05-27_q1b-z2-conditioning-second-axis/result.yaml,
-    primary_result.cumulative_chi2_improvement_above_Z_c_ci95 (body_sha256 b3b1efa7d028cd6caa6220493847a5d2b8fa6de957814211df01df6294baaa6d).
-    The cumulative-baseline reference for the metric itself is Q1A''s settled M3 sigma=(day_type, Z_c)
-    chi^2 = 952.5167 (carryforward held constant per pre-commitment 4); this is the unchanged anchor against
-    which cumulative_chi2_improvement_above_Z_c is computed both at N=200 and at N=400. The R-A1B'' /
-    R-B1B'' / R-C1B'' cuts are RELATIVE to Q1B''s 476.358 CI width (75% and 110% multipliers respectively);
-    see thread.threshold_derivations for the algebra. Q1B''s realized point 662.223 (better_chi2_Z2_c)
-    is the point-stability anchor for the sub-criterion.'
-  secondary: "DUAL-ANCHOR REPRODUCTION CHECKS at N=400 (same gates as Q1B's \xA7metric.SECONDARY reproduction-check\
-    \ #1 and #2; the script's BLOCKING assertions at experiment/q1b_z2_conditioning/__main__.py:1434 and\
-    \ 1464 remain in force):\n\n  Check #1 (Q2A anchor): re-run M3 with sigma=(day_type) on the pre-cutoff\
-    \ library; SMC-propagate at N=400; expect repro_chi2_no_z ~953.84 (Q2A's settled M3 chi^2). The tolerance\
-    \ is _REPRODUCTION_TOL_CHI2=50.0 (experiment/q1b_z2_conditioning/__main__.py:134).\n\n  Check #2 (Q1A\
-    \ anchor): re-run M3 with sigma=(day_type, Z_c) on the pre-cutoff library; SMC-propagate at N=400;\
-    \ expect repro_chi2_zc ~952.5167 (Q1A's settled M3 chi^2). Same tolerance 50.0.\n\nN_PARTICLES-SHIFT\
-    \ SEMANTICS AT N=400 (PRE-COMMITMENT 3 CARVE-OUT, VERBATIM FROM USER DIRECTION + NODES.Q1B'.NOTES\
-    \ IN THREAD.YAML): the existing assertions at lines 1434 and 1464 call SMC with M=args.n_particles.\
-    \ At N=400 the SMC trajectories diverge from the seed-exact N=200 path (the SEED_BASE_Q2A / SEED_BASE_Q1A\
-    \ seeds are held constant, but the M-particle ensemble sampled from the per-cell mixture parameters\
-    \ differs in higher-order draws when M changes; reproduction is bit-identical only at fixed M). Drift\
-    \ could be within the existing tol=50 chi^2 or above it. Phase_a treats the drift AS PART OF THE MEASUREMENT,\
-    \ not as a methodology defect:\n\n  - If both reproduction checks PASS within 50 chi^2 of their respective\
-    \ anchors, the dual-anchor framing survives at N=400 and the primary verdict (on cumulative CI width)\
-    \ is interpretable against Q1B's 476.358 anchor.\n\n  - If either reproduction check FAILS at N=400\
-    \ (drift > 50), THAT ITSELF IS EMPIRICAL EVIDENCE that SMC variance at N=200 was non-trivial in the\
-    \ parent Q1B / Q1A / Q2A fits -- informative SIDE-CHANNEL, NOT a failed gate.\n\n  CATCH-AND-REPORT\
-    \ SEMANTICS (preregister's call per the thread node note's explicit grant of authority): the existing\
-    \ assert statements at lines 1434 and 1464 ARE NOT CARVED OUT in this phase_a. Q1B' does NOT amend\
-    \ the production script. If the assert halts execution, the preregister's intent is preserved as follows:\
-    \ (1) the realized repro_chi2_no_z and repro_chi2_zc values printed by the script before the assert\
-    \ are captured (script lines 1428-1430 and 1458-1460 print the values), (2) result.yaml's execution_deviations\
-    \ field records the assert halt with the realized values and the |diff| from each anchor, (3) the\
-    \ primary verdict (CI width on cumulative_chi2_improvement _above_Z_c) is reported as MISSING in result.yaml\
-    \ with explanation that the dual-anchor framing did not survive at N=400 (this is itself the side-channel\
-    \ finding), and (4) the arbiter's verdict at that point is on the side-channel signal alone (the SMC\
-    \ variance at N=200 was non-trivial; doubling N revealed it). If the assert PASSES (both |diff| <=\
-    \ 50), result.yaml reports the primary verdict normally alongside the realized repro |diff| values\
-    \ (which are informative regardless of pass/fail). NOTE: the arbiter is not bound by this phase_a\
-    \ to render R-A1B''/R-B1B''/R-C1B'' if the primary metric is MISSING; the side-channel verdict is\
+  primary: 'Q1B''s settled realized 95% CI WIDTH on cumulative_chi2_improvement_above_Z_c = 476.358 chi^2 (CI [+8.064, +484.423],
+    settled point +290.293). Source artifact: ../2026-05-27_q1b-z2-conditioning-second-axis/result.yaml, primary_result.cumulative_chi2_improvement_above_Z_c_ci95
+    (body_sha256 b3b1efa7d028cd6caa6220493847a5d2b8fa6de957814211df01df6294baaa6d). The cumulative-baseline reference for
+    the metric itself is Q1A''s settled M3 sigma=(day_type, Z_c) chi^2 = 952.5167 (carryforward held constant per pre-commitment
+    4); this is the unchanged anchor against which cumulative_chi2_improvement_above_Z_c is computed both at N=200 and at
+    N=400. The R-A1B'' / R-B1B'' / R-C1B'' cuts are RELATIVE to Q1B''s 476.358 CI width (75% and 110% multipliers respectively);
+    see thread.threshold_derivations for the algebra. Q1B''s realized point 662.223 (better_chi2_Z2_c) is the point-stability
+    anchor for the sub-criterion.'
+  secondary: "DUAL-ANCHOR REPRODUCTION CHECKS at N=400 (same gates as Q1B's §metric.SECONDARY reproduction-check #1 and #2;\
+    \ the script's BLOCKING assertions at experiment/q1b_z2_conditioning/__main__.py:1434 and 1464 remain in force):\n\n \
+    \ Check #1 (Q2A anchor): re-run M3 with sigma=(day_type) on the pre-cutoff library; SMC-propagate at N=400; expect repro_chi2_no_z\
+    \ ~953.84 (Q2A's settled M3 chi^2). The tolerance is _REPRODUCTION_TOL_CHI2=50.0 (experiment/q1b_z2_conditioning/__main__.py:134).\n\
+    \n  Check #2 (Q1A anchor): re-run M3 with sigma=(day_type, Z_c) on the pre-cutoff library; SMC-propagate at N=400; expect\
+    \ repro_chi2_zc ~952.5167 (Q1A's settled M3 chi^2). Same tolerance 50.0.\n\nN_PARTICLES-SHIFT SEMANTICS AT N=400 (PRE-COMMITMENT\
+    \ 3 CARVE-OUT, VERBATIM FROM USER DIRECTION + NODES.Q1B'.NOTES IN THREAD.YAML): the existing assertions at lines 1434\
+    \ and 1464 call SMC with M=args.n_particles. At N=400 the SMC trajectories diverge from the seed-exact N=200 path (the\
+    \ SEED_BASE_Q2A / SEED_BASE_Q1A seeds are held constant, but the M-particle ensemble sampled from the per-cell mixture\
+    \ parameters differs in higher-order draws when M changes; reproduction is bit-identical only at fixed M). Drift could\
+    \ be within the existing tol=50 chi^2 or above it. Phase_a treats the drift AS PART OF THE MEASUREMENT, not as a methodology\
+    \ defect:\n\n  - If both reproduction checks PASS within 50 chi^2 of their respective anchors, the dual-anchor framing\
+    \ survives at N=400 and the primary verdict (on cumulative CI width) is interpretable against Q1B's 476.358 anchor.\n\n\
+    \  - If either reproduction check FAILS at N=400 (drift > 50), THAT ITSELF IS EMPIRICAL EVIDENCE that SMC variance at\
+    \ N=200 was non-trivial in the parent Q1B / Q1A / Q2A fits -- informative SIDE-CHANNEL, NOT a failed gate.\n\n  CATCH-AND-REPORT\
+    \ SEMANTICS (preregister's call per the thread node note's explicit grant of authority): the existing assert statements\
+    \ at lines 1434 and 1464 ARE NOT CARVED OUT in this phase_a. Q1B' does NOT amend the production script. If the assert\
+    \ halts execution, the preregister's intent is preserved as follows: (1) the realized repro_chi2_no_z and repro_chi2_zc\
+    \ values printed by the script before the assert are captured (script lines 1428-1430 and 1458-1460 print the values),\
+    \ (2) result.yaml's execution_deviations field records the assert halt with the realized values and the |diff| from each\
+    \ anchor, (3) the primary verdict (CI width on cumulative_chi2_improvement _above_Z_c) is reported as MISSING in result.yaml\
+    \ with explanation that the dual-anchor framing did not survive at N=400 (this is itself the side-channel finding), and\
+    \ (4) the arbiter's verdict at that point is on the side-channel signal alone (the SMC variance at N=200 was non-trivial;\
+    \ doubling N revealed it). If the assert PASSES (both |diff| <= 50), result.yaml reports the primary verdict normally\
+    \ alongside the realized repro |diff| values (which are informative regardless of pass/fail). NOTE: the arbiter is not\
+    \ bound by this phase_a to render R-A1B''/R-B1B''/R-C1B'' if the primary metric is MISSING; the side-channel verdict is\
     \ the legitimate alternative recourse and is pre-registered HERE rather than left to arbiter discretion.\n"
-body_sha256: 7e6b4882ac7092f8d01d5134107c1350636b8e3e657919bbfe9c69d6cbfcb45e
+body_sha256: 7ed3eea35553b9c5cd3e03d0003603ed4d56337d151362d4a11c2d1955b75e78
 ci_method:
-  details: '1000 paired-day bootstrap resamples of post-cutoff days (pair = (delivery_day, day_type) preserving
-    within-day correlation; same scheme as Q1B, Q1A, Q2A, P1). _Z2_BOOT_OFFSET=8013 (Q1B''s bootstrap
-    seed; held constant per variables.excluded). Per resample: refit M3 per (day_type, Z_c, Z2_c) cell
-    on the resampled rows; SMC-propagate post-cutoff with N=400 particles; recompute marginal PIT chi^2
-    per candidate; recompute cumulative_chi2_improvement_above_Z_c = 952.5167 - better_chi2. Report 95%
-    percentile CI on cumulative_chi2_improvement_above_Z_c, better_chi2, chi2_Z2_b, chi2_Z2_c, and the
-    head-to-head chi2_diff. The bootstrap scheme is identical to Q1B; only N_PARTICLES in the SMC propagation
-    step changes.'
+  details: '1000 paired-day bootstrap resamples of post-cutoff days (pair = (delivery_day, day_type) preserving within-day
+    correlation; same scheme as Q1B, Q1A, Q2A, P1). _Z2_BOOT_OFFSET=8013 (Q1B''s bootstrap seed; held constant per variables.excluded).
+    Per resample: refit M3 per (day_type, Z_c, Z2_c) cell on the resampled rows; SMC-propagate post-cutoff with N=400 particles;
+    recompute marginal PIT chi^2 per candidate; recompute cumulative_chi2_improvement_above_Z_c = 952.5167 - better_chi2.
+    Report 95% percentile CI on cumulative_chi2_improvement_above_Z_c, better_chi2, chi2_Z2_b, chi2_Z2_c, and the head-to-head
+    chi2_diff. The bootstrap scheme is identical to Q1B; only N_PARTICLES in the SMC propagation step changes.'
   type: paired_day_bootstrap
   width: 95 percent percentile interval
 corroboration_criterion:
-  numeric: cumulative_chi2_improvement_above_Z_c CI95 width <= 357.27 chi^2 AND |better_chi2_point - 662.223|
-    <= 50 chi^2 (R-A1B' fires).
-  reasoning: '357.27 = 75% of Q1B''s realized 476.358 chi^2 CI width. A 25% width reduction under N_PARTICLES
-    doubling implies V_smc/V_total >= 0.875 (the SMC variance component must be at least 87.5% of total
-    variance for total width to shrink to 75% under V_smc -> V_smc/2 from the 1/N scaling). This is the
-    "SMC particle noise dominates" signal in its strong form. The point-stability sub-criterion conjunct
-    prevents a misleading R-A1B'' where the CI tightens because the realized point shifted to a region
-    with lower local variance (e.g., away from the saturday__zc6__zr1 cell at chi^2=967 that dominated
-    Q1B''s per-cell decomposition); requiring |point - 662.223| <= 50 keeps the R-A1B'' verdict semantically
-    attached to the variance reduction interpretation. Substantive consequence of R-A1B'': the tightened
-    CI clears the way for clean adjudication of the (a)/(b)/(c) amendment paths surfaced in Q1B''s S4
-    advance, OR justifies a second denser tightening run (Q1B'''' at N=800) before further substantive
-    amendments -- but Q1B'''' would require a new dated entry per stopping_criterion below; it is NOT
-    a continuation of Q1B''.'
+  numeric: cumulative_chi2_improvement_above_Z_c CI95 width <= 357.27 chi^2 AND |better_chi2_point - 662.223| <= 50 chi^2
+    (R-A1B' fires).
+  reasoning: '357.27 = 75% of Q1B''s realized 476.358 chi^2 CI width. A 25% width reduction under N_PARTICLES doubling implies
+    V_smc/V_total >= 0.875 (the SMC variance component must be at least 87.5% of total variance for total width to shrink
+    to 75% under V_smc -> V_smc/2 from the 1/N scaling). This is the "SMC particle noise dominates" signal in its strong form.
+    The point-stability sub-criterion conjunct prevents a misleading R-A1B'' where the CI tightens because the realized point
+    shifted to a region with lower local variance (e.g., away from the saturday__zc6__zr1 cell at chi^2=967 that dominated
+    Q1B''s per-cell decomposition); requiring |point - 662.223| <= 50 keeps the R-A1B'' verdict semantically attached to the
+    variance reduction interpretation. Substantive consequence of R-A1B'': the tightened CI clears the way for clean adjudication
+    of the (a)/(b)/(c) amendment paths surfaced in Q1B''s S4 advance, OR justifies a second denser tightening run (Q1B''''
+    at N=800) before further substantive amendments -- but Q1B'''' would require a new dated entry per stopping_criterion
+    below; it is NOT a continuation of Q1B''.'
 data:
-  cutoff_handling: "Identical to Q1B per phase_a \xA7data.cutoff_handling in ../2026-05-27_q1b-z2-conditioning-second-axis/phase_a.yaml.\
-    \ Pre-cutoff library fits per-cell mixture parameters (w1, w2, s1, s2); post-cutoff is used only for\
-    \ SMC propagation and marginal PIT chi^2 evaluation. No leakage. Q1B' does not change the cutoff or\
-    \ the partition; only N_PARTICLES."
+  cutoff_handling: Identical to Q1B per phase_a §data.cutoff_handling in ../2026-05-27_q1b-z2-conditioning-second-axis/phase_a.yaml.
+    Pre-cutoff library fits per-cell mixture parameters (w1, w2, s1, s2); post-cutoff is used only for SMC propagation and
+    marginal PIT chi^2 evaluation. No leakage. Q1B' does not change the cutoff or the partition; only N_PARTICLES.
   partition:
-    dev: not used (the within-cell EM fit is deterministic; no held-out validation for hyperparameter
-      tuning).
-    test: post-cutoff actuals (post spec.data_cutoff) for SMC particle propagation + paired-day bootstrap
-      + marginal PIT chi^2 evaluation; identical to Q1B's post-cutoff window.
-    train: pre-cutoff library (load_pre_cutoff_actuals at the spec.data_cutoff) for per-(day_type, Z_c,
-      Z2_c) M3 mixture refits; identical to Q1B's library.
-  source: Ontario IESO demand (cfg.paths.historical_csvs); identical loaders and identical partition as
-    Q1B (load_actuals + zscore_transform + load_pre_cutoff_actuals at cfg.data.day_anchor_hours=07; same
-    embedding_dims from spec[predictor][embedding_dims]; same Z_c column derivation from (delivery_day,
-    h) per Q1A's _hour_of_week_bin convention; same Z2_c column derivation from P1 production _time_of_day_label(h)).
-    No new data source; no Z-column construction change.
+    dev: not used (the within-cell EM fit is deterministic; no held-out validation for hyperparameter tuning).
+    test: post-cutoff actuals (post spec.data_cutoff) for SMC particle propagation + paired-day bootstrap + marginal PIT chi^2
+      evaluation; identical to Q1B's post-cutoff window.
+    train: pre-cutoff library (load_pre_cutoff_actuals at the spec.data_cutoff) for per-(day_type, Z_c, Z2_c) M3 mixture refits;
+      identical to Q1B's library.
+  source: Ontario IESO demand (cfg.paths.historical_csvs); identical loaders and identical partition as Q1B (load_actuals
+    + zscore_transform + load_pre_cutoff_actuals at cfg.data.day_anchor_hours=07; same embedding_dims from spec[predictor][embedding_dims];
+    same Z_c column derivation from (delivery_day, h) per Q1A's _hour_of_week_bin convention; same Z2_c column derivation
+    from P1 production _time_of_day_label(h)). No new data source; no Z-column construction change.
 falsification_criterion:
-  numeric: cumulative_chi2_improvement_above_Z_c CI95 width >= 524.0 chi^2 OR |better_chi2_point - 662.223|
-    > 50 chi^2 (R-C1B' fires).
-  reasoning: '524.0 = ~110% of Q1B''s realized 476.358 chi^2 CI width. Widening under denser SMC contradicts
-    the basic SMC SE-scaling argument (SMC variance scales 1/N; doubling N should not increase total CI
-    width unless library-fit drift, seed dependence, or another anomaly is introduced -- and Q1B'' holds
-    library, seeds, and bootstrap convention fixed per variables.excluded). 110% admits paired-day bootstrap
-    finite- sample noise without making R-C1B'' trivially unfireable (a strict width-must-not-grow threshold
-    at 100.001% would be unfalsifiable in practice given bootstrap variance on the realized width itself).
-    The point-stability sub-criterion (|better_chi2_point - 662.223| > 50) catches the orthogonal failure
-    mode: SMC doubling has not merely reduced variance but has shifted the realized point, which indicates
-    seed-dependence or library-fit drift worth diagnosing before any further amendment. The 50 chi^2 threshold
-    is the script''s existing _REPRODUCTION_TOL_CHI2 (~1 sigma of Q2A''s bootstrap distribution) inherited
-    as the point-shift tolerance; doubling SMC particles should leave the seeded point within 1 sigma
-    of the N=200 realization.'
+  numeric: cumulative_chi2_improvement_above_Z_c CI95 width > 524.0 chi^2 OR |better_chi2_point - 662.223| > 50 chi^2 (R-C1B'
+    fires).
+  reasoning: '524.0 = ~110% of Q1B''s realized 476.358 chi^2 CI width. Widening under denser SMC contradicts the basic SMC
+    SE-scaling argument (SMC variance scales 1/N; doubling N should not increase total CI width unless library-fit drift,
+    seed dependence, or another anomaly is introduced -- and Q1B'' holds library, seeds, and bootstrap convention fixed per
+    variables.excluded). 110% admits paired-day bootstrap finite- sample noise without making R-C1B'' trivially unfireable
+    (a strict width-must-not-grow threshold at 100.001% would be unfalsifiable in practice given bootstrap variance on the
+    realized width itself). The point-stability sub-criterion (|better_chi2_point - 662.223| > 50) catches the orthogonal
+    failure mode: SMC doubling has not merely reduced variance but has shifted the realized point, which indicates seed-dependence
+    or library-fit drift worth diagnosing before any further amendment. The 50 chi^2 threshold is the script''s existing _REPRODUCTION_TOL_CHI2
+    (~1 sigma of Q2A''s bootstrap distribution) inherited as the point-shift tolerance; doubling SMC particles should leave
+    the seeded point within 1 sigma of the N=200 realization.'
 git_clean: true
-git_sha: 42ed0eb1b6d833540b7d3bca958b29285545b607
+git_sha: 8dff102331019aee1fc9f52eae6cdc380eead62f
 hypothesis:
-  counter: 'Eval-window noise (the post-cutoff window has a fixed ~12,000 rows of paired-day bootstrap
-    support that finer SMC propagation cannot enlarge) dominates the cumulative CI width; doubling N_PARTICLES
-    changes the CI95 width by less than 20% in either direction, leaving the realized width in (357.27,
-    524.0] and firing R-B1B''. The substantive consequence is the same in either CI band: the user adjudication
-    of the (a)/(b)/(c) amendment paths surfaced in Q1B''s S4 advance proceeds on substantive prior + structural
-    reasoning rather than waiting for the SMC-tightening lever to deliver a narrower CI. See devils_advocate.yaml
-    (stamped separately) for the full counter-forecast.'
-  proponent: SMC particle-count noise is the dominant component of Q1B's cumulative_chi2_improvement_above_Z_c
-    CI width; doubling N_PARTICLES from 200 to 400 (which halves SMC sampling variance per the 1/N central
-    limit scaling) tightens the cumulative CI95 width to <= 357.27 chi^2 (<= 75% of Q1B's realized 476.358
-    chi^2), firing R-A1B'. See proponent.yaml (stamped separately) for the full forecast including the
-    point-shift sub-prediction and what would change the proponent's mind.
-metric: "PRIMARY: realized 95% CI WIDTH on cumulative_chi2_improvement_above_Z_c at the (day_type, Z_c,\
-  \ Z2_c) configuration after re-running experiment/q1b_z2_conditioning/__main__.py with --n-particles\
-  \ 400.\n\n  cumulative_chi2_improvement_above_Z_c = 952.5167 - better_chi2_Z2_c\n  (where 952.5167 is\
-  \ Q1A''s settled M3 sigma=(day_type, Z_c) chi^2 anchor;\n  see baselines.primary)\n\nThe CI95 is computed\
-  \ by the existing paired-day bootstrap convention (1000 resamples, paired-day with within-day correlation\
-  \ preserved, _Z2_BOOT_OFFSET=8013) shared with Q1B; doubling N_PARTICLES does NOT change the bootstrap\
-  \ scheme. Per resample: re-run M3 per (day_type, Z_c, Z2_c) cell on the resampled rows; SMC-propagate\
-  \ post-cutoff under N=400 particles; recompute marginal PIT chi^2; recompute cumulative chi^2 improvement\
-  \ above the Z_c-only baseline.\n\nVERDICT CUTS (PRE-LOCKED per user direction; see thread.threshold_derivations\
-  \ for the algebra and source-artifact traceback):\n\n  R-A1B'' fires if: realized CI95 width <= 357.27\
-  \ chi^2 (<= 75% of Q1B''s realized 476.358 chi^2 width)\n  R-B1B'' fires if: realized CI95 width in\
-  \ (357.27, 524.0] chi^2 (mixed; SMC noise contributes but eval-window-noise is non-trivial)\n  R-C1B''\
-  \ fires if: realized CI95 width > 524.0 chi^2 OR |better_chi2_point - 662.223| > 50 chi^2 (widens, OR\
-  \ point shifts more than Monte-Carlo noise allows; anomaly warranting investigation before further amendment)\n\
-  \nPOINT-STABILITY SUB-CRITERION (pre-locked; PRIMARY-side qualifier on R-A1B'' and R-B1B'' verdicts):\
-  \ if |better_chi2_point - 662.223| > 50 chi^2 the verdict is R-C1B'' regardless of the CI width band,\
-  \ because a point shift larger than the script''s _REPRODUCTION_TOL_CHI2 indicates the SMC doubling\
-  \ has not merely reduced variance but has shifted the realized estimate. The 50 chi^2 threshold matches\
-  \ the existing experiment/q1b_z2_conditioning/__main__.py:134 _REPRODUCTION_TOL_CHI2, which is documented\
-  \ as ~1 sigma of Q2A''s bootstrap distribution. Doubling SMC particles should leave the seeded point\
-  \ estimate within this 1-sigma envelope; a shift > 50 chi^2 is an anomaly (seed dependence, library\
-  \ drift, or another methodological issue worth diagnosing).\n\nSECONDARY / informational (the result\
-  \ artifact must report these alongside the primary verdict):\n  - cumulative_chi2_improvement_above_Z_c\
-  \ full CI95 bounds (low, high), not just the width; for symmetry diagnostic against Q1B''s [+8.064,\
-  \ +484.423] (Q1B''s CI was right-skewed; if N=400 symmetrizes it, that is itself informative about which\
-  \ bound is SMC-driven).\n  - better_chi2 full CI95 bounds + width (cross-comparison to Q1B''s [468.094,\
-  \ 944.452]; same 476.358 width by construction of the cumulative metric, since cumulative = 952.5167\
-  \ - better_chi2).\n  - chi2_Z2_b and chi2_Z2_c full point + CI95 (the script re-runs both head-to-head\
-  \ branches at N=400; Z2_c is the verdict-relevant branch but Z2_b is informational and reported for\
-  \ completeness).\n  - chi2_diff (Z2_b - Z2_c) + CI95 at N=400 (head-to-head sub-finding; reported for\
-  \ whether the NEAR- TIE designation at N=200 survives at N=400; not a verdict input).\n  - Per-(day_type,\
-  \ Z_c, Z2_c) cell mixture parameters + per-cell chi^2 contributions at N=400 (informational; cross-comparison\
-  \ to Q1B''s per-cell decomposition, in particular the dominant saturday__zc6__zr1 morning_ramp cell\
-  \ at chi^2=967 from Q1B).\n  - Reproduction-check values: repro_chi2_no_z (Q2A anchor) and repro_chi2_zc\
-  \ (Q1A anchor), with N=400 SMC drift values relative to the settled Q2A 953.84 and Q1A 952.5167; see\
-  \ baselines.secondary for the N-shift carve-out semantics (drift > tol is informative side-channel,\
-  \ NOT a failed gate -- but the existing assert WILL halt execution; result.yaml must capture the value\
-  \ in execution_deviations regardless of pass/fail).\n"
+  counter: 'Eval-window noise (the post-cutoff window has a fixed ~12,000 rows of paired-day bootstrap support that finer
+    SMC propagation cannot enlarge) dominates the cumulative CI width; doubling N_PARTICLES changes the CI95 width by less
+    than 20% in either direction, leaving the realized width in (357.27, 524.0] and firing R-B1B''. The substantive consequence
+    is the same in either CI band: the user adjudication of the (a)/(b)/(c) amendment paths surfaced in Q1B''s S4 advance
+    proceeds on substantive prior + structural reasoning rather than waiting for the SMC-tightening lever to deliver a narrower
+    CI. See devils_advocate.yaml (stamped separately) for the full counter-forecast.'
+  proponent: SMC particle-count noise is the dominant component of Q1B's cumulative_chi2_improvement_above_Z_c CI width; doubling
+    N_PARTICLES from 200 to 400 (which halves SMC sampling variance per the 1/N central limit scaling) tightens the cumulative
+    CI95 width to <= 357.27 chi^2 (<= 75% of Q1B's realized 476.358 chi^2), firing R-A1B'. See proponent.yaml (stamped separately)
+    for the full forecast including the point-shift sub-prediction and what would change the proponent's mind.
+metric: "PRIMARY: realized 95% CI WIDTH on cumulative_chi2_improvement_above_Z_c at the (day_type, Z_c, Z2_c) configuration\
+  \ after re-running experiment/q1b_z2_conditioning/__main__.py with --n-particles 400.\n\n  cumulative_chi2_improvement_above_Z_c\
+  \ = 952.5167 - better_chi2_Z2_c\n  (where 952.5167 is Q1A''s settled M3 sigma=(day_type, Z_c) chi^2 anchor;\n  see baselines.primary)\n\
+  \nThe CI95 is computed by the existing paired-day bootstrap convention (1000 resamples, paired-day with within-day correlation\
+  \ preserved, _Z2_BOOT_OFFSET=8013) shared with Q1B; doubling N_PARTICLES does NOT change the bootstrap scheme. Per resample:\
+  \ re-run M3 per (day_type, Z_c, Z2_c) cell on the resampled rows; SMC-propagate post-cutoff under N=400 particles; recompute\
+  \ marginal PIT chi^2; recompute cumulative chi^2 improvement above the Z_c-only baseline.\n\nVERDICT CUTS (PRE-LOCKED per\
+  \ user direction; see thread.threshold_derivations for the algebra and source-artifact traceback):\n\n  R-A1B'' fires if:\
+  \ realized CI95 width <= 357.27 chi^2 (<= 75% of Q1B''s realized 476.358 chi^2 width)\n  R-B1B'' fires if: realized CI95\
+  \ width in (357.27, 524.0] chi^2 (mixed; SMC noise contributes but eval-window-noise is non-trivial)\n  R-C1B'' fires if:\
+  \ realized CI95 width > 524.0 chi^2 OR |better_chi2_point - 662.223| > 50 chi^2 (widens, OR point shifts more than Monte-Carlo\
+  \ noise allows; anomaly warranting investigation before further amendment)\n\nPOINT-STABILITY SUB-CRITERION (pre-locked;\
+  \ PRIMARY-side qualifier on R-A1B'' and R-B1B'' verdicts): if |better_chi2_point - 662.223| > 50 chi^2 the verdict is R-C1B''\
+  \ regardless of the CI width band, because a point shift larger than the script''s _REPRODUCTION_TOL_CHI2 indicates the\
+  \ SMC doubling has not merely reduced variance but has shifted the realized estimate. The 50 chi^2 threshold matches the\
+  \ existing experiment/q1b_z2_conditioning/__main__.py:134 _REPRODUCTION_TOL_CHI2, which is documented as ~1 sigma of Q2A''s\
+  \ bootstrap distribution. Doubling SMC particles should leave the seeded point estimate within this 1-sigma envelope; a\
+  \ shift > 50 chi^2 is an anomaly (seed dependence, library drift, or another methodological issue worth diagnosing).\n\n\
+  SECONDARY / informational (the result artifact must report these alongside the primary verdict):\n  - cumulative_chi2_improvement_above_Z_c\
+  \ full CI95 bounds (low, high), not just the width; for symmetry diagnostic against Q1B''s [+8.064, +484.423] (Q1B''s CI\
+  \ was right-skewed; if N=400 symmetrizes it, that is itself informative about which bound is SMC-driven).\n  - better_chi2\
+  \ full CI95 bounds + width (cross-comparison to Q1B''s [468.094, 944.452]; same 476.358 width by construction of the cumulative\
+  \ metric, since cumulative = 952.5167 - better_chi2).\n  - chi2_Z2_b and chi2_Z2_c full point + CI95 (the script re-runs\
+  \ both head-to-head branches at N=400; Z2_c is the verdict-relevant branch but Z2_b is informational and reported for completeness).\n\
+  \  - chi2_diff (Z2_b - Z2_c) + CI95 at N=400 (head-to-head sub-finding; reported for whether the NEAR- TIE designation at\
+  \ N=200 survives at N=400; not a verdict input).\n  - Per-(day_type, Z_c, Z2_c) cell mixture parameters + per-cell chi^2\
+  \ contributions at N=400 (informational; cross-comparison to Q1B''s per-cell decomposition, in particular the dominant saturday__zc6__zr1\
+  \ morning_ramp cell at chi^2=967 from Q1B).\n  - Reproduction-check values: repro_chi2_no_z (Q2A anchor) and repro_chi2_zc\
+  \ (Q1A anchor), with N=400 SMC drift values relative to the settled Q2A 953.84 and Q1A 952.5167; see baselines.secondary\
+  \ for the N-shift carve-out semantics (drift > tol is informative side-channel, NOT a failed gate -- but the existing assert\
+  \ WILL halt execution; result.yaml must capture the value in execution_deviations regardless of pass/fail).\n"
 references:
 - body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
   file: ../2026-05-27_resolution-paths-thread/thread.yaml
@@ -191,34 +178,29 @@ related_seed:
 - notes/seeds/multiscale_factor_coherence.md
 - writeup/tex/missing_content_memo.tex
 - ~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md
-research_question: Does Q1B's realized cumulative_chi2_improvement_above_Z_c CI95 width (476.358 chi^2
-  at N_PARTICLES=200) narrow under denser SMC propagation (N_PARTICLES=200 -> 400, all other methodology
-  identical), or is the wide CI dominated by eval-window-noise (12,000-row post-cutoff window + paired-day
-  bootstrap finite-sample variance) intrinsic to the data rather than to the estimator? The verdict metric
-  is the realized 95% CI WIDTH on cumulative_chi2_improvement_above_Z_c at the winning (day_type, Z_c,
-  Z2_c) configuration; the secondary point-stability sub-criterion confirms the SMC doubling has not destabilized
-  the point estimate (a sign of seed dependence or another methodological anomaly).
+research_question: Does Q1B's realized cumulative_chi2_improvement_above_Z_c CI95 width (476.358 chi^2 at N_PARTICLES=200)
+  narrow under denser SMC propagation (N_PARTICLES=200 -> 400, all other methodology identical), or is the wide CI dominated
+  by eval-window-noise (12,000-row post-cutoff window + paired-day bootstrap finite-sample variance) intrinsic to the data
+  rather than to the estimator? The verdict metric is the realized 95% CI WIDTH on cumulative_chi2_improvement_above_Z_c at
+  the winning (day_type, Z_c, Z2_c) configuration; the secondary point-stability sub-criterion confirms the SMC doubling has
+  not destabilized the point estimate (a sign of seed dependence or another methodological anomaly).
 schema: phase_a
 stopping_criterion:
-  reasoning: Scope creep at the empirical-CI-tightening level is the failure mode this phase_a prevents.
-    The decision after Q1B' fires its verdict is the (a)/(b)/(c) amendment-direction adjudication surfaced
-    in Q1B's S4 advance, NOT a Q1B'' at N=800. If R-A1B' fires and the user wants further tightening before
-    substantive amendment, that is a legitimate new line of inquiry and gets a new dated entry; the append-only
-    rule preserves the chain. If R-B1B' fires, the user adjudicates (a)/(b)/(c) on substantive grounds;
-    another tightening run would be silent post-hoc adaptation (the user might continue running Q1B''
-    at higher N until the CI narrows by chance, an argmin-without- variance failure mode). If R-C1B' fires
-    (widens or point-shift), the next step is diagnostic investigation of the anomaly, not another tightening
-    run.
-  rule: 'One run of experiment/q1b_z2_conditioning/__main__.py with --n-particles 400 is sufficient. The
-    verdict (R-A1B'' / R-B1B'' / R-C1B'') is determined by the realized CI95 width on cumulative_chi2_improvement_above_Z_c
-    at the (day_type, Z_c, Z2_c) configuration plus the point-stability sub-criterion |better_chi2_point
-    - 662.223| <= 50 chi^2. Re-running with a different SMC seed (changing SEED_BASE_Q2A / SEED_BASE_Q1A
-    / _TAG_SEED_OFFSET_M3 / _Z_SEED_OFFSET_Q1A _Z_c / _Z2_SEED_OFFSET / _Z2_BOOT_OFFSET) or a different
-    N_PARTICLES value (N > 400 to chase a narrower CI; N != 400 to spot-check) is a DEVIATION REQUIRING
-    A NEW DATED ENTRY per the registry append-only rule, NOT a continuation of Q1B''. Specifically: a
-    Q1B'''' at N=800 would be a NEW pre-registration (e.g., 2026-MM-DD_q1b-doubleprime- smc-tightening)
-    referencing Q1B'' as predecessor, with its own phase_a / proponent / devils_advocate / result / arbiter
-    chain. STOP.'
+  reasoning: Scope creep at the empirical-CI-tightening level is the failure mode this phase_a prevents. The decision after
+    Q1B' fires its verdict is the (a)/(b)/(c) amendment-direction adjudication surfaced in Q1B's S4 advance, NOT a Q1B'' at
+    N=800. If R-A1B' fires and the user wants further tightening before substantive amendment, that is a legitimate new line
+    of inquiry and gets a new dated entry; the append-only rule preserves the chain. If R-B1B' fires, the user adjudicates
+    (a)/(b)/(c) on substantive grounds; another tightening run would be silent post-hoc adaptation (the user might continue
+    running Q1B'' at higher N until the CI narrows by chance, an argmin-without- variance failure mode). If R-C1B' fires (widens
+    or point-shift), the next step is diagnostic investigation of the anomaly, not another tightening run.
+  rule: 'One run of experiment/q1b_z2_conditioning/__main__.py with --n-particles 400 is sufficient. The verdict (R-A1B''
+    / R-B1B'' / R-C1B'') is determined by the realized CI95 width on cumulative_chi2_improvement_above_Z_c at the (day_type,
+    Z_c, Z2_c) configuration plus the point-stability sub-criterion |better_chi2_point - 662.223| <= 50 chi^2. Re-running
+    with a different SMC seed (changing SEED_BASE_Q2A / SEED_BASE_Q1A / _TAG_SEED_OFFSET_M3 / _Z_SEED_OFFSET_Q1A _Z_c / _Z2_SEED_OFFSET
+    / _Z2_BOOT_OFFSET) or a different N_PARTICLES value (N > 400 to chase a narrower CI; N != 400 to spot-check) is a DEVIATION
+    REQUIRING A NEW DATED ENTRY per the registry append-only rule, NOT a continuation of Q1B''. Specifically: a Q1B'''' at
+    N=800 would be a NEW pre-registration (e.g., 2026-MM-DD_q1b-doubleprime- smc-tightening) referencing Q1B'' as predecessor,
+    with its own phase_a / proponent / devils_advocate / result / arbiter chain. STOP.'
 thread:
   node_id: Q1B'
   parent_branch: R-A
@@ -338,57 +320,49 @@ thread:
 topic: q1b-prime-smc-tightening
 variables:
   dependent:
-  - "cumulative_chi2_improvement_above_Z_c (PRIMARY verdict metric; framework- reading-relevant quantity\
-    \ = Q1A.M3.\u03C3=(day_type,Z_c) settled chi^2 952.5167 - better_chi2_Z2_c). Report point AND full\
-    \ CI95 bounds AND CI95 width. Verdict cuts apply to CI95 width."
-  - cumulative_chi2_improvement_above_Z_c_ci95 (the full [low, high] bounds, not just the width; required
-    for cross-comparison with Q1B's realized [+8.064, +484.423] and for the secondary CI symmetry diagnostic).
-  - 'better_chi2 (SECONDARY diagnostic; the post-cutoff marginal PIT chi^2 at the better of the two head-to-head
-    candidates Q1B settled on, which was Z2_c at point 662.223). Report point + CI95 + width. Used for
-    the point-stability sub-criterion: |better_chi2_point - 662.223| <= 50 chi^2. Q1B''s better_chi2 CI95
-    width (476.358) is the source of the R-A1B'' threshold derivation.'
-  - 'repro_chi2_no_z (Q2A anchor at N=400; reproduction-check #1 in the existing script lines 1418-1443;
-    expected ~953.84 +/- SMC drift). Report point + |diff| from Q2A settled 953.84 + tol-pass/fail flag.
-    See baselines.secondary for the N-shift carve-out semantics.'
-  - 'repro_chi2_zc (Q1A anchor at N=400; reproduction-check #2 in the existing script lines 1446-1474;
-    expected ~952.5167 +/- SMC drift). Report point + |diff| from Q1A settled 952.5167 + tol-pass/fail
-    flag. See baselines.secondary for the N-shift carve-out semantics.'
+  - cumulative_chi2_improvement_above_Z_c (PRIMARY verdict metric; framework- reading-relevant quantity = Q1A.M3.σ=(day_type,Z_c)
+    settled chi^2 952.5167 - better_chi2_Z2_c). Report point AND full CI95 bounds AND CI95 width. Verdict cuts apply to CI95
+    width.
+  - cumulative_chi2_improvement_above_Z_c_ci95 (the full [low, high] bounds, not just the width; required for cross-comparison
+    with Q1B's realized [+8.064, +484.423] and for the secondary CI symmetry diagnostic).
+  - 'better_chi2 (SECONDARY diagnostic; the post-cutoff marginal PIT chi^2 at the better of the two head-to-head candidates
+    Q1B settled on, which was Z2_c at point 662.223). Report point + CI95 + width. Used for the point-stability sub-criterion:
+    |better_chi2_point - 662.223| <= 50 chi^2. Q1B''s better_chi2 CI95 width (476.358) is the source of the R-A1B'' threshold
+    derivation.'
+  - 'repro_chi2_no_z (Q2A anchor at N=400; reproduction-check #1 in the existing script lines 1418-1443; expected ~953.84
+    +/- SMC drift). Report point + |diff| from Q2A settled 953.84 + tol-pass/fail flag. See baselines.secondary for the N-shift
+    carve-out semantics.'
+  - 'repro_chi2_zc (Q1A anchor at N=400; reproduction-check #2 in the existing script lines 1446-1474; expected ~952.5167
+    +/- SMC drift). Report point + |diff| from Q1A settled 952.5167 + tol-pass/fail flag. See baselines.secondary for the
+    N-shift carve-out semantics.'
   excluded:
-  - 'SMC seed convention (held constant: SEED_BASE_Q2A=20260526, SEED_BASE_Q1A=20260527, _TAG_SEED_OFFSET_M3=31,
-    _Z_SEED_OFFSET_Q1A_Z_c=73, _Z2_SEED_OFFSET={Z2_b: 89, Z2_c: 97}, _Z2_BOOT_OFFSET=8013; identical to
-    Q1B per experiment/q1b_z2_conditioning/__main__.py:104-116). Reasoning: Q1B'' tests the dependence
-    of the CI on N alone; changing seed at the same time would conflate Monte-Carlo variance reduction
-    with a seed- dependent realization shift, and the point-stability sub-criterion would no longer be
+  - 'SMC seed convention (held constant: SEED_BASE_Q2A=20260526, SEED_BASE_Q1A=20260527, _TAG_SEED_OFFSET_M3=31, _Z_SEED_OFFSET_Q1A_Z_c=73,
+    _Z2_SEED_OFFSET={Z2_b: 89, Z2_c: 97}, _Z2_BOOT_OFFSET=8013; identical to Q1B per experiment/q1b_z2_conditioning/__main__.py:104-116).
+    Reasoning: Q1B'' tests the dependence of the CI on N alone; changing seed at the same time would conflate Monte-Carlo
+    variance reduction with a seed- dependent realization shift, and the point-stability sub-criterion would no longer be
     interpretable.'
-  - 'Library construction (held constant: same load_actuals + zscore_transform + load_pre_cutoff_actuals
-    + per-(day_type, Z_c, Z2) library partition; same MIN_CELL_SIZE=200 pool-to-(day_type, Z_c)-parent
-    fallback rule). Reasoning: per pre-commitment 3, the dual-anchor reproduction framing requires the
-    library partition to be bit-identical to Q1B; any library change would invalidate the comparison to
-    Q1B''s 476.358 CI width and to the Q1A/Q2A reproduction anchors.'
-  - 'mixture_2_gaussian_mle_fit (held constant: production fitter in processing/innovations/estimator.py:424;
-    same call sites). Reasoning: Q1B'' tests SMC variance, not fitting variance; the per-cell EM fit is
-    deterministic given the library partition.'
-  - 'Paired-day bootstrap convention (held constant: N_BOOTSTRAP=1000, _Z2_BOOT_OFFSET=8013, paired-day
-    resampling per the same scheme Q1B used). Reasoning: the bootstrap is the eval-window-noise component
-    the proponent and DA hypotheses are head-to-head about; changing it at the same time would make the
-    result uninterpretable.'
-  - 'The Z2_c 4-level categorical binning (held constant: same P1-production binning {overnight: h in
-    {1..6}, morning_ramp: h in {7..11}, afternoon: h in {12..17}, evening: h in {18..24}} mapped to integer
-    levels {0,1,2,3}). Reasoning: Q1B'' is a single-arm tightening run on Q1B''s winning configuration,
-    NOT a head-to-head re-test of Z2_b vs Z2_c. Per Q1B''s settled result, Z2_c won the head-to-head at
-    NEAR-TIE (chi2_diff = +33.776 < paired SE 44.71); the parsimony-preferred winner Z2_c is the configuration
-    Q1B'' tightens. The Z2_b branch is still re-run in the script (the CLI does not toggle it off and
-    re-running both branches preserves the script''s structural integrity), but the verdict is on the
-    Z2_c CI width. Reporting Z2_b numerics is informational only; the verdict-relevant secondary diagnostic
-    is the Z2_c CI symmetry.'
+  - 'Library construction (held constant: same load_actuals + zscore_transform + load_pre_cutoff_actuals + per-(day_type,
+    Z_c, Z2) library partition; same MIN_CELL_SIZE=200 pool-to-(day_type, Z_c)-parent fallback rule). Reasoning: per pre-commitment
+    3, the dual-anchor reproduction framing requires the library partition to be bit-identical to Q1B; any library change
+    would invalidate the comparison to Q1B''s 476.358 CI width and to the Q1A/Q2A reproduction anchors.'
+  - 'mixture_2_gaussian_mle_fit (held constant: production fitter in processing/innovations/estimator.py:424; same call sites).
+    Reasoning: Q1B'' tests SMC variance, not fitting variance; the per-cell EM fit is deterministic given the library partition.'
+  - 'Paired-day bootstrap convention (held constant: N_BOOTSTRAP=1000, _Z2_BOOT_OFFSET=8013, paired-day resampling per the
+    same scheme Q1B used). Reasoning: the bootstrap is the eval-window-noise component the proponent and DA hypotheses are
+    head-to-head about; changing it at the same time would make the result uninterpretable.'
+  - 'The Z2_c 4-level categorical binning (held constant: same P1-production binning {overnight: h in {1..6}, morning_ramp:
+    h in {7..11}, afternoon: h in {12..17}, evening: h in {18..24}} mapped to integer levels {0,1,2,3}). Reasoning: Q1B''
+    is a single-arm tightening run on Q1B''s winning configuration, NOT a head-to-head re-test of Z2_b vs Z2_c. Per Q1B''s
+    settled result, Z2_c won the head-to-head at NEAR-TIE (chi2_diff = +33.776 < paired SE 44.71); the parsimony-preferred
+    winner Z2_c is the configuration Q1B'' tightens. The Z2_b branch is still re-run in the script (the CLI does not toggle
+    it off and re-running both branches preserves the script''s structural integrity), but the verdict is on the Z2_c CI width.
+    Reporting Z2_b numerics is informational only; the verdict-relevant secondary diagnostic is the Z2_c CI symmetry.'
   - 'Verdict cuts R_A1B_CUT=228 and R_C1B_CUT=2284 (held constant per experiment/q1b_z2_conditioning/__main__.py:120-122).
-    Reasoning: Q1B'' does NOT re-verdict Q1B''s outcome category (Q1B settled R-B1B); Q1B'' verdicts the
-    CI width on cumulative_chi2_improvement_above_Z_c at the settled (day_type, Z_c, Z2_c) configuration.
-    The integer cuts 228/2284 are inherited unchanged from the thread skeleton; they are not the verdict
-    cuts for Q1B''.'
+    Reasoning: Q1B'' does NOT re-verdict Q1B''s outcome category (Q1B settled R-B1B); Q1B'' verdicts the CI width on cumulative_chi2_improvement_above_Z_c
+    at the settled (day_type, Z_c, Z2_c) configuration. The integer cuts 228/2284 are inherited unchanged from the thread
+    skeleton; they are not the verdict cuts for Q1B''.'
   independent:
-  - 'N_PARTICLES (single knob being varied: 200 in Q1B, 400 in Q1B''). Passed via the existing CLI flag
-    --n-particles at experiment/q1b_z2_conditioning/ __main__.py:1318, which is already wired to args.n_particles
-    in both reproduction-check call sites (lines 1424, 1454) and in the head-to-head SMC propagation.
-    NO other knob is varied.'
+  - 'N_PARTICLES (single knob being varied: 200 in Q1B, 400 in Q1B''). Passed via the existing CLI flag --n-particles at experiment/q1b_z2_conditioning/
+    __main__.py:1318, which is already wired to args.n_particles in both reproduction-check call sites (lines 1424, 1454)
+    and in the head-to-head SMC propagation. NO other knob is varied.'
 written_at: '2026-05-29T23:30:00-07:00'
