@@ -1,0 +1,443 @@
+schema: phase_fidelity
+body_sha256: c6c54096a593b20484f53175ae31431e7add0de0f91120f37e05dbe65b3d5980
+aggregate_verdict: PASS
+fidelity_coverage_passed: true
+purpose: |
+  Check P (pre-run phase-fidelity audit) on Q1B's experiment script
+  (experiment/q1b_z2_conditioning/__main__.py). Confirms (L1, BLOCKING)
+  that every dependent / independent / excluded variable from phase_a
+  §variables and every pre-locked constant/threshold from phase_a is
+  addressable in the script and surfaces in the result.yaml that
+  --emit-result will write; and (L2, advisory) that the procedure
+  encoded in the script matches phase_a §metric and §stopping_criterion
+  (production fitter, library construction, SMC propagation, pool-
+  fallback target, paired-bootstrap scheme, near-tie rule, landslide
+  qualifier, reproduction-check seed wiring).
+checked_by: phase-fidelity agent (.claude/agents/phase-fidelity.md), Check P
+topic: q1b-z2-conditioning-second-axis
+written_at: '2026-05-28T05:30:00-07:00'
+git_sha: 40ac261e0052fbe53b80446697fa4de00d887886
+git_clean: false
+script_audited: experiment/q1b_z2_conditioning/__main__.py
+script_lines: 1764
+script_status_note: |
+  Q1B script is untracked at audit time (status: '?? experiment/
+  q1b_z2_conditioning/'). git_clean: false reflects this. Code-path
+  audit ALREADY PASSED on the working-tree script (verdict
+  PRODUCTION-PATH; .venv/bin/python -m experiment.audit.code_path
+  experiment/q1b_z2_conditioning/__main__.py). The pre-commit Check P
+  is the same convention used for Q1A (commit b133647 + c3a62c2 ran
+  Check P before final commit; per Q1A check_r artifact_format_note).
+  The check_p artifact will be tracked once the experiment is run and
+  the result + check_r are committed atomically.
+
+references:
+- file: phase_a.yaml
+  body_sha256: 0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10
+- file: ../2026-05-27_q1a-z-conditioning-strongest-axis/phase_fidelity_check_r.yaml
+  body_sha256: a2d327698160e1e48de0fb46ad8fcd7698e2d45937c5dcef9ea6ee066923735f
+  relation: predecessor_node_check_r_schema_template
+- file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  body_sha256: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
+  relation: thread
+
+thread:
+  node_id: Q1B
+  parent_branch: R-A
+  thread_topic: resolution-paths-thread
+  thread_body_sha256: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
+
+code_path_audit:
+  verdict: PASS
+  tool: .venv/bin/python -m experiment.audit.code_path experiment/q1b_z2_conditioning/__main__.py
+  detail: |
+    Production-path audit ran against the working-tree script.
+    Result: "Production-path verified. The claim may be CITED
+    subject to the other audits (arbiter, multiverse)." All
+    fit-bearing calls go through processing.innovations.estimator.
+    mixture_2_gaussian_mle_fit (lines 348, 371, 398, 694, 779) and
+    Q2A's reused helpers (_build_library_for_daytype,
+    _make_mixture_2_sampler, _marginal_pit_chi2, _smc_iterate_family,
+    _pit_for_family) imported from
+    experiment.distributional_class_q2a.__main__. Z2_c uses P1's
+    production binning via direct import of
+    experiment.p1_patra_sen.__main__._time_of_day_label (line 212).
+    PRODUCTION-PATH, BLOCKING precondition cleared.
+
+l1_check:
+  pass: true
+  items_checked: 18
+  items_passed: 18
+  items_failed: []
+  notes: |
+    Every dependent variable from phase_a §variables.dependent is
+    surfaced in the result.yaml structure emitted by
+    _render_result_yaml (lines 1031-1306). 8 fields under
+    primary_result.value (chi2_Z2_b, chi2_Z2_c, better_chi2,
+    chi2_diff, winner, near_tie_flag, landslide_R_A1B,
+    cumulative_chi2_improvement_above_Z_c), 4 CI fields directly
+    under primary_result (chi2_Z2_b_ci95, chi2_Z2_c_ci95,
+    chi2_diff_ci95, cumulative_chi2_improvement_above_Z_c_ci95),
+    and 6 fields in secondary_results[0..5] (per_cell_mixture_params_
+    {Z2_b,Z2_c}, per_cell_chi2_contribution_{Z2_b,Z2_c},
+    pooling_fallback_log_{Z2_b,Z2_c}). Pre-locked constants
+    R_A1B_CUT=228, R_C1B_CUT=2284, MIN_CELL_SIZE=200,
+    N_PARTICLES=200, N_BOOTSTRAP=1000, N_PIT_BINS=10,
+    Q1A_M3_Z_c_CHI2_SETTLED=952.5167, Q2A_M3_CHI2_SETTLED=953.84,
+    _REPRODUCTION_TOL_CHI2=50.0 are all module-level (lines 92-148)
+    and traceable to phase_a / thread skeleton.
+  items_audited:
+    chi2_Z2_b:
+      location: 'primary_result.value.chi2_Z2_b (line 1138; computed at line 1521-1522 via _marginal_pit_chi2 on Z2_b candidate PIT table)'
+      verdict: PASS
+    chi2_Z2_c:
+      location: 'primary_result.value.chi2_Z2_c (line 1139; same path with tag=Z2_c)'
+      verdict: PASS
+    better_chi2:
+      location: 'primary_result.value.better_chi2 (line 1140; computed in _evaluate_outcome as min(chi2_Z2_b, chi2_Z2_c) at line 820)'
+      verdict: PASS
+    chi2_diff:
+      location: 'primary_result.value.chi2_diff (line 1141; diff = chi2_Z2_b - chi2_Z2_c at line 822, sign matches Q1A convention)'
+      verdict: PASS
+    chi2_Z2_b_ci95:
+      location: 'primary_result.chi2_Z2_b_ci95 (line 1161-1162; populated from paired-day bootstrap ci_for("Z2_b") at line 1072)'
+      verdict: PASS
+    chi2_Z2_c_ci95:
+      location: 'primary_result.chi2_Z2_c_ci95 (line 1163-1164; same path with tag=Z2_c)'
+      verdict: PASS
+    chi2_diff_ci95:
+      location: 'primary_result.chi2_diff_ci95 (line 1165-1166; populated from boot["chi2"]["diff"] which is recorded at line 1579)'
+      verdict: PASS
+    cumulative_chi2_improvement_above_Z_c:
+      location: |-
+        primary_result.value.cumulative_chi2_improvement_above_Z_c
+        (line 1145; computed as Q1A_M3_Z_c_CHI2_SETTLED -
+        outcome["better_chi2"] at line 1602)
+      verdict: PASS
+    cumulative_chi2_improvement_above_Z_c_ci95:
+      location: |-
+        primary_result.cumulative_chi2_improvement_above_Z_c_ci95
+        (line 1167-1168; CI computed from the boot["chi2"]
+        ["cum_improvement"] distribution at line 1592-1595, which
+        accumulates per-bootstrap Q1A_M3_Z_c_CHI2_SETTLED - better_b
+        at line 1582-1584)
+      verdict: PASS
+    per_cell_mixture_params_Z2_b:
+      location: |-
+        secondary_results[0].value (line 1175-1178; cells_for("Z2_b")
+        helper at line 1057-1070 walks fits_per_dt_cell["Z2_b"]
+        and emits {weights, scales, n_library, z_c, z2} per
+        (day_type, Z_c, Z2) cell using zc{N}__z2{N} key convention)
+      verdict: PASS
+    per_cell_mixture_params_Z2_c:
+      location: 'secondary_results[1].value (line 1179-1182; same path with tag=Z2_c)'
+      verdict: PASS
+    per_cell_chi2_contribution_Z2_b:
+      location: |-
+        secondary_results[2].value (line 1183-1198; emitted from
+        per_cell_chi2["Z2_b"] dict, which is populated at lines
+        1529-1542 by grouping post-cutoff PIT rows by (day_type,
+        z_c_value, z2_value) and running _marginal_pit_chi2 per
+        cell. Key convention {dt}__zc{z_c}__z2{z2})
+      verdict: PASS
+    per_cell_chi2_contribution_Z2_c:
+      location: 'secondary_results[3].value (line 1199-1213; same path with tag=Z2_c)'
+      verdict: PASS
+    pooling_fallback_log_Z2_b:
+      location: |-
+        secondary_results[4].value (line 1214-1226; populated from
+        fallback_log["Z2_b"] which is filled inside
+        _pit_for_zc_z2_candidate at lines 478-493 — pool target is
+        the (day_type, Z_c) parent fit, NOT day_type-only)
+      verdict: PASS
+    pooling_fallback_log_Z2_c:
+      location: 'secondary_results[5].value (line 1227-1237; same path with tag=Z2_c)'
+      verdict: PASS
+    winner:
+      location: 'primary_result.value.winner (line 1142; computed in _evaluate_outcome at line 821 as the candidate with the lower chi^2)'
+      verdict: PASS
+    near_tie_flag:
+      location: |-
+        primary_result.value.near_tie_flag (line 1143; computed in
+        _evaluate_outcome at line 823-825 as
+        abs(chi2_diff) < 1.0 * chi2_diff_se, where chi2_diff_se =
+        np.nanstd(boot_chi2["diff"]) at line 1590 — same convention
+        as Q1A line 1275)
+      verdict: PASS
+    landslide_R_A1B:
+      location: |-
+        primary_result.value.landslide_R_A1B (line 1144; computed in
+        _render_result_yaml at lines 1088-1096 as
+        (outcome.verdict == "R-A1B") AND
+        (better_chi2 <= R_A1B_CUT) AND
+        (ci_low_better <= R_A1B_CUT). Set to None outside R-A1B
+        verdict, matching Q1A's convention that landslide is only
+        defined for the corroboration outcome.)
+      verdict: PASS
+  pre_locked_constants_audited:
+    R_A1B_CUT:
+      location: 'module-level line 120; value 228; surfaced at result.yaml secondary_results[7].value.R_A1B_cut (line 1296)'
+      verdict: PASS
+    R_C1B_CUT:
+      location: 'module-level line 121; value 2284; surfaced at result.yaml secondary_results[7].value.R_C1B_cut (line 1297)'
+      verdict: PASS
+    MIN_CELL_SIZE:
+      location: 'module-level line 142; value 200; enforced at _build_library_per_zc_z2_cell line 279 and _build_library_per_zc_only line 327'
+      verdict: PASS
+    N_PARTICLES:
+      location: 'module-level line 92; value 200; default for --n-particles CLI flag at line 1318; matches Q2A M3 convention'
+      verdict: PASS
+    N_BOOTSTRAP:
+      location: 'module-level line 93; value 1000; default for --n-bootstrap CLI flag at line 1319'
+      verdict: PASS
+    N_PIT_BINS:
+      location: 'module-level line 94; value 10; passed through to _marginal_pit_chi2 (Q2A''s production helper, imported at line 77)'
+      verdict: PASS
+    Q1A_M3_Z_c_CHI2_SETTLED:
+      location: |-
+        module-level line 127; value 952.5167; baseline for
+        reproduction-check #2 (asserted at line 1464-1472) and
+        for cumulative_improvement (line 1602, 1583)
+      verdict: PASS
+    Q2A_M3_CHI2_SETTLED:
+      location: |-
+        module-level line 126; value 953.84; baseline for
+        reproduction-check #1 (asserted at line 1434-1442)
+      verdict: PASS
+    _REPRODUCTION_TOL_CHI2:
+      location: |-
+        module-level line 134; value 50.0; applied at lines 1434
+        and 1464; matches Q1A's tolerance (per phase_a §metric
+        derivation "~1σ of Q2A's bootstrap distribution")
+      verdict: PASS
+    Z2_b_definition:
+      location: |-
+        _z2_b_label at line 186-193: returns 0 if h <= 6 else 1.
+        Matches phase_a §metric "Z2_b = 0 if h ∈ {1..6} else 1"
+        verbatim.
+      verdict: PASS
+    Z2_c_definition:
+      location: |-
+        _z2_c_label at line 204-212: returns the integer level
+        via _Z2_C_LABEL_TO_INT[_time_of_day_label(h)], where
+        _time_of_day_label is imported directly from
+        experiment.p1_patra_sen.__main__ (line 84). Matches
+        phase_a §amendment_note "P1's production binning is the
+        methodology source-of-truth" — Z2_c uses P1's
+        {1..6, 7..11, 12..17, 18..24} binning by importing the
+        production function rather than reimplementing.
+      verdict: PASS
+
+l2_check:
+  pass: true
+  items_checked: 9
+  items_passed: 8
+  items_advisory:
+  - name: amendment_note_pool_fallback_prediction_internal_inconsistency
+    reason: |
+      Phase_a's amendment_note (lines 14-34) makes an empirical
+      prediction that "ONE post-cutoff cell — (weekday, Z_c=5,
+      morning_ramp) at n=144 — falls below MIN_CELL_SIZE=200; that
+      cell's post-cutoff propagation pools to its (day_type, Z_c)
+      = (weekday, 5) parent per the registered pool-to-(day_type,
+      Z_c) fallback rule." However, phase_a §metric step 2 (lines
+      174-181) defines pool-fallback as firing on PRE-CUTOFF
+      LIBRARY sample size, not post-cutoff cell size: "For
+      (day_type, Z_c, Z2) cells with n < MIN_CELL_SIZE in the
+      pre-cutoff library, POOL TO THE (day_type, Z_c) PARENT
+      cell". The amendment_note's own empirical fact reports
+      pre-cutoff min Z2_c cell at n=2364 — well above 200.
+      Therefore at runtime, by phase_a §metric (the binding
+      methodology), no pool-fallback will fire and
+      pooling_fallback_log_Z2_b / pooling_fallback_log_Z2_c will
+      be empty dicts. The amendment_note's last-sentence
+      empirical-prediction is an internal inconsistency in
+      phase_a — §metric governs and §metric's rule is correctly
+      implemented in the script (lines 240-284 fit-side pre-cutoff
+      threshold; lines 478-493 post-cutoff routing does the
+      lookup, not a thresholded re-fit). The script is faithful
+      to §metric; the empirical-fact paragraph in amendment_note
+      mis-describes the fallback trigger. ADVISORY: arbiter
+      should expect empty pooling_fallback_log_Z2_b and
+      pooling_fallback_log_Z2_c, and read the amendment_note's
+      last-sentence prediction as describing a routing event (a
+      post-cutoff state that maps to a fit not present in the
+      3-tuple cell), NOT a fit-side pool-fallback. The
+      methodology-vs-prediction inconsistency is non-blocking and
+      cosmetic; resolution at result-time is simply for the
+      arbiter to note that pooling_fallback_log entries record
+      ROUTING events (post-cutoff state mapping to the
+      (day_type, Z_c) parent for fit lookup) rather than
+      fit-side thresholded pooling, and that under the
+      registered binning no fit-side pool-fallback fires.
+  notes: |
+    The procedure encoded in the script matches phase_a §metric
+    and §stopping_criterion at every methodological step. One
+    advisory item flagged: an internal inconsistency in phase_a
+    between §metric (pool-fallback fires on pre-cutoff library
+    sample size, NOT a fit-side defect at runtime) and the
+    amendment_note's empirical-fact paragraph (which references
+    post-cutoff cell counts as if they trigger pool-fallback).
+    The script correctly implements §metric. No script defect;
+    advisory only.
+  items_audited:
+    production_fitter:
+      detail: |
+        phase_a §metric step 1 specifies mixture_2_gaussian_mle_fit
+        (processing/innovations/estimator.py:424). Script calls
+        this production function at lines 348, 371, 398, 694, 779
+        — never reimplemented. Code-path audit confirmed
+        PRODUCTION-PATH.
+      verdict: PASS
+    library_construction:
+      detail: |
+        Two library-builder functions: _build_library_per_zc_z2_cell
+        at line 240 (3-tuple cell key, day_type filter at anchor,
+        Z derivation at predicted-hour = anchor + 1h, contiguity
+        check on the (anchor, target) pair via
+        target - anchor == 1h); and _build_library_per_zc_only at
+        line 287 (Q1A's σ-algebra, used for the Z_c-only
+        reproduction-check fit and the pool-fallback target). Both
+        match Q1A's pattern (Q1A line 201-249 _build_library_per_z_cell)
+        and Q2A's day_anchor seam exclusion (the
+        target - anchor != 1h check). MIN_CELL_SIZE=200 enforced
+        at lines 279 and 327.
+      verdict: PASS
+    SMC_propagation:
+      detail: |
+        N_PARTICLES = 200 per state (line 92). Two RNG-seeded
+        propagation paths: reproduction-check #1 (line 1419-1426)
+        seeds with SEED_BASE_Q2A + 100 + _TAG_SEED_OFFSET_M3 =
+        20260657 (matches Q2A's M3 SMC seed exactly, replays the
+        no-Z baseline); reproduction-check #2 (line 1449-1455)
+        seeds with SEED_BASE_Q1A + 100 + _Z_SEED_OFFSET_Q1A_Z_c =
+        20260700 (matches Q1A line 1201 with tag=Z_c and
+        _Z_SEED_OFFSET["Z_c"]=73, replays Q1A's Z_c-branch SMC
+        seed exactly). Head-to-head propagation (line 1510-1527)
+        seeds per-tag with SEED_BASE + 100 + _Z2_SEED_OFFSET[tag]
+        (Z2_b: 20260716, Z2_c: 20260724). Q1B's per-tag offsets
+        (89, 97) are NEW (distinct from Q1A's _Z_SEED_OFFSET
+        {Z_b:67, Z_c:73}) to avoid silent seed-aliasing between
+        sibling experiments.
+      verdict: PASS
+    marginal_PIT_chi2:
+      detail: |
+        _marginal_pit_chi2 imported from Q2A
+        (experiment.distributional_class_q2a.__main__, line 77)
+        — 10-bin equiprobable Pearson chi^2 vs uniform, same
+        convention as Q1, Q2A, Q2B, P1, Q1A. Applied at line
+        1426 (repro #1), 1456 (repro #2), 1521 (per-Z2-candidate
+        post-cutoff marginal), 1538 (per-cell chi^2 contribution),
+        1576 (per-bootstrap-sample marginal). All five aggregation
+        levels go through the imported production helper.
+      verdict: PASS
+    pool_fallback_target:
+      detail: |
+        phase_a §metric step 2: "POOL TO THE (day_type, Z_c)
+        PARENT cell (NOT day_type-only). The (day_type, Z_c)
+        parent is Q1A's settled per-cell M3 fit (carryforward
+        sigma-algebra); pooling to day_type-only would silently
+        undo Q1A's Z_c carryforward and contaminate the cumulative
+        chi^2." Script implements cascading fallback at
+        _pit_for_zc_z2_candidate lines 476-493: first lookup
+        the (day_type, Z_c, Z2) cell fit; if missing, fall
+        back to the (day_type, Z_c) parent (line 479); if STILL
+        missing (an informational safety net for fits with no
+        Z_c parent — should not fire under the registered cell
+        counts), fall back to day_type-only as final tertiary
+        fallback (line 488). fallback_log is keyed by (day_type,
+        z_c_value, z2_value) and accumulates the count of
+        routings; the (day_type, Z_c) parent is the L2 trap and
+        is correctly the primary fallback target.
+      verdict: PASS
+    paired_day_bootstrap:
+      detail: |
+        N_BOOTSTRAP = 1000 (line 93). Implementation at lines
+        1551-1597: builds the union of post-cutoff delivery_days
+        across both candidates (line 1553-1555), groups
+        per-candidate PIT tables by delivery_day (line 1557-1561),
+        seeds the bootstrap RNG with SEED_BASE + _Z2_BOOT_OFFSET
+        = 20268540 (line 1564-1566; _Z2_BOOT_OFFSET=8013, distinct
+        from Q1A's _Z_BOOT_OFFSET=8011). PER RESAMPLE the SAME
+        sampled_days index (line 1568-1569) is applied to BOTH
+        Z2_b and Z2_c (line 1571-1577) — this is the paired
+        structure: a single resample contributes one paired
+        observation of (chi2_Z2_b, chi2_Z2_c, chi2_diff,
+        better_chi2, cum_improvement). 95% percentile CIs are
+        computed on each at lines 1587-1595.
+      verdict: PASS
+    near_tie_rule:
+      detail: |
+        phase_a §metric "NEAR-TIE if |chi2_Z2_b - chi2_Z2_c| <
+        1.0 * paired-bootstrap SE of the difference (1 sigma of
+        the paired difference distribution)". chi2_diff_se =
+        np.nanstd(boot_chi2["diff"]) at line 1590 (matches Q1A's
+        identical estimator at line 1275). _evaluate_outcome
+        line 824-825: near_tie = abs(diff) < 1.0 * chi2_diff_se.
+        On NEAR-TIE, the head-to-head reason string records
+        "NEAR-TIE (no ranking)" and the verdict still fires on
+        min(); the candidate with the lower point estimate
+        retains the "winner" label per phase_a (lines 1142-1143
+        of result.yaml carry both fields). Matches phase_a
+        verbatim.
+      verdict: PASS
+    landslide_qualifier:
+      detail: |
+        phase_a §corroboration_criterion: "R-A1B fires AT
+        LANDSLIDE STRENGTH on at least one candidate: better
+        candidate's cumulative chi^2 point estimate <= 228 AND
+        lower bootstrap 95% CI bound <= 228 (both clearing the
+        cut simultaneously, analogous to Q1A corroboration_criterion
+        and P1 R-A landslide reading)." Script lines 1088-1096:
+        landslide_R_A1B is True iff outcome.verdict == "R-A1B"
+        AND outcome.better_chi2 <= R_A1B_CUT AND
+        ci_low_better <= R_A1B_CUT; None outside R-A1B. Matches
+        phase_a verbatim and matches Q1A's analogous convention
+        (per Q1A check_r, landslide is null outside the
+        corroboration verdict).
+      verdict: PASS
+    synthetic_gate:
+      detail: |
+        phase_a §baselines.secondary specifies a synthetic
+        recovery gate with two parts: (i) per-cell fitted (w, s1,
+        s2) within tolerance, (ii) PIT chi^2 under full
+        3-tuple-conditioned model approximately Uniform[0,1];
+        plus a FALSE-Z companion. Script _run_inline_synthetic_gate
+        at line 676-800: 4-stratum DGP (2 Z_c × 2 Z2),
+        SYNTHETIC_GATE_N_LIB=2000 rows/cell, SYNTHETIC_GATE_M=100
+        SMC particles, SYNTHETIC_GATE_CHI2_CEILING=60 per-cell.
+        (a) parameter recovery within _SYNTH_PARAM_TOL=0.15 on
+        w_r and relative tolerance on s2 — BLOCKING; (b)
+        per-cell PIT chi^2 < 60 — BLOCKING; (c) false-Z2
+        collapse companion (advisory, matches Q1A convention).
+        BLOCKING gate cleared via assert at line 1348-1355 (gate
+        FAIL exits with code 2 before any Ontario read). Matches
+        phase_a verbatim.
+      verdict: PASS
+
+verdict: PASS
+
+next_step_recommendation: |
+  Run experiment with --emit-result. Command:
+
+    .venv/bin/python -m experiment.q1b_z2_conditioning --emit-result
+
+  Expected runtime: synthetic gate ~30s, then Ontario fits and SMC
+  propagation. Required precondition for --emit-result: git tree is
+  clean (experiment.provenance.make_result refuses to write a CLAIM-
+  GRADE artifact on a dirty tree, per the strict refuse-on-dirty rule
+  in CLAUDE.md). Commit the Q1B script and this check_p.yaml before
+  the --emit-result invocation; then Check R audits the result.yaml
+  + experiment/results/q1b_z2_conditioning.txt.
+
+  Advisory carryforward to Check R / arbiter (non-blocking):
+  pooling_fallback_log_Z2_b and pooling_fallback_log_Z2_c will both
+  be empty under the registered fit-side pre-cutoff MIN_CELL_SIZE
+  trigger (phase_a §metric step 2 is the binding rule). The
+  amendment_note's last-sentence claim that one cell pools
+  post-cutoff describes a routing event for a post-cutoff state
+  whose 3-tuple cell is below threshold IN THE PRE-CUTOFF LIBRARY
+  — which under the registered numbers (pre-cutoff min 2364) does
+  not occur. If the runtime confirms empty pooling_fallback_log
+  dicts, this is the expected result; the arbiter should not read
+  empty logs as a defect.
