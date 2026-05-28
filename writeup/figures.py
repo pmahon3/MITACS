@@ -480,13 +480,132 @@ def fig_act2_forest() -> Path:
     return out
 
 
+# ---------------------------------------------------------------------------
+# Figure 7: Q1B per-cell chi^2 heatmap (Z2_c stratification)
+# ---------------------------------------------------------------------------
+#
+# Reads Q1B's per_cell_chi2 dict from scratch/data/q1b_z2_conditioning/q1b.pkl.
+# Plots three small-multiples (one per day-type) of chi^2 contribution per
+# (Z_c, Z_2) cell under the M3 winning configuration. Highlights the
+# saturday__zc6__morning_ramp cell (chi^2 = 967.3 = the single cell that
+# contributes more than the pooled marginal 952.5) as the structural
+# corroboration of P1's binding-axis localisation: P1 named hour_of_week
+# bin 6 (Sat 07 - Sun 03) at alpha_L = 0.61; Q1A's per-cell decomposition
+# showed that bin contributed chi^2 = 1634 under (day_type, Z_c)
+# stratification alone; Q1B's joint (day_type, Z_c, Z_2) stratification
+# splits that 1634 across Z_2 as morning_ramp 967 > evening 400 > afternoon
+# 328, revealing structural within-stratum heterogeneity.
+#
+# This is the per-cell-decomposition story from S13 made visual.
+
+Q1B_PKL = ROOT / "scratch" / "data" / "q1b_z2_conditioning" / "q1b.pkl"
+
+# Display labels for the 4-level Z2 (P1's _time_of_day_label binning).
+Z2_LABELS = ["overnight", "morning ramp", "afternoon", "evening"]
+# Hour-of-week binning: 8 bins of 21 hours, anchored Mon 00. Labels
+# trimmed to fit the heatmap row labels.
+ZC_LABELS = [
+    "0 (Mon 00-20)",
+    "1 (Mon 21-Tu 17)",
+    "2 (Tu 18-We 14)",
+    "3 (We 15-Th 11)",
+    "4 (Th 12-Fr 09)",
+    "5 (Fr 10-Sa 06)",
+    "6 (Sa 07-Su 03)",
+    "7 (Su 04-Su 23)",
+]
+
+
+def fig_q1b_per_cell_heatmap() -> Path:
+    """Per-cell chi^2 contribution under joint (day_type, Z_c, Z_2)
+    stratification. The saturday__zc6__morning_ramp cell at chi^2=967.3
+    is the structural corroboration of P1's binding-axis finding."""
+    import pickle
+    with Q1B_PKL.open("rb") as f:
+        d = pickle.load(f)
+    pc = d["per_cell_chi2"]["Z2_c"]  # dict[(day_type, z_c, z_2)] -> {chi2, n_rows}
+
+    # Build a 3-panel (day_type) x 8 (z_c) x 4 (z_2) layout.
+    # Empty (structurally-impossible) cells are masked.
+    daytypes = ("weekday", "saturday", "sunday")
+    fig, axes = plt.subplots(1, 3, figsize=(6.5, 4.0),
+                             gridspec_kw={"width_ratios": [1, 1, 1]})
+
+    # Common color scale across panels for fair cross-day-type comparison.
+    # vmax = 1000 puts the saturday hot cell (967) near the top of the
+    # scale; cells above 1000 (if any) would saturate, which is fine ---
+    # the visual point is "this cell is much bigger than the others",
+    # not "exact value of the hot cell."
+    vmax = 1000.0
+    cmap = plt.get_cmap("YlOrRd")
+
+    for ax, dt in zip(axes, daytypes):
+        # Build the 8x4 matrix; np.nan for structurally-empty cells.
+        M = np.full((8, 4), np.nan)
+        for (d_t, zc, z2), v in pc.items():
+            if d_t == dt:
+                M[zc, z2] = v["chi2"]
+
+        # Imshow with masking. cmap.bad sets the colour for nan.
+        cmap_w_bad = cmap.copy()
+        cmap_w_bad.set_bad("#ededed")  # light grey for structural NaN
+        im = ax.imshow(M, cmap=cmap_w_bad, vmin=0, vmax=vmax,
+                       aspect="auto", origin="upper")
+
+        # Annotate each non-empty cell with its chi^2.
+        for i in range(8):
+            for j in range(4):
+                if not np.isnan(M[i, j]):
+                    val = M[i, j]
+                    # White text on dark cells, black on light.
+                    txt_color = "white" if val > 0.55 * vmax else "#252525"
+                    ax.text(j, i, f"{val:.0f}",
+                            ha="center", va="center",
+                            fontsize=7.5, color=txt_color)
+
+        ax.set_title(dt, fontsize=10, pad=4)
+        ax.set_xticks(range(4))
+        ax.set_xticklabels(Z2_LABELS, rotation=35, ha="right", fontsize=7.5)
+        if ax is axes[0]:
+            ax.set_yticks(range(8))
+            ax.set_yticklabels(ZC_LABELS, fontsize=7.0)
+            ax.set_ylabel("$Z_c$  (hour-of-week bin)", fontsize=9)
+        else:
+            ax.set_yticks(range(8))
+            ax.set_yticklabels([])
+        ax.set_xlabel("$Z_2$  (time-of-day)", fontsize=9)
+        for s in ("top", "right"):
+            ax.spines[s].set_visible(False)
+
+    # Single shared colorbar at the right edge.
+    cbar_ax = fig.add_axes([0.93, 0.18, 0.02, 0.66])
+    cb = fig.colorbar(im, cax=cbar_ax)
+    cb.set_label(r"per-cell $\chi^2$", fontsize=9)
+    cb.ax.tick_params(labelsize=7.5)
+
+    # Highlight saturday__zc6__morning_ramp (the headline cell).
+    # The saturday panel is axes[1]; coords (z_c=6, z_2=1).
+    rect = plt.Rectangle((1 - 0.5, 6 - 0.5), 1, 1,
+                         fill=False, edgecolor="#1a1a1a", linewidth=1.4,
+                         zorder=5)
+    axes[1].add_patch(rect)
+
+    fig.subplots_adjust(left=0.18, right=0.91, top=0.92, bottom=0.22,
+                        wspace=0.08)
+    out = FIGS / "fig_q1b_per_cell_heatmap.pdf"
+    fig.savefig(out)
+    plt.close(fig)
+    return out
+
+
 def main() -> None:
     for fn in (fig_per_horizon_mae,
                fig_diurnal_envelope,
                fig_multisigma_coverage,
                fig_pit_panel,
                fig_ck_divergence,
-               fig_act2_forest):
+               fig_act2_forest,
+               fig_q1b_per_cell_heatmap):
         path = fn()
         print(f"  wrote {path.relative_to(ROOT)}")
 

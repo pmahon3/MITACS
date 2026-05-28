@@ -803,6 +803,26 @@ variance cap, seam exclusion) account for it?\footnote{Registry:
 Q2A = \path{2026-05-26_q2a-richer-family-mixture-or-nonparametric}
 (\texttt{6ae6ce53\ldots}; CLAIM).}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{fig_signed_error_by_hour.pdf}
+\caption{Saturday's $4\times$-weekday $\chi^{2}$ asymmetry,
+family-invariant in Q2A, is structural and visible at the level of
+signed forecast error by hour-of-delivery-day. Weekday error peaks
+near $+800~\mathrm{MW}$ at the midday plateau (HE9--HE12);
+Saturday's morning-ramp error reaches $\approx +1800~\mathrm{MW}$
+at HE8--HE9 and remains above $+800$ through evening; Sunday
+peaks largest at $\approx +1700~\mathrm{MW}$ at HE8--HE9, again
+sustained through the day. Both weekend day-types show the
+forecast running systematically high through the daytime
+window; weekday is broadly closer to balanced. The asymmetry is
+\emph{independent} of distributional family --- Q2A confirmed
+M3, M4, M5 are $\chi^{2}$-indistinguishable per day-type --- so
+the gap lives in the conditioning structure, not in the
+predictive-distribution family.}
+\label{fig:signed-error-by-hour}
+\end{figure}
+
 \paragraph{Q2B (2026-05-26): does the residual live in a
 same-$Q$ mechanism the framing has not yet absorbed?} Q2A bounded
 the family lever and the Saturday-vs-weekday asymmetry it
@@ -861,6 +881,25 @@ binding axis close the marginal-PIT gap?\footnote{Registry: P1 =
 body-SHA256 \texttt{5eb024b7\ldots}; no standalone result.yaml,
 verdict stamped in arbiter).}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{fig_bias_climatology.pdf}
+\caption{P1's per-stratum $\hat\alpha_L$ ranking
+(Saturday $0.65 >$ Sunday $0.49 >$ Weekday $0.30$) corresponds
+visually to the structure of the climatology bias
+$\mu_{m,h} - y$. Weekday is mostly negative with a mild midday
+lift to $\approx -250~\mathrm{MW}$; Saturday and Sunday carry
+positive morning-ramp biases reaching $+750~\mathrm{MW}$ and
+$+1100~\mathrm{MW}$ respectively. The day-type axis carries
+genuine localising signal that P1 measures as a non-Gaussian
+mixture fraction and that here is visible as a per-hour bias
+shape. The narrower question P1 leaves for Q1A and Q1B is
+whether refining the conditioning $\sigma$-algebra on the
+strongest-signal axis (\texttt{hour\_of\_week}) closes the
+gap at the marginal-PIT level.}
+\label{fig:bias-climatology}
+\end{figure}
+
 \paragraph{Q1A and Q1B (2026-05-27): does refining the
 $\sigma$-algebra on the localised axis close the gap?} P1 named
 \texttt{hour\_of\_week} as the binding axis. Q1A tested the
@@ -901,6 +940,29 @@ sampling variance?\footnote{Registry: Q1A =
 (\texttt{c1057bcd\ldots}; CLAIM); Q1B =
 \path{2026-05-27_q1b-z2-conditioning-second-axis}
 (\texttt{b3b1efa7\ldots}; CLAIM).}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{fig_q1b_per_cell_heatmap.pdf}
+\caption{The Q1B residual is concentrated in a single cell that
+P1's $\hat\alpha_L$ predicted. Per-cell $\chi^{2}$ contribution
+under Q1B's winning joint stratification $\sigma = (\text{day-type},
+Z_c, Z_2)$ with $Z_c$ the $8$-level \texttt{hour\_of\_week} bin
+and $Z_2$ the $4$-level \texttt{time\_of\_day} bin. The framed cell
+(\emph{saturday}, $Z_c = 6$ [Sat 07 -- Sun 03], $Z_2 = $ morning
+ramp) at $\chi^{2} = 967$ alone exceeds the pooled marginal
+$952.5$; this is exactly the stratum P1 named at $\hat\alpha_L =
+0.61$. Q1A's per-cell decomposition under the coarser
+$(\text{day-type}, Z_c)$ stratification put the Sat-$Z_c{=}6$ row
+at $\chi^{2} = 1634$; the joint $Z_2$ refinement here splits that
+$1634$ as morning ramp $967$ $>$ evening $400$ $>$ afternoon
+$328$, revealing genuine within-stratum heterogeneity that
+single-axis $\sigma$-algebra refinement cannot resolve. Light-grey
+cells are structurally impossible $(\text{day-type}, Z_c)$
+combinations (e.g., Saturday cannot fall in $Z_c \in \{0, 1, 2,
+3, 4\}$).}
+\label{fig:q1b-per-cell}
+\end{figure}
 
 \paragraph{Q1B$'$ (2026-05-29): where does the wide CI come
 from?} Q1B's wide CI on the cumulative reduction admits two
