@@ -1,72 +1,208 @@
-# Devil's-advocate counter-prediction — written SIMULTANEOUSLY with
-# phase_a.yaml, BEFORE any data is touched.
-#
-# Required by .claude/agents/devils-advocate.md. The counter-prediction
-# is itself testable; /audit arbiter grades both this and the
-# proponent's forecast. An adversary that is unfalsifiable (no numeric
-# commitment) is noise.
-
-schema: devils_advocate
-written_at: <ISO 8601>
-git_sha: <REQUIRED>
-git_clean: <REQUIRED>
-body_sha256: <REQUIRED — auto-filled>
-references:
-  - file: phase_a.yaml
-    body_sha256: <REQUIRED — hash of phase_a.yaml>
-
-# ------------------------------------------------------------------
-# Strongest argument against
-# ------------------------------------------------------------------
-
-strongest_argument: <REQUIRED — one paragraph; specific "fails if..."
-                                not vague "might not work">
-
-# Failure modes ranked by lab history. Cite memory files.
-specific_failure_modes:
-  - rank: 1
-    mode: <e.g. cosmetic-via-sigma-shrinkage>
-    memory_ref: <e.g. mitacs-clim-gap-nonstationary>
-    likelihood: <0-1>
-
-  - rank: 2
-    mode: <e.g. argmin-without-variance>
-    memory_ref: <e.g. mitacs-theta-rail-pinning>
-    likelihood: <0-1>
-
-  - rank: 3
-    mode: <e.g. diagnostic-reimplements-production>
-    memory_ref: <e.g. mitacs-dayanchor-seam>
-    likelihood: <0-1>
-
-severity: <REQUIRED — fatal | serious | manageable>
-# Fatal: the experiment cannot answer the question as posed.
-# Serious: the answer will be confounded; results need heavy caveat.
-# Manageable: there's risk but the experiment is still worth running.
-
-# ------------------------------------------------------------------
-# The counter-prediction
-# ------------------------------------------------------------------
-
+body_sha256: 6c3caa120583a8ca54f028b0cd0136c6816cfeb069f6d7435f84894c202a0c5a
+confidence: 0.68
 counter_prediction:
-  value: <REQUIRED — numeric, in same units as phase_a.metric>
-  units: <REQUIRED>
-  reasoning: <REQUIRED — one sentence>
-
-# ------------------------------------------------------------------
-# What would change my mind
-# ------------------------------------------------------------------
-
-what_would_change_my_mind:
-  - <REQUIRED — concrete numeric outcome that would force retraction
-                of this objection>
-  # E.g. "if the per-HE bias shape across direct h-step factors is
-  # genuinely flat (max |signed_err_HE| < 100 MW), I retract."
-
-# ------------------------------------------------------------------
-# Opportunity cost
-# ------------------------------------------------------------------
-
+  reasoning: better_chi2 lands in R-B1B around 948 (cumulative_chi2_improvement_above_Z_c ~ 4.5 chi^2, Q1A-comparable magnitude);
+    Z2_b wins the head-to-head at point estimate by ~9 chi^2 (capturing the overnight-vs-rest orthogonal signal without small-cell
+    EM variance) but chi2_diff CI straddles zero (NEAR-TIE per phase_a.metric rule). Joint S9+S10+S11+S12 establishes within-data
+    sigma-algebra enrichment is asymptotically bounded; time_of_day as P1's second-ranked axis with weaker prior support delivers
+    no more than the Q1A magnitude (0.18% of gap).
+  units: marginal PIT chi^2 (10-bin Pearson) - better_chi2 = min(chi2_Z2_b, chi2_Z2_c)
+  value: 948.0
+evidence_chain:
+- claim: Q1A's hour_of_week Z conditioning closes 0.18% of the gap (1.33 chi^2 of 725.84). Hour_of_week is P1's BINDING axis
+    at range 0.575 (lower CI 0.4475); time_of_day is SECOND-RANKED at range 0.485 (lower CI 0.385) - structurally weaker prior.
+  source: memory/mitacs-q1a-z-conditioning.md + memory/mitacs-p1-patra-sen-localization.md
+- claim: Joint S9+S10+S11+S12 = applied chi^2-side corroboration of identifiability obstruction; three within-data levers
+    (richer-family, mechanism ablation, hour_of_week stratification) all empirically bounded. Q1B is the fourth lever in the
+    same regime.
+  source: memory/mitacs-q2a-richer-family.md + mitacs-q2b-non-distributional.md + mitacs-q1a-z-conditioning.md
+- claim: time_of_day is a strictly coarser partition of within-day position than hour_of_week; Z_c's 8 bins already span time_of_day
+    strata, so per-(day_type, Z_c) M3 fits Q1A produced are already marginalizing over time_of_day within each cell. Z2's
+    orthogonal information above Z_c is bounded by the overnight-vs-rest contrast (alpha_L 0.1125 vs 0.475-0.598).
+  source: phase_a.yaml metric block + P1 arbiter time_of_day_axis_ranking
+- claim: saturday__bin6 contributes chi^2=1634 in Q1A (single cell exceeds pooled marginal 952.5 by 70%); P1 alpha_L 0.61
+    in this stratum. Splitting this cell four ways by Z2_c generates n~324 sub-cells (post-cutoff n~80-100) where mixture
+    EM has high small-sample variance.
+  source: memory/mitacs-q1a-z-conditioning.md per_cell decomposition + S9 family capacity
+- claim: 'Reduction curve: M0->M1 = 16x, M1->M3 = 1.44x, M3->M3+Z_c = 1.0014x. The asymptote is empirically confirmed by Q1A;
+    M3+Z_c+Z2 step is bounded above by the same asymptotic envelope. A 4.18x further reduction from 952.5 to 228 in ONE sigma-algebra-enrichment
+    step would invert the curve.'
+  source: memory/mitacs-q2a-richer-family.md + mitacs-q1a-z-conditioning.md
+- claim: Post-cutoff (weekday, Z_c=5, morning_ramp) cell at n=144 falls below MIN_CELL_SIZE=200 and pools to (weekday, Z_c=5)
+    parent per phase_a.metric. This is a 1-of-32-cell pool-fallback that shrinks Z2_c's effective refinement and tilts the
+    head-to-head slightly toward Z2_b on the granularity-vs-robustness tradeoff. Not decisive but a methodological tilt at
+    the margin.
+  source: phase_a.yaml threshold_derivations amendment_note + phase_a.metric pool fallback rule
+forecast:
+  better_chi2_ci95:
+  - 620.0
+  - 1340.0
+  better_chi2_point: 948.0
+  chi2_Z2_b_ci95:
+  - 620.0
+  - 1340.0
+  chi2_Z2_b_point: 948.0
+  chi2_Z2_c_ci95:
+  - 625.0
+  - 1360.0
+  chi2_Z2_c_point: 957.0
+  chi2_diff_ci95:
+  - -95.0
+  - 75.0
+  chi2_diff_point: -9.0
+  cumulative_chi2_improvement_above_Z_c_ci95:
+  - -100.0
+  - 100.0
+  cumulative_chi2_improvement_above_Z_c_point: 4.5
+  cumulative_chi2_improvement_above_Z_c_share_note: share = (Q1A_baseline - better_chi2) / (Q1A_baseline - R_A1B_cut) = (952.5167
+    - 948) / (952.5167 - 228) = 4.5 / 724.5167 ~ 0.62% of the remaining gap. Comparable in magnitude to Q1A's 0.18%-of-gap
+    reading; cumulative two-Z share (Q1A + Q1B) approximately (953.84 - 948) / (953.84 - 228) = 5.84 / 725.84 ~ 0.80% of the
+    original Q2A gap. Far short of the closure_rule's 0.80 share threshold for thread RESOLVED.
+  cumulative_chi2_improvement_above_Z_c_share_point: 0.0062
+  head_to_head_winner: Z2_b
+  head_to_head_winner_note: Z2_b wins at point estimate (~9 chi^2 margin) because it captures the dominant orthogonal signal
+    (overnight-vs-rest) without paying small-cell EM variance on the 4-level partition. The realized chi2_diff CI [-95, +75]
+    straddles zero by construction (paired SE ~50-60 chi^2 in Q1A's setting; expect similar or marginally larger for Q1B's
+    finer 3-tuple cells). Mechanical winner per better_chi2 = min rule is Z2_b; substantive head-to-head sub-finding should
+    record NO STATISTICALLY-DISCERNIBLE WINNER per the NEAR-TIE rule in phase_a.metric.
+  landslide_qualifier_predicted: false
+  near_tie_predicted: true
+  per_stratum_Z2_4level_chi2_point:
+    afternoon: 340.0
+    evening: 327.0
+    morning_ramp: 215.0
+    note: overnight is light per P1 alpha_L 0.1125 (within-cell mixture absorbs almost completely). morning_ramp is moderate
+      (P1 alpha_L 0.5825 but partially overlaps weekday cold strata at h ~ 7-11). afternoon is the heaviest per-stratum contribution
+      (P1 alpha_L 0.5975, highest of the four time_of_day strata; overlaps saturday__z5/z6 hot zone at h ~ 12-17). evening
+      is comparable to afternoon (P1 alpha_L 0.475, weekend evening hours overlap saturday__z6 hot zone). Sum = 957 approximate
+      (consistent with chi2_Z2_c forecast point; per-stratum decomposition is the Z2_c partition since Z2_b's binary partition
+      only has two strata).
+    overnight: 75.0
+  per_stratum_Z2_binary_chi2_point:
+    daytime: 873.0
+    note: Z2_b's binary partition aggregates morning_ramp + afternoon + evening into one 'daytime' stratum. Overnight unchanged
+      at ~75 (sigma-algebra captures the cleanly Gaussian overnight stratum identically to Z2_c). Daytime ~873 absorbs the
+      three daytime sub-strata without the within-daytime variance penalty Z2_c pays. Sum = 948 approximate (consistent with
+      chi2_Z2_b forecast point).
+    overnight: 75.0
+git_clean: true
+git_sha: a606ef914b6f7c96befd8a14ae64169a84fd5ec0
 opportunity_cost:
-  alternative: <what else could be done with this time>
-  ranking: <does the experiment beat the alternative — yes | no | unclear>
+  alternative: 'Skip Q1B and amend the thread to reopen Q1C (temperature/exogenous Z), or open a new thread directly targeting
+    auxiliary information beyond the time index per framework programme disintegration_diagnostic.md. Joint S9+S10+S11+S12
+    already establishes within-data levers are bounded; Q1B is forecast to corroborate that rather than refute it. Estimated
+    cost of Q1C scaffolding: ECCC ingest + temperature-Z construction + per-(day_type, temperature_bin) M3 refits, ~3-5 analyst-days.
+    Estimated payoff: temperature is the most-cited candidate Z per mitacs-clim-gap-nonstationary; clim-gap is hour-flat and
+    weeks-flat (orthogonal to hour_of_week and time_of_day, by construction), so introducing exogenous Z is the framework-prescribed
+    resolution path.'
+  ranking: unclear
+  ranking_note: Q1B is registered, cheap to run (re-uses Q1A's library + propagation seed; ~minutes of wall-clock), and provides
+    an additional registered chi^2-side data point on the identifiability obstruction whether it fires R-A1B (refutes me)
+    or R-B1B (corroborates me). The pre-registration discipline value of running Q1B is independent of the expected outcome
+    - both my and the proponent's positions get graded, and the workflow produces another calibration data point. If R-B1B
+    fires as I forecast, the thread trajectory pre-flag (EXHAUSTED-UNRESOLVED) is registered and the coordinator decides thread
+    amendment vs new thread on the temperature arm. Q1B is therefore worth running EVEN IF the substantive outcome is forecast
+    to be null - the workflow value is registering a within-data lever's null result before pivoting to exogenous Z.
+outcome: R-B1B
+rationale_summary: Joint S9+S10+S11+S12 has already established that within-data sigma-algebra-enrichment levers are empirically
+  bounded at the ~0.18%-of-gap scale. Q1A's hour_of_week Z (P1 range 0.575, the BINDING axis) shaved 1.33 chi^2 out of a 725.84
+  gap; Q1B's time_of_day Z (P1 range 0.485, the SECOND-ranked axis, with WEAKER prior support) is structurally a coarser cut
+  of within-day position that overlaps the hour_of_week partition already absorbed by the Z_c carryforward. Net cumulative
+  improvement above Z_c should sit in the 1-5 chi^2 range, dominated by Z2's overnight-vs-rest contrast (the one piece of
+  orthogonal information P1 isolated; alpha_L overnight 0.1125 vs daytime 0.475-0.598). Z2_b (binary, overnight indicator)
+  wins the head-to-head at the point estimate by ~5-15 chi^2 because it captures the dominant orthogonal signal without paying
+  small-cell EM variance on the 4-level partition (the (weekday, Z_c=5, morning_ramp) n=144 pool-fallback is the methodological
+  tilt). The realized chi2_diff CI straddles zero (NEAR-TIE), so the head-to-head is mechanically Z2_b but substantively no-ranking;
+  outcome is R-B1B at the high end of the band, ~947-952 cumulative chi^2.
+references:
+- body_sha256: 0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10
+  file: phase_a.yaml
+  relation: phase_a
+- body_sha256: 6b49d9136437c1905c6a48f4f8bf6511feeafc4ba7bc01124be6efb14c53ed7c
+  file: ../2026-05-27_q1a-z-conditioning-strongest-axis/arbiter.yaml
+  relation: predecessor_node_arbiter
+- body_sha256: 5eb024b72dbeb0148000fe3f5e44da316b00685a0d5b15dde8df2b66d0218067
+  file: ../2026-05-27_p1-patra-sen-per-stratum-localization/arbiter.yaml
+  relation: parent_node_arbiter
+- body_sha256: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
+  file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  relation: thread
+schema: devils_advocate
+severity: manageable
+specific_failure_modes:
+- likelihood: 0.7
+  memory_ref: mitacs-p1-patra-sen-localization
+  mode: 'Structural redundancy: time_of_day is a coarser cut of within-day position than hour_of_week; Z_c''s 8 bins already
+    span time_of_day boundaries, so per-(day_type, Z_c) mixture fits Q1A produced are already marginalizing over time_of_day
+    strata within each cell. Z2''s additive sigma-algebra content above Z_c is bounded by the orthogonal piece (overnight-vs-rest
+    at P1 alpha_L 0.1125 vs 0.475-0.598).'
+  rank: 1
+- likelihood: 0.65
+  memory_ref: mitacs-q2a-richer-family
+  mode: 'Within-cell family capacity ceiling: S9 established M3=M4=M5 chi^2-indistinguishable in stratified fits. The hot
+    zone (saturday__bin6 at chi^2=1634 per Q1A per-cell) is where mixture-2-Gaussian is at capacity; splitting that cell four
+    ways by Z2_c generates n~324 sub-cells where mixture-fit parameter variance carries through the paired-bootstrap CI rather
+    than absorbing the residual law''s within-cell tail heterogeneity.'
+  rank: 2
+- likelihood: 0.45
+  memory_ref: mitacs-q1a-z-conditioning
+  mode: 'Small-cell EM variance: the (weekday, Z_c=5, morning_ramp) n=144 post-cutoff cell pools to its (day_type, Z_c)=(weekday,
+    5) parent, making Z2_c''s effective refinement 31 cells of 32. The pool-fallback is methodologically clean but it does
+    shrink Z2_c''s advantage over Z2_b on the granularity-vs-robustness tradeoff. Not decisive (1 cell of 32) but a tilt at
+    the margin.'
+  rank: 3
+- likelihood: 0.85
+  memory_ref: mitacs-q2b-non-distributional
+  mode: 'Identifiability obstruction binding from the chi^2 side: joint S9+S10+S11+S12 = applied corroboration of disintegration_diagnostic.md
+    (structured-noise vs noisy-structure indistinguishable from kappa_Q alone). Q1B is the fourth within-data lever in the
+    sequence; resolution requires auxiliary information beyond the time index. Cumulative chi^2 stays above R-A1B = 228 by
+    orders of magnitude.'
+  rank: 4
+strongest_argument: The chi^2-side identifiability obstruction is now applied-corroborated at three levels (S9 distributional
+  class, S10 mechanism ablation, S11/S12 hour_of_week stratification); Q1B is the fourth within-data lever in the sequence
+  and faces a structural ceiling on what time-indexed Z's can deliver. time_of_day is a STRICTLY COARSER partition of within-day
+  position than hour_of_week. Q1A's Z_c (8-level hour_of_week) already crosses morning_ramp / afternoon / evening / overnight
+  boundaries within each bin; the per-cell mixture-2-Gaussian fits Q1A produced are already marginalizing over time_of_day
+  strata within each (day_type, Z_c) cell. Z2's refinement helps only to the extent that within-(day_type, Z_c)-cell non-Gaussian
+  mass is heterogeneous across time_of_day strata at a magnitude exceeding the mixture-2-Gaussian family's capacity to absorb.
+  The S9 evidence (M3=M4=M5 chi^2-indistinguishable) is that distributional-family capacity is BOUNDED within strata. Per
+  Q1A's per-cell decomposition, saturday__bin6 at chi^2=1634 (P1 alpha_L 0.61) is the dominant mass; splitting that cell by
+  time_of_day_4 generates four sub-cells (n approx 324 each in pre-cutoff; ~80-100 each in post-cutoff) where the EM-effective
+  draw is marginal and mixture parameter estimates carry small-sample variance through the paired-bootstrap CI. The one piece
+  of genuinely orthogonal information time_of_day adds over hour_of_week is the overnight-vs-rest contrast (P1 ranked overnight
+  0.1125 vs daytime 0.475-0.598); Z2_b operationalizes exactly that contrast without paying granularity variance. The Z2_b
+  lever should deliver 1-5 chi^2 of reduction on top of Z_c (Q1A-comparable magnitude); Z2_c at four levels reproduces most
+  of Z2_b's gain (the overnight split dominates the daytime sub-splits per P1's clustering) but pays small-cell variance in
+  the (weekday, Z_c=5, morning_ramp) pool-fallback footprint. Cumulative chi^2 lands around 947-952, comfortably in R-B1B
+  at the high end of the band.
+thread:
+  node_id: Q1B
+  parent_branch: R-A
+  thread_body_sha256: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
+  thread_topic: resolution-paths-thread
+topic: q1b-z2-conditioning-second-axis
+what_would_change_my_mind:
+- condition: better_chi2 < 400 (cumulative_chi2_improvement_above_Z_c > 552 chi^2)
+  interpretation: 'Z2 closes more than half the remaining gap on top of Z_c. This would falsify the within-data-bounded prior:
+    the joint S9+S10+S11+S12 reading would be wrong and within-data sigma-algebra enrichment is not asymptotically bounded.
+    My structural near-redundancy argument is wrong; time_of_day captures information orthogonal to hour_of_week at a magnitude
+    that the family-capacity ceiling cannot bind. Resolution-paths thread RESOLVED on the multi-Z path; my reading of joint
+    S9+S10+S11+S12 as ''within-data exhausted'' is empirically refuted.'
+- condition: better_chi2 <= 228 (R-A1B fires at point); CI lower bound also <= 228 (landslide R-A1B)
+  interpretation: 'The thread closure_rule fires; the multi-Z hypothesis (cumulative Z_c + Z2 closes the marginal gap) is
+    confirmed. My R-B1B forecast is decisively falsified; the proponent wins. This would be a stronger refutation of the joint-S9+S10+S11+S12
+    reading than condition 1: not only is within-data lever non-zero, it actually closes the gap with two Z''s combined.'
+- condition: '|chi2_diff| > 100 with paired-bootstrap 95% CI not crossing zero on either side (decisive head-to-head winner)'
+  interpretation: 'The head-to-head is NOT a NEAR-TIE; one of Z2_b or Z2_c is statistically discriminated as better. My NEAR-TIE
+    forecast is falsified; binary-vs-4-level is empirically discriminable on the verdict-metric. Direction matters: if Z2_c
+    wins decisively, my granularity-overfits-small-cells argument is wrong; if Z2_b wins decisively, the binary captures the
+    entire signal cleanly and my central call is direction-correct but magnitude-wrong.'
+- condition: cumulative_chi2_improvement_above_Z_c > 50 chi^2 (more than 10x my point forecast of 4.5)
+  interpretation: 'Z2 delivers meaningfully above the 1-5 chi^2 range I forecast. R-B1B may still fire mechanically but the
+    within-bucket point forecast is decisively wrong. This would update my reduction-curve-asymptote prior: the asymptote
+    is not where I placed it; time_of_day adds substantively above hour_of_week rather than the bounded ~Q1A-magnitude I forecast.'
+- condition: per_stratum_Z2_4level overnight chi^2 > 200 (overnight stratum is NOT Gaussian-light)
+  interpretation: My P1-overnight-is-Gaussian-light premise is wrong; overnight does not absorb into the mixture-fit cleanly.
+    This would refute the 'one orthogonal piece of information' framing (overnight-vs-rest as the binding contrast); the structural
+    argument for Z2_b winning the head-to-head needs revision.
+written_at: '2026-05-28T11:15:00-07:00'

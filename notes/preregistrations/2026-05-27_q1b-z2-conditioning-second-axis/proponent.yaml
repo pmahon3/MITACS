@@ -1,52 +1,214 @@
-# Proponent forecast — written SIMULTANEOUSLY with phase_a.yaml.
-#
-# The analyst's own numeric prediction of what the experiment will
-# show, BEFORE any data is touched. Kahneman's "what would change my
-# mind" rule operationalized. Without it, post-hoc rationalisation is
-# silent.
-#
-# Graded by /audit arbiter against devils_advocate.yaml after the
-# result is in.
-
-schema: proponent
-written_at: <ISO 8601>
-git_sha: <REQUIRED>
-git_clean: <REQUIRED>
-body_sha256: <REQUIRED — auto-filled>
-references:
-  - file: phase_a.yaml
-    body_sha256: <REQUIRED — hash of phase_a.yaml>
-
-# ------------------------------------------------------------------
-# The forecast
-# ------------------------------------------------------------------
-
+body_sha256: e5bf1f55c3fa574d416b1cf036303942ad8430ab3bb399210a69304676bb3c12
+confidence: 0.4
+confidence_note: Lower confidence than Q1A proponent's 0.55 to honor the Q1A arbiter's
+  explicit calibration warning that Patra-Sen-localization-implies-chi^2-closure forecasts
+  in the alpha_L range [0.5, 0.7] empirically correspond to chi^2 reductions of 0-2%,
+  not 50-95%. The proponent argues R-A1B on a different structural mechanism than
+  Q1A's premise (within-cell orthogonality / M3 family-capacity relief from finer
+  cell partition, not localization-magnitude); the calibration warning is acknowledged
+  and the confidence is tempered, not the position.
+evidence_chain:
+- claim: P1 R-A landslide identified time_of_day as the second-strongest axis at range
+    0.485 [0.385, 0.578] (P1 arbiter); within-day structure overnight 0.1125 vs morning_ramp
+    0.5825 vs afternoon 0.5975 vs evening 0.475 is a clean overnight-vs-rest contrast
+    with a 5x span across day-time.
+  source: memory/mitacs-p1-patra-sen-localization.md
+- claim: 'Q1A per-cell decomposition: saturday__z6 = 1634 chi^2 (single cell exceeds
+    pooled marginal 952.5 by 70%); mixture w2 = 0.20, scales s1 = 0.096 / s2 = 0.215
+    - the M3 2-component family is at capacity within this 21-hour-wide cell.'
+  source: memory/mitacs-q1a-z-conditioning.md
+- claim: 'saturday__z6 spans Sat 07:00 - Sun 03:00 (effective overlap), which crosses
+    all 4 P1 time_of_day strata: Sat 07:00-11:59 (morning_ramp), Sat 12:00-17:59 (afternoon),
+    Sat 18:00-23:59 (evening), Sun 00:00-03:00 (overnight). M3''s 2 mixture components
+    are insufficient to fit this 4-modal within-cell tail structure.'
+  source: experiment/p1_patra_sen/__main__.py:81-96 (_time_of_day_label production
+    binning) + Q1A arbiter saturday__z6 cell description.
+- claim: 'Z2_c partition refinement: saturday__z6__overnight (P1 alpha_L 0.1125 cleanly
+    Gaussian; n predicted ~150 post-cutoff but pre-cutoff library well above MIN_CELL_SIZE=200),
+    saturday__z6__morning_ramp / afternoon / evening (heavy-tailed but within-cell
+    homogeneous - all 3 strata have similar P1 alpha_L 0.48-0.60 within-stratum, so
+    an M3 fit within each should not be at family capacity).'
+  source: phase_a.yaml threshold_derivations + P1 arbiter time_of_day_axis_ranking.
+- claim: 'Q1A Z conditioning lever reduced chi^2 by 0.18% of gap (1.33 of 725.84 chi^2
+    units); proponent''s premise here is that this floor reflected an exhausted-within-cell-multimodality
+    structure, NOT an exhausted distributional family per se. The Q1B finer partition
+    tests this directly: if the M3 family genuinely cannot detect within-stratum non-Gaussianity
+    (the DA/EXHAUSTED-UNRESOLVED reading), Q1B''s reduction will also asymptote at
+    <2% of gap. If the family was constrained by within-cell heterogeneity (proponent''s
+    reading), Q1B''s reduction can be much larger.'
+  source: memory/mitacs-q1a-z-conditioning.md + memory/mitacs-q2a-richer-family.md
+    (reduction curve).
+- claim: 'Z2_c (4-level) is non-redundant with Z_c (8-level hour_of_week): Z_c separates
+    DAY-of-week with bins spanning ~21 hours each (week-cyclical); Z2_c separates
+    HOUR-of-day with bins spanning 5-7 hours each (day-cyclical). The cartesian product
+    (Z_c x Z2_c) gives 32 cells partitioning the 168 weekly hours into ~5.25-hour
+    blocks indexed by (week_phase, day_phase). This is a genuine refinement; (Z_c,
+    Z2_c) isolates Mon-overnight from Mon-day in a way neither alone does.'
+  source: phase_a.yaml metric + Q1A arbiter z_lever_marginal discussion.
+- claim: 'Empirical pre-data cell counts (phase_a threshold_derivations as amended
+    for P1 production binning): pre-cutoff (day_type x Z_c x Z2_c) 32 non-empty cells,
+    min 2364 / max 8281 / median 7092 - pool-fallback never fires on fit side. Post-cutoff
+    (day_type x Z_c x Z2_c) 32 non-empty cells, min 144 / max 504; ONE post-cutoff
+    cell (weekday, Z_c=5, morning_ramp) at n=144 pools to its (day_type, Z_c) parent.
+    This is a small evaluation-side footprint and the proponent does NOT bet on it
+    affecting the marginal chi^2 reading.'
+  source: phase_a.yaml amendment_note + threshold_derivations.
 forecast:
-  value: <REQUIRED — numeric, in same units as phase_a.metric>
-  units: <REQUIRED — e.g. MW, percentage points, dimensionless>
-  reasoning: <REQUIRED — one sentence; why this number, not another>
-
-# Optional: a CI on the forecast itself. If the proponent is highly
-# uncertain, this widens the SE in the arbiter's distance metric.
-forecast_ci:
-  width: <optional — e.g. 95%>
-  low: <numeric>
-  high: <numeric>
-
-# ------------------------------------------------------------------
-# What would change the analyst's mind
-# ------------------------------------------------------------------
-
+  better_chi2_ci95:
+  - 90.0
+  - 450.0
+  better_chi2_point: 180.0
+  chi2_Z2_b_ci95:
+  - 180.0
+  - 620.0
+  chi2_Z2_b_point: 340.0
+  chi2_Z2_c_ci95:
+  - 90.0
+  - 450.0
+  chi2_Z2_c_point: 180.0
+  chi2_diff_ci95:
+  - 20.0
+  - 320.0
+  chi2_diff_point: 160.0
+  cumulative_chi2_improvement_above_Z_c_ci95:
+  - 502.5
+  - 862.5
+  cumulative_chi2_improvement_above_Z_c_note: cumulative_chi2_improvement_above_Z_c
+    = 952.5167 - better_chi2. Point forecast 772.5 (= 952.5167 - 180) corresponds
+    to closing 772.5 / 724.5167 = 1.07 = ~107% of the Q1A-leftover gap; the share
+    exceeds 1.0 because better_chi2 < R-A1B_cut. The thread's closure_rule (share
+    > 0.80 => RESOLVED on multi-Z path) is predicted to fire at point and at the lower
+    CI bound; the upper CI bound (502.5 / 724.5167 = 0.69) does NOT fire the closure_rule,
+    hence the no-landslide qualifier.
+  cumulative_chi2_improvement_above_Z_c_point: 772.5
+  head_to_head_margin_note: Z2_c (4-level categorical) is predicted to win by a non-trivial
+    margin because the within-day alpha_L gradient P1 measured (overnight 0.1125 essentially
+    Gaussian vs afternoon 0.5975 / morning_ramp 0.5825 / evening 0.475 heavy-tailed)
+    is a structured 5x span across the day; the binary Z2_b collapses the three daytime/evening
+    strata together and discards that gradient. The proponent's near-orthogonality
+    argument hinges on the 4-level partition isolating overnight cleanly AND distinguishing
+    morning_ramp from afternoon (P1 ranks them 0.5825 vs 0.5975 - close but the cells
+    are large enough that the M3 fits should differ). chi2_diff CI excludes zero on
+    the positive (Z2_c-favored) side at 95%.
+  head_to_head_margin_point: 160.0
+  head_to_head_winner: Z2_c
+  landslide_R_A1B_note: Point clears 228 in the central forecast; lower CI bound (90)
+    also clears 228. But the predicted CI is WIDE (~360 chi^2 units wide) to honor
+    the Q1A calibration warning - the proponent does NOT claim landslide confidence.
+    Mechanical R-A1B is the registered call; landslide is predicted only if better_chi2_ci95[1]
+    (upper bound) also lands below 228, which the central forecast does NOT predict.
+  landslide_R_A1B_predicted: false
+  per_stratum_chi2_contribution_Z2_c_note: These are PER-STRATUM POOLED chi^2 contributions
+    (pooled over day_type and Z_c WITHIN the Z2_c stratum), summing approximately
+    to the marginal better_chi2 point estimate 180. The morning_ramp and afternoon
+    strata are predicted to be the dominant contributors per P1's alpha_L ranking
+    (morning_ramp 0.5825, afternoon 0.5975 - both within 0.025 of P1's hour_of_week
+    binding bin 6 at 0.61). The overnight stratum (P1 0.1125, essentially Gaussian)
+    is predicted to fit near-perfectly per cell and contribute very little. The evening
+    stratum (P1 0.475) intermediate. If morning_ramp + afternoon are NOT the dominant
+    contributors, the proponent's structural argument is falsified even if the marginal
+    R-A1B fires.
+  per_stratum_chi2_contribution_Z2_c_point:
+    afternoon: 65.0
+    evening: 40.0
+    morning_ramp: 60.0
+    overnight: 15.0
+  reproduction_check_1_predicted: chi^2 under sigma=(day_type) alone reproduces Q2A's
+    settled 953.84 within paired-bootstrap noise (|diff| < 5 chi^2 units; Q1A reproduced
+    to 4 decimal places at 0.003 |diff|, so the prior on tight reproduction is strong).
+  reproduction_check_2_predicted: chi^2 under sigma=(day_type, Z_c) alone (no Z2)
+    reproduces Q1A's settled 952.5167 within paired-bootstrap noise (|diff| < 5 chi^2
+    units). This is the cumulative-baseline anchor; if it drifts, the Z2 reduction
+    measurement is incoherent.
+git_clean: false
+git_sha: a606ef914b6f7c96befd8a14ae64169a84fd5ec0
+outcome: R-A1B
+rationale_summary: 'The proponent argues R-A1B fires via WITHIN-CELL ORTHOGONALITY,
+  not via P1 localization magnitude. Q1A''s per-cell decomposition showed saturday__z6
+  (Q1A''s hottest hour_of_week cell) contributed chi^2 = 1634 alone, with mixture-2-Gaussian
+  tail weight w2 = 0.20 and the family at capacity. The proponent''s claim: Z_c bins
+  are ~21 hours wide and mix overnight/morning_ramp/afternoon/evening WITHIN a single
+  cell. M3 has only 2 mixture components and cannot fit a 4-modal within-cell tail
+  structure; saturday__z6 contains all 4 P1 time_of_day strata (overnight near-Gaussian
+  + 3 heavy-tailed daytime/evening strata) compressed into a 2-component fit. Z2_c
+  splits saturday__z6 into 4 sub-cells: saturday__z6__overnight (M3 fits a near-Gaussian,
+  cleanly), saturday__z6__morning_ramp / afternoon / evening (M3 fits 2-component
+  heavy-tailed in each, with within-sub-cell homogeneity that the marginal saturday__z6
+  lacked). The chi^2 reduction is concentrated EXACTLY where Q1A''s hot cells lived;
+  the family capacity is RELIEVED by the finer partition, not exhausted. The non-redundancy
+  with Q_c is structural: hour_of_week separates Mon-day from Sat-day but lumps Mon-overnight
+  with Mon-day; (Z_c, Z2_c) joint isolates Mon-overnight, Sat-morning_ramp, Sun-afternoon
+  as distinct cells where the non-Gaussian mass is plausibly distributed differently.
+  Z2_c wins over Z2_b because the binary collapse destroys the morning_ramp/afternoon/evening
+  differentiation (P1 alpha_L 0.5825 / 0.5975 / 0.475 are close in magnitude but the
+  sub-cells differ in n and in latent tail shape). The Q1A calibration warning is
+  acknowledged: the proponent does NOT claim a tight Q1A-style CI; the CI is widened
+  to honor the warning. Confidence 0.40.'
+references:
+- body_sha256: 0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10
+  file: phase_a.yaml
+  relation: phase_a
+- body_sha256: 6b49d9136437c1905c6a48f4f8bf6511feeafc4ba7bc01124be6efb14c53ed7c
+  file: ../2026-05-27_q1a-z-conditioning-strongest-axis/arbiter.yaml
+  relation: predecessor_node_arbiter
+- body_sha256: 5eb024b72dbeb0148000fe3f5e44da316b00685a0d5b15dde8df2b66d0218067
+  file: ../2026-05-27_p1-patra-sen-per-stratum-localization/arbiter.yaml
+  relation: parent_node_arbiter
+schema: proponent
+thread:
+  node_id: Q1B
+  parent_branch: R-A
+  thread_body_sha256: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
+  thread_topic: resolution-paths-thread
+topic: q1b-z2-conditioning-second-axis
 what_would_change_my_mind:
-  - <REQUIRED — concrete numeric outcome that would force a retraction>
-  # E.g. "if MAE_mw exceeds 720, I retract the claim that direct h-step
-  # factor estimation flattens the per-HE bias shape."
-
-# ------------------------------------------------------------------
-# Confidence
-# ------------------------------------------------------------------
-
-confidence: <REQUIRED — 0-1, the analyst's subjective probability that
-                       the forecast lands within the corroboration region>
-# This is recorded for calibration tracking across topics; not used by
-# the arbiter directly.
+- condition: 'Reproduction check #2 (sigma=(day_type, Z_c) alone reproduces Q1A''s
+    952.5167) drifts by more than paired-bootstrap noise (|diff| > 5 chi^2 units).'
+  interpretation: The cumulative-baseline anchor is incoherent; the Z2 reduction measurement
+    is not directly comparable to Q1A's settled chi^2. The R-A1B reading would be
+    re-interpreted under the new baseline. If reproduction reads ~10% high (say 1050),
+    the proponent's point forecast shifts to ~250-300 and R-A1B becomes the borderline
+    mechanical call rather than the central prediction.
+- condition: better_chi2 > 600 (clear non-closure, halfway down the R-B1B band).
+  interpretation: The proponent's within-cell orthogonality premise is falsified.
+    Z2 is informative on P1's localization metric but does not deliver chi^2 closure
+    on the M3 family lever; the DA/EXHAUSTED-UNRESOLVED reading is correct. The within-data
+    sigma-algebra enrichment is empirically bounded at ~0.18%-of-gap order even with
+    a second axis stacked on top; resolution requires exogenous Z (temperature) or
+    a metric-side reframe (P2 calibration).
+- condition: chi2_diff CI crosses zero (head-to-head NEAR-TIE).
+  interpretation: The within-day alpha_L gradient (overnight vs daytime/evening) that
+    the proponent bet on does NOT translate to chi^2 differentiation between Z2_b
+    (binary) and Z2_c (4-level). The binary's collapse of morning_ramp/afternoon/evening
+    does NOT cost chi^2 because the within-stratum tail structures are similar enough
+    that M3 fits absorb them comparably. Parsimony would favor Z2_b in this case (same
+    break-tie convention Q1A used). The proponent would update toward 'Z2 is helpful
+    but the binary captures most of the signal' and lose ranking confidence on the
+    head-to-head.
+- condition: Per-stratum (Z2_c) chi^2 decomposition does NOT show morning_ramp + afternoon
+    as dominant contributors (e.g., evening dominates, or overnight contributes >50).
+  interpretation: The proponent's structural argument from P1's within-day alpha_L
+    ranking is empirically refuted. If overnight contributes much chi^2, the near-Gaussian
+    P1 reading was a per-stratum-pooled artifact, not a structural fact. If evening
+    dominates while morning_ramp/afternoon don't, the within-day signal is in evening's
+    tail (P1 alpha_L 0.475 < morning_ramp/afternoon) and the within-cell orthogonality
+    argument is wrong about which sub-cells are at capacity. R-A1B may still fire
+    mechanically but the substantive picture is unforecast.
+- condition: Pooling-fallback fires on >= 3 cells in the pre-cutoff fit side (not
+    just the post-cutoff (weekday, Z_c=5, morning_ramp) cell).
+  interpretation: Phase_a threshold_derivations says NEVER on the fit side. If the
+    bootstrap resampling drops multiple cells below MIN_CELL_SIZE=200, the per-stratum
+    M3 fits in the affected cells collapse to (day_type, Z_c) parent (Q1A's cell)
+    and undo most of Q1B's added partition. chi^2 would drift toward Q1A's 952.5167
+    and R-A1B firing becomes implausible. The proponent's prior on stable fit-side
+    cell counts is tight given the median 7092 / min 2364 in the deterministic pre-cutoff
+    library, but bootstrap drops are random.
+- condition: Per-cell mixture weights w2 stay above 0.30 in the predicted-dominant
+    sub-cells (saturday__z6__morning_ramp, saturday__z6__afternoon, sunday__z6/z7__morning_ramp/afternoon).
+  interpretation: If even after the finer partition the mixture's 'tail' component
+    is the majority within sub-cells, the 2-component centred-Gaussian family is itself
+    misspecified at the cell level - the within-cell tail structure is not 1-component-heavy
+    + 1-component-tail but something the family can't represent (e.g. multi-modal,
+    or skewed). chi^2 would be expected in R-B1B not R-A1B and the M4 (mixture-3-Gaussian)
+    refit becomes the natural follow-up, not closure.
+written_at: '2026-05-28T04:05:00-07:00'
