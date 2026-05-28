@@ -1,0 +1,237 @@
+body_sha256: 38ad4ce0e47f35e7e745205306e3d839148f1d8251c9fae8e2ed76476d1981dd
+confidence: 0.55
+confidence_note: 'The 0.55 reflects an asymmetric posterior: high confidence the CI narrows somewhat under
+  N=400 (SMC SE strictly scales as 1/sqrt(N), so any non-zero V_smc share yields some tightening), and
+  lower confidence that the share is high enough (V_smc/V_total >= 0.875) for the realized width to clear
+  the R-A1B'' cut at 357.27 chi^2. The cut is the strong-form discriminator (SMC noise DOMINATES, not
+  merely CONTRIBUTES), and the precise V_smc share is the empirical question Q1B'' is measuring. The proponent
+  argues the share is at the upper end of a defensible range; the DA argues mid-range. Calibration deference
+  to the Q1A arbiter''s standing warning on proponent over-confidence is honored: the central forecast
+  is on the discriminator cut, the CI95 [290, 395] straddles the R-A1B''/R-B1B'' boundary at 357.27, and
+  the point-shift sub-criterion is forecast well inside the 50 chi^2 envelope rather than at the edge.'
+evidence_chain:
+- claim: SMC sampling variance scales as 1/N (central limit on the M-particle ensemble mean of the per-cell
+    propagated kernel). Doubling N halves V_smc exactly under asymptotic conditions. Total CI95 width
+    on a Gaussian-pivot statistic scales as sqrt(V_total); under V_total = V_smc + V_other with V_smc
+    -> V_smc/2 and V_other held constant, the width ratio is sqrt(1 - 0.5*s) where s = V_smc/V_total at
+    N=200. For the realized width to clear the R-A1B' cut at 357.27 chi^2 (75% of 476.358), s >= 0.875.
+    The proponent argues s ~ 0.99 (point), CI95 on s ~ [0.65, 1.0].
+  source: "phase_a.yaml threshold_derivations.ci_width_cuts (R-A1B' algebra); mathematical SE-scaling\
+    \ argument standard in SMC literature (Doucet & Johansen 2009 \xA73)."
+- claim: 'Q1B''s per-fit CI shape is consistent with within-pair (SMC-dominated) variance: chi2_Z2_c_ci95
+    width = 465.6 chi^2 ([479.78, 945.41]); better_chi2_ci95 width = 476.36 chi^2 ([468.09, 944.45]);
+    chi2_diff_ci95 width = 177.7 chi^2 ([-53.19, +124.47]) with paired SE = 44.71. The paired structure
+    (within-pair SE much smaller than between-pair total) shows the within-pair variance contributes substantially
+    to total CI width; the within-pair variance is dominated by SMC particle-level resampling within each
+    paired-day bootstrap iteration (the bootstrap re-fits the mixture parameters per resample then re-runs
+    SMC, so each resample combines fit-side and SMC-side noise; the fit-side is deterministic given the
+    resampled rows because EM converges to the same optimum, so the within-resample noise IS SMC noise).'
+  source: ../2026-05-27_q1b-z2-conditioning-second-axis/result.yaml primary_result chi2_Z2_c_ci95, better_chi2_ci95,
+    chi2_diff_ci95; phase_a.yaml ci_method.details.
+- claim: Eval-window noise (the 12,000-row post-cutoff window + 1000-resample paired-day bootstrap) is
+    already well-resolved at N=200. The post-cutoff window is fixed by data availability and cannot be
+    enlarged by changing SMC particle count. If eval-window-noise dominated the CI width at N=200, doubling
+    N would have minimal effect on the CI; the proponent's prediction is the opposite (large narrowing).
+    The discriminating empirical question is exactly which side of V_smc/V_total = 0.875 the truth sits,
+    and the proponent argues it sits well above (s ~ 0.99 point).
+  source: phase_a.yaml hypothesis.counter (DA stance phrased for contrast); phase_a.yaml data.partition.test
+    (12,000-row post-cutoff window).
+- claim: 'Per-cell decomposition reinforces SMC dominance at the cell level. Q1B''s largest per-cell contributions:
+    saturday__zc6__zr1 (morning_ramp) at chi^2 967 with n_rows=360 / library n=5910; sunday__zc7__zr1
+    at 317 with n_rows=355 / library n=5915; saturday__zc6__zr3 (evening) at 400 with n_rows=504 / library
+    n=8274. Library counts are 5,910 - 8,281: large enough that mixture-2-Gaussian parameter estimates
+    from EM are well-determined (parameter SE ~ 1/sqrt(n_library) ~ 0.013 on a scale of 0.1; the EM optimum
+    is essentially deterministic given the resampled rows). The residual per-cell chi^2 variance is from
+    SMC propagation: at N=200 per propagation, the empirical particle CDF has SE ~ 1/sqrt(200) ~ 0.071
+    on the [0,1] PIT; at N=400 this halves to 0.035, biting directly into the per-cell chi^2 variance.'
+  source: ../2026-05-27_q1b-z2-conditioning-second-axis/result.yaml secondary_results per_cell_chi2_contribution_Z2_c,
+    per_cell_mixture_params_Z2_c.
+- claim: 'Point-shift forecast: SMC point bias scales as 1/N (vs the 1/sqrt(N) scaling of SMC variance).
+    Q1B''s realized better_chi2_Z2_c = 662.223. At N=200 the SMC-induced point bias contribution is ~
+    C/200 for some constant C; at N=400 it is ~ C/400. The point shift from N=200 to N=400 is therefore
+    the difference, ~ C/400, half the N=200 bias. Empirically at this scale (Q1B''s 662.223 point with
+    paired-bootstrap SE on the point ~ 22 chi^2 / sqrt(1000) ~ 0.7 -- so the point estimator''s sampling
+    SE is small; SMC contribution to point bias is bounded above by ~ paired SE on the bootstrap estimator
+    ~ 22 chi^2 at the per-resample level, and the residual after N=200 -> N=400 doubling is half of that
+    ~ 11 chi^2). Proponent forecast 15 chi^2 (point), CI [2, 38].'
+  source: "phase_a.yaml threshold_derivations.point_stability_threshold; standard SMC bias-variance decomposition\
+    \ (Crisan & Doucet 2002 \xA74)."
+- claim: 'Reproduction-check side-channel asymmetry. Q1B''s reproduction-check #1 (Q2A anchor): abs_diff
+    = 0.003 chi^2 at N=200 (essentially exact). #2 (Q1A anchor): abs_diff = 3.3e-05 chi^2 at N=200 (literally
+    exact to 5 decimal places). The proponent forecasts these drift to ~ 5-15 chi^2 at N=400 because the
+    SEED_BASE seed-sequence determinism breaks when M changes (per phase_a''s N-shift carve-out semantics);
+    the magnitude of drift is itself informative about SMC variance at the parent fits. If the asserts
+    PASS within tol=50 the primary verdict is clean; if either FAILS the side-channel directly corroborates
+    the proponent''s SMC-dominance hypothesis at the no-Z and Z_c-only layers. The proponent therefore
+    has an asymmetric payoff structure: PASS -> primary verdict interpretable in the proponent''s favor
+    if narrowing is observed; FAIL -> side-channel evidence FOR the proponent''s position regardless of
+    primary metric.'
+  source: ../2026-05-27_q1b-z2-conditioning-second-axis/result.yaml secondary_results reproduction_check_no_z,
+    reproduction_check_zc_only; phase_a.yaml baselines.secondary catch-and-report semantics.
+forecast:
+  better_chi2_point_shift_from_662_223_ci95:
+  - 2.0
+  - 38.0
+  better_chi2_point_shift_from_662_223_note: 'Secondary point-stability sub-criterion. Phase_a locks the
+    sub-criterion as |better_chi2_point - 662.223| <= 50 chi^2 for the verdict to attach semantically
+    to variance reduction (rather than a realization shift). Proponent point forecast 15 chi^2 absolute
+    shift; 95% CI [2, 38] strictly inside the 50 chi^2 envelope at both bounds. Rationale: SMC point bias
+    scales as 1/N (not 1/sqrt(N)), so doubling N halves the residual point drift contribution from N=200''s
+    realization. The 12,000-row eval window plus 1000-resample paired-day bootstrap dominate the point''s
+    sampling distribution; the SMC-induced point shift from doubling N is a sub-leading correction. The
+    point forecast 15 is roughly the magnitude of a single bootstrap iteration''s contribution at this
+    scale (~SE_paired /sqrt(N_BOOT) ~ 1.4, scaled up by the relevant constant for SMC contribution to
+    the central estimator). CI [2, 38] honors that the realized shift could be near zero (lower bound)
+    or near the 50 chi^2 ceiling at the upper bound, but the proponent''s strong forecast is that it lands
+    well inside.'
+  better_chi2_point_shift_from_662_223_point: 15.0
+  chi2_diff_at_N400_near_tie_predicted: TRUE NEAR-TIE retains; |chi2_diff| < paired SE. Q1B's chi2_diff
+    = +33.776 with paired SE 44.71 (NEAR-TIE designation at N=200). Doubling N tightens chi2_diff's SE
+    if SMC was a non-trivial variance source there too. Proponent forecasts chi2_diff_N400 ~ +25 chi^2
+    (point), paired SE ~ 32 chi^2 (narrowed from 44.71 by approximately sqrt(2) under SMC dominance);
+    the NEAR-TIE flag still flips TRUE because |+25| < 32. Informational only; the verdict-relevant branch
+    is Z2_c per phase_a variables.excluded.
+  cumulative_chi2_improvement_above_Z_c_ci95_width_ci95:
+  - 290.0
+  - 395.0
+  cumulative_chi2_improvement_above_Z_c_ci95_width_note: 'Primary verdict metric. Point forecast 338 chi^2
+    = 0.710 * Q1B realized 476.358 chi^2, just above the asymptotic 1/sqrt(2) ratio floor of 0.7071 *
+    476.358 = 336.85 (the floor that obtains if V_smc/V_total = 1.0 exactly; SMC variance halves, eval-window-noise
+    is zero, total variance halves, total CI width tightens by sqrt(2)). Point forecast corresponds to
+    V_smc/V_total ~ 0.99, i.e., the proponent''s strong-form prior that SMC noise IS the dominant variance
+    component in Q1B''s wide CI. CI95 [290, 395]: the lower bound 290 admits bootstrap-on-the-realized-width
+    finite-sample noise plus minor undershoot of the asymptotic floor (1000 bootstrap resamples yield
+    SE on the realized width of ~width/sqrt(N_BOOT) ~ 11 chi^2, so a realized width of 338 - 2*SE ~ 316
+    is plausible; pushing to 290 admits left-tail bootstrap noise stacked on a near-1.0 V_smc share).
+    Upper bound 395 corresponds to V_smc/V_total ~ 0.65 (sqrt(1 - 0.65/2) * 476.358 = 391.5) plus a small
+    admission for bootstrap noise on the realized width; this admits that V_smc share could be at the
+    lower end of the defensible range. Across [290, 395] the proponent forecast clears the R-A1B'' cut
+    at point and at lower CI, but the upper CI bound (395) falls inside the R-B1B'' band (357.27, 524.0];
+    the proponent is forecasting a mechanical R-A1B'' with the upper CI bound straddling into R-B1B''.
+    This is the same wide-CI honesty Q1B proponent applied (predicted CI 360-wide on better_chi2 to honor
+    calibration warnings).'
+  cumulative_chi2_improvement_above_Z_c_ci95_width_outcome_lower_ci: R-A1B'
+  cumulative_chi2_improvement_above_Z_c_ci95_width_outcome_point: R-A1B'
+  cumulative_chi2_improvement_above_Z_c_ci95_width_outcome_upper_ci: R-B1B'
+  cumulative_chi2_improvement_above_Z_c_ci95_width_point: 338.0
+  per_cell_chi2_dominance_predicted: saturday__zc6__zr1 (morning_ramp) remains the single dominant cell
+    at chi^2 ~ 950 +/- 50 (Q1B realized 967.28); within-cell SMC noise contributes <5% of the cell-level
+    chi^2 because the cell has n_rows=360 post-cutoff and pre-cutoff library n=5910 (large enough that
+    mixture parameters are well-estimated; SMC propagation noise is the dominant residual variance). Per-cell
+    chi^2 contributions at N=400 are predicted within +/-10% of Q1B's realized values per cell; the contamination
+    IS where P1 said it would be and where Q1B settled, and SMC tightening does NOT redistribute the contamination
+    across cells (just tightens the CI on the marginal pooled chi^2 statistic).
+  reproduction_check_1_predicted: 'q1b_no_z_chi2 at N=400 reproduces Q2A settled 953.84 within tol=50;
+    |diff| ~ 5-15 chi^2 (SMC drift from changing M=200 to M=400 with same seeds; the SEED_BASE_Q2A=20260526
+    seed sequence is held constant but the M-particle ensemble draws differ in higher-order positions
+    when M changes per the N-shift carve-out semantics in phase_a baselines.secondary). The proponent
+    is reasonably confident reproduction-check #1 PASSES the existing BLOCKING assert at experiment/q1b_z2_conditioning/__main__.py:1434;
+    the |diff| is informative side-channel (a |diff| at the high end of [5, 15] indicates SMC was contributing
+    non-trivially at N=200 even in the no-Z baseline).'
+  reproduction_check_2_predicted: 'q1b_zc_only_chi2 at N=400 reproduces Q1A settled 952.5167 within tol=50;
+    |diff| ~ 5-15 chi^2 (same N-shift carve-out logic as reproduction-check #1). Proponent confident reproduction-check
+    #2 PASSES the existing BLOCKING assert at line 1464; the |diff| is informative side-channel. If either
+    reproduction check FAILS the existing assert at N=400, phase_a''s catch-and-report semantics fire
+    and the side-channel finding (SMC variance at N=200 was non-trivial in the parent fits) IS itself
+    the proponent''s position confirmed at a different inferential layer. The proponent therefore does
+    NOT bet against the asserts; the asymmetric payoff structure favors the proponent regardless of pass/fail
+    on the asserts (PASS -> primary verdict interpretable; FAIL -> side-channel confirms SMC dominance
+    at the parent layer).'
+git_clean: false
+git_sha: 13649d8fb4fb7c4463bd981a3e0837b5da0df5a9
+outcome: R-A1B'
+rationale_summary: 'The proponent argues R-A1B'' fires: SMC particle-count noise IS the dominant variance
+  component in Q1B''s 476.358 chi^2 CI width, and doubling N_PARTICLES from 200 to 400 will tighten the
+  realized CI width to <= 357.27 chi^2. The argument is mathematical (1/N variance scaling), structural
+  (Q1B''s per-fit CI shape and paired-bootstrap diagnostics suggest within-pair SMC variance dominates
+  eval-window noise), and per-cell (the largest per-cell chi^2 contributors involve cells with library
+  counts in the few-thousand range where SMC propagation is the dominant residual noise source). Point
+  forecast: width 338 chi^2 (close to the sqrt(2) asymptotic floor of 337). CI95 [290, 395] straddles
+  the R-A1B''/R-B1B'' boundary at upper bound to honor calibration warnings. The point-stability sub-criterion
+  is forecast comfortably inside the 50 chi^2 envelope (point 15 chi^2, CI [2, 38]) because SMC point
+  bias scales 1/N (not 1/sqrt(N)) and the 12,000-row eval-window + 1000-resample bootstrap dominate the
+  point''s sampling distribution. Reproduction checks #1 and #2 are forecast to PASS the existing asserts;
+  if either FAILS at N=400, phase_a''s catch-and-report semantics convert the failure into informative
+  side-channel evidence FOR the proponent''s position (SMC was contributing non-trivially at the parent
+  layer). The substantive consequence of R-A1B'' firing: the tightened CI clears the way for clean user-side
+  adjudication of the (a)/(b)/(c) amendment paths surfaced in Q1B''s S4 advance.'
+references:
+- body_sha256: 7e6b4882ac7092f8d01d5134107c1350636b8e3e657919bbfe9c69d6cbfcb45e
+  file: phase_a.yaml
+  relation: phase_a
+- body_sha256: b3b1efa7d028cd6caa6220493847a5d2b8fa6de957814211df01df6294baaa6d
+  file: ../2026-05-27_q1b-z2-conditioning-second-axis/result.yaml
+  relation: predecessor_node_result
+- body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
+  file: ../2026-05-27_resolution-paths-thread/thread.yaml
+  relation: thread
+schema: proponent
+thread:
+  node_id: Q1B'
+  parent_branch: R-A
+  thread_body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
+  thread_topic: resolution-paths-thread
+topic: q1b-prime-smc-tightening
+what_would_change_my_mind:
+- condition: Realized cumulative_chi2_improvement_above_Z_c CI95 width > 400 chi^2.
+  interpretation: 'The SMC-dominance forecast is falsified at the strong form. If the realized width lands
+    above 400, V_smc/V_total < ~0.60 (since 400 = sqrt(1 - 0.5*0.6) * 476.358 = sqrt(0.7) * 476.358 =
+    398.6; equivalently the ratio 400/476.358 = 0.840 implies sqrt(1 - 0.5*s) = 0.840 so s = 2*(1 - 0.706)
+    = 0.59). The DA''s eval-window-dominance reading would be correct in this case: the 12,000-row post-cutoff
+    window contributes more variance than SMC at N=200, and further SMC tightening cannot close it. The
+    proponent would lose the discriminating verdict and the substantive consequence (clean adjudication
+    of (a)/(b)/(c) amendments) shifts to the (b) or (c) path more than (a) per phase_a stopping_criterion.'
+- condition: '|better_chi2_point - 662.223| > 50 chi^2 (point-stability sub-criterion fires R-C1B'').'
+  interpretation: 'Phase_a locks: any point shift > 50 triggers R-C1B'' regardless of CI width. The proponent''s
+    forecast (point 15, CI [2, 38]) is comfortably inside. A realized shift > 50 indicates SMC seed dependence
+    is real and amendment A2''s framing of "doubling N narrows variance without shifting point" is wrong;
+    SMC point bias at N=200 was non-trivial (point biased by > 50 chi^2) and the proponent''s point-bias-scales-1/N
+    argument did not deliver the predicted small residual at N=400. The substantive read becomes: SMC
+    contribution to Q1B''s reading was structural not just variance, and further tightening runs (Q1B''''
+    at N=800 per stopping_criterion) would be needed before clean adjudication.'
+- condition: 'Reproduction-check #1 (Q2A anchor) drift > 50 chi^2 at N=400 (existing assert at line 1434
+    FAILS).'
+  interpretation: 'Phase_a''s catch-and-report semantics fire: result.yaml reports the primary verdict
+    as MISSING and the arbiter renders on the side-channel signal alone. The proponent''s position is
+    corroborated at the side-channel layer (SMC was non-trivial at the no-Z parent layer); however, the
+    primary metric verdict becomes uncomputable in the clean form. The proponent''s payoff is asymmetric
+    in favor: the side-channel reading is the proponent''s position confirmed at a different inferential
+    layer, even though the primary R-A1B''/R-B1B''/R-C1B'' verdict cannot be rendered.'
+- condition: 'Reproduction-check #2 (Q1A anchor) drift > 50 chi^2 at N=400 (existing assert at line 1464
+    FAILS).'
+  interpretation: 'Same logic as reproduction-check #1, but with a stronger implication: the cumulative-baseline
+    anchor (Q1A settled 952.5167) was sensitive to SMC particle count at N=200. The cumulative_chi2_improvement_above_Z_c
+    metric is computed against 952.5167 (held constant per pre-commitment 4); if the realized re-baseline
+    at N=400 is meaningfully different, the cumulative improvement metric becomes ill-defined even in
+    the side-channel reading. The proponent would lose ranking authority over the primary verdict and
+    the substantive consequence shifts to requiring a re-baselining pre-registration (a Q1B'''' or similar
+    at N=800 with the cumulative baseline itself re-measured at the higher N) before any further amendment
+    to the thread.'
+- condition: chi2_diff_ci95 width at N=400 NOT narrowed by >= 30% from Q1B's 177.66 chi^2 (Q1B chi2_diff_ci95
+    = [-53.19, 124.47]).
+  interpretation: The proponent's structural argument that SMC dominates within-pair variance is partially
+    falsified. chi2_diff is the head-to-head paired statistic; if its CI width doesn't narrow as expected
+    under SMC doubling, the within-pair variance was NOT dominated by SMC at N=200, and instead the eval-window-noise
+    contribution to within-pair variance was substantial. This is a softer falsifier than primary-metric
+    failure (informational rather than verdict-relevant per phase_a variables.excluded), but it would
+    update the proponent toward "SMC contributes but is not the sole dominant variance source" and lose
+    confidence in the strong-form interpretation of R-A1B'.
+- condition: Per-cell chi^2 contributions at N=400 redistribute substantially from Q1B's pattern (e.g.,
+    saturday__zc6__zr1 drops below 700 chi^2, or a different cell becomes dominant).
+  interpretation: The proponent's per-cell SMC-dominance argument is empirically refuted at the per-cell
+    level. If SMC tightening at N=400 substantially redistributes the per-cell contributions, the per-cell
+    chi^2 at N=200 was reflecting SMC propagation noise on the specific per-cell PIT empirical CDFs rather
+    than genuine misspecification structure (and the structural reading of the contamination IS where
+    P1 said weakens correspondingly). Marginal R-A1B' may still fire mechanically (the SMC argument survives
+    at the pooled level), but the substantive picture (contamination concentrated in saturday__zc6__zr1
+    per Q1B's decomposition) becomes harder to defend as a sub-finding worth carrying forward to (a)/(b)/(c)
+    adjudication.
+- condition: Inline synthetic gate (the script's BLOCKING gate at experiment/q1b_z2_conditioning/__main__.py
+    inline_synthetic_gate, lines ~1320-1410) FAILS at N=400.
+  interpretation: The SMC propagation at N=400 has a methodological bug exposed only at the higher particle
+    count (e.g., a numerical overflow in the cumulative weight normalization at large M, or an undetected
+    boundary condition in the per-cell propagation). The primary verdict becomes uncomputable; arbiter
+    would not render R-A1B'/R-B1B'/R-C1B' but rather flag the methodological failure. Proponent loses
+    everything in this case; the script's production-path integrity is the precondition for both the primary
+    verdict and the side-channel readings.
+written_at: '2026-05-29T23:35:00-07:00'

@@ -1,0 +1,265 @@
+body_sha256: 174d38efd7da8da8864d51e40cbd726d27e93a75199a3258d3b29db8a70cc072
+confidence: 0.55
+counter_prediction:
+  reasoning: Variance decomposition from Q1B's realized CIs implies V_smc/V_total ~ 7% at N=200; halving V_smc under N=200->400
+    tightens total CI width to ~88% of Q1B's 476.358 = 419 chi^2, squarely in R-B1B' band (357.27, 524.0]. Eval-window noise
+    is the dominant variance source and irreducible under any change to N_PARTICLES.
+  references_phase_a: 7e6b4882ac7092f8d01d5134107c1350636b8e3e657919bbfe9c69d6cbfcb45e
+  units: chi^2 (95% CI WIDTH on cumulative_chi2_improvement_above_Z_c at N=400)
+  value: 419.0
+  written_at: '2026-05-29T23:35:00-07:00'
+evidence_chain:
+- claim: Q1B's realized chi2_diff paired-bootstrap CI [-53.186, +124.470] implies paired SE ~45 chi^2 (half-width 88.83 /
+    1.96 = 45.32), consistent with the 44.71 paired SE cited in S12/S13 memories. The chi2_diff variance is a pure between-day
+    variance (both Z2_b and Z2_c SMC-propagated under the same particle draws per bootstrap resample; SMC noise cancels in
+    the diff), so 44.71 chi^2 is a clean LOWER BOUND on the eval-window-noise floor for a chi^2 statistic of this construction.
+  source: notes/preregistrations/2026-05-27_q1b-z2-conditioning-second-axis/result.yaml primary_result.chi2_diff_ci95
+- claim: "Q1B's chi2_Z2_c_ci95 [479.784, 945.406] (width 465.62) vs chi2_diff CI width 177.66 gives an amplification ratio\
+    \ 2.62 \u2014 the ratio of eval-window SE on absolute chi^2_Z2_c to eval-window SE on the paired difference. Applied to\
+    \ chi2_diff SE 44.71, this gives eval-window SE on chi2_Z2_c ~ 117 chi^2. Combined with total SE on cumulative ~ 121.5\
+    \ (from CI width 476.358), V_smc/V_total ~ (121.5^2 - 117^2) / 121.5^2 ~ 0.07 \u2014 i.e. SMC variance is ~7% of total\
+    \ variance, not the 87.5% required for R-A1B'."
+  source: notes/preregistrations/2026-05-27_q1b-z2-conditioning-second-axis/result.yaml primary_result.chi2_Z2_c_ci95 + cumulative_chi2_improvement_above_Z_c_ci95
+- claim: Q1A's settled CI on cumulative chi^2 improvement (settled chi2_diff +33.5 with paired SE 56.84 per S12; chi2_Z_c
+    CI not directly reported but implied tighter than Q1B's by visual inspection of the registered narrative "single-axis
+    closes 0.18% of gap at point with tight CI" vs Q1B's "JOINT closes 40% AT POINT but CI 60x"). Q1A at SAME N=200 had narrower
+    CIs than Q1B; this is the joint-stratification footprint, not an SMC artifact.
+  source: memory/mitacs-q1a-z-conditioning.md + memory/mitacs-q1b-z2-conditioning.md
+- claim: Q1B's per-cell decomposition shows saturday__zc6__zr1 (morning_ramp) at chi^2=967 contributing single-cell more than
+    the pooled marginal 952.5 by itself; weekday cell at (Z_c=5, morning_ramp) n_post=144 pooled to parent. The smallest n_post
+    cells dominate per-cell parameter variance and carry through the paired-bootstrap CI. This is the joint-stratification
+    finite-sample noise; N=400 SMC propagation does not reduce per-cell mixture-fit parameter variance.
+  source: notes/preregistrations/2026-05-27_q1b-z2-conditioning-second-axis/result.yaml secondary_results.per_cell_chi2_contribution_Z2_c
+- claim: SMC point estimate bias scales as 1/M; eval-window noise on point estimate scales as 1/sqrt(N_eval). At M 200->400
+    (bias halved) and N_eval fixed (eval-window unchanged), the point shift between N=200 and N=400 SMC runs is bounded by
+    ~ (bias_at_200 - bias_at_400) + monte_carlo_noise on the single-seed draw. With reproduction-check tol = 50 chi^2 documented
+    as ~1 sigma of Q2A's bootstrap distribution (i.e. the eval-window scale), the point shift is expected within 0-50 chi^2;
+    central forecast 22 chi^2 with CI [5, 47].
+  source: experiment/q1b_z2_conditioning/__main__.py:134 _REPRODUCTION_TOL_CHI2 documentation + standard Monte-Carlo SMC theory
+- claim: 'Joint S9+S10+S11+S12 establishes that within-data sigma-algebra- enrichment levers are empirically bounded. The
+    Q1B JOINT result (S13) added a wide-CI fourth data point. Q1B'' is a methodological tightening run, NOT a substantive
+    lever; its purpose is to disambiguate whether Q1B''s wide CI is methodological (SMC) or substantive (eval-window + joint-strat).
+    My DA forecast says: methodological tightening cannot recover what eval-window noise binds away, so R-B1B'' fires. The
+    substantive picture (joint S9-S13 empirical bounding) is unaffected by this verdict.'
+  source: memory/mitacs-q2a-richer-family.md + mitacs-q2b-non-distributional.md + mitacs-q1a-z-conditioning.md + mitacs-q1b-z2-conditioning.md
+forecast:
+  better_chi2_point_shift_from_662_223_ci95:
+  - 5.0
+  - 47.0
+  better_chi2_point_shift_from_662_223_note: absolute shift |better_chi2 at N=400 - 662.223|. Forecast point 22 chi^2; CI
+    [5, 47]. The point-stability sub-criterion threshold is 50 chi^2 (R-C1B' fires regardless of CI band if |shift| > 50).
+    My CI upper bound 47 < 50; the SMC doubling should leave the seeded point within the script's _REPRODUCTION_TOL_CHI2 envelope
+    and not trip the point-stability sub-criterion.
+  better_chi2_point_shift_from_662_223_point: 22.0
+  chi2_diff_at_N400_ci95:
+  - -65.0
+  - 125.0
+  chi2_diff_at_N400_note: point ~ Q1B's realized +33.78 (NEAR-TIE); paired SE decreases marginally under denser SMC (within-resample
+    SMC noise on each branch contributes a small component of chi2_diff variance, but the between-day variance dominates per
+    the strongest_argument decomposition). NEAR-TIE flag expected to remain TRUE at N=400.
+  chi2_diff_at_N400_point: 30.0
+  cumulative_chi2_improvement_above_Z_c_ci95_width_ci95:
+  - 370.0
+  - 480.0
+  cumulative_chi2_improvement_above_Z_c_ci95_width_point: 419.0
+  cumulative_chi2_improvement_above_Z_c_ci95_width_share_note: share = realized CI width / Q1B's 476.358 chi^2 anchor. Forecast
+    point 0.88 (88% of Q1B's width); CI [0.78, 1.01]. R-A1B' threshold is share <= 0.75 (CI lower bound 0.78 misses the threshold
+    by 0.03; only the most aggressive SMC-dominance tail of my prior touches R-A1B'). R-C1B' threshold is share > 1.10 (CI
+    upper bound 1.01 misses the widening threshold by 0.09); the realized width landing IN R-B1B' is the central mass of my
+    forecast.
+  cumulative_chi2_improvement_above_Z_c_ci95_width_share_of_Q1B_anchor_ci95:
+  - 0.78
+  - 1.01
+  cumulative_chi2_improvement_above_Z_c_ci95_width_share_of_Q1B_anchor_point: 0.88
+  cumulative_chi2_improvement_above_Z_c_point_at_N400: 268.0
+  cumulative_chi2_improvement_above_Z_c_point_at_N400_ci95:
+  - 17.0
+  - 514.0
+  cumulative_chi2_improvement_above_Z_c_point_at_N400_note: 'derived: 952.5167 - (662.223 +/- 22) = 290.293 -/+ 22 at point;
+    central forecast assumes point shifts DOWNWARD (point closure decreases slightly) consistent with SMC bias correction
+    at higher M (the N=200 SMC point may be slightly optimistically tighter than the asymptotic-M point because finite-particle
+    sampling on a non-degenerate mixture density tends to over-concentrate probability mass and inflate apparent closure).
+    268 chi^2 ~ 90% of Q1B''s 290.293 point. CI bounds reflect the realized CI width forecast 419 chi^2 centered around 268.'
+  cumulative_chi2_improvement_above_Z_c_share_of_Q1A_leftover_gap_at_point: 0.37
+  cumulative_chi2_improvement_above_Z_c_share_of_Q1A_leftover_gap_note: share = 268 / (952.5167 - 228) = 268 / 724.5167 ~
+    0.37 of the remaining gap to R-A1B's cut. Versus Q1B's 290.293 / 724.5167 ~ 0.40, the central forecast is a small downward
+    shift in point closure. Cumulative (Q1A + Q1B') share of original Q2A gap = (953.84 - (952.5167 - 268)) / (953.84 - 228)
+    = (953.84 - 684.5167) / 725.84 ~ 0.371. Still well below thread closure_rule's 0.80 share threshold for thread RESOLVED.
+    Substantive thread state is unchanged by Q1B'.
+  near_tie_at_N400_note: '|chi2_diff_point| / paired_SE forecast ~ 30/42 ~ 0.71; NEAR-TIE per phase_a parent criterion |chi2_diff|
+    < paired SE preserved.'
+  near_tie_at_N400_predicted: true
+  reproduction_check_no_z_drift_ci95:
+  - 0.0
+  - 35.0
+  reproduction_check_no_z_drift_note: '|repro_chi2_no_z at N=400 - 953.84| forecast point 5 chi^2; CI [0, 35]. Well within
+    the 50-chi^2 BLOCKING tolerance. The N=400 SMC ensemble re-draws the seeded particle paths; for the (day_type)- only stratification
+    this is the lowest-variance configuration and the settled Q2A 953.84 should reproduce within a few chi^2.'
+  reproduction_check_no_z_drift_point: 5.0
+  reproduction_check_zc_drift_ci95:
+  - 0.0
+  - 35.0
+  reproduction_check_zc_drift_note: "|repro_chi2_zc at N=400 - 952.5167| forecast point 5 chi^2; CI [0, 35]. Same logic as\
+    \ the no_z check; the (day_type, Z_c) stratification is intermediate granularity. Both reproduction-check drifts expected\
+    \ to PASS within tolerance; if EITHER fails, the side-channel verdict on SMC variance non-triviality fires per phase_a\
+    \ baselines.secondary catch-and-report semantics \u2014 which would be BROADLY consistent with my \"SMC variance non-zero\
+    \ but bounded\" reading but inconsistent with the strong R-A1B' \"SMC dominant\" reading."
+  reproduction_check_zc_drift_point: 5.0
+git_clean: false
+git_sha: 13649d8fb4fb7c4463bd981a3e0837b5da0df5a9
+opportunity_cost:
+  alternative: "Q1B' is a methodological tightening run, not a substantive lever. If the goal is \"decide between (a)/(b)/(c)\
+    \ amendment paths from Q1B's S4 advance,\" the cheapest path is for the user to adjudicate on substantive prior + structural\
+    \ reasoning, accepting Q1B's wide CI as substantively informative (it says \"joint multi-axis Z gets above zero at lower\
+    \ CI but full closure does not fire\"). Q1B' is forecast to yield CI width 419 chi^2 [370, 480] \u2014 substantively the\
+    \ same wide-CI reading; the adjudication inputs do not change. The opportunity cost is small (the run is minutes of wall-clock;\
+    \ the pre-registration is in hand) but the substantive payoff is also small. The pre-registration discipline value is\
+    \ genuine \u2014 registering a methodological-tightening null verdict before further substantive amendment is the right\
+    \ shape \u2014 but it is not a critical-path experiment."
+  ranking: clear
+  ranking_note: Q1B'' is registered, cheap to run (re-uses Q1B''s library + seeds; only --n-particles changes), and provides
+    a registered chi^2-side data point on whether Q1B''s wide CI is SMC-noise (proponent) or eval-window-noise (me). The pre-registration
+    discipline value is independent of expected outcome. If R-A1B'' fires (refutes me, confirms proponent), Q1B''s wide CI
+    was a methodological artifact and tighter CIs can be obtained by denser SMC; that''s a valuable methodological calibration
+    finding. If R-B1B'' fires (confirms me), Q1B''s wide CI is substantive and the (a)/(b)/(c) adjudication proceeds on substantive
+    grounds. If R-C1B'' fires (widens or point-shifts), the SMC pipeline has a stability anomaly worth diagnosing. All three
+    outcomes have non-zero workflow value; my forecast is that R-B1B'' lands centrally and the workflow proceeds without further
+    SMC tightening.
+outcome: R-B1B'
+rationale_summary: "The CI width on cumulative_chi2_improvement_above_Z_c is composed of SMC-propagation variance (V_smc,\
+  \ scales 1/M) and eval-window noise (V_eval, fixed at the post-cutoff window + paired-day bootstrap convention). Empirically\
+  \ decomposing Q1B's realized CIs using chi2_diff's paired SE 44.71 as the SMC-cancelling between-day variance proxy, V_smc/V_total\
+  \ ~ 7% at N=200. The R-A1B' cut at 75% of 476.358 requires V_smc/V_total >= 87.5% \u2014 an extreme prior. Forecast: CI\
+  \ width 419 chi^2 [370, 480], 88% of Q1B's anchor (CI lower bound 0.78 just misses the 0.75 R-A1B' cut, central mass and\
+  \ upper CI in R-B1B', upper CI 1.01 misses the R-C1B' 1.10 widening cut). Point-shift forecast 22 chi^2 [5, 47], well within\
+  \ the 50-chi^2 point-stability sub- criterion envelope. Reproduction-check drifts forecast 5 chi^2 each [0, 35], well within\
+  \ the 50-chi^2 BLOCKING tolerance; NEAR-TIE flag survives. Q1A's same-N=200 narrower CIs (compared to Q1B's) are independent\
+  \ corroborating evidence that the joint-stratification subdivision (Z_c x Z2 creating smaller per-cell n_post) drives Q1B's\
+  \ wider CIs, NOT insufficient particle count. Doubling N=400 cannot add post-cutoff rows; it can only halve the small SMC\
+  \ variance component. The substantive thread state (joint S9+S10+S11+S12+S13 bounded-lever picture) is unchanged by the\
+  \ Q1B' verdict; the (a)/(b)/(c) amendment adjudication proceeds on substantive grounds regardless."
+references:
+- body_sha256: 7e6b4882ac7092f8d01d5134107c1350636b8e3e657919bbfe9c69d6cbfcb45e
+  file: phase_a.yaml
+  relation: phase_a
+- body_sha256: b3b1efa7d028cd6caa6220493847a5d2b8fa6de957814211df01df6294baaa6d
+  file: ../2026-05-27_q1b-z2-conditioning-second-axis/result.yaml
+  relation: predecessor_node_result
+- body_sha256: 0602f0c07c9468e3f5905e4730dc55515ae81ed0f2533db38b408a59212f5c10
+  file: ../2026-05-27_q1b-z2-conditioning-second-axis/phase_a.yaml
+  relation: predecessor_node_phase_a
+- body_sha256: c1057bcda2b997d76cd8c2dd243d0446fe8efdc15807256d0731fe155d6d6119
+  file: ../2026-05-27_q1a-z-conditioning-strongest-axis/result.yaml
+  relation: cumulative_baseline_anchor
+schema: devils_advocate
+severity: manageable
+specific_failure_modes:
+- likelihood: 0.75
+  memory_ref: mitacs-q1b-z2-conditioning
+  mode: "Variance-decomposition dominance: V_eval (paired-day bootstrap on fixed ~12,000-row post-cutoff window with within-day\
+    \ correlation preserved) is irreducible under any change to N_PARTICLES, and empirically dominates V_smc by ~7x at N=200\
+    \ per the chi2_diff paired SE 44.71 decomposition shown in the strongest_argument. The R-A1B' cut at 75% of 476.358 =\
+    \ 357.27 requires V_smc/V_total >= 0.875; the empirical V_smc/V_total ~ 0.07 implies CI tightening to ~98% of 476.358,\
+    \ i.e. ~467 chi^2 \u2014 squarely in R-B1B'."
+  rank: 1
+- likelihood: 0.65
+  memory_ref: mitacs-q1a-z-conditioning
+  mode: 'JOINT-stratification finite-sample noise: Q1B''s primary cell sizes after the Z_c x Z2 split shrink to as small as
+    n_post~144 (the weekday, Z_c=5, morning_ramp pool-fallback cell) and n_post~80-100 in several Saturday/Sunday cells. The
+    mixture-2-Gaussian EM-fit variance carries through the paired-day bootstrap CI; this is per-cell parameter variance, NOT
+    SMC propagation variance, and N=400 SMC does not reduce it. Q1A at N=200 saw narrower CIs because Q1A''s (day_type, Z_c)
+    cells averaged 2-4x larger n_post than Q1B''s (day_type, Z_c, Z2) cells; the extra subdivision is the cause of Q1B''s
+    wider CI, not insufficient particle count. This argument is independent of variance- decomposition above and reinforces
+    the same conclusion: tightening levers other than n_post-per-cell cannot recover Q1A''s CI tightness.'
+  rank: 2
+- likelihood: 0.3
+  memory_ref: mitacs-q1b-z2-conditioning
+  mode: 'Point-shift from N=400 SMC re-draw: SMC bias is order 1/M, eval-window noise is order 1/sqrt(N_eval). At M 200->400
+    (halved bias), bias contribution to the realized point estimate is small (a few chi^2). Eval-window noise at fixed N_eval
+    contributes the rest; the point estimate sits within ~1 sigma of N=200''s 662.223. Forecast |point_shift| ~ 22 chi^2 with
+    CI [5, 47]; well within the script''s 50-chi^2 _REPRODUCTION_TOL_CHI2 envelope. This is a stability check, not an anomaly
+    indicator; only |shift| > 50 would flag seed-dependence or library drift (R-C1B'' regardless of CI band per phase_a point-stability
+    sub-criterion).'
+  rank: 3
+- likelihood: 0.45
+  memory_ref: mitacs-q1b-z2-conditioning
+  mode: Reproduction-check drift as informative side-channel (not a failure mode of MY forecast but a possible secondary outcome).
+    If repro_chi2_no_z or repro_chi2_zc drift by > 50 chi^2 from their settled anchors (953.84 and 952.5167), the existing
+    blocking assert at __main__.py:1434 or :1464 halts execution. Per phase_a baselines.secondary catch-and-report semantics,
+    the realized values are captured in execution_deviations and the primary verdict is reported MISSING. In that scenario
+    the arbiter renders on the side-channel (SMC variance at N=200 was non-trivial), which is broadly consistent with my "modest
+    tightening" forecast (modest SMC variance) but not with the strong R-A1B' "SMC dominant" reading. My forecast is robust
+    to this scenario in interpretation but the primary verdict numbers would be MISSING.
+  rank: 4
+strongest_argument: "The CI width on cumulative_chi2_improvement_above_Z_c is a composite of two variance sources with very\
+  \ different scaling laws under N_PARTICLES doubling. The SMC-propagation variance component V_smc scales as 1/M (M = particle\
+  \ count), so N=200 -> 400 halves V_smc. The eval-window-noise component V_eval is fixed by the post-cutoff window size (~12,000\
+  \ hourly rows; ~500 paired days at N_BOOTSTRAP=1000) and is INVARIANT under any change to N_PARTICLES \u2014 paired-day\
+  \ bootstrap on a fixed sample has irreducible day-to-day variance in the chi^2 statistic. The proponent argument requires\
+  \ V_smc/V_total >= 0.875 for total CI width to shrink to <= 75% of Q1B's 476.358 (the R-A1B' cut). That is an extreme prior:\
+  \ it asks for SMC particle noise to dominate ~7x over eval-window noise. The empirical signal cutting against it is paired\
+  \ SE_chi2_diff = 44.71 chi^2 at Q1B's N=200 (result.yaml primary_result.chi2_diff_ci95 [-53.186, +124.470] -> width 177.65\
+  \ / (2*1.96) = 45.32; consistent with the cited paired SE 44.71). The chi2_diff paired-bootstrap variance is purely between-day;\
+  \ it has no SMC component (both Z2_b and Z2_c branches are propagated under the SAME particle draw per resample, so SMC\
+  \ noise cancels in the difference). That 44.71 chi^2 paired SE is therefore a clean lower-bound proxy for the eval-window-noise\
+  \ floor on a chi^2 statistic of this construction. Q1B's cumulative CI half-width is 476.358/2 = 238.179, which corresponds\
+  \ to a marginal SE of ~121.5 (assuming normal-percentile CI). The eval-window floor is ~44.71 (chi2_diff SE) extended to\
+  \ the chi2_Z2_c absolute scale by a factor accounting for the day-to-day variance amplification when summed over both branches\
+  \ rather than differenced \u2014 call this factor f \\in [1.5, 3.0] (informed by Q1B's chi2_Z2_c_ci95 [479.78, 945.41] width\
+  \ 465.62 vs chi2_diff CI width 177.66; ratio 2.62). So eval-window SE on chi2_Z2_c is ~ 44.71 * 2.62 = 117.1; total SE 121.5;\
+  \ SMC SE component ~sqrt(121.5^2 - 117.1^2) = sqrt(14762.25 - 13712.41) = sqrt(1049.84) = 32.4. Implied V_smc/V_total =\
+  \ 1049.84/14762.25 = 0.071, i.e. ~7%. Under N 200->400, V_smc -> V_smc/2 = 524.92, V_total_new = 524.92 + 13712.41 = 14237.33,\
+  \ SE_new = 119.32, CI width new = 119.32 * (476.358 / 121.5) = 467.7. That is ~98.2% of Q1B's 476.358 \u2014 a 1.8% tightening,\
+  \ squarely in R-B1B' and nowhere near the R-A1B' 357.27 cut. The forecast point estimate of 419 chi^2 builds in a 95% upper-end\
+  \ prior for V_smc/V_total (allowing the empirical SE-decomposition to under-estimate V_smc); the central forecast is ~470\
+  \ chi^2 (a near-null tightening). Q1A's same-N=200 narrower CIs are an independent corroborating signal: Q1B's extra Z2\
+  \ layer subdivides cells further, leaving fewer post-cutoff rows per cell; that's a JOINT-stratification phenomenon, not\
+  \ an SMC phenomenon, and doubling N=400 does NOT add post-cutoff rows."
+thread:
+  node_id: Q1B'
+  parent_branch: R-A
+  thread_body_sha256: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
+  thread_topic: resolution-paths-thread
+topic: q1b-prime-smc-tightening
+what_would_change_my_mind:
+- condition: realized CI width on cumulative_chi2_improvement_above_Z_c at N=400 <= 357.27 chi^2 (R-A1B' fires per phase_a
+    corroboration_criterion)
+  interpretation: 'My eval-window-dominance forecast is decisively falsified; V_smc/V_total >= 0.875 at N=200 and the proponent
+    wins. The chi2_diff paired-SE decomposition I used as the eval-window-floor proxy was wrong (or the f~2.62 amplification
+    factor from chi2_diff scale to chi2_Z2_c scale was a substantial under-estimate). Methodological calibration: SMC variance
+    was the dominant component of Q1B''s wide CI; further tightening to N=800 might yield additional gains, and the R-A1B''
+    tightened CI clears the way for clean (a)/(b)/(c) adjudication.'
+- condition: '|better_chi2 at N=400 - 662.223| > 50 chi^2 (R-C1B'' fires per point-stability sub-criterion)'
+  interpretation: My "modest point shift" forecast (22 chi^2 [5, 47]) is wrong; SMC seed-dependence or library-fit drift is
+    non-trivial. This refutes the "SMC bias scales 1/M, modest" reading and indicates the SMC pipeline has instability worth
+    diagnosing before any further amendment. The verdict is R-C1B' regardless of the CI band, so my R-B1B' forecast is mechanically
+    wrong even if the CI width itself lands in R-B1B'.
+- condition: realized CI width on cumulative_chi2_improvement_above_Z_c at N=400 > 524.0 chi^2 (R-C1B' fires per falsification_criterion
+    CI-widening branch)
+  interpretation: CI widens under denser SMC, which contradicts the basic 1/N SE-scaling argument. My forecast upper CI 1.01
+    admits this barely (allows width up to 480 = share 1.008); a realized width > 524 (share > 1.10) indicates library drift,
+    seed-dependence, or another anomaly. R-C1B' fires on CI grounds; my forecast was direction-correct (modest tightening,
+    not R-A1B') but magnitude-wrong on the central tendency.
+- condition: reproduction_check_no_z |diff from Q2A 953.84| > 50 chi^2 OR reproduction_check_zc |diff from Q1A 952.5167| >
+    50 chi^2 (either blocking assert halts execution)
+  interpretation: My reproduction-check drift forecasts (5 chi^2 each, CI [0, 35]) are wrong. The script halts and the primary
+    verdict is MISSING; the arbiter renders on the side-channel signal (SMC variance at N=200 was non-trivial). This is BROADLY
+    consistent with my "SMC variance non-zero but bounded" reading IF the side-channel verdict is "modest" (e.g., drifts ~50-100
+    chi^2). It is INCONSISTENT with my reading if drifts are >> 100 chi^2 (which would suggest seed-dependence or library-fit
+    issues rather than pure particle-count Monte-Carlo noise). My forecast is robust in interpretation if drifts are in [50,
+    100]; not robust if drifts are >100.
+- condition: V_smc/V_total estimated post-hoc from Q1B prime realized CIs (using the same chi2_diff paired-SE decomposition
+    I used in the strongest_argument) is observed to be > 0.40
+  interpretation: 'My variance-decomposition empirical proxy was wrong: chi2_diff paired SE 44.71 was NOT a clean eval-window-noise
+    floor proxy; SMC noise does NOT cancel cleanly in the chi2_diff because the Z2_b and Z2_c branches are not propagated
+    under bit-identical particle draws at N=400 (the seed structure I assumed does not hold under the M-particle resampling
+    at higher M). My empirical anchor for the V_smc/V_total ratio collapses, and the forecast point 419 chi^2 may have been
+    an under-estimate of the tightening. The R-B1B'' verdict may still fire, but my forecast was poorly calibrated on the
+    central tendency.'
+- condition: Q1A's historical CI on cumulative_chi2_improvement above the Q2A baseline at N=200 turns out to have been WIDER
+    than Q1B's, not narrower (overturning my "joint-stratification subdivision drives wider CIs" argument)
+  interpretation: My joint-stratification finite-sample noise argument (failure_mode rank 2) is wrong; Q1B's wider CIs are
+    NOT a function of smaller per-cell n_post. Then the residual driver of Q1B's wider CIs is more likely the SMC pipeline's
+    sensitivity to the deeper conditioning structure (more cells -> more independent SMC propagation paths -> more SMC variance
+    not less). My forecast loses one of its two independent supporting arguments; central tendency may be poorly calibrated.
+written_at: '2026-05-29T23:35:00-07:00'
