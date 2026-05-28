@@ -359,10 +359,11 @@ kernel-family-agnostic theory memo (the memo predates them).
   empirically bounded. Resolution requires **auxiliary
   information beyond the time index** (temperature / exogenous
   Z). **Routing:** R-B1A routes to Q1B (time_of_day) with Z_c
-  carryforward (near-tie caveat); EXHAUSTED-UNRESOLVED
-  trajectory pre-flagged in the S3 state-history (Q1B's
-  time_of_day range 0.485 < hour_of_week's 0.575 — weaker prior
-  support for the same skepticism).
+  carryforward (near-tie caveat); S3 state-history carries an
+  advisory pre-flag that EXHAUSTED-UNRESOLVED is a plausible Q1B
+  trajectory given joint S9+S10+S11+S12, but Q1B's verdict is
+  not prejudged — its phase_a must register cuts and forecasts
+  on Q1B's own merits.
 
 ### Lines of inquiry
 - `2026-05-26_missing-content-thread`: **exhausted** under registered
@@ -419,9 +420,13 @@ kernel-family-agnostic theory memo (the memo predates them).
   RESOLVE the thread; R-B1B / R-C1B branch into P2 (synthetic
   Gaussian-DGP calibration) given joint S9+S10+S11+S12 exhaust
   the within-data lever question. Weaker prior support than Q1A
-  (time_of_day P1 range 0.485 vs hour_of_week 0.575) — given
-  Q1A's 0.18%-of-gap reading, EXHAUSTED-UNRESOLVED is the
-  baseline-expected trajectory.
+  (time_of_day P1 range 0.485 vs hour_of_week 0.575). The joint
+  S9+S10+S11+S12 picture makes EXHAUSTED-UNRESOLVED a plausible
+  Q1B trajectory — but this is background context for thread
+  planning, NOT a prejudgment of Q1B's verdict. The proponent
+  must still argue R-A1B on its merits and the arbiter must
+  render against pre-registered cuts; pre-judging a negative
+  result is the same workflow risk as pre-judging a positive one.
 - **Q1A' deferred** (per user direction during S12 session):
   empirical Q1A' synthetic-gate-build discovered that phase_a
   §metric's FastICA selection rule (max |excess_kurtosis|) does
