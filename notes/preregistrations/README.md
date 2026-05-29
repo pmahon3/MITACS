@@ -187,6 +187,46 @@ Memory citations (in `~/.claude/projects/.../memory/*.md`) MUST
 include the tag. The convention is to put `[SETTLED]` or
 `[PROVISIONAL]` next to any reference to a registry entry.
 
+## Registry-list view vs thread view (known limitation)
+
+`registry list` (defined in `experiment/audit/registry.py:list_entries`
+calling `entry_status`) shows a per-experiment status derived strictly
+from artifact existence in the experiment directory: `AWAITING-B` if
+only `phase_a.yaml` exists, `AWAITING-RES` if `phase_b.yaml` exists
+but no `result.yaml`, `AWAITING-ARB` if `result.yaml` but no
+`arbiter.yaml`, then `SETTLED` / `PROVISIONAL` / `AMBIGUOUS` once the
+arbiter has rendered. It does NOT read `thread.yaml`.
+
+This creates a known mismatch when a thread node is **closed via
+thread amendment without running** (status: `exhausted`,
+`closed`). The per-experiment view continues to show whichever
+phase the existing artifacts suggest (typically `AWAITING-B` if
+phase_a was stamped before the amendment closed the node).
+
+**Current instance:** Q1A' under `2026-05-27_resolution-paths-thread`.
+Closed via thread amendment A3 (2026-05-29; FastICA selection-rule
+design defect; see memory `q1a-prime-fastica-selection-defect`).
+`registry list` shows it as `AWAITING-B`; `thread status
+2026-05-27_resolution-paths-thread` shows it as `exhausted`. The
+**thread view is the source-of-truth for thread-membership state**;
+the per-experiment view is the source-of-truth for artifact existence
+on disk. They are not in conflict; they answer different questions.
+
+**Convention for readers**: when scanning for "what experiments are
+still open / awaiting work", consult `thread status <slug>` for the
+relevant thread before trusting `registry list`. A node that
+`registry list` reports as `AWAITING-B` may already be `closed` /
+`exhausted` at the thread level via amendment.
+
+**Workflow-design retro question** (not addressed; N=1 current
+instance does not warrant infrastructure change): should
+`entry_status()` cross-reference `thread.yaml` for nodes that
+belong to a thread? If a second close-via-amendment case arises,
+revisit. The minimum-cost extension would be a `closed.yaml` marker
+file written by `thread-coordinator` when it executes a
+close-via-amendment, and a new `entry_status()` return value
+`EXHAUSTED-PRE-DATA` / `CLOSED-PRE-DATA` keyed on the marker.
+
 ## Reading order for a new claim
 
 1. Read the latest `arbiter.yaml` in each relevant subdirectory.
