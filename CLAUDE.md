@@ -554,6 +554,30 @@ kernel-family-agnostic theory memo (the memo predates them).
   (not daily-mean); single-station sufficient for first cut;
   forecast temperature relevant for the registered forward
   experiment.
+  **Framework-side stake (added 2026-05-30):** T1 execution is
+  also the single surviving revival trigger for the framework-
+  side `kappa_q characterisation ladder` seed, which the
+  Resolvent_Framework session formally audited and PARKED 2026-
+  05-30 (filed at `Resolvent_Framework/notes/covered_leads/
+  kappa_q_characterisation_ladder.md`; audit verdict at
+  `…_audit.md`; calibration anchor at `…/residual_structure_
+  inference.md`). Audit found Type 4 vocabulary CONDITIONAL FAIL
+  (three-statements test fails on circumlocution ≠ non-
+  stateability), Type 7 methodology CONDITIONAL pending
+  demonstrated advantage, all other types FAIL. Either sign of
+  T1's pre-registered ACF-drop prediction clears Type 7
+  (operational utility demonstrated by the prediction having
+  existed because of the framing, not by its sign). **MITACS-
+  side framing implication:** T1's secondary metric is now
+  cited as Diggle 1988 / DHLZ 2002 ch. 5 residual-variogram
+  σ²ρ(1) component, inferentially inverted per Cinelli-Hazlett
+  2022 / Chernozhukov et al. 2024 sensitivity-analysis stance.
+  No novelty claim on either side; framework-side seed PARK
+  does not block T1 or the Goal-4 §7→§8 paragraph (now
+  writeable citing Diggle + Cinelli-Hazlett / Chernozhukov,
+  pending §1 todo and forward-experiment §7 todo). MITACS-side
+  companion at `notes/seeds/kappa_q_limits_applied.md` carries
+  the corrigendum and full revival-trigger documentation.
 - **Goal-4 writeup integration LANDED** (2026-05-29): per user
   "Position 2" decision (write up the within-data exhaustion
   story before opening the temperature arm), then reframed under
