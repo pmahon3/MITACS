@@ -536,6 +536,24 @@ kernel-family-agnostic theory memo (the memo predates them).
   analogue joint refinement); T1.R-C1T handoff to NPMLEmix /
   P2 synthetic-DGP / alternative-Z. T3 is the Q1B'-analogue
   CI-tightening run, pre-registered only if T1/T2 CIs are wide.
+  **T1 phase_a author note**: read
+  `scratch/within_stratum_residual_diagnostic_summary.md`
+  (INSPECTION-ONLY scratch, 2026-05-29) before filling. The
+  diagnostic characterised the within-stratum residual
+  structure as a slow-varying-continuous-factor signature
+  (mean lag-1 ACF across all 32 cells = +0.67, weak lag-5)
+  consistent with temperature's footprint. Per user direction
+  2026-05-29, T1 should register a **secondary metric**
+  alongside the χ² primary: post-conditioning within-cell
+  lag-1 ACF (predicted to drop from +0.67 toward 0 if
+  temperature is the missing Z; stays > +0.4 under DA's
+  null reading). The diagnostic itself is INSPECTION-ONLY and
+  not citable as a result; its content becomes
+  registered-finding-eligible via T1's secondary metric.
+  ECCC scope from the diagnostic: hourly resolution required
+  (not daily-mean); single-station sufficient for first cut;
+  forecast temperature relevant for the registered forward
+  experiment.
 - **Goal-4 writeup integration LANDED** (2026-05-29): per user
   "Position 2" decision (write up the within-data exhaustion
   story before opening the temperature arm), then reframed under
