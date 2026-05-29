@@ -2,19 +2,19 @@ amendments:
 - amendment_id: A1
   changes:
   - 'Add node Q1A'' (parent_branch: R-A, parent_id: P1, status: active)'
-  - Add branching_rules.Q1A' with all three outcomes mapped to null (independent verdict; non-gating w.r.t. thread
-    state machine)
+  - Add branching_rules.Q1A' with all three outcomes mapped to null (independent verdict; non-gating w.r.t. thread state machine)
   - current_node_id unchanged (remains Q1A; Q1A' is out-of-state-machine sibling)
   - branching_rules.P1.R-A unchanged (remains Q1A per settled-node immutability rule)
   - P1 node entry unchanged (settled-node immutability rule)
   git_sha: 769d854ff21e92fe16d230c037f6daf647133d28
   prior_tree_hash: 9a5647a5f7ea6b3ee44d53e95c23e165e9d706d105db9afbf2c4f0cc25a3c6ba
-  reason: "Add Q1A' as a non-gating sibling of Q1A under P1.R-A. Per the disintegration_diagnostic note \xA7(f),\
-    \ data-driven Z-recovery (SDR via SIR; ICA via FastICA) is recommended as a consistency check on P1's hand-specified\
-    \ hour_of_week binding axis. The original thread tree only included candidate-Z testing as type-1 auxiliary\
-    \ information; data-driven Z-discovery was implicit in the framework but not registered as a thread node. Running\
-    \ Q1A' in parallel with Q1A means the consistency check fires regardless of Q1A's \u03C7\xB2-closure outcome,\
-    \ validating P1's hand-specified-axis approach as a method.\n"
+  reason: 'Add Q1A'' as a non-gating sibling of Q1A under P1.R-A. Per the disintegration_diagnostic note §(f), data-driven
+    Z-recovery (SDR via SIR; ICA via FastICA) is recommended as a consistency check on P1''s hand-specified hour_of_week binding
+    axis. The original thread tree only included candidate-Z testing as type-1 auxiliary information; data-driven Z-discovery
+    was implicit in the framework but not registered as a thread node. Running Q1A'' in parallel with Q1A means the consistency
+    check fires regardless of Q1A''s χ²-closure outcome, validating P1''s hand-specified-axis approach as a method.
+
+    '
   written_at: '2026-05-27T16:04:06-07:00'
 - amendment_id: A2
   changes:
@@ -25,58 +25,101 @@ amendments:
   - Q1B node entry unchanged (settled-node immutability rule)
   git_sha: 9ee4ac20b6abb79b419cf90ea71186933b3e40e2
   prior_tree_hash: 91d529c9273698689cd7e6bc2340feec7e93e0ae79b0056c2904e5759c5ba8ed
-  reason: 'A2 adds Q1B'' as a non-gating sibling of Q1B under parent_branch=R-A. Per user decision (d) locked end
-    of session 2026-05-29-a, the tightening run brackets whether Q1B''s wide CI [+8.06, +484.4] on cumulative chi^2
-    improvement (width 476.358 chi^2, spans ~60x at point 290.3) narrows under denser SMC (N_PARTICLES 200->400)
-    or is dominated by eval-window-noise. Empirical CI-tightening experiment; not a head-to-head; outcome informs
-    the user adjudication of the (a)/(b)/(c) amendment paths surfaced in Q1B''s S4 advance. This matters because
-    (a) further within-data Z axes, (b) cross-axis joint stratification thread spawn, and (c) temperature/exogenous-Z
-    arm are each ranked differently depending on whether the Q1B effect is near the lower CI bound (8.06 chi^2;
-    essentially Q1A-scale; (c) becomes dominant) or near the upper CI bound (484.4 chi^2; ~67% closure; (a)/(b)
-    become attractive). Q1B'' tightens the CI before the user picks. Non-gating w.r.t. thread state machine; current_node_id
-    remains null; Q1B'' settlement does NOT advance the tree.
+  reason: 'A2 adds Q1B'' as a non-gating sibling of Q1B under parent_branch=R-A. Per user decision (d) locked end of session
+    2026-05-29-a, the tightening run brackets whether Q1B''s wide CI [+8.06, +484.4] on cumulative chi^2 improvement (width
+    476.358 chi^2, spans ~60x at point 290.3) narrows under denser SMC (N_PARTICLES 200->400) or is dominated by eval-window-noise.
+    Empirical CI-tightening experiment; not a head-to-head; outcome informs the user adjudication of the (a)/(b)/(c) amendment
+    paths surfaced in Q1B''s S4 advance. This matters because (a) further within-data Z axes, (b) cross-axis joint stratification
+    thread spawn, and (c) temperature/exogenous-Z arm are each ranked differently depending on whether the Q1B effect is near
+    the lower CI bound (8.06 chi^2; essentially Q1A-scale; (c) becomes dominant) or near the upper CI bound (484.4 chi^2;
+    ~67% closure; (a)/(b) become attractive). Q1B'' tightens the CI before the user picks. Non-gating w.r.t. thread state
+    machine; current_node_id remains null; Q1B'' settlement does NOT advance the tree.
 
     '
   written_at: '2026-05-29T22:00:00-07:00'
 - amendment_id: A3
   changes:
   - 'Change nodes."Q1A''".status: active -> exhausted'
-  - 'Add nodes."Q1A''".result: EXHAUSTED-PRE-DATA (FastICA selection-rule design defect; SIR-side science deferred
-    to potential future SDR-only thread)'
-  - Extend nodes."Q1A'".notes with one paragraph documenting the close-without-running, citing the memory file slug
-    (q1a-prime-fastica-selection-defect.md, user-filesystem) and the SIR-side production-helper + synthetic-recovery-gate
-    build commit (78b5069) so future-session readers see the trail
-  - branching_rules.Q1A' UNCHANGED (still all three outcomes mapped to null per A1; non-gating w.r.t. thread state
-    machine preserved)
-  - current_node_id UNCHANGED (remains null; Q1A' was non-gating from A1 so its exhaustion does not affect the state
-    machine)
+  - 'Add nodes."Q1A''".result: EXHAUSTED-PRE-DATA (FastICA selection-rule design defect; SIR-side science deferred to potential
+    future SDR-only thread)'
+  - Extend nodes."Q1A'".notes with one paragraph documenting the close-without-running, citing the memory file slug (q1a-prime-fastica-selection-defect.md,
+    user-filesystem) and the SIR-side production-helper + synthetic-recovery-gate build commit (78b5069) so future-session
+    readers see the trail
+  - branching_rules.Q1A' UNCHANGED (still all three outcomes mapped to null per A1; non-gating w.r.t. thread state machine
+    preserved)
+  - current_node_id UNCHANGED (remains null; Q1A' was non-gating from A1 so its exhaustion does not affect the state machine)
   - state UNCHANGED (remains active; thread is not exhausted -- main Q1B branch still awaiting (a)/(b)/(c) adjudication)
-  - All settled-node entries (P1, Q1A, Q1B, Q1B', Q1C) UNCHANGED (settled-node immutability rule; Q1A' was active
-    not settled so this update is permitted)
+  - All settled-node entries (P1, Q1A, Q1B, Q1B', Q1C) UNCHANGED (settled-node immutability rule; Q1A' was active not settled
+    so this update is permitted)
   git_sha: bdd503a9da1dbfe01a6505f8b30e49e83910a5f1
   prior_tree_hash: 164f8bb95e347e2db90e26ac1bc46c0dd4fac42d07733c0ba9651b841fd8fe15
-  reason: 'A3 closes Q1A'' as EXHAUSTED without running, on the basis of an empirical FastICA design defect surfaced
-    during exploratory synthetic-gate-build. The FastICA pre-registered selection rule (max |excess_kurtosis|) picks
-    structurally-non-Gaussian binary day-type indicators over continuous cyclic signals when X carries both -- making
-    the registered head-to-head between SIR and FastICA structurally broken on Ontario-mimic X. Multi-seed on amended
-    synthetic showed FastICA picks the saturday/sunday binary-indicator columns (signal/null top |kurt| ratio ~1.0),
-    giving bimodal rho_signal {~0.65, ~0.01} and rho_null at the X-cyclic-loading floor 0.55-0.71 -- the registered
-    0.70/0.30 cuts are unsatisfiable by construction. Per user adjudication 2026-05-29 (advisor-consulted): close
-    via thread amendment rather than re-amend Q1A''s phase_a a second time in the same session (lab-discipline rules
-    flag the second-amendment smell). The FastICA defect IS the substantive deliverable -- a generalisable workflow
-    lesson about textbook ICA usage on heterogeneous X carrying both continuous-cyclic and binary-indicator columns
-    -- and is captured as a methodological finding in memory file q1a-prime-fastica-selection-defect.md (user-filesystem;
+  reason: 'A3 closes Q1A'' as EXHAUSTED without running, on the basis of an empirical FastICA design defect surfaced during
+    exploratory synthetic-gate-build. The FastICA pre-registered selection rule (max |excess_kurtosis|) picks structurally-non-Gaussian
+    binary day-type indicators over continuous cyclic signals when X carries both -- making the registered head-to-head between
+    SIR and FastICA structurally broken on Ontario-mimic X. Multi-seed on amended synthetic showed FastICA picks the saturday/sunday
+    binary-indicator columns (signal/null top |kurt| ratio ~1.0), giving bimodal rho_signal {~0.65, ~0.01} and rho_null at
+    the X-cyclic-loading floor 0.55-0.71 -- the registered 0.70/0.30 cuts are unsatisfiable by construction. Per user adjudication
+    2026-05-29 (advisor-consulted): close via thread amendment rather than re-amend Q1A''s phase_a a second time in the same
+    session (lab-discipline rules flag the second-amendment smell). The FastICA defect IS the substantive deliverable -- a
+    generalisable workflow lesson about textbook ICA usage on heterogeneous X carrying both continuous-cyclic and binary-indicator
+    columns -- and is captured as a methodological finding in memory file q1a-prime-fastica-selection-defect.md (user-filesystem;
     not in repo, durable independent of registry state). SIR-side science (consistency-check on P1''s binding hour_of_week
-    axis via an independent SDR method) is preserved as a deferred follow-up: would require a new pre-registration
-    thread, not a Q1A''-amendment restart. The SIR-side production helper + synthetic recovery gate landed in commit
-    78b5069 and remain in-tree, available to the future SDR-only thread. branching_rules.Q1A'' is preserved unchanged
-    (all three outcomes -> null per A1''s non-gating design) -- the exhaustion is in the node''s status field, not
-    in the branching rules; current_node_id remains null and thread state remains active per the original non-gating
-    intent of A1.
+    axis via an independent SDR method) is preserved as a deferred follow-up: would require a new pre-registration thread,
+    not a Q1A''-amendment restart. The SIR-side production helper + synthetic recovery gate landed in commit 78b5069 and remain
+    in-tree, available to the future SDR-only thread. branching_rules.Q1A'' is preserved unchanged (all three outcomes ->
+    null per A1''s non-gating design) -- the exhaustion is in the node''s status field, not in the branching rules; current_node_id
+    remains null and thread state remains active per the original non-gating intent of A1.
 
     '
   written_at: '2026-05-29T23:00:00-07:00'
-body_sha256: 03e8664c94812bdebe87bdf0619b9d88d04798a7eec65b0b11c48305ee11d7d1
+- amendment_id: A4
+  changes:
+  - 'Add node T1 (parent_branch: temperature_arm, parent_id: null, status: planned). Root of temperature-arm sub-tree. phase_a_skeleton:
+    candidate_set = [temperature_decile_or_equivalent_low_resolution_exogenous_temperature_Z]; cumulative-baseline = Q1A''s
+    settled M3 chi^2 = 952.5167; outcome_categories R-A1T (≤ 228, RESOLVES) / R-B1T ((228, 2284], routes to T2) / R-C1T (>
+    2284, handoff to alternative-Z / NPMLEmix / P2). skeleton_thresholds_depend_on: ECCC data shape + MIN_CELL_SIZE feasibility
+    per T1 phase_a fill time.'
+  - 'Add node T2 (parent_branch: R-B1T, parent_id: T1, status: planned). Q1B-analogue joint refinement; phase_a fill contingent
+    on T1.R-B1T per branching_rules.T1. Outcome cuts per usual structure (R-A1T''/R-B1T''/R-C1T''); specific additional within-arm
+    axis registered at T2 phase_a fill time per T1''s realized per-cell decomposition.'
+  - 'Add node T3 (parent_branch: R-B1T, parent_id: T1, status: planned). Q1B''-analogue methodological-tightening non-gating
+    sibling on the temperature arm; pre-registered only if T1''s or T2''s realized CI is wide. branching_rules.T3 all-null
+    per non-gating-sibling design.'
+  - 'Add branching_rules.T1 = {R-A1T: null (thread RESOLVES), R-B1T: T2, R-C1T: null (handoff to alternative-Z / NPMLEmix
+    / synthetic-DGP)}.'
+  - 'Add branching_rules.T2 = {R-A1T'': null, R-B1T'': null (consider T3 if CI wide), R-C1T'': null}.'
+  - 'Add branching_rules.T3 = {R-A1T'''': null, R-B1T'''': null, R-C1T'''': null} (non-gating sibling, like Q1B'').'
+  - current_node_id UNCHANGED (remains null; T1 phase_a fill is the trigger for state-machine advancement, blocked on ECCC
+    data acquisition).
+  - state UNCHANGED (remains active; thread is now active on the temperature arm).
+  - All existing nodes (P1, Q1A, Q1A', Q1B, Q1B', Q1C, P2) UNCHANGED per settled/exhausted/closed/planned-node immutability.
+  - All existing branching_rules (P1, Q1A, Q1A', Q1B, Q1B', Q1C, P2) UNCHANGED.
+  git_sha: ddb2f5198c0941f0714da707b1643b0fb93856d1
+  prior_tree_hash: 03e8664c94812bdebe87bdf0619b9d88d04798a7eec65b0b11c48305ee11d7d1
+  reason: 'A4 grafts a temperature-arm sub-tree onto the resolution-paths-thread. The within-data candidate-Z arc has settled
+    (P1 R-A landslide, Q1A R-B1A, Q1B R-B1B substantive favorable, Q1B'' R-B1B'' aligned settled; Q1A'' exhausted pre-data
+    per A3; Q1C closed as sibling-not-fired at S2). The thread''s research question — which of the three framework-prescribed
+    resolution paths closes the residual chi^2 — is partially answered: path (i) candidate-Z testing, restricted to the time-indexed
+    sigma-algebra, is empirically bounded (single-axis bounded near zero per S12; joint multi-axis bounded at higher magnitude
+    per S13 but not closing to R-A1B; methodological tightening empirically bounded per S5/Q1B''). The joint S9+S10+S11+S12+S13+S5(Q1B'')
+    record is publication-grade evidence for the identifiability obstruction under time-indexed sigma-algebras alone. The
+    temperature arm extends path (i) to exogenous Z beyond the time index — Q'' = Q ∨ σ(Z) with Z = temperature — the framework-prescribed
+    next move per S14''s reading and per the mitacs-clim-gap-nonstationary record (hour-flat ~+1000 MW persistent post-cutoff
+    bias). Three new planned nodes are added: T1 (root of the temperature arm; extends Q1A''s settled Z_c carryforward with
+    a temperature-derived Z2), T2 (Q1B-analogue joint refinement; placeholder pending T1 data feasibility), T3 (Q1B''-analogue
+    methodological tightening; optional contingent on T1/T2 CI structure). T1''s phase_a fill is BLOCKED on ECCC (Environment
+    and Climate Change Canada) hourly weather data acquisition — next-session infrastructure work — so current_node_id remains
+    null (T1 will become current_node when its phase_a is filled; the state-machine advancement is data-acquisition-gated,
+    not amendment-gated). T2/T3 phase_a fill is contingent on prior settlements per branching_rules.T1.R-B1T = T2 and T3''s
+    non-gating-sibling design. thread state remains active. The amendment preserves all settled / exhausted / closed node
+    entries unchanged per the settled-node immutability rule, and preserves all existing branching_rules entries (P1, Q1A,
+    Q1A'', Q1B, Q1B'', Q1C, P2) unchanged. P2 (synthetic Gaussian-DGP calibration) and NPMLEmix-class methods-novelty resolution
+    paths remain un-pursued; A4 does not close them — they are reachable via T1.R-C1T''s alternative-Z / NPMLEmix / synthetic-DGP
+    handoff and via the remaining Q1C.R-C1C / Q1B.R-C1B / Q1A.R-C1A routes through P2 unchanged.
+
+    '
+  written_at: '2026-05-28T12:00:00-07:00'
+body_sha256: 7506d272399de0816083171a867919ffc7adaf558290f1d3e09f982efe80558b
 branching_rules:
   P1:
     R-A: Q1A
@@ -104,9 +147,21 @@ branching_rules:
     R-A1C: null
     R-B1C: null
     R-C1C: P2
+  T1:
+    R-A1T: null
+    R-B1T: T2
+    R-C1T: null
+  T2:
+    R-A1T': null
+    R-B1T': null
+    R-C1T': null
+  T3:
+    R-A1T'': null
+    R-B1T'': null
+    R-C1T'': null
 current_node_id: null
 git_clean: true
-git_sha: bdd503a9da1dbfe01a6505f8b30e49e83910a5f1
+git_sha: ddb2f5198c0941f0714da707b1643b0fb93856d1
 nodes:
   P1:
     id: P1
@@ -121,26 +176,28 @@ nodes:
       - season
       - day_type
       - hour_of_week
-      metric_class: "Plain Patra-Sen (2016) two-component mixture estimator \u03B1\u0302_L (lower 95% bound on non-Gaussian\
-        \ mixture fraction) applied per stratum to the standardized residuals of Q1's M1 predictor (Student-t kernel;\
-        \ the best \u03BA_1-only predictor). Stratification across 5 axes: demand quantile (terciles), time-of-day\
-        \ (4 bins: overnight 00-05 / morning ramp 06-10 / afternoon 11-16 / evening 17-23), season (3 bins: winter\
-        \ Nov-Mar / summer Jun-Aug / shoulder Apr-May+Sep-Oct), day-type (3: weekday/saturday/sunday), and hour-of-week\
-        \ (collapsed to 8 bins; finer than day-type+time-of-day combined). Per axis: report \u03B1\u0302_L per stratum\
-        \ with 1000 paired-day bootstrap CIs; compute range_axis = max(\u03B1\u0302_L) \u2212 min(\u03B1\u0302_L)\
-        \ across strata in that axis.\n"
+      metric_class: 'Plain Patra-Sen (2016) two-component mixture estimator α̂_L (lower 95% bound on non-Gaussian mixture
+        fraction) applied per stratum to the standardized residuals of Q1''s M1 predictor (Student-t kernel; the best κ_1-only
+        predictor). Stratification across 5 axes: demand quantile (terciles), time-of-day (4 bins: overnight 00-05 / morning
+        ramp 06-10 / afternoon 11-16 / evening 17-23), season (3 bins: winter Nov-Mar / summer Jun-Aug / shoulder Apr-May+Sep-Oct),
+        day-type (3: weekday/saturday/sunday), and hour-of-week (collapsed to 8 bins; finer than day-type+time-of-day combined).
+        Per axis: report α̂_L per stratum with 1000 paired-day bootstrap CIs; compute range_axis = max(α̂_L) − min(α̂_L) across
+        strata in that axis.
+
+        '
       outcome_categories:
-      - R-A: "max over axes of range(\u03B1\u0302_L) > 0.20 (Z detectable from current data; the binding axis points\
-          \ at where Z is concentrated)"
+      - R-A: max over axes of range(α̂_L) > 0.20 (Z detectable from current data; the binding axis points at where Z is concentrated)
       - R-B: max range in (0.10, 0.20] (marginal variation; Z hint present but not localized)
       - R-C: max range < 0.10 (constant across all strata; Z orthogonal to current natural conditioning)
     status: settled
   P2:
     id: P2
     name: synthetic-gaussian-DGP-calibration
-    notes: "P2 is triggered when all live R-A branches (Q1A/B/C) fire R-C1A/B/C. Provides interpretation framework\
-      \ for the thread-EXHAUSTED-UNRESOLVED case: Ontario's \u03B1\u0302_L excess above the synthetic floor would\
-      \ attribute the residual to structure even though no single Z closes the gap.\n"
+    notes: 'P2 is triggered when all live R-A branches (Q1A/B/C) fire R-C1A/B/C. Provides interpretation framework for the
+      thread-EXHAUSTED-UNRESOLVED case: Ontario''s α̂_L excess above the synthetic floor would attribute the residual to structure
+      even though no single Z closes the gap.
+
+      '
     parent_branch: null
     parent_id: null
     phase_a_path: null
@@ -148,10 +205,11 @@ nodes:
       candidate_set:
       - gaussian_floor
       - single_Z_recovery
-      metric_class: "Generate synthetic data with: (a) known-Gaussian DGP with matched autocorrelation; (b) known\
-        \ covariate-dependent mixture DGP with single-Z structure. Run plain Patra-Sen (per P1's method) on both.\
-        \ Establish \u03B1\u0302_L floor under (a); confirm recovery under (b). Provides a reference baseline against\
-        \ which Ontario's \u03B1\u0302_L excess can be attributed.\n"
+      metric_class: 'Generate synthetic data with: (a) known-Gaussian DGP with matched autocorrelation; (b) known covariate-dependent
+        mixture DGP with single-Z structure. Run plain Patra-Sen (per P1''s method) on both. Establish α̂_L floor under (a);
+        confirm recovery under (b). Provides a reference baseline against which Ontario''s α̂_L excess can be attributed.
+
+        '
       outcome_categories:
       - methodology_grade_calibration
     status: planned
@@ -164,14 +222,14 @@ nodes:
     phase_a_skeleton:
       candidate_set:
       - strongest_Z_from_P1_R-A
-      metric_class: "Re-fit M3 (mixture-2-Gaussian) with the additional conditioning variable Z derived from P1's\
-        \ strongest-signal stratification axis. Recompute marginal PIT \u03C7\xB2 on post-cutoff data. Use Q2A's\
-        \ gate-derived cuts.\n"
+      metric_class: 'Re-fit M3 (mixture-2-Gaussian) with the additional conditioning variable Z derived from P1''s strongest-signal
+        stratification axis. Recompute marginal PIT χ² on post-cutoff data. Use Q2A''s gate-derived cuts.
+
+        '
       outcome_categories:
-      - R-A1A: "\u03C7\xB2 \u2264 228 (Q2A R-A2 cut; this Z closes the gap; specific Z identified)"
-      - R-B1A: "\u03C7\xB2 in (228, 2284] (Z helps but doesn't close; multi-Z needed)"
-      - R-C1A: "\u03C7\xB2 > 2284 (Z doesn't help; P1's signal was a false positive or the localization missed the\
-          \ actual Z)"
+      - R-A1A: χ² ≤ 228 (Q2A R-A2 cut; this Z closes the gap; specific Z identified)
+      - R-B1A: χ² in (228, 2284] (Z helps but doesn't close; multi-Z needed)
+      - R-C1A: χ² > 2284 (Z doesn't help; P1's signal was a false positive or the localization missed the actual Z)
       skeleton_thresholds_depend_on:
       - field: binding_axis_and_Z_construction
         rule: Q1A's specific Z is derived from P1's R-A binding axis at result time.
@@ -181,21 +239,20 @@ nodes:
   Q1A':
     id: Q1A'
     name: q1a-prime-sdr-ica-sibling
-    notes: 'A3 (2026-05-29) closed Q1A'' as EXHAUSTED without running. Empirical FastICA design defect surfaced
-      during exploratory synthetic-gate-build: the pre-registered selection rule (max |excess_kurtosis|) picks structurally-non-Gaussian
-      binary day-type indicators (saturday, sunday columns in X) over the continuous cyclic signal that the cyclic-rho
-      verdict statistic expects to recover. Multi-seed on amended synthetic showed FastICA selecting the binary
-      columns (signal/null top |kurt| ratio ~1.0), giving bimodal rho_signal {~0.65, ~0.01} and rho_null at the
-      X-cyclic-loading floor 0.55-0.71 -- the registered 0.70/0.30 cuts are unsatisfiable by construction. Per user
-      adjudication 2026-05-29 (advisor-consulted), the close-without-running path was preferred over re-amending
-      Q1A''s phase_a a second time in one session (lab-discipline rules flag the second-amendment smell). The FastICA
-      defect IS the substantive deliverable -- a generalisable methodological finding about textbook ICA usage on
-      heterogeneous X carrying both continuous-cyclic and binary-indicator columns -- and is captured in user-filesystem
-      memory file `q1a-prime-fastica-selection-defect.md` (written 2026-05-29, durable independent of registry state).
-      SIR-side production helper + synthetic recovery gate landed in commit 78b5069 and remain in-tree; SIR-side
-      science (independent SDR-method consistency-check on P1''s binding hour_of_week axis) is preserved as a deferred
-      follow-up that would require a new pre-registration thread, not a Q1A''-amendment restart. Non-gating per
-      A1: branching_rules.Q1A'' unchanged (all three outcomes -> null); current_node_id and thread state unaffected.
+    notes: 'A3 (2026-05-29) closed Q1A'' as EXHAUSTED without running. Empirical FastICA design defect surfaced during exploratory
+      synthetic-gate-build: the pre-registered selection rule (max |excess_kurtosis|) picks structurally-non-Gaussian binary
+      day-type indicators (saturday, sunday columns in X) over the continuous cyclic signal that the cyclic-rho verdict statistic
+      expects to recover. Multi-seed on amended synthetic showed FastICA selecting the binary columns (signal/null top |kurt|
+      ratio ~1.0), giving bimodal rho_signal {~0.65, ~0.01} and rho_null at the X-cyclic-loading floor 0.55-0.71 -- the registered
+      0.70/0.30 cuts are unsatisfiable by construction. Per user adjudication 2026-05-29 (advisor-consulted), the close-without-running
+      path was preferred over re-amending Q1A''s phase_a a second time in one session (lab-discipline rules flag the second-amendment
+      smell). The FastICA defect IS the substantive deliverable -- a generalisable methodological finding about textbook ICA
+      usage on heterogeneous X carrying both continuous-cyclic and binary-indicator columns -- and is captured in user-filesystem
+      memory file `q1a-prime-fastica-selection-defect.md` (written 2026-05-29, durable independent of registry state). SIR-side
+      production helper + synthetic recovery gate landed in commit 78b5069 and remain in-tree; SIR-side science (independent
+      SDR-method consistency-check on P1''s binding hour_of_week axis) is preserved as a deferred follow-up that would require
+      a new pre-registration thread, not a Q1A''-amendment restart. Non-gating per A1: branching_rules.Q1A'' unchanged (all
+      three outcomes -> null); current_node_id and thread state unaffected.
 
       '
     parent_branch: R-A
@@ -205,46 +262,46 @@ nodes:
       candidate_set:
       - SIR
       - FastICA
-      metric_class: "Data-driven Z-recovery on \u03BA\u0302_Q's PIT residuals via SIR and FastICA (head-to-head).\
-        \ Input covariate matrix: the 4 non-hour_of_week P1 axes (demand_quantile, time_of_day, season, day_type)\
-        \ plus lagged demand (lag-1, lag-24). hour_of_week explicitly EXCLUDED from the input matrix \u2014 the\
-        \ discriminating empirical test is whether the methods recover an hour_of_week-aligned direction WITHOUT\
-        \ being pre-specified. For each method, identify the top component (highest eigenvalue for SIR; highest\
-        \ non-Gaussianity for FastICA), project hour_of_week onto a cyclic representation (sin/cos pair at the weekly\
-        \ fundamental frequency 2\u03C0/168), compute |Spearman \u03C1| between the top component's loadings and\
-        \ the cyclic hour_of_week phase. 1000-rep paired-day bootstrap CIs on each \u03C1.\n"
+      metric_class: 'Data-driven Z-recovery on κ̂_Q''s PIT residuals via SIR and FastICA (head-to-head). Input covariate matrix:
+        the 4 non-hour_of_week P1 axes (demand_quantile, time_of_day, season, day_type) plus lagged demand (lag-1, lag-24).
+        hour_of_week explicitly EXCLUDED from the input matrix — the discriminating empirical test is whether the methods
+        recover an hour_of_week-aligned direction WITHOUT being pre-specified. For each method, identify the top component
+        (highest eigenvalue for SIR; highest non-Gaussianity for FastICA), project hour_of_week onto a cyclic representation
+        (sin/cos pair at the weekly fundamental frequency 2π/168), compute |Spearman ρ| between the top component''s loadings
+        and the cyclic hour_of_week phase. 1000-rep paired-day bootstrap CIs on each ρ.
+
+        '
       outcome_categories:
-      - R-A1A': "max(|\u03C1_SIR|, |\u03C1_FastICA|) \u2265 0.5 (P1's hand-specified hour_of_week IS recovered by\
-          \ at least one data-driven method; SDR/ICA validates the approach)"
-      - R-B1A': "max(|\u03C1_SIR|, |\u03C1_FastICA|) in [0.3, 0.5) (partial recovery; methods sense the social-weekly\
-          \ structure but don't dominantly identify it)"
-      - R-C1A': "max(|\u03C1_SIR|, |\u03C1_FastICA|) < 0.3 (hour_of_week NOT recovered; P1's hand-specified axis\
-          \ is either an artifact or below SDR/ICA's sensitivity floor)"
+      - R-A1A': max(|ρ_SIR|, |ρ_FastICA|) ≥ 0.5 (P1's hand-specified hour_of_week IS recovered by at least one data-driven
+          method; SDR/ICA validates the approach)
+      - R-B1A': max(|ρ_SIR|, |ρ_FastICA|) in [0.3, 0.5) (partial recovery; methods sense the social-weekly structure but don't
+          dominantly identify it)
+      - R-C1A': max(|ρ_SIR|, |ρ_FastICA|) < 0.3 (hour_of_week NOT recovered; P1's hand-specified axis is either an artifact
+          or below SDR/ICA's sensitivity floor)
       skeleton_thresholds_depend_on:
       - field: hour_of_week_cyclic_phase
-        rule: "cyclic representation computed at the weekly fundamental frequency 2\u03C0/168; precise sin/cos column\
-          \ construction is the phase_a author's call."
-        source: P1.result (binding axis = hour_of_week; weekly fundamental from the 21-hour bin structure used in
-          P1)
-    result: EXHAUSTED-PRE-DATA (FastICA selection-rule design defect; SIR-side science deferred to potential future
-      SDR-only thread)
+        rule: cyclic representation computed at the weekly fundamental frequency 2π/168; precise sin/cos column construction
+          is the phase_a author's call.
+        source: P1.result (binding axis = hour_of_week; weekly fundamental from the 21-hour bin structure used in P1)
+    result: EXHAUSTED-PRE-DATA (FastICA selection-rule design defect; SIR-side science deferred to potential future SDR-only
+      thread)
     status: exhausted
   Q1B:
     id: Q1B
     name: Z2-conditioning-second-axis
     notes: 'Predecessor-carryforward from Q1A.R-B1A (arbiter body_sha256 6b49d9136437c1905c6a48f4f8bf6511feeafc4ba7bc01124be6efb14c53ed7c):
-      Z1 = Z_c (8-level hour_of_week stratification) is the parsimony-preferred point-estimate winner used as Q1B''s
-      cumulative baseline. NEAR-TIE CAVEAT: chi2_diff = +33.5 [-93, +143] straddles zero (paired SE 56.84 > |diff|);
-      Z_b (binary weekend carve-out) and Z_c are statistically indistinguishable on the verdict-metric. Q1B''s phase_a
-      author should NOT treat Z_c as definitively the right Z1; the head-to-head sub-finding records ''no statistically-discernible
-      winner.'' SUBSTANTIVE PROVISO: the Q1A Z lever delivered 0.18% of the gap-to-close (1.3267 out of 725.8433
-      chi^2 units). P1 second-strongest axis is time_of_day at range 0.485 (vs hour_of_week 0.575), so the prior
-      on Q1B closing the gap via the same within-data sigma-algebra-enrichment lever is even weaker than Q1A''s
-      already-weak prior. Q1B''s phase_a should factor this in: either (a) the cumulative-Z1+Z2 multi-Z hypothesis
-      becomes the binding test, or (b) the thread approaches EXHAUSTED-UNRESOLVED if Q1B also fires R-B1B/R-C1B
-      (R-C1B routes to P2 synthetic calibration per branching_rules.Q1B.R-C1B). The temperature prior (clim-gap-nonstationary)
-      remains candidate for the marginal pathology but is not in the thread''s live branches; thread amendment to
-      reopen Q1C (or a new thread targeting temperature directly) is a natural next move if Q1B fires R-B1B/R-C1B.
+      Z1 = Z_c (8-level hour_of_week stratification) is the parsimony-preferred point-estimate winner used as Q1B''s cumulative
+      baseline. NEAR-TIE CAVEAT: chi2_diff = +33.5 [-93, +143] straddles zero (paired SE 56.84 > |diff|); Z_b (binary weekend
+      carve-out) and Z_c are statistically indistinguishable on the verdict-metric. Q1B''s phase_a author should NOT treat
+      Z_c as definitively the right Z1; the head-to-head sub-finding records ''no statistically-discernible winner.'' SUBSTANTIVE
+      PROVISO: the Q1A Z lever delivered 0.18% of the gap-to-close (1.3267 out of 725.8433 chi^2 units). P1 second-strongest
+      axis is time_of_day at range 0.485 (vs hour_of_week 0.575), so the prior on Q1B closing the gap via the same within-data
+      sigma-algebra-enrichment lever is even weaker than Q1A''s already-weak prior. Q1B''s phase_a should factor this in:
+      either (a) the cumulative-Z1+Z2 multi-Z hypothesis becomes the binding test, or (b) the thread approaches EXHAUSTED-UNRESOLVED
+      if Q1B also fires R-B1B/R-C1B (R-C1B routes to P2 synthetic calibration per branching_rules.Q1B.R-C1B). The temperature
+      prior (clim-gap-nonstationary) remains candidate for the marginal pathology but is not in the thread''s live branches;
+      thread amendment to reopen Q1C (or a new thread targeting temperature directly) is a natural next move if Q1B fires
+      R-B1B/R-C1B.
 
       '
     parent_branch: R-A
@@ -258,90 +315,87 @@ nodes:
 
         '
       outcome_categories:
-      - R-A1B: "cumulative-with-Z1 \u03C7\xB2 \u2264 228 (Z1+Z2 close gap together)"
+      - R-A1B: cumulative-with-Z1 χ² ≤ 228 (Z1+Z2 close gap together)
       - R-B1B: in (228, 2284]
       - R-C1B: '> 2284 (Z2 redundant with Z1)'
       skeleton_thresholds_depend_on:
       - field: second_Z_construction
-        rule: "Q1B's Z2 is the second-ranked axis from P1; Q1B's cumulative \u03C7\xB2 is computed against Q1A's\
-          \ Z1-conditioned baseline."
+        rule: Q1B's Z2 is the second-ranked axis from P1; Q1B's cumulative χ² is computed against Q1A's Z1-conditioned baseline.
         source: P1.result AND Q1A.result
     result: R-B1B
     status: settled
   Q1B':
     id: Q1B'
     name: q1b-prime-smc-tightening
-    notes: 'Q1B'' is a non-gating empirical CI-tightening run on Q1B''s winning (day_type, Z_c, Z2_c) configuration.
-      Single arm: re-run `experiment/q1b_z2_conditioning/__main__.py` with `--n-particles 400` (vs Q1B''s 200).
-      All other code paths identical (same library, same fitter, same SMC seed convention, same paired-day bootstrap
-      convention, same MIN_CELL_SIZE pool-fallback rule, same dual reproduction-check anchors Q2A 953.84 + Q1A 952.5167).
+    notes: 'Q1B'' is a non-gating empirical CI-tightening run on Q1B''s winning (day_type, Z_c, Z2_c) configuration. Single
+      arm: re-run `experiment/q1b_z2_conditioning/__main__.py` with `--n-particles 400` (vs Q1B''s 200). All other code paths
+      identical (same library, same fitter, same SMC seed convention, same paired-day bootstrap convention, same MIN_CELL_SIZE
+      pool-fallback rule, same dual reproduction-check anchors Q2A 953.84 + Q1A 952.5167).
 
 
-      Verdict is on the cumulative_chi2_improvement_above_Z_c CI WIDTH, not the point estimate. R-A1B'' fires if
-      width narrows to <= 75% of Q1B''s realized 476.358 chi^2 width (i.e., <= 357.27). R-B1B'' = mixed. R-C1B''
-      = widens OR point shift > 50 chi^2.
+      Verdict is on the cumulative_chi2_improvement_above_Z_c CI WIDTH, not the point estimate. R-A1B'' fires if width narrows
+      to <= 75% of Q1B''s realized 476.358 chi^2 width (i.e., <= 357.27). R-B1B'' = mixed. R-C1B'' = widens OR point shift
+      > 50 chi^2.
 
 
-      Reproduction-check semantics at N=400: the existing BLOCKING assertions in `__main__.py` lines 1424/1454 call
-      SMC with M=args.n_particles. At N=400 the SMC trajectories diverge from the seed-exact N=200 path; drift could
-      be within the existing tol=50 chi^2 or above it. Phase_a treats drift as part of the measurement: if repro
-      passes within 50, the dual-anchor framing survives; if it FAILS, that itself is empirical evidence that SMC
-      variance at N=200 was non-trivial in the parent fits -- informative side-channel, not a failed gate. The script''s
-      existing assert will halt execution if drift > 50; phase_a may carve out a catch-and-report rather than carve
-      out the assert itself (preregister''s call when filling phase_a).
+      Reproduction-check semantics at N=400: the existing BLOCKING assertions in `__main__.py` lines 1424/1454 call SMC with
+      M=args.n_particles. At N=400 the SMC trajectories diverge from the seed-exact N=200 path; drift could be within the
+      existing tol=50 chi^2 or above it. Phase_a treats drift as part of the measurement: if repro passes within 50, the dual-anchor
+      framing survives; if it FAILS, that itself is empirical evidence that SMC variance at N=200 was non-trivial in the parent
+      fits -- informative side-channel, not a failed gate. The script''s existing assert will halt execution if drift > 50;
+      phase_a may carve out a catch-and-report rather than carve out the assert itself (preregister''s call when filling phase_a).
 
 
-      Non-gating: branching_rules.Q1B'' = {R-A1B'': null, R-B1B'': null, R-C1B'': null}. Q1B''''s settlement does
-      NOT advance current_node_id. Q1B'' informs the user adjudication of the (a)/(b)/(c) paths surfaced by Q1B''s
-      S4 advance but does not itself pick one.
+      Non-gating: branching_rules.Q1B'' = {R-A1B'': null, R-B1B'': null, R-C1B'': null}. Q1B''''s settlement does NOT advance
+      current_node_id. Q1B'' informs the user adjudication of the (a)/(b)/(c) paths surfaced by Q1B''s S4 advance but does
+      not itself pick one.
 
 
 
-      SETTLED 2026-05-28 per arbiter body_sha256 1ee09afa...: verdict R-B1B'' (mechanical = substantive; ALIGNED
-      on R-B1B'', no suffix). Realized cumulative_chi2_improvement_above_Z_c CI95 = [-34.576, +471.622]; CI WIDTH
-      = 506.198 chi^2 in registered band (357.27, 524.0]. Realized better_chi2 = 679.128; |point_shift from Q1B''s
-      662.223| = 16.905 << tol 50. Both point-stability and CI-width R-B1B'' conjuncts cleared unambiguously. Realized
-      direction is +29.84 chi^2 WIDENING (+6.3% vs Q1B''s 476.358), OPPOSITE both forecasters'' narrowing predictions:
-      proponent R-A1B'' (width 338 [290, 395], 25%+ narrowing) and DA R-B1B'' (width 419 [370, 480], ~12% narrowing)
-      BOTH FALSIFIED on direction-of-magnitude; the registered R-B1B'' band is the unfalsifiability zone for direction
-      errors on the verdict-metric. DA wins on outcome category (R-B1B'' mechanical match); proponent''s R-A1B''
-      falsified. Both forecasters got point-stability right (16.905 << 50). Substantive finding: Q1B''s wide CI
-      is INTRINSIC TO DATA, not estimator -- eval-window-noise dominates; within-data SMC-tightening is empirically
-      EXHAUSTED as a CI-narrowing mechanism. Joint S9+S10+S11+S12+S13+Q1B'' is now a three-layer corroboration of
-      the identifiability obstruction (distributional-class via S9+S10; sigma-algebra-enrichment via S11+S12+S13;
-      methodological tightening via Q1B''). 7th named-failure-mode instance, new shape variant: outcome-category
-      mechanical match for ONE side (DA), BOTH sides falsified on direction-of-magnitude. PROVENANCE-GRADE INSPECTION-ONLY
-      (.txt artifact collision with Q1B; result.yaml + pickle ARE the durable record, both produced by audited PRODUCTION-PATH
-      code with all BLOCKING gates passed including dual reproduction checks Q2A |diff|=5.225 and Q1A |diff|=44.595
-      within tol=50). Reproduction checks at both anchors PASS. Q1B'' is non-gating per amendment A2; branching_rules.Q1B''.R-B1B''
-      = null; settlement does NOT advance current_node_id (remains null per S4 -- the main Q1B branch''s (a)/(b)/(c)
-      three-way amendment decision is now INFORMED by Q1B'' but not auto-decided).'
+      SETTLED 2026-05-28 per arbiter body_sha256 1ee09afa...: verdict R-B1B'' (mechanical = substantive; ALIGNED on R-B1B'',
+      no suffix). Realized cumulative_chi2_improvement_above_Z_c CI95 = [-34.576, +471.622]; CI WIDTH = 506.198 chi^2 in registered
+      band (357.27, 524.0]. Realized better_chi2 = 679.128; |point_shift from Q1B''s 662.223| = 16.905 << tol 50. Both point-stability
+      and CI-width R-B1B'' conjuncts cleared unambiguously. Realized direction is +29.84 chi^2 WIDENING (+6.3% vs Q1B''s 476.358),
+      OPPOSITE both forecasters'' narrowing predictions: proponent R-A1B'' (width 338 [290, 395], 25%+ narrowing) and DA R-B1B''
+      (width 419 [370, 480], ~12% narrowing) BOTH FALSIFIED on direction-of-magnitude; the registered R-B1B'' band is the
+      unfalsifiability zone for direction errors on the verdict-metric. DA wins on outcome category (R-B1B'' mechanical match);
+      proponent''s R-A1B'' falsified. Both forecasters got point-stability right (16.905 << 50). Substantive finding: Q1B''s
+      wide CI is INTRINSIC TO DATA, not estimator -- eval-window-noise dominates; within-data SMC-tightening is empirically
+      EXHAUSTED as a CI-narrowing mechanism. Joint S9+S10+S11+S12+S13+Q1B'' is now a three-layer corroboration of the identifiability
+      obstruction (distributional-class via S9+S10; sigma-algebra-enrichment via S11+S12+S13; methodological tightening via
+      Q1B''). 7th named-failure-mode instance, new shape variant: outcome-category mechanical match for ONE side (DA), BOTH
+      sides falsified on direction-of-magnitude. PROVENANCE-GRADE INSPECTION-ONLY (.txt artifact collision with Q1B; result.yaml
+      + pickle ARE the durable record, both produced by audited PRODUCTION-PATH code with all BLOCKING gates passed including
+      dual reproduction checks Q2A |diff|=5.225 and Q1A |diff|=44.595 within tol=50). Reproduction checks at both anchors
+      PASS. Q1B'' is non-gating per amendment A2; branching_rules.Q1B''.R-B1B'' = null; settlement does NOT advance current_node_id
+      (remains null per S4 -- the main Q1B branch''s (a)/(b)/(c) three-way amendment decision is now INFORMED by Q1B'' but
+      not auto-decided).'
     parent_branch: R-A
     parent_id: Q1B
     phase_a_path: 2026-05-29_q1b-prime-smc-tightening/phase_a.yaml
     phase_a_skeleton:
       candidate_set:
       - SMC_particle_count_change
-      metric_class: 'Empirical CI-tightening on Q1B''s settled cumulative_chi2_improvement_above_Z_c statistic.
-        Single arm: re-run Q1B''s winning (day_type, Z_c, Z2_c) configuration with N_PARTICLES=400 (vs Q1B''s 200).
-        All other methodology identical (library, fitter, SMC seed convention, paired-day bootstrap convention,
-        dual reproduction-check anchors). Verdict metric is the realized 95% CI WIDTH on cumulative_chi2_improvement_above_Z_c.
-        Q1B''s realized width was 476.358 chi^2 ([+8.064, +484.423]).
+      metric_class: 'Empirical CI-tightening on Q1B''s settled cumulative_chi2_improvement_above_Z_c statistic. Single arm:
+        re-run Q1B''s winning (day_type, Z_c, Z2_c) configuration with N_PARTICLES=400 (vs Q1B''s 200). All other methodology
+        identical (library, fitter, SMC seed convention, paired-day bootstrap convention, dual reproduction-check anchors).
+        Verdict metric is the realized 95% CI WIDTH on cumulative_chi2_improvement_above_Z_c. Q1B''s realized width was 476.358
+        chi^2 ([+8.064, +484.423]).
 
         '
       outcome_categories:
-      - R-A1B': CI width <= 357.27 (<= 75% of Q1B's 476.358; SMC noise IS the dominant variance component -- tightening
-          lever works; user can adjudicate (a)/(b)/(c) on the narrower CI)
-      - R-B1B': CI width in (357.27, 524.0] (mixed; SMC noise contributes but eval-window-noise is non-trivial;
-          user accepts wide CI and adjudicates (a)/(b)/(c) on substantive grounds)
-      - R-C1B': 'CI width > 524.0 OR |better_chi2 point shift| > 50 chi^2 (widens, OR SMC point estimate shifts
-          more than Monte-Carlo noise allows -- anomaly: SMC seed dependence or methodological issue worth diagnosing
-          before any further amendment)'
+      - R-A1B': CI width <= 357.27 (<= 75% of Q1B's 476.358; SMC noise IS the dominant variance component -- tightening lever
+          works; user can adjudicate (a)/(b)/(c) on the narrower CI)
+      - R-B1B': CI width in (357.27, 524.0] (mixed; SMC noise contributes but eval-window-noise is non-trivial; user accepts
+          wide CI and adjudicates (a)/(b)/(c) on substantive grounds)
+      - R-C1B': 'CI width > 524.0 OR |better_chi2 point shift| > 50 chi^2 (widens, OR SMC point estimate shifts more than
+          Monte-Carlo noise allows -- anomaly: SMC seed dependence or methodological issue worth diagnosing before any further
+          amendment)'
       skeleton_thresholds_depend_on:
       - field: ci_width_cuts
-        rule: 'R-A1B'' / R-B1B'' / R-C1B'' cuts are derived from Q1B''s realized better_chi2 CI95 width (476.358
-          chi^2 from result.yaml). 75%-cut (357.27) discriminates V_smc/V_total >= 0.875 from below; 110%-cut (524.0)
-          admits bootstrap noise without making R-C1B'' trivially unfireable.
+        rule: 'R-A1B'' / R-B1B'' / R-C1B'' cuts are derived from Q1B''s realized better_chi2 CI95 width (476.358 chi^2 from
+          result.yaml). 75%-cut (357.27) discriminates V_smc/V_total >= 0.875 from below; 110%-cut (524.0) admits bootstrap
+          noise without making R-C1B'' trivially unfireable.
 
           '
         source: Q1B.result (primary_result.chi2_Z2_c_ci95 width)
@@ -350,9 +404,9 @@ nodes:
   Q1C:
     id: Q1C
     name: temperature-fallback-prior-supported-Z
-    notes: 'Requires exogenous data source. ECCC (Environment and Climate Change Canada) historical hourly weather
-      is free, but the data acquisition + alignment is a pre-experiment infrastructure cost that must land before
-      Q1C''s phase_a is filled.
+    notes: 'Requires exogenous data source. ECCC (Environment and Climate Change Canada) historical hourly weather is free,
+      but the data acquisition + alignment is a pre-experiment infrastructure cost that must land before Q1C''s phase_a is
+      filled.
 
       '
     parent_branch: R-C
@@ -361,18 +415,139 @@ nodes:
     phase_a_skeleton:
       candidate_set:
       - temperature
-      metric_class: "If P1 returns R-C (constant \u03B1\u0302_L across all natural strata), test the prior-supported\
-        \ Z anyway: temperature. clim-gap-nonstationary and postcovid-probe both name temperature as the strongest\
-        \ a priori candidate. If R-A1C fires, P1's signal was a false null (temperature orthogonal to all five sketched\
-        \ stratification axes); if R-C1C fires, the missing content is not temperature and (P2 calibration is the\
-        \ next step).\n"
+      metric_class: 'If P1 returns R-C (constant α̂_L across all natural strata), test the prior-supported Z anyway: temperature.
+        clim-gap-nonstationary and postcovid-probe both name temperature as the strongest a priori candidate. If R-A1C fires,
+        P1''s signal was a false null (temperature orthogonal to all five sketched stratification axes); if R-C1C fires, the
+        missing content is not temperature and (P2 calibration is the next step).
+
+        '
       outcome_categories:
-      - R-A1C: "\u03C7\xB2 \u2264 228 (temperature closes gap; P1 was false null)"
+      - R-A1C: χ² ≤ 228 (temperature closes gap; P1 was false null)
       - R-B1C: in (228, 2284]
-      - R-C1C: "\u03C7\xB2 > 2284 (temperature doesn't help either; \u2192 P2)"
+      - R-C1C: χ² > 2284 (temperature doesn't help either; → P2)
     status: closed
-question: "Of the three framework-prescribed resolution paths for the identifiability obstruction (S9+S10), which\
-  \ closes the residual ~954 \u03C7\xB2 of the \u03BA_1 predictor on post-cutoff Ontario data?"
+  T1:
+    id: T1
+    name: temperature-z-conditioning-exogenous
+    notes: 'T1 is the root node of the temperature-arm sub-tree grafted by amendment A4. Extends path (i) candidate-Z testing
+      — the resolution-paths-thread''s original framework-prescribed direction — to exogenous Z beyond the time index. Per
+      the kernel framing this is Q'' = Q ∨ σ(Z) with Z = temperature. Cumulative baseline is Q1A''s settled M3 chi^2 = 952.5167
+      (the Z_c-conditioned configuration carried forward through Q1B); T1 tests whether adding a temperature-derived Z2 closes
+      additional gap. T1 phase_a fill is BLOCKED on ECCC (Environment and Climate Change Canada) hourly weather data acquisition
+      — a pre-experiment infrastructure cost that must land before phase_a author can construct Z2 (decile binning, station
+      selection / province-wide aggregation, alignment to Ontario demand timestamps, missing-data handling). Threshold cuts
+      in outcome_categories below inherit the thread skeleton''s (228, 2284] band as a starting point but may be re-derived
+      per the realized MIN_CELL_SIZE feasibility study at T1 phase_a fill time. Prior on T1 closing the residual gap is the
+      strongest within the temperature arm per (S10c) under-dispersion signature, (S11)''s social-weekly localisation (leaves
+      room for a secondary climatological signal), and the mitacs-clim-gap-nonstationary memory''s hour-flat ~+1000 MW persistent
+      post-cutoff bias.
+
+      '
+    parent_branch: temperature_arm
+    parent_id: null
+    phase_a_path: null
+    phase_a_skeleton:
+      candidate_set:
+      - temperature_decile_or_equivalent_low_resolution_exogenous_temperature_Z
+      metric_class: 'Extends Q1A''s settled (day_type, Z_c) σ-algebra with a temperature-derived Z2 (decile binning of hourly
+        temperature or equivalent low-resolution exogenous Z; specific binning to register at T1 phase_a fill time per ECCC
+        data shape). Cumulative-baseline = Q1A''s M3 chi^2 = 952.5167 (the Z_c-conditioned post-cutoff PIT chi^2). Verdict
+        on better_chi2 against cuts inherited from the thread skeleton''s (228, 2284] band (R-A2 cut at 228; R-C2 cut at 2284)
+        or re-derived per T1 phase_a author given realized cell-size structure. Production-path mixture_2_gaussian_mle_fit
+        per (day_type, Z_c, T1_Z2_temperature) cell with MIN_CELL_SIZE pool-fallback per Q1B convention; paired-day bootstrap
+        CIs.
+
+        '
+      outcome_categories:
+      - R-A1T: chi^2 ≤ 228 (temperature closes the residual gap; thread RESOLVES on path (i) extended to exogenous Z; cumulative
+          explained share > 0.80 satisfies root.closure_rule)
+      - R-B1T: chi^2 in (228, 2284] (temperature helps but doesn't close on its own; routes to T2 for joint multi-axis refinement
+          with an additional within-arm axis)
+      - R-C1T: chi^2 > 2284 (temperature doesn't help; the within-data lever + temperature lever are jointly empirically exhausted;
+          handoff to alternative-Z candidates / NPMLEmix / synthetic Gaussian-DGP calibration (P2) per the remaining un-pursued
+          framework paths)
+      skeleton_thresholds_depend_on:
+      - field: temperature_Z_construction_and_binning
+        rule: T1's specific Z2 construction (decile binning vs continuous, station selection vs province-wide aggregation,
+          alignment convention to Ontario demand hourly timestamps, missing-data handling, lag structure if any) is the phase_a
+          author's call given ECCC data shape at acquisition time.
+        source: ECCC hourly weather data acquisition (next-session infrastructure work; not yet completed)
+      - field: MIN_CELL_SIZE_and_cut_recalibration
+        rule: T1's outcome_categories cuts (228 / 2284) inherit from the thread skeleton's R-A2/R-C2 band but may be recalibrated
+          per realized cell-size structure under the (day_type, Z_c, T1_Z2_temperature) joint partition. Recalibration, if
+          any, must be registered at T1 phase_a fill time prior to running.
+        source: T1 phase_a fill time feasibility study (post ECCC acquisition)
+    status: planned
+  T2:
+    id: T2
+    name: temperature-z-joint-refinement
+    notes: 'T2 is the joint-refinement child of T1, fired only if T1 settles R-B1T (temperature helps but doesn''t close on
+      its own). Q1B-analogue: tests whether an additional within-arm axis combined with T1''s settled (day_type, Z_c, temperature_Z)
+      configuration closes the remaining gap. The specific additional axis to register at T2 phase_a fill time depends on
+      T1 results — candidates include higher-resolution temperature binning, lagged temperature (1h, 24h), or a secondary
+      weather variable (humidity, wind) if ECCC acquisition yielded the broader weather feed. T2 phase_a fill is contingent
+      on T1 settlement per branching_rules.T1.R-B1T = T2.
+
+      '
+    parent_branch: R-B1T
+    parent_id: T1
+    phase_a_path: null
+    phase_a_skeleton:
+      candidate_set:
+      - joint_refinement_of_day_type_Z_c_temperature_Z_plus_additional_within_arm_axis
+      metric_class: 'Q1B-analogue joint multi-axis on top of T1''s settled (day_type, Z_c, temperature_Z) configuration. Specific
+        additional axis (higher-resolution temperature, lagged temperature, secondary weather variable) registered at T2 phase_a
+        fill time per T1 results. Cumulative-baseline = T1''s settled chi^2. Verdict per usual cut structure (R-A2T''/R-B1T''/R-C1T'')
+        on better_chi2.
+
+        '
+      outcome_categories:
+      - R-A1T': cumulative chi^2 ≤ 228 (joint within-arm refinement closes the gap; thread RESOLVES)
+      - R-B1T': cumulative chi^2 in (228, 2284] (helps but doesn't close; consider T3 for methodological tightening if CI
+          is wide)
+      - R-C1T': cumulative chi^2 > 2284 (additional within-arm axis redundant with T1's temperature_Z; within-arm exhausted)
+      skeleton_thresholds_depend_on:
+      - field: additional_within_arm_axis_construction
+        rule: T2's additional axis (higher-resolution temperature binning vs lagged temperature vs secondary weather variable)
+          is registered at T2 phase_a fill time per T1's realized per-cell decomposition and CI structure.
+        source: T1.result (post settlement)
+    status: planned
+  T3:
+    id: T3
+    name: temperature-arm-smc-tightening
+    notes: 'T3 is a non-gating CI-tightening sibling on the temperature arm, modeled on Q1B'' (S5). Optional: registered only
+      if T1''s or T2''s realized CI is wide and the user needs SMC-vs-eval-window variance decomposition before adjudicating
+      next steps. Parent_id is nominally T1 (matches Q1B'' precedent of pinning to its parent settlement); if T2 fires R-B1T''
+      first and T3 is then triggered to tighten T2''s CI rather than T1''s, the parent_id may be adjusted at T3 phase_a fill
+      time (within-arm methodological-tightening contingency). branching_rules.T3 all-null per non-gating-sibling design —
+      T3 settlement does NOT advance the state machine, exactly as Q1B'' settlement did not (S5).
+
+      '
+    parent_branch: R-B1T
+    parent_id: T1
+    phase_a_path: null
+    phase_a_skeleton:
+      candidate_set:
+      - SMC_particle_count_change_on_temperature_arm
+      metric_class: 'Q1B''-analogue CI-tightening via SMC particle count doubling on T1''s (or T2''s) winning configuration.
+        Pre-registered ONLY IF T1 or T2 settles with wide realized CI and the user requires SMC-vs-eval-window variance decomposition
+        before further amendment. Methodology identical to Q1B'' (N_PARTICLES doubling, same library, same fitter, same SMC
+        seed convention, same paired-day bootstrap, same dual reproduction-check anchors per realized T1/T2 settlements).
+
+        '
+      outcome_categories:
+      - R-A1T'': CI width narrows substantially (SMC noise IS dominant variance component; tightening lever works)
+      - R-B1T'': CI width in mixed band (SMC noise contributes but eval-window-noise non-trivial; wide CI accepted)
+      - R-C1T'': CI width widens OR point shift exceeds Monte-Carlo tolerance (anomaly worth diagnosing)
+      skeleton_thresholds_depend_on:
+      - field: ci_width_cuts_and_parent_pinning
+        rule: T3's CI-width cut bands are derived from T1's (or T2's) realized better_chi2 CI95 width at phase_a fill time,
+          mirroring Q1B''s 75% / 110% cuts off Q1B's 476.358 chi^2 width. Parent pinning (T1 vs T2) may be adjusted at fill
+          time per which prior settlement T3 is tightening — non-gating design preserved either way.
+        source: T1.result and/or T2.result (post settlement)
+    status: planned
+question: Of the three framework-prescribed resolution paths for the identifiability obstruction (S9+S10), which closes the
+  residual ~954 χ² of the κ_1 predictor on post-cutoff Ontario data?
 references:
 - body_sha256: c89e2f7604f7dbe756e7598a1b8c796da503112dac3664db42de70c873e3a4bd
   file: ../2026-05-26_distributional-class-thread/thread.yaml
@@ -391,28 +566,28 @@ root:
     file: ../2026-05-26_distributional-class-thread/thread.yaml
   - body_sha256: 5a237eb6f43257c31650f1205d7335e250042b6286a5a4f3d6ead6af56cc8013
     file: ../2026-05-26_q2b-non-distributional-decomposition/arbiter.yaml
-  closure_rule: "Thread RESOLVED when cumulative explained share > 80% across the Z's tested, where share = (\u03C7\
-    \xB2_baseline \u2212 \u03C7\xB2_after_fix) / (\u03C7\xB2_baseline \u2212 R-A2_cut) following Q2B's convention.\
-    \ Specifically: Single Q1A.R-A1A with share > 0.80 \u2192 RESOLVED (single dominant Z); Q1A.R-B1A + Q1B.R-A1B\
-    \ with cumulative > 0.80 \u2192 RESOLVED (multi-Z); Cumulative < 0.80 across all tested branches \u2192 EXHAUSTED-UNRESOLVED\
-    \ (P2 calibration provides closure framing)."
-  description: "The distributional-class-thread was declared exhausted on 2026-05-26 (commit 543e3e8) following\
-    \ Q2B's SETTLED R-C3 verdict (commit daad39f). Joint S9+S10 evidence (Q2A bounded the kernel-refinement lever;\
-    \ Q2B bounded the pre-registered same-Q non-distributional candidates with two sign-determined negative) is\
-    \ consistent with the identifiability obstruction \u2014 published theorem per Bergna et al. (2026 Prop 1),\
-    \ Heckman-Singer (1984), Allahverdyan (2020), Andrews-Mallows (1974). See the theory-side framework note `~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md`\
-    \ (PARKED 2026-05-26) and its audit-correction note `disintegration_diagnostic_audit_correction.md` (2026-05-27).\
-    \ The framework prescribes three resolution paths to break the structured-noise / noisy-structure tie via auxiliary\
-    \ information: (i) candidate-Z testing; (ii) stratified covariate-dependent mixture decomposition diagnostic;\
-    \ (iii) synthetic Gaussian-DGP calibration. This thread tests these paths against Ontario \u03BA_1 residuals."
-  scope_limits: "This thread tests the \u03C3-algebra-enrichment axis with auxiliary information. It does NOT re-test\
-    \ the distributional-class axis (closed by S9+S10). Results are attribution-grade (no deployable predictors);\
-    \ adding Z to the predictor changes the conditioning \u03C3-algebra, so results are framed as \u03C3-algebra\
-    \ adequacy / Bayes risk reduction, not as predictor improvements. The methods-novelty branch of path (ii) was\
-    \ determined dead by literature scout 2026-05-26 (notes/literature/2026-05-26_stratified-patra-sen-scout.md,\
-    \ commit 8f0f3f3 / 40b971b): Deb, Saha, Guntuboyina, Sen (2022, JASA, NPMLEmix) provides the canonical covariate-dependent\
-    \ generalization. This thread uses plain Patra-Sen (2016) per stratum with range-threshold verdict for P1 \u2014\
-    \ sufficient for the registered verdict architecture without invoking NPMLEmix's Mosek dependency.\n"
+  closure_rule: 'Thread RESOLVED when cumulative explained share > 80% across the Z''s tested, where share = (χ²_baseline
+    − χ²_after_fix) / (χ²_baseline − R-A2_cut) following Q2B''s convention. Specifically: Single Q1A.R-A1A with share > 0.80
+    → RESOLVED (single dominant Z); Q1A.R-B1A + Q1B.R-A1B with cumulative > 0.80 → RESOLVED (multi-Z); Cumulative < 0.80 across
+    all tested branches → EXHAUSTED-UNRESOLVED (P2 calibration provides closure framing).'
+  description: 'The distributional-class-thread was declared exhausted on 2026-05-26 (commit 543e3e8) following Q2B''s SETTLED
+    R-C3 verdict (commit daad39f). Joint S9+S10 evidence (Q2A bounded the kernel-refinement lever; Q2B bounded the pre-registered
+    same-Q non-distributional candidates with two sign-determined negative) is consistent with the identifiability obstruction
+    — published theorem per Bergna et al. (2026 Prop 1), Heckman-Singer (1984), Allahverdyan (2020), Andrews-Mallows (1974).
+    See the theory-side framework note `~/Research/Mathematics/Resolvent_Framework/notes/unsorted/disintegration_diagnostic.md`
+    (PARKED 2026-05-26) and its audit-correction note `disintegration_diagnostic_audit_correction.md` (2026-05-27). The framework
+    prescribes three resolution paths to break the structured-noise / noisy-structure tie via auxiliary information: (i) candidate-Z
+    testing; (ii) stratified covariate-dependent mixture decomposition diagnostic; (iii) synthetic Gaussian-DGP calibration.
+    This thread tests these paths against Ontario κ_1 residuals.'
+  scope_limits: 'This thread tests the σ-algebra-enrichment axis with auxiliary information. It does NOT re-test the distributional-class
+    axis (closed by S9+S10). Results are attribution-grade (no deployable predictors); adding Z to the predictor changes the
+    conditioning σ-algebra, so results are framed as σ-algebra adequacy / Bayes risk reduction, not as predictor improvements.
+    The methods-novelty branch of path (ii) was determined dead by literature scout 2026-05-26 (notes/literature/2026-05-26_stratified-patra-sen-scout.md,
+    commit 8f0f3f3 / 40b971b): Deb, Saha, Guntuboyina, Sen (2022, JASA, NPMLEmix) provides the canonical covariate-dependent
+    generalization. This thread uses plain Patra-Sen (2016) per stratum with range-threshold verdict for P1 — sufficient for
+    the registered verdict architecture without invoking NPMLEmix''s Mosek dependency.
+
+    '
 schema: thread
 state: active
 state_history:
@@ -420,11 +595,25 @@ state_history:
   branch_fired: null
   git_sha: c387aea
   node_settled: null
-  notes: "Initial activation per thread-coordinator Procedure \xA71 / \xA73.\nP1 (patra-sen-per-stratum-localization)\
-    \ phase_a + proponent +\ndevils_advocate registered in commit eb043ba (body_sha256\na5f9d35b411d2b3c3735700ce312d70bb699b831250ff07b24a376eeb3067080).\n\
-    Thread transitions from planning to active; P1.status from\nplanned to active. No arbiter has rendered on P1;\
-    \ this is the\nanalyst-declared advancement that the procedure permits when\nthe root node's phase_a is registered.\
-    \ No siblings are closed\n(P1 is the root node; no branching_rules entry has fired).\n"
+  notes: 'Initial activation per thread-coordinator Procedure §1 / §3.
+
+    P1 (patra-sen-per-stratum-localization) phase_a + proponent +
+
+    devils_advocate registered in commit eb043ba (body_sha256
+
+    a5f9d35b411d2b3c3735700ce312d70bb699b831250ff07b24a376eeb3067080).
+
+    Thread transitions from planning to active; P1.status from
+
+    planned to active. No arbiter has rendered on P1; this is the
+
+    analyst-declared advancement that the procedure permits when
+
+    the root node''s phase_a is registered. No siblings are closed
+
+    (P1 is the root node; no branching_rules entry has fired).
+
+    '
   prior_hash: 3fe3573938b0aa24e7332e090a578401722ed225330b12395101b66a58c8c2ab
   siblings_closed: []
   transition: planning_to_active
@@ -467,43 +656,40 @@ state_history:
   branch_fired: R-B1A
   git_sha: b1336475ec21d8ba6507bde1be2c8a42fdb5e4c1
   node_settled: Q1A
-  notes: 'Q1A SETTLED R-B1A (mechanical = substantive on outcome category; DA wins on outcome category and on 4
-    of 5 within-bucket surfaces; proponent direction-of-sign point-correct but realized direction within paired
-    SE so statistically zero). better_chi2 = 952.5167 [625.34, 1342.33] sits comfortably inside the registered (228,
-    2284] ambiguous band - ~4x clear of R-A1A on the low side, ~2.4x clear of R-C1A on the high side. Routes to
-    Q1B per branching_rules.Q1A.R-B1A. Q1A.status: active -> settled; Q1B.status: planned -> active; current_node_id:
-    Q1A -> Q1B.
+  notes: 'Q1A SETTLED R-B1A (mechanical = substantive on outcome category; DA wins on outcome category and on 4 of 5 within-bucket
+    surfaces; proponent direction-of-sign point-correct but realized direction within paired SE so statistically zero). better_chi2
+    = 952.5167 [625.34, 1342.33] sits comfortably inside the registered (228, 2284] ambiguous band - ~4x clear of R-A1A on
+    the low side, ~2.4x clear of R-C1A on the high side. Routes to Q1B per branching_rules.Q1A.R-B1A. Q1A.status: active ->
+    settled; Q1B.status: planned -> active; current_node_id: Q1A -> Q1B.
 
 
-    NO SIBLINGS CLOSED at thread level. branching_rules.Q1A.R-A1A maps to null (would have routed to thread RESOLVED;
-    did not fire). branching_rules.Q1A.R-C1A maps to P2 (did not fire, but P2 remains reachable via Q1B.R-C1B and
-    Q1C.R-C1C so P2 is NOT closed). Q1A'' is a parallel non-state-machine sibling per amendment A1 (independent
-    verdict; branching_rules.Q1A'' all map to null); unchanged by this advancement.
+    NO SIBLINGS CLOSED at thread level. branching_rules.Q1A.R-A1A maps to null (would have routed to thread RESOLVED; did
+    not fire). branching_rules.Q1A.R-C1A maps to P2 (did not fire, but P2 remains reachable via Q1B.R-C1B and Q1C.R-C1C so
+    P2 is NOT closed). Q1A'' is a parallel non-state-machine sibling per amendment A1 (independent verdict; branching_rules.Q1A''
+    all map to null); unchanged by this advancement.
 
 
-    CARRYFORWARD: Z_c (8-level hour_of_week stratification) is the parsimony-preferred point-estimate winner used
-    as Q1B''s Z1 baseline. NEAR-TIE CAVEAT: chi2_diff = +33.5 [-93, +143] straddles zero (paired SE 56.84 > |diff|);
-    Z_b and Z_c are statistically indistinguishable on the verdict-metric. Recorded in nodes.Q1B.notes for the phase_a
-    author.
+    CARRYFORWARD: Z_c (8-level hour_of_week stratification) is the parsimony-preferred point-estimate winner used as Q1B''s
+    Z1 baseline. NEAR-TIE CAVEAT: chi2_diff = +33.5 [-93, +143] straddles zero (paired SE 56.84 > |diff|); Z_b and Z_c are
+    statistically indistinguishable on the verdict-metric. Recorded in nodes.Q1B.notes for the phase_a author.
 
 
-    SUBSTANTIVE PRE-FLAG (per arbiter''s notes_for_thread_coordinator advisory): the Q1A Z lever delivered 0.18%
-    of the gap-to-close (1.3267 out of 725.8433 chi^2 units). Joint S9+S10+S11+Q1A picture corroborates the identifiability
-    obstruction from the chi^2 side - within-data sigma-algebra enrichment via the strongest P1 axis (hour_of_week)
-    is empirically bounded near zero. P1''s second-strongest axis (time_of_day, range 0.485) re-partitions information
-    already in the time index; the prior on Q1B closing the gap via the same lever is weaker than Q1A''s already-weak
-    prior. Trajectory pre-flag: if Q1B fires R-B1B / R-C1B, the thread approaches EXHAUSTED-UNRESOLVED; R-C1B routes
-    to P2 (synthetic Gaussian-DGP calibration), and a thread amendment to reopen Q1C (temperature) or a new thread
-    targeting temperature directly becomes the natural next move outside the registered branching. Per phase-fidelity
-    / pre-registration discipline, the coordinator does not extend the tree here; this trajectory pre-flag is advisory
-    only and does not amend branching_rules.
+    SUBSTANTIVE PRE-FLAG (per arbiter''s notes_for_thread_coordinator advisory): the Q1A Z lever delivered 0.18% of the gap-to-close
+    (1.3267 out of 725.8433 chi^2 units). Joint S9+S10+S11+Q1A picture corroborates the identifiability obstruction from the
+    chi^2 side - within-data sigma-algebra enrichment via the strongest P1 axis (hour_of_week) is empirically bounded near
+    zero. P1''s second-strongest axis (time_of_day, range 0.485) re-partitions information already in the time index; the
+    prior on Q1B closing the gap via the same lever is weaker than Q1A''s already-weak prior. Trajectory pre-flag: if Q1B
+    fires R-B1B / R-C1B, the thread approaches EXHAUSTED-UNRESOLVED; R-C1B routes to P2 (synthetic Gaussian-DGP calibration),
+    and a thread amendment to reopen Q1C (temperature) or a new thread targeting temperature directly becomes the natural
+    next move outside the registered branching. Per phase-fidelity / pre-registration discipline, the coordinator does not
+    extend the tree here; this trajectory pre-flag is advisory only and does not amend branching_rules.
 
 
-    DA''s Z_c point forecast (950 vs realized 952.5; 0.3% residual) is the single best pre-registered numeric point
-    forecast in the workflow''s history. Fifth instance of fourth-named-failure-mode in a NEW SHAPE VARIANT: mechanical
-    + within-bucket point forecasts both match DA; head-to-head direction point-correct for proponent but realized
-    direction is within paired SE (statistically zero). Memory file mitacs-q1a-z-conditioning.md + CLAUDE.md (S12)
-    update are required follow-ups (arbiter.memory_update_required = true); the coordinator does not write those.
+    DA''s Z_c point forecast (950 vs realized 952.5; 0.3% residual) is the single best pre-registered numeric point forecast
+    in the workflow''s history. Fifth instance of fourth-named-failure-mode in a NEW SHAPE VARIANT: mechanical + within-bucket
+    point forecasts both match DA; head-to-head direction point-correct for proponent but realized direction is within paired
+    SE (statistically zero). Memory file mitacs-q1a-z-conditioning.md + CLAUDE.md (S12) update are required follow-ups (arbiter.memory_update_required
+    = true); the coordinator does not write those.
 
     '
   prior_hash: 21a8bb20b6e9e19c8536fa664dc8978749c19c0d1c21dee3f239c59781d3f6d6
@@ -515,95 +701,126 @@ state_history:
   branch_fired: R-B1B
   git_sha: 1736e712065d130275dd8b0b8e7246717d952d6e
   node_settled: Q1B
-  notes: "Q1B SETTLED R-B1B (mechanical) / R-B1B_SUBSTANTIVE_FAVORABLE (substantive suffix per arbiter aggregate\
-    \ SETTLED). better_chi2 = 662.2233 [468.094, 944.452] sits unambiguously interior to the registered (228, 2284]\
-    \ band (lower CI bound ~2.05x clear of R-A1B; upper CI bound ~2.42x clear of R-C1B). chi2_Z2_b = 696.0 [492.25,\
-    \ 1009.01]; chi2_Z2_c = 662.22 [479.78, 945.41]; chi2_diff = +33.78 [-53.19, +124.47] with paired SE = 44.71\
-    \ \u2192 |diff|/SE = 0.756 < 1.0 NEAR-TIE. Z2_c (4-level categorical per P1's production binning) wins at point\
-    \ estimate by +33.78 chi^2 but no statistically-discernible head-to-head ranking.\n\nQ1B.status: active -> settled;\
-    \ Q1B.result: R-B1B; Q1B.phase_a_path filled (2026-05-27_q1b-z2-conditioning-second-axis/phase_a.yaml). current_node_id:\
-    \ Q1B -> null. THREAD PAUSED PENDING USER DECISION ON AMENDMENT DIRECTION (see \"coordinator decision space\"\
-    \ in this note); no auto-advancement under branching_rules.Q1B.R-B1B = null per the registered tree.\n\nNO SIBLINGS\
-    \ CLOSED at thread level. branching_rules.Q1B.R-A1B maps to null (would have triggered thread-RESOLVED if cumulative\
-    \ share > 0.80 per root.closure_rule; realized share 0.40 < 0.80, did not fire). branching_rules.Q1B.R-C1B maps\
-    \ to P2 (synthetic Gaussian-DGP calibration; did not fire). P2 remains reachable via Q1C.R-C1C and is NOT closed\
-    \ at thread level. Q1A' (parallel non-state-machine sibling per amendment A1; phase_a deferred per \"Q1A' deferred\"\
-    \ in CLAUDE.md pending FastICA selection-rule design refresh) is unaffected by Q1B's state advancement; its\
-    \ eventual arbiter fires on its own outcome categories independently.\n\nSUBSTANTIVE CENTRAL FINDING (the verdict\
-    \ label R-B1B understates the realized informativeness; the arbiter suffix _SUBSTANTIVE_FAVORABLE marks this).\
-    \ Z2 (time_of_day) delivered a CUMULATIVE REDUCTION of 290.29 chi^2 above Q1A's Z_c carryforward [8.06, 484.42]\
-    \ = 40.07% of the remaining gap-to-close to R-A1B (725.84 chi^2 between Q1A baseline 952.5167 and R-A1B cut\
-    \ 228). From the Q2A no-Z baseline 953.84, the cumulative share is 40.18%. By comparison, Q1A's Z lever closed\
-    \ 0.18% of the gap (1.33 chi^2 units). Q1B's Z2 lever is 218x Q1A's in absolute chi^2 units and ~220x as a share-of-gap.\
-    \ The cumulative CI lower bound (8.06) is sign-determined positive at 95% (barely).\n\nCRITICAL S3 PRE-FLAG\
-    \ DOWNGRADE: the S3 state-history advisory pre-flagged EXHAUSTED-UNRESOLVED as a plausible Q1B trajectory if\
-    \ Q1B delivered \"similar 0.18%-of-gap magnitudes\" to Q1A. That premise is EMPIRICALLY REFUTED by Q1B's 218x-Q1A\
-    \ realization. EXHAUSTED-UNRESOLVED is NOT auto-fired at S4 and is NOT the most natural substantive interpretation\
-    \ of this result. The S3 pre-flag is superseded by realized data; the prior S3 entry remains historical (the\
-    \ pre-flag was advisory at the time, registered against the trajectory premise that the data has now refuted)\
-    \ but the operative state-history reading is this S4 note. The thread does NOT auto-resolve either: the realized\
-    \ cumulative share 0.40 is below root.closure_rule's 0.80 threshold for thread-RESOLVED via the multi-Z path.\
-    \ The thread is in a state the registered tree did not pre-anticipate: substantively informative + neither RESOLVED\
-    \ nor EXHAUSTED. The workflow shape mirrors Q2A's \"first arbiter without mechanical/substantive gap\" \u2014\
-    \ a tree-shape-first observation that the realized data sits in a previously-uncharted regime relative to both\
-    \ forecasters' priors and the pre-registered closure logic.\n\nFRAMEWORK READING SHARPENING (binding for the\
-    \ kernel-family-agnostic theory memo + CLAUDE.md framework section at next refresh). Joint S9+S10+S11+S12 was\
-    \ read in Q1A's arbiter and the S3 thread notes as \"within-data sigma-algebra-enrichment levers are empirically\
-    \ bounded at the ~0.18%-of-gap scale.\" Q1B refutes that reading AS-STATED. The sharpened reading: SINGLE-AXIS\
-    \ within-data sigma-algebra enrichment IS bounded near zero (Q1A delivered 0.18%); JOINT multi-axis within-data\
-    \ conditioning recovers MEANINGFULLY MORE (Q1B delivered 40.07% on top of Q1A's carryforward). FULL closure\
-    \ to R-A1B is NOT achieved within the time-index alone (cumulative point 662 is 2.9x above R-A1B cut; lower\
-    \ CI 468 is 2.05x above), so the identifiability obstruction at the FULL-CLOSURE level remains a candidate reading\
-    \ \u2014 but the within-data lever space has more directions than single-axis P1 ranking suggested. Cross-axis\
-    \ joint stratification is the within-data direction the framework reading should now incorporate.\n\nPER-CELL\
-    \ CORROBORATION OF P1 AT FINER RESOLUTION. Q1A's dominant saturday__zc6 cell (chi^2 = 1634; alpha_L = 0.61 stratum\
-    \ per P1) splits across time_of_day strata as morning_ramp (967.28) > evening (399.77) > afternoon (328.09).\
-    \ Sum 1695, comparable to Q1A's 1634 (small overshoot expected under finer sigma-algebra). The morning_ramp\
-    \ sub-stratum within saturday__zc6 alone exceeds the pooled Q1B marginal 662.22 by 46%. The contamination IS\
-    \ where P1 said it would be AND has internal time_of_day structure that hour_of_week alone could not resolve.\
-    \ The joint (Z_c, Z2) sigma-algebra reveals genuine sub-structure the single-axis P1 ranking could not isolate.\n\
-    \nREPRODUCTION CHECKS AT BOTH ANCHORS EXACT. q1b_no_z_chi2 = 953.8433 reproduces Q2A's settled M3 chi^2 = 953.84\
-    \ to 4 decimals (|diff|/settled = 3.5e-6). q1b_zc_only_chi2 = 952.5167 reproduces Q1A's settled Z_c-only chi^2\
-    \ = 952.5167 to 8 decimals (|diff|/settled = 3.5e-8). The fitting machinery is bit-identical at both endpoints\
-    \ \u2014 the 290 chi^2 cumulative closure is a real signal, not a pipeline drift artifact. Strongest dual-anchor\
-    \ reproduction in the workflow's history.\n\nSIXTH NAMED-FAILURE-MODE INSTANCE (new shape variant). Pattern\
-    \ shape: MIXED SCORING DECOMPOSITION across forecast surfaces. Outcome category matches DA (R-B1B); near-tie\
-    \ shape matches DA; near-tie magnitude bracket exceeded by both forecasters; winner-direction matches proponent\
-    \ (Z2_c at point); cumulative-reduction magnitude (290 chi^2) sits ORDERS OF MAGNITUDE from both sides' implicit\
-    \ priors (proponent expected ~772 chi^2 closure to R-A1B; DA expected ~5 chi^2 of Q1A-scale movement). Realized\
-    \ data in a previously- uncharted cumulative-reduction regime that neither pre-registration anticipated. closer_forecast\
-    \ = devils_advocate (4 of 5 surfaces).\n\nCOORDINATOR DECISION SPACE (deferred to user; surfaced here per arbiter's\
-    \ notes_for_thread_coordinator). All three are framework-supported; the realized data does not statistically\
-    \ rank them. The thread-coordinator does NOT pre-commit the tree \u2014 this is an amendment-direction decision\
-    \ for the user (and benefits from advisor input). The three options:\n(a) Thread amendment adding a third within-data\
-    \ Z axis. P1's remaining axes ranked by range: season (0.135), demand_quantile (0.075) \u2014 weaker prior support\
-    \ than time_of_day (0.485, used as Z2) but the cross-axis joint hypothesis is newly-validated by Q1B's realization.\
-    \ Could register Q1D (third within-data Z axis added to (Z_c, Z2_c) carryforward) with adjusted MIN_CELL_SIZE\
-    \ for the finer cell partition.\n(b) Spawn a new thread targeting cross-axis joint stratification more systematically.\
-    \ The framework-reading sharpening Q1B delivered (single-axis vs joint multi-axis as distinct lever classes)\
-    \ suggests a new line of inquiry: what is the cumulative limit of within-data joint conditioning? Multi-axis\
-    \ sweeps could be pre-registered as a thread root rather than as single-axis amendments to this thread.\n(c)\
-    \ Pivot to the temperature/exogenous-Z arm (Q1C reopening amendment or new thread per the framework-prescribed\
-    \ resolution paths in disintegration_diagnostic.md). Full closure to R-A1B is NOT achieved within the time-index\
-    \ (cumulative point 662 still 2.9x above R-A1B cut; lower CI 468 still 2.05x above). The clim-gap-nonstationary\
-    \ memory continues to point at temperature as the strongest a-priori candidate for the residual 60% of the gap.\n\
-    \nThe arbiter explicitly does NOT pre-judge which path the coordinator takes; the coordinator records the realized\
-    \ state + framework-reading sharpening + the three-way decision space. The user adjudicates the amendment direction\
-    \ in a separate dispatch.\n\nFRAMEWORK-SIDE AUDIT BACKLOG (advisory; not coordinator scope). The kernel-family-agnostic\
-    \ theory memo (writeup/tex/missing_content_memo.tex) already predates (S11) and (S12); (S13) (this entry) compounds\
-    \ the backlog. When the memo's /audit pure is next run, fold (S11)-(S13) into the within-data-lever-boundedness\
-    \ section: the boundedness reading should be sharpened from \"single-axis bounded\" to \"single-axis bounded\
-    \ near zero; joint multi-axis bounded at higher magnitude but full closure requires auxiliary information beyond\
-    \ the time index.\" CLAUDE.md's \"Settled findings since 2026-05-21\" section also needs (S13) added with the\
-    \ headline numerics, the 40.07%-of-gap reading, the framework-reading sharpening, and the 6th- named-failure-mode-instance\
-    \ notation.\n\nTEMPERATURE PRIOR STATUS: still candidate for full closure beyond within-data joint conditioning.\
-    \ Q1B's 40%-of-gap closure leaves 60% unexplained; the clim-gap-nonstationary prior continues to be the strongest\
-    \ a-priori candidate for the residual. Coordinator's decision (a)-(c) above implicitly ranks the order of arms\
-    \ \u2014 within-data axes first vs exogenous Z first.\n\nP2 STATUS: still reachable (from Q1C.R-C1C). Not affected\
-    \ by Q1B.R-B1B firing.\n\nQ1A' STATUS: parallel non-state-machine sibling per amendment A1; phase_a not yet\
-    \ filled (deferred per \"Q1A' deferred\" in CLAUDE.md pending FastICA selection-rule design refresh). Independent\
-    \ of Q1B's state advancement; its eventual arbiter will fire on its own outcome categories independently of\
-    \ the resolution-paths-thread state machine.\n"
+  notes: 'Q1B SETTLED R-B1B (mechanical) / R-B1B_SUBSTANTIVE_FAVORABLE (substantive suffix per arbiter aggregate SETTLED).
+    better_chi2 = 662.2233 [468.094, 944.452] sits unambiguously interior to the registered (228, 2284] band (lower CI bound
+    ~2.05x clear of R-A1B; upper CI bound ~2.42x clear of R-C1B). chi2_Z2_b = 696.0 [492.25, 1009.01]; chi2_Z2_c = 662.22
+    [479.78, 945.41]; chi2_diff = +33.78 [-53.19, +124.47] with paired SE = 44.71 → |diff|/SE = 0.756 < 1.0 NEAR-TIE. Z2_c
+    (4-level categorical per P1''s production binning) wins at point estimate by +33.78 chi^2 but no statistically-discernible
+    head-to-head ranking.
+
+
+    Q1B.status: active -> settled; Q1B.result: R-B1B; Q1B.phase_a_path filled (2026-05-27_q1b-z2-conditioning-second-axis/phase_a.yaml).
+    current_node_id: Q1B -> null. THREAD PAUSED PENDING USER DECISION ON AMENDMENT DIRECTION (see "coordinator decision space"
+    in this note); no auto-advancement under branching_rules.Q1B.R-B1B = null per the registered tree.
+
+
+    NO SIBLINGS CLOSED at thread level. branching_rules.Q1B.R-A1B maps to null (would have triggered thread-RESOLVED if cumulative
+    share > 0.80 per root.closure_rule; realized share 0.40 < 0.80, did not fire). branching_rules.Q1B.R-C1B maps to P2 (synthetic
+    Gaussian-DGP calibration; did not fire). P2 remains reachable via Q1C.R-C1C and is NOT closed at thread level. Q1A'' (parallel
+    non-state-machine sibling per amendment A1; phase_a deferred per "Q1A'' deferred" in CLAUDE.md pending FastICA selection-rule
+    design refresh) is unaffected by Q1B''s state advancement; its eventual arbiter fires on its own outcome categories independently.
+
+
+    SUBSTANTIVE CENTRAL FINDING (the verdict label R-B1B understates the realized informativeness; the arbiter suffix _SUBSTANTIVE_FAVORABLE
+    marks this). Z2 (time_of_day) delivered a CUMULATIVE REDUCTION of 290.29 chi^2 above Q1A''s Z_c carryforward [8.06, 484.42]
+    = 40.07% of the remaining gap-to-close to R-A1B (725.84 chi^2 between Q1A baseline 952.5167 and R-A1B cut 228). From the
+    Q2A no-Z baseline 953.84, the cumulative share is 40.18%. By comparison, Q1A''s Z lever closed 0.18% of the gap (1.33
+    chi^2 units). Q1B''s Z2 lever is 218x Q1A''s in absolute chi^2 units and ~220x as a share-of-gap. The cumulative CI lower
+    bound (8.06) is sign-determined positive at 95% (barely).
+
+
+    CRITICAL S3 PRE-FLAG DOWNGRADE: the S3 state-history advisory pre-flagged EXHAUSTED-UNRESOLVED as a plausible Q1B trajectory
+    if Q1B delivered "similar 0.18%-of-gap magnitudes" to Q1A. That premise is EMPIRICALLY REFUTED by Q1B''s 218x-Q1A realization.
+    EXHAUSTED-UNRESOLVED is NOT auto-fired at S4 and is NOT the most natural substantive interpretation of this result. The
+    S3 pre-flag is superseded by realized data; the prior S3 entry remains historical (the pre-flag was advisory at the time,
+    registered against the trajectory premise that the data has now refuted) but the operative state-history reading is this
+    S4 note. The thread does NOT auto-resolve either: the realized cumulative share 0.40 is below root.closure_rule''s 0.80
+    threshold for thread-RESOLVED via the multi-Z path. The thread is in a state the registered tree did not pre-anticipate:
+    substantively informative + neither RESOLVED nor EXHAUSTED. The workflow shape mirrors Q2A''s "first arbiter without mechanical/substantive
+    gap" — a tree-shape-first observation that the realized data sits in a previously-uncharted regime relative to both forecasters''
+    priors and the pre-registered closure logic.
+
+
+    FRAMEWORK READING SHARPENING (binding for the kernel-family-agnostic theory memo + CLAUDE.md framework section at next
+    refresh). Joint S9+S10+S11+S12 was read in Q1A''s arbiter and the S3 thread notes as "within-data sigma-algebra-enrichment
+    levers are empirically bounded at the ~0.18%-of-gap scale." Q1B refutes that reading AS-STATED. The sharpened reading:
+    SINGLE-AXIS within-data sigma-algebra enrichment IS bounded near zero (Q1A delivered 0.18%); JOINT multi-axis within-data
+    conditioning recovers MEANINGFULLY MORE (Q1B delivered 40.07% on top of Q1A''s carryforward). FULL closure to R-A1B is
+    NOT achieved within the time-index alone (cumulative point 662 is 2.9x above R-A1B cut; lower CI 468 is 2.05x above),
+    so the identifiability obstruction at the FULL-CLOSURE level remains a candidate reading — but the within-data lever space
+    has more directions than single-axis P1 ranking suggested. Cross-axis joint stratification is the within-data direction
+    the framework reading should now incorporate.
+
+
+    PER-CELL CORROBORATION OF P1 AT FINER RESOLUTION. Q1A''s dominant saturday__zc6 cell (chi^2 = 1634; alpha_L = 0.61 stratum
+    per P1) splits across time_of_day strata as morning_ramp (967.28) > evening (399.77) > afternoon (328.09). Sum 1695, comparable
+    to Q1A''s 1634 (small overshoot expected under finer sigma-algebra). The morning_ramp sub-stratum within saturday__zc6
+    alone exceeds the pooled Q1B marginal 662.22 by 46%. The contamination IS where P1 said it would be AND has internal time_of_day
+    structure that hour_of_week alone could not resolve. The joint (Z_c, Z2) sigma-algebra reveals genuine sub-structure the
+    single-axis P1 ranking could not isolate.
+
+
+    REPRODUCTION CHECKS AT BOTH ANCHORS EXACT. q1b_no_z_chi2 = 953.8433 reproduces Q2A''s settled M3 chi^2 = 953.84 to 4 decimals
+    (|diff|/settled = 3.5e-6). q1b_zc_only_chi2 = 952.5167 reproduces Q1A''s settled Z_c-only chi^2 = 952.5167 to 8 decimals
+    (|diff|/settled = 3.5e-8). The fitting machinery is bit-identical at both endpoints — the 290 chi^2 cumulative closure
+    is a real signal, not a pipeline drift artifact. Strongest dual-anchor reproduction in the workflow''s history.
+
+
+    SIXTH NAMED-FAILURE-MODE INSTANCE (new shape variant). Pattern shape: MIXED SCORING DECOMPOSITION across forecast surfaces.
+    Outcome category matches DA (R-B1B); near-tie shape matches DA; near-tie magnitude bracket exceeded by both forecasters;
+    winner-direction matches proponent (Z2_c at point); cumulative-reduction magnitude (290 chi^2) sits ORDERS OF MAGNITUDE
+    from both sides'' implicit priors (proponent expected ~772 chi^2 closure to R-A1B; DA expected ~5 chi^2 of Q1A-scale movement).
+    Realized data in a previously- uncharted cumulative-reduction regime that neither pre-registration anticipated. closer_forecast
+    = devils_advocate (4 of 5 surfaces).
+
+
+    COORDINATOR DECISION SPACE (deferred to user; surfaced here per arbiter''s notes_for_thread_coordinator). All three are
+    framework-supported; the realized data does not statistically rank them. The thread-coordinator does NOT pre-commit the
+    tree — this is an amendment-direction decision for the user (and benefits from advisor input). The three options:
+
+    (a) Thread amendment adding a third within-data Z axis. P1''s remaining axes ranked by range: season (0.135), demand_quantile
+    (0.075) — weaker prior support than time_of_day (0.485, used as Z2) but the cross-axis joint hypothesis is newly-validated
+    by Q1B''s realization. Could register Q1D (third within-data Z axis added to (Z_c, Z2_c) carryforward) with adjusted MIN_CELL_SIZE
+    for the finer cell partition.
+
+    (b) Spawn a new thread targeting cross-axis joint stratification more systematically. The framework-reading sharpening
+    Q1B delivered (single-axis vs joint multi-axis as distinct lever classes) suggests a new line of inquiry: what is the
+    cumulative limit of within-data joint conditioning? Multi-axis sweeps could be pre-registered as a thread root rather
+    than as single-axis amendments to this thread.
+
+    (c) Pivot to the temperature/exogenous-Z arm (Q1C reopening amendment or new thread per the framework-prescribed resolution
+    paths in disintegration_diagnostic.md). Full closure to R-A1B is NOT achieved within the time-index (cumulative point
+    662 still 2.9x above R-A1B cut; lower CI 468 still 2.05x above). The clim-gap-nonstationary memory continues to point
+    at temperature as the strongest a-priori candidate for the residual 60% of the gap.
+
+
+    The arbiter explicitly does NOT pre-judge which path the coordinator takes; the coordinator records the realized state
+    + framework-reading sharpening + the three-way decision space. The user adjudicates the amendment direction in a separate
+    dispatch.
+
+
+    FRAMEWORK-SIDE AUDIT BACKLOG (advisory; not coordinator scope). The kernel-family-agnostic theory memo (writeup/tex/missing_content_memo.tex)
+    already predates (S11) and (S12); (S13) (this entry) compounds the backlog. When the memo''s /audit pure is next run,
+    fold (S11)-(S13) into the within-data-lever-boundedness section: the boundedness reading should be sharpened from "single-axis
+    bounded" to "single-axis bounded near zero; joint multi-axis bounded at higher magnitude but full closure requires auxiliary
+    information beyond the time index." CLAUDE.md''s "Settled findings since 2026-05-21" section also needs (S13) added with
+    the headline numerics, the 40.07%-of-gap reading, the framework-reading sharpening, and the 6th- named-failure-mode-instance
+    notation.
+
+
+    TEMPERATURE PRIOR STATUS: still candidate for full closure beyond within-data joint conditioning. Q1B''s 40%-of-gap closure
+    leaves 60% unexplained; the clim-gap-nonstationary prior continues to be the strongest a-priori candidate for the residual.
+    Coordinator''s decision (a)-(c) above implicitly ranks the order of arms — within-data axes first vs exogenous Z first.
+
+
+    P2 STATUS: still reachable (from Q1C.R-C1C). Not affected by Q1B.R-B1B firing.
+
+
+    Q1A'' STATUS: parallel non-state-machine sibling per amendment A1; phase_a not yet filled (deferred per "Q1A'' deferred"
+    in CLAUDE.md pending FastICA selection-rule design refresh). Independent of Q1B''s state advancement; its eventual arbiter
+    will fire on its own outcome categories independently of the resolution-paths-thread state machine.
+
+    '
   prior_hash: 173b3d58f79291c80dbc323ab175df0d102a16b655806086794cb33bd71d10a9
   siblings_closed: []
   transition: node_settled_no_auto_advance
@@ -614,102 +831,94 @@ state_history:
   git_sha: b2a6f8985c57a86e23ebfaabc03c040ebb3c61b4
   node_settled: Q1B'
   notes: 'Q1B'' SETTLED R-B1B'' (mechanical = substantive; ALIGNED on R-B1B'', no suffix). Q1B'' is the non-state-machine
-    sibling added by amendment A2 (parent_branch R-A under Q1B); per A2''s non-gating design, branching_rules.Q1B''
-    = {R-A1B'': null, R-B1B'': null, R-C1B'': null} -- settlement does NOT advance current_node_id, which remains
-    null per S4. The main Q1B branch state-history reading is UNCHANGED by Q1B''s settlement; the user adjudication
-    of the (a)/(b)/(c) three-way amendment decision surfaced in S4 is now INFORMED by Q1B'' but not auto-decided.
+    sibling added by amendment A2 (parent_branch R-A under Q1B); per A2''s non-gating design, branching_rules.Q1B'' = {R-A1B'':
+    null, R-B1B'': null, R-C1B'': null} -- settlement does NOT advance current_node_id, which remains null per S4. The main
+    Q1B branch state-history reading is UNCHANGED by Q1B''s settlement; the user adjudication of the (a)/(b)/(c) three-way
+    amendment decision surfaced in S4 is now INFORMED by Q1B'' but not auto-decided.
 
 
-    VERDICT NUMERICS. Realized cumulative_chi2_improvement_above_Z_c CI95 = [-34.576, +471.622]; CI WIDTH = 471.622
-    - (-34.576) = 506.198 chi^2 in registered band (357.27, 524.0]. Realized better_chi2 = 679.128; |better_chi2_point
-    - 662.223| = 16.905, well below tol = 50 (point-stability sub-criterion PASS). Both R-B1B'' conjuncts (CI-width
-    band + point-stability) cleared unambiguously. R-A1B'' (corroboration: width <= 357.27 AND |point-shift| <=
-    50) NOT cleared on the width conjunct (realized 506.198 > 357.27 by 148.93 chi^2). R-C1B'' (falsification: width
-    > 524.0 OR |point-shift| > 50) NOT cleared on either disjunct (width 506.198 < 524.0 by 17.80 chi^2; point-shift
-    16.905 < 50 by 33.10 chi^2).
+    VERDICT NUMERICS. Realized cumulative_chi2_improvement_above_Z_c CI95 = [-34.576, +471.622]; CI WIDTH = 471.622 - (-34.576)
+    = 506.198 chi^2 in registered band (357.27, 524.0]. Realized better_chi2 = 679.128; |better_chi2_point - 662.223| = 16.905,
+    well below tol = 50 (point-stability sub-criterion PASS). Both R-B1B'' conjuncts (CI-width band + point-stability) cleared
+    unambiguously. R-A1B'' (corroboration: width <= 357.27 AND |point-shift| <= 50) NOT cleared on the width conjunct (realized
+    506.198 > 357.27 by 148.93 chi^2). R-C1B'' (falsification: width > 524.0 OR |point-shift| > 50) NOT cleared on either
+    disjunct (width 506.198 < 524.0 by 17.80 chi^2; point-shift 16.905 < 50 by 33.10 chi^2).
 
 
-    DIRECTION-OF-MAGNITUDE RESULT (the central substantive finding). Realized CI width WIDENED by +29.84 chi^2 (+6.26%)
-    vs Q1B''s 476.358 chi^2 at N_PARTICLES=200 -- OPPOSITE both forecasters'' narrowing predictions. Proponent forecast
-    R-A1B'' (width 338 [290, 395]; >=25% narrowing); DA forecast R-B1B'' (width 419 [370, 480]; ~12% narrowing).
-    BOTH SIDES FALSIFIED ON DIRECTION-OF-MAGNITUDE on the verdict-metric. The registered R-B1B'' band is wide enough
-    to absorb the disagreement (the band spans 357.27 to 524.0, covering both narrowing-to-419 and widening-to-506);
-    the band itself is the unfalsifiability zone for direction errors on this metric. DA wins on the registered
-    outcome category (R-B1B'' mechanical match); proponent''s R-A1B'' falsified. Both forecasters got point-stability
-    right (16.905 << 50; SMC doubling did not destabilize the realized estimate; seed-dependence and other R-C1B''
-    point failure modes empirically ruled out).
+    DIRECTION-OF-MAGNITUDE RESULT (the central substantive finding). Realized CI width WIDENED by +29.84 chi^2 (+6.26%) vs
+    Q1B''s 476.358 chi^2 at N_PARTICLES=200 -- OPPOSITE both forecasters'' narrowing predictions. Proponent forecast R-A1B''
+    (width 338 [290, 395]; >=25% narrowing); DA forecast R-B1B'' (width 419 [370, 480]; ~12% narrowing). BOTH SIDES FALSIFIED
+    ON DIRECTION-OF-MAGNITUDE on the verdict-metric. The registered R-B1B'' band is wide enough to absorb the disagreement
+    (the band spans 357.27 to 524.0, covering both narrowing-to-419 and widening-to-506); the band itself is the unfalsifiability
+    zone for direction errors on this metric. DA wins on the registered outcome category (R-B1B'' mechanical match); proponent''s
+    R-A1B'' falsified. Both forecasters got point-stability right (16.905 << 50; SMC doubling did not destabilize the realized
+    estimate; seed-dependence and other R-C1B'' point failure modes empirically ruled out).
 
 
-    POSITION WITHIN BAND. Realized width 506.198 sits at 89.3% of the way through the R-B1B'' band: upper-edge headroom
-    17.80 chi^2 (3.4% of cut value); lower-edge headroom 148.93 chi^2 (41.7% of cut value); realized 8.4x closer
-    to R-C1B'' than to R-A1B''. This is a STRUCTURALLY DIFFERENT R-B1B'' SHAPE than Q1B''s settled R-B1B (which
-    sat unambiguously interior to its (228, 2284] band, 2.05x clear of R-A1B on the low side per S4). Q1B'' R-B1B''
-    fires at the OPPOSITE end of its band -- near the widening-direction edge -- consistent with the +6.3% widening
-    central finding.
+    POSITION WITHIN BAND. Realized width 506.198 sits at 89.3% of the way through the R-B1B'' band: upper-edge headroom 17.80
+    chi^2 (3.4% of cut value); lower-edge headroom 148.93 chi^2 (41.7% of cut value); realized 8.4x closer to R-C1B'' than
+    to R-A1B''. This is a STRUCTURALLY DIFFERENT R-B1B'' SHAPE than Q1B''s settled R-B1B (which sat unambiguously interior
+    to its (228, 2284] band, 2.05x clear of R-A1B on the low side per S4). Q1B'' R-B1B'' fires at the OPPOSITE end of its
+    band -- near the widening-direction edge -- consistent with the +6.3% widening central finding.
 
 
-    REPRODUCTION CHECKS PASS WITHIN TOL. Reproduction check #1 (no-Z anchor): q1bp_no_z_chi2 = 959.065 vs Q2A settled
-    953.84, |diff| = 5.225 < tol = 50, OK. Reproduction check #2 (Z_c-only / Q1A carryforward anchor): q1bp_zc_only_chi2
-    = 997.112 vs Q1A settled 952.517, |diff| = 44.595 < tol = 50, OK (11% headroom). Both BLOCKING asserts at __main__.py:1424/1454
-    PASSED. The Q1A-anchor drift (44.595 of 50 tol used) is itself empirical evidence that SMC particle noise at
-    N=200 IS non-trivial at the Z_c-stratified parent layer (but NOT at the no-Z pooled layer 5.225 << 50); sharpens
-    the framework reading from S13.
+    REPRODUCTION CHECKS PASS WITHIN TOL. Reproduction check #1 (no-Z anchor): q1bp_no_z_chi2 = 959.065 vs Q2A settled 953.84,
+    |diff| = 5.225 < tol = 50, OK. Reproduction check #2 (Z_c-only / Q1A carryforward anchor): q1bp_zc_only_chi2 = 997.112
+    vs Q1A settled 952.517, |diff| = 44.595 < tol = 50, OK (11% headroom). Both BLOCKING asserts at __main__.py:1424/1454
+    PASSED. The Q1A-anchor drift (44.595 of 50 tol used) is itself empirical evidence that SMC particle noise at N=200 IS
+    non-trivial at the Z_c-stratified parent layer (but NOT at the no-Z pooled layer 5.225 << 50); sharpens the framework
+    reading from S13.
 
 
-    FRAMEWORK-READING EXTENSION (binding for kernel-family-agnostic theory memo + CLAUDE.md framework section at
-    next refresh). Q1B'' provides METHODOLOGICAL-SIDE corroboration of S13''s substantive finding (within-data tightening
-    levers are bounded). S13 established this at the substantive level (single-axis vs joint multi-axis sigma-algebra
-    enrichment); Q1B'' establishes it at the methodological level (SMC particle-count doubling does NOT narrow the
-    realized CI; eval-window-noise dominates over SMC propagation noise in the Q1B(Z_c, Z2_c) configuration). Joint
-    S9+S10+S11+S12+S13+Q1B'' is now a THREE-LAYER CORROBORATION of the identifiability obstruction from disintegration_diagnostic.md:
-    distributional-class via S9+S10; sigma-algebra-enrichment via S11+S12+S13; methodological tightening via Q1B''.
-    The boundedness-of-within-data-levers reading should be extended from S13''s "single-axis bounded near zero;
-    joint multi-axis bounded at higher magnitude but full closure requires auxiliary information beyond the time
-    index" to "single-axis bounded near zero; joint multi-axis bounded at higher magnitude; methodological tightening
-    (SMC particle count) cannot narrow the CI further; full closure requires auxiliary information beyond the time
+    FRAMEWORK-READING EXTENSION (binding for kernel-family-agnostic theory memo + CLAUDE.md framework section at next refresh).
+    Q1B'' provides METHODOLOGICAL-SIDE corroboration of S13''s substantive finding (within-data tightening levers are bounded).
+    S13 established this at the substantive level (single-axis vs joint multi-axis sigma-algebra enrichment); Q1B'' establishes
+    it at the methodological level (SMC particle-count doubling does NOT narrow the realized CI; eval-window-noise dominates
+    over SMC propagation noise in the Q1B(Z_c, Z2_c) configuration). Joint S9+S10+S11+S12+S13+Q1B'' is now a THREE-LAYER CORROBORATION
+    of the identifiability obstruction from disintegration_diagnostic.md: distributional-class via S9+S10; sigma-algebra-enrichment
+    via S11+S12+S13; methodological tightening via Q1B''. The boundedness-of-within-data-levers reading should be extended
+    from S13''s "single-axis bounded near zero; joint multi-axis bounded at higher magnitude but full closure requires auxiliary
+    information beyond the time index" to "single-axis bounded near zero; joint multi-axis bounded at higher magnitude; methodological
+    tightening (SMC particle count) cannot narrow the CI further; full closure requires auxiliary information beyond the time
     index." This is the durable framework correction Q1B'' delivered on the methodological side.
 
 
-    USER DECISION (d) PREMISE CONFIRMED. The locked end-of-session-2026-05-29-a decision (d) -- run Q1B'' to bracket
-    whether Q1B''s wide CI was SMC-driven or eval-window-driven before (a)/(b)/(c) adjudication -- is now answered.
-    Q1B'' confirms the user''s framing: Q1B''s wide CI is intrinsic to data, not estimator. The (a)/(b)/(c) decision
-    must now proceed on substantive grounds on the WIDE CI -- within-data tightening is empirically impossible.
-    Per the arbiter''s notes_for_thread_coordinator (NON-PREJUDGING), all three framework-supported options remain
-    on the table: (a) third within-data Z axis added to (Z_c, Z2_c) carryforward; (b) cross-axis joint stratification
-    thread spawn; (c) temperature/exogenous-Z arm. Q1B''''s methodological confirmation that within-data levers
-    are bounded sharpens the prior that exogenous Z is required for full closure -- but this is background context
-    for the user''s adjudication, not a coordinator pre-commitment.
+    USER DECISION (d) PREMISE CONFIRMED. The locked end-of-session-2026-05-29-a decision (d) -- run Q1B'' to bracket whether
+    Q1B''s wide CI was SMC-driven or eval-window-driven before (a)/(b)/(c) adjudication -- is now answered. Q1B'' confirms
+    the user''s framing: Q1B''s wide CI is intrinsic to data, not estimator. The (a)/(b)/(c) decision must now proceed on
+    substantive grounds on the WIDE CI -- within-data tightening is empirically impossible. Per the arbiter''s notes_for_thread_coordinator
+    (NON-PREJUDGING), all three framework-supported options remain on the table: (a) third within-data Z axis added to (Z_c,
+    Z2_c) carryforward; (b) cross-axis joint stratification thread spawn; (c) temperature/exogenous-Z arm. Q1B''''s methodological
+    confirmation that within-data levers are bounded sharpens the prior that exogenous Z is required for full closure -- but
+    this is background context for the user''s adjudication, not a coordinator pre-commitment.
 
 
-    SEVENTH NAMED-FAILURE-MODE INSTANCE (new shape variant). Pattern shape: OUTCOME-CATEGORY MATCHES ONE SIDE (DA),
-    BOTH SIDES FALSIFIED ON DIRECTION-OF-MAGNITUDE on the verdict-metric. Previously seen: (S8/Q1) R-D mechanical
-    / R-C substantive; (S9/Q2A) M3=M4=M5 chi^2-indistinguishable; (S10/Q2B) two sign-determined NEGATIVE shares;
-    (S11/P1) hour_of_week-not-season binding; (S12/Q1A) DA outcome match + near-tie shape match + cumulative reduction
-    magnitude in uncharted regime; (S13/Q1B) mixed scoring across surfaces, cumulative-reduction magnitude orders
-    of magnitude from both sides'' priors. Q1B'' adds: outcome-category mechanical match for DA, but BOTH SIDES
-    wrong on direction-of-magnitude (proponent strong-narrowing predicted; DA modest-narrowing predicted; realized
-    WIDENING). The mechanical R-B1B'' band fires because the band is wide enough to absorb the disagreement; the
-    band itself is the unfalsifiability zone for direction errors on this metric. Future eval-window-dominance forecasts
-    should pre-register MORE conservative width-change predictions (closer to no-change-or-slight-widening rather
+    SEVENTH NAMED-FAILURE-MODE INSTANCE (new shape variant). Pattern shape: OUTCOME-CATEGORY MATCHES ONE SIDE (DA), BOTH SIDES
+    FALSIFIED ON DIRECTION-OF-MAGNITUDE on the verdict-metric. Previously seen: (S8/Q1) R-D mechanical / R-C substantive;
+    (S9/Q2A) M3=M4=M5 chi^2-indistinguishable; (S10/Q2B) two sign-determined NEGATIVE shares; (S11/P1) hour_of_week-not-season
+    binding; (S12/Q1A) DA outcome match + near-tie shape match + cumulative reduction magnitude in uncharted regime; (S13/Q1B)
+    mixed scoring across surfaces, cumulative-reduction magnitude orders of magnitude from both sides'' priors. Q1B'' adds:
+    outcome-category mechanical match for DA, but BOTH SIDES wrong on direction-of-magnitude (proponent strong-narrowing predicted;
+    DA modest-narrowing predicted; realized WIDENING). The mechanical R-B1B'' band fires because the band is wide enough to
+    absorb the disagreement; the band itself is the unfalsifiability zone for direction errors on this metric. Future eval-window-dominance
+    forecasts should pre-register MORE conservative width-change predictions (closer to no-change-or-slight-widening rather
     than 12% narrowing).
 
 
     NO SIBLINGS CLOSED at thread level. All three Q1B'' outcome branches map to null per amendment A2''s non-gating-sibling
-    design (R-A1B'', R-B1B'', R-C1B'' all null). P2 remains reachable via Q1C.R-C1C in branching_rules -- P2 is
-    NOT closed by Q1B''''s firing. Q1A'' (parallel non-state-machine sibling per amendment A1; registry status AWAITING-B;
-    phase_a deferred per CLAUDE.md Q1A'' deferred section pending FastICA selection-rule design refresh) is unaffected
-    by Q1B''s advancement; its eventual arbiter will fire on its own outcome categories independently. Q1C (closed
-    per S2) remains closed.
+    design (R-A1B'', R-B1B'', R-C1B'' all null). P2 remains reachable via Q1C.R-C1C in branching_rules -- P2 is NOT closed
+    by Q1B''''s firing. Q1A'' (parallel non-state-machine sibling per amendment A1; registry status AWAITING-B; phase_a deferred
+    per CLAUDE.md Q1A'' deferred section pending FastICA selection-rule design refresh) is unaffected by Q1B''s advancement;
+    its eventual arbiter will fire on its own outcome categories independently. Q1C (closed per S2) remains closed.
 
 
     Q1B''.status: planned -> settled. Q1B''.result: R-B1B''. Q1B''.phase_a_path filled (2026-05-29_q1b-prime-smc-tightening/phase_a.yaml).
-    current_node_id: null -> null (UNCHANGED per A2 non-gating). thread.state: active -> active (unchanged; tree
-    is neither RESOLVED nor EXHAUSTED). Q1B'' INSPECTION-ONLY grade caveat (per result.yaml.grade_demotion_reason:
-    .txt collision with Q1B''s CLAIM-GRADE artifact; result.yaml + pickle ARE the durable record produced by audited
-    PRODUCTION-PATH code with all BLOCKING gates passed) must travel with downstream citations. Verdict numerics
-    are settled and non-revisable; citation grade is non-removable absent re-emission. Arbiter recommended memory
-    file mitacs-q1b-prime-smc-tightening.md and CLAUDE.md (S14) update; coordinator does not write those (out of
-    scope per thread-coordinator agent definition).'
+    current_node_id: null -> null (UNCHANGED per A2 non-gating). thread.state: active -> active (unchanged; tree is neither
+    RESOLVED nor EXHAUSTED). Q1B'' INSPECTION-ONLY grade caveat (per result.yaml.grade_demotion_reason: .txt collision with
+    Q1B''s CLAIM-GRADE artifact; result.yaml + pickle ARE the durable record produced by audited PRODUCTION-PATH code with
+    all BLOCKING gates passed) must travel with downstream citations. Verdict numerics are settled and non-revisable; citation
+    grade is non-removable absent re-emission. Arbiter recommended memory file mitacs-q1b-prime-smc-tightening.md and CLAUDE.md
+    (S14) update; coordinator does not write those (out of scope per thread-coordinator agent definition).'
   prior_hash: 5c8f5e7d5a3640018ea99010079498e92e5c79e86d187881a7f3d9eccdd18fb9
   siblings_closed: []
   transition: node_settled_no_advance
