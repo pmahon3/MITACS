@@ -469,10 +469,20 @@ kernel-family-agnostic theory memo (the memo predates them).
   empirically impossible) → amendment A3 closed Q1A' as
   EXHAUSTED-PRE-DATA without running (2026-05-29; FastICA
   selection-rule design defect; see "Q1A' CLOSED" below and
-  [[q1a-prime-fastica-selection-defect]]). Settled nodes: P1,
-  Q1A, Q1B, Q1B'. Exhausted (pre-data, non-gating): Q1A'.
-  Closed: Q1C (S2 sibling-not-fired). Planned: P2 (synthetic
-  Gaussian-DGP calibration; reachable only via amendment).
+  [[q1a-prime-fastica-selection-defect]]) → amendment A4 grafts
+  the **temperature-arm sub-tree** (2026-05-29; new planned
+  nodes T1, T2, T3 — extends candidate-Z testing to exogenous
+  Z; T1 phase_a fill blocked on ECCC hourly weather data
+  acquisition next session; current_node still null;
+  state-machine advancement is data-acquisition-gated, not
+  amendment-gated). Settled nodes: P1, Q1A, Q1B, Q1B'.
+  Exhausted (pre-data, non-gating): Q1A'. Closed: Q1C
+  (S2 sibling-not-fired). Planned: T1 (root of temperature arm
+  per A4), T2 (Q1B-analogue joint refinement; contingent T1
+  R-B1T), T3 (Q1B'-analogue methodological tightening;
+  optional non-gating sibling), P2 (synthetic Gaussian-DGP
+  calibration; reachable via T1.R-C1T handoff or future
+  amendment).
 
   **Joint S9+S10+S11+S12+S13+S14 = three independent layers of
   identifiability-obstruction evidence**: distributional-class
@@ -513,16 +523,19 @@ kernel-family-agnostic theory memo (the memo predates them).
 ### Open
 - Web dashboard.
 - Forward-experiment results accrue with calendar time.
-- `resolution-paths-thread` paused at current_node=null awaiting
-  user adjudication of three-way amendment decision (a)/(b)/(c)
-  with S14-weighted priors above. Q1B' confirmed within-data
-  tightening empirically impossible (S14); the (a)/(b)/(c) choice
-  is now a strategic-pivot decision (continue mining within-data
-  vs. open the temperature arm) rather than an experimental
-  selection question. Advisor input warranted; pre-judging a
-  positive temperature result is the same workflow risk as
-  pre-judging the negative within-data results were before they
-  arrived.
+- `resolution-paths-thread` active on temperature arm
+  (amendment A4 grafted T1/T2/T3 sub-tree 2026-05-29 per user
+  Position-C pivot decision). current_node=null until T1
+  phase_a is filled — gated on **ECCC hourly weather data
+  acquisition** (the next-session infrastructure work). T1
+  root spec: M3 with σ = (day_type, Z_c, temperature_decile or
+  equivalent), cumulative baseline = Q1A's settled 952.5167.
+  Verdict cuts (228, 2284] inherited from thread skeleton or
+  re-derived per T1 phase_a author. T1.R-A1T resolves the
+  thread on path (i) extended; T1.R-B1T routes to T2 (Q1B-
+  analogue joint refinement); T1.R-C1T handoff to NPMLEmix /
+  P2 synthetic-DGP / alternative-Z. T3 is the Q1B'-analogue
+  CI-tightening run, pre-registered only if T1/T2 CIs are wide.
 - **Goal-4 writeup integration LANDED** (2026-05-29): per user
   "Position 2" decision (write up the within-data exhaustion
   story before opening the temperature arm), then reframed under
