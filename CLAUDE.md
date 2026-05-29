@@ -466,11 +466,13 @@ kernel-family-agnostic theory memo (the memo predates them).
   → amendment A2 added Q1B' as non-gating tightening sibling
   (2026-05-29) → Q1B' SETTLED R-B1B' INSPECTION-ONLY (S14; CI WIDENED
   6.3% under SMC particle doubling; within-data tightening
-  empirically impossible). Settled nodes: P1, Q1A, Q1B, Q1B'.
+  empirically impossible) → amendment A3 closed Q1A' as
+  EXHAUSTED-PRE-DATA without running (2026-05-29; FastICA
+  selection-rule design defect; see "Q1A' CLOSED" below and
+  [[q1a-prime-fastica-selection-defect]]). Settled nodes: P1,
+  Q1A, Q1B, Q1B'. Exhausted (pre-data, non-gating): Q1A'.
   Closed: Q1C (S2 sibling-not-fired). Planned: P2 (synthetic
   Gaussian-DGP calibration; reachable only via amendment).
-  Parallel-active: Q1A' (SDR/ICA sibling, registry AWAITING-B per
-  FastICA design defect — see "Q1A' deferred" below).
 
   **Joint S9+S10+S11+S12+S13+S14 = three independent layers of
   identifiability-obstruction evidence**: distributional-class
@@ -521,28 +523,46 @@ kernel-family-agnostic theory memo (the memo predates them).
   positive temperature result is the same workflow risk as
   pre-judging the negative within-data results were before they
   arrived.
-- **Goal-4 writeup integration in progress** (2026-05-29): per
-  user "Position 2" decision (write up the within-data exhaustion
-  story before opening the temperature arm). Memory file S14
-  shipped (this commit); memo additions §9-§12 + status table
-  update + framework synthesis (next commit); draft additions
-  §5 narrative + Conclusion sharpening (next commit). Once the
-  publication-grade artifact is in place, (a)/(b)/(c) adjudication
-  proceeds.
-- **Q1A' deferred** (per user direction during S12 session):
-  empirical Q1A' synthetic-gate-build discovered that phase_a
-  §metric's FastICA selection rule (max |excess_kurtosis|) does
-  not compose with the cyclic-ρ verdict statistic. Multi-seed
-  on amended synthetic showed FastICA picks the saturday/sunday
-  binary-indicator columns (signal/null top |kurt| ratio ~1.0),
-  giving bimodal rho_signal {~0.65, ~0.01} and rho_null at the
-  X-cyclic-loading floor 0.55-0.71 — the 0.70/0.30 cuts
-  unsatisfiable. SIR side amendment landed (signal/null
-  eigenvalue ratio ≥ 50× replaces null-ρ cut); FastICA side needs
-  a fresh design decision (advisor options: amend selection rule
-  to max-|ρ|-vs-Y, drop FastICA from head-to-head, or extend
-  Q1A' window with a different selection criterion). Defer
-  until empirical FastICA findings can inform clean re-design.
+- **Goal-4 writeup integration LANDED** (2026-05-29): per user
+  "Position 2" decision (write up the within-data exhaustion
+  story before opening the temperature arm), then reframed under
+  user's "three-act directed-search narrative" framing. Final
+  draft is 23 pages with three-act narrative (Act 1: what
+  univariate data gives you under the kernel framing; Act 2:
+  directed search through the residual lever space; Act 3:
+  framework-prescribed exogenous-Z follow-on). Each act carries
+  its own figure complement (six new figures added across two
+  visual-storytelling-pass commits, including the §7 Act-2
+  forest plot summary). Two `\todo` blocks remain for the
+  author group: prior-work context (§1) and forward-experiment
+  results (§7, accrues with calendar time). Companion memo
+  (`writeup/tex/missing_content_memo.tex`) at 34pp still uses the
+  bounded-finding framing in §9-§12 (the draft has since been
+  reframed) — that's a defer-to-next-pass debt.
+- **Q1A' CLOSED via thread amendment A3** (2026-05-29):
+  EXHAUSTED-PRE-DATA. The FastICA selection-rule defect IS the
+  substantive deliverable; see
+  [[q1a-prime-fastica-selection-defect]] memory for the
+  generalisable lesson. Empirical exploration showed FastICA's
+  pre-registered max-|excess_kurtosis| selection picks the
+  structurally-non-Gaussian binary day-type indicators
+  (saturday, sunday) over the continuous cyclic signal the
+  cyclic-ρ verdict statistic expects — bimodal rho_signal
+  {~0.65, ~0.01}, rho_null at X-cyclic-loading floor 0.55-0.71;
+  pre-registered 0.70/0.30 cuts unsatisfiable. SIR side science
+  (consistency-check on P1's hand-specified hour_of_week axis
+  via independent SDR method) is preserved as a deferred follow-
+  up — would require a new pre-registration thread, not a Q1A'
+  amendment restart. Per workflow rule, close-via-amendment was
+  chosen over second-amendment-to-same-phase_a-in-one-session.
+  Q1A' was non-gating from A1, so A3 doesn't affect
+  current_node (still null) or thread state (still active).
+  Workflow note: registry per-experiment list shows Q1A' as
+  AWAITING-B because the per-artifact view doesn't read
+  thread.yaml; thread-level state lives in
+  `nodes."Q1A'".status=exhausted`. Workflow-design retro item:
+  should `registry list` read thread.yaml for thread-amended
+  closures? Open question.
 - The Goal-4 paper's abstract (written last). With S11 + S12
   in hand, the resolution-paths arc has settled-to-negative
   on the most-promising within-data Z lever; the writeup now
