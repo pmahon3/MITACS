@@ -1,0 +1,54 @@
+# PROVENANCE-GRADE: INSPECTION-ONLY
+# Within-stratum residual structure on Q1's M1 PIT residuals.
+
+Loading scratch/data/distributional_class_q1/q1.pkl ...
+  pit_M1 rows: 12000 (2025-01-01 → 2026-05-16)
+  annotated with (z_c, z_2) per P1's production binning.
+
+# cells: 32
+
+## Per-cell diagnostics
+day_type  z_c    z_2_label   n  n_days acf_lag1 acf_lag5 var_ratio sd_per_day_mean spec_peak_freq
+saturday    5    overnight 432      72   +0.682   +0.174      0.82           0.221         0.0023
+saturday    6 morning_ramp 360      72   +0.632   +0.241      0.19           0.104         0.0028
+saturday    6    afternoon 432      72   +0.802   +0.186      0.43           0.181         0.0069
+saturday    6      evening 504      72   +0.770   +0.303      0.52           0.186         0.0060
+  sunday    6    overnight 213      71   +0.584   +0.005      1.03           0.269         0.0376
+  sunday    7    overnight 213      71   +0.408   +0.028      0.80           0.218         0.3333
+  sunday    7 morning_ramp 355      71   +0.618   +0.154      0.18           0.099         0.2000
+  sunday    7    afternoon 426      71   +0.792   +0.243      0.64           0.216         0.0070
+  sunday    7      evening 497      71   +0.795   +0.323      0.64           0.215         0.0241
+ weekday    0    overnight 426      71   +0.743   +0.188      1.11           0.272         0.0023
+ weekday    0 morning_ramp 355      71   +0.648   +0.221      0.89           0.235         0.2000
+ weekday    0    afternoon 426      71   +0.752   +0.154      0.65           0.217         0.0164
+ weekday    0      evening 284      71   +0.697   +0.097      0.48           0.194         0.0070
+ weekday    1    overnight 426      71   +0.700   +0.323      0.77           0.222         0.0023
+ weekday    1 morning_ramp 355      71   +0.620   +0.233      0.72           0.203         0.2000
+ weekday    1    afternoon 426      71   +0.745   -0.026      0.61           0.207         0.0446
+ weekday    1      evening 284     142   +0.384   -0.051      0.54           0.216         0.0704
+ weekday    2    overnight 432      72   +0.680   +0.091      0.87           0.230         0.0694
+ weekday    2 morning_ramp 360      72   +0.604   +0.063      0.66           0.195         0.2000
+ weekday    2    afternoon 288      72   +0.661   -0.103      0.60           0.216         0.0278
+ weekday    2      evening 426      71   +0.719   +0.284      0.49           0.184         0.0023
+ weekday    3    overnight 426      71   +0.706   +0.250      0.88           0.237         0.0047
+ weekday    3 morning_ramp 355      71   +0.650   +0.261      0.71           0.202         0.2000
+ weekday    3    afternoon 215     143   +0.332   +0.004      0.76           0.250         0.3349
+ weekday    3      evening 504      72   +0.753   +0.254      0.56           0.192         0.0020
+ weekday    4    overnight 432      72   +0.709   +0.357      0.84           0.230         0.0162
+ weekday    4 morning_ramp 216      72   +0.603   +0.101      0.64           0.210         0.0046
+ weekday    4    afternoon 355      71   +0.719   -0.108      0.73           0.236         0.0225
+ weekday    4      evening 497      71   +0.715   +0.091      0.60           0.201         0.1429
+ weekday    5 morning_ramp 144      72   +0.594   +0.165      0.50           0.203            NaN
+ weekday    5    afternoon 432      72   +0.816   +0.221      0.64           0.219         0.0278
+ weekday    5      evening 504      72   +0.759   +0.288      0.55           0.190         0.0020
+
+## Aggregate signatures
+  total rows: 12000
+  cells with lag-1 ACF clearing Bartlett 95% null bound: 32 / 32
+  mean lag-1 ACF across cells: +0.669
+  median lag-1 ACF across cells: +0.699
+  mean variance ratio vs uniform[0,1]: 0.66  (<1 = under-dispersed)
+  mean SD of per-day-means within-cell: 0.208
+
+writing diagnostic plot: scratch/within_stratum_residual_diagnostic.pdf
+done.
